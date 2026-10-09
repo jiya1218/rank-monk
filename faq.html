@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>FAQ & Architectural Docs — Rank Monk</title>
+  <meta name="description" content="Frequently asked questions about Rank Monk: AI blog quality, CMS webhook integrations, AEO citation radar, self-healing technical fixes, and billing.">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+  <link rel="apple-touch-icon" href="assets/rank-monk-icon.png">
+
+  <!-- Google Fonts: Plus Jakarta Sans, Inter, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Core Stylesheets -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body class="page-fade-in">
+
+  <!-- ==========================================================================
+       SITE HEADER
+       ========================================================================== -->
+  <header class="site-header" id="siteHeader">
+    <div class="container nav-container">
+      
+      <!-- Brand Logo -->
+      <a href="index.html" class="brand-logo" aria-label="Rank Monk Home">
+        <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="brand-logo-img">
+      </a>
+
+      <!-- Desktop Navigation Links -->
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="features.html" class="nav-link">Features</a>
+        <a href="engines.html" class="nav-link">AI Engines</a>
+        <a href="comparison.html" class="nav-link">Comparison</a>
+        <a href="pricing.html" class="nav-link">Pricing</a>
+        <a href="faq.html" class="nav-link active">FAQ & Docs</a>
+      </nav>
+
+      <!-- Nav Actions -->
+      <div class="nav-actions">
+        <a href="pricing.html" class="btn btn-espresso btn-sm">Coming Soon ⚡</a>
+        
+        <!-- Mobile Nav Toggle -->
+        <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle Navigation">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Mobile App Navigation Drawer (Native App Experience) -->
+    <div class="mobile-nav-sheet" id="mobileNavSheet">
+      <div class="mobile-sheet-head">
+        <a href="index.html" class="brand-logo" aria-label="Rank Monk Home">
+          <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="brand-logo-img" style="height: 34px;">
+        </a>
+        <button class="mobile-sheet-close" id="mobileSheetClose" aria-label="Close menu">✕</button>
+      </div>
+      
+      <div class="mobile-sheet-links">
+        <a href="index.html" class="nav-link mobile-link">
+          <span>🏠 Home</span>
+          <span class="link-sub">Command Center</span>
+        </a>
+        <a href="features.html" class="nav-link mobile-link">
+          <span>⚡ Features Overview</span>
+          <span class="link-sub">24 Engine Matrix</span>
+        </a>
+        <a href="engines.html" class="nav-link mobile-link">
+          <span>⚙️ 6 Core AI Engines</span>
+          <span class="link-sub">Architecture</span>
+        </a>
+        <a href="comparison.html" class="nav-link mobile-link">
+          <span>⚖️ Stack Collapse</span>
+          <span class="link-sub">Save $1,180/mo</span>
+        </a>
+        <a href="pricing.html" class="nav-link mobile-link">
+          <span>🏷️ Pricing & Plans</span>
+          <span class="link-sub">Revealing Soon</span>
+        </a>
+        <a href="faq.html" class="nav-link mobile-link active">
+          <span>📖 FAQ & Knowledge</span>
+          <span class="link-sub">Manifesto & Docs</span>
+        </a>
+      </div>
+
+      <div class="mobile-sheet-footer">
+        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; color: var(--text-muted); padding: 4px 2px;">
+          <span style="display: inline-flex; align-items: center; gap: 6px;">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: #10B981; box-shadow: 0 0 6px #10B981;"></span>
+            Private Alpha OS v2.4
+          </span>
+          <span style="color: var(--nude-sand); font-weight: 700;">50% Privilege</span>
+        </div>
+        <button onclick="showComingSoon()" class="btn btn-espresso" style="width: 100%; min-height: 46px;">
+          Join Private Alpha ⚡
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ==========================================================================
+         HERO SECTION
+         ========================================================================== -->
+    <section class="section hero-section">
+      <!-- Floating Interactive Live Micro-Pills -->
+      <div class="hero-floating-pill pill-pos-left anim-float-slow">
+        <div class="pill-icon">📖</div>
+        <div>
+          <div>Knowledge Base</div>
+          <span class="pill-meta"><strong class="pill-highlight">Instant Answers</strong> 24/7</span>
+        </div>
+      </div>
+
+      <div class="hero-floating-pill pill-pos-right anim-float-reverse">
+        <div class="pill-icon">🏛️</div>
+        <div>
+          <div>The Zen Manifesto</div>
+          <span class="pill-meta"><strong class="pill-highlight">Read Our Philosophy</strong></span>
+        </div>
+      </div>
+
+      <div class="container hero-content">
+        <div class="section-tag">
+          <span class="dot"></span>
+          <span>Knowledge & Architecture</span>
+        </div>
+
+        <h1 class="hero-headline">
+          Everything You Need to Know<br>
+          <span class="grad-sand">About Autonomous Search</span>
+        </h1>
+
+        <p class="hero-description">
+          Find transparent explanations regarding AI article generation quality, CMS security, AEO answer engine optimization, and crawler mechanics.
+        </p>
+
+        <!-- Live Interactive FAQ Search Filter -->
+        <div style="max-width: 580px; margin: 28px auto 0;" class="anim-beam-glow">
+          <div style="display: flex; align-items: center; background: #FFFFFF; border: 1px solid var(--border-stone); border-radius: var(--radius-pill); padding: 6px 8px 6px 20px; box-shadow: var(--shadow-sm);">
+            <span style="color: var(--nude-taupe); margin-right: 10px; font-size: 16px;">🔍</span>
+            <input type="text" id="faqSearchInput" placeholder="Filter questions (e.g. CMS, AEO, ChatGPT, pricing)..." style="flex: 1; border: none; background: transparent; font-size: 14.5px; color: var(--text-heading); outline: none; font-weight: 600;" oninput="filterFaqQuestions(this.value)">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         ACCORDION FAQ LIST
+         ========================================================================== -->
+    <section class="section" style="padding-top: 10px;">
+      <div class="container">
+        
+        <div class="faq-accordion-wrap" id="faqListContainer">
+          
+          <!-- Item 1 -->
+          <div class="faq-item active" data-faq-text="how does rank monk write articles ai content quality google penalty">
+            <button class="faq-question-btn" onclick="toggleFaq(this)">
+              <span style="color: var(--text-heading); font-weight: 700;">How does Rank Monk prevent AI content penalties on Google?</span>
+              <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              Rank Monk rejects generic AI templates. Every article is engineered using semantic entity graphs, authoritative external research citations, structured JSON-LD schemas, and auto-generated diagrams. Google evaluates helpfulness and EEAT (Experience, Expertise, Authoritativeness, Trustworthiness)—which Rank Monk validates mathematically before publishing.
+            </div>
+          </div>
+
+          <!-- Item 2 -->
+          <div class="faq-item" data-faq-text="what is aeo answer engine optimization chatgpt perplexity search">
+            <button class="faq-question-btn" onclick="toggleFaq(this)">
+              <span style="color: var(--text-heading); font-weight: 700;">What is AEO and how does Rank Monk track ChatGPT citations?</span>
+              <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              Answer Engine Optimization (AEO) optimizes your web presence to be cited directly by LLMs like ChatGPT 4o, Perplexity AI, Google Gemini, and Claude. Rank Monk formats your content with structured Q&A entity nodes and continuously tests whether conversational models cite your brand as the primary reference when prospective customers ask buying questions.
+            </div>
+          </div>
+
+          <!-- Item 3 -->
+          <div class="faq-item" data-faq-text="cms integrations wordpress webflow shopify ghost webhooks">
+            <button class="faq-question-btn" onclick="toggleFaq(this)">
+              <span style="color: var(--text-heading); font-weight: 700;">Which CMS platforms are supported for 1-click auto-publishing?</span>
+              <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              Rank Monk integrates out-of-the-box with WordPress (REST API & Application Passwords), Webflow CMS Collections, Shopify Blogs, and Ghost CMS. You can also connect custom headless architectures (Next.js, Astro, Remix) using our authenticated REST Webhook endpoints.
+            </div>
+          </div>
+
+          <!-- Item 4 -->
+          <div class="faq-item" data-faq-text="what is self-healing technical seo 1-click fixes broken links metadata">
+            <button class="faq-question-btn" onclick="toggleFaq(this)">
+              <span style="color: var(--text-heading); font-weight: 700;">How does the Self-Healing Technical SEO crawler work?</span>
+              <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              Unlike audit tools that simply hand you an overwhelming PDF spreadsheet of problems, Rank Monk runs a continuous headless crawler. When missing meta titles, empty schema, broken canonicals, or 404 links are discovered, our system compiles the exact programmatic fix. Clicking "Apply 1-Click Fix" injects the repair straight into your CMS.
+            </div>
+          </div>
+
+          <!-- Item 5 -->
+          <div class="faq-item" data-faq-text="pricing trial credit card cancel refund annual discount">
+            <button class="faq-question-btn" onclick="toggleFaq(this)">
+              <span style="color: var(--text-heading); font-weight: 700;">Do I need a credit card for the 14-day free trial?</span>
+              <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              No credit card is required to begin. You receive full access to connect your domain, run comprehensive site diagnostics, review AEO citation scores, and generate sample drafts immediately. You can upgrade or cancel anytime with zero friction.
+            </div>
+          </div>
+
+          <!-- Item 6 -->
+          <div class="faq-item" data-faq-text="social media repurposing linkedin carousels twitter x threads">
+            <button class="faq-question-btn" onclick="toggleFaq(this)">
+              <span style="color: var(--text-heading); font-weight: 700;">How does the Social Repurposing Studio generate carousels?</span>
+              <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              Once an article is published, the studio extracts the core takeaways and creates a high-conversion 5-slide LinkedIn PDF carousel (1080x1350 vector resolution) along with a 6-post Twitter/X thread. You can download vector assets directly or schedule them through your connected social accounts.
+            </div>
+          </div>
+
+          <!-- Item 7 -->
+          <div class="faq-item" data-faq-text="agency multi client workspaces client reporting white label">
+            <button class="faq-question-btn" onclick="toggleFaq(this)">
+              <span style="color: var(--text-heading); font-weight: 700;">Can marketing agencies manage multiple client domains under one account?</span>
+              <span class="faq-icon">+</span>
+            </button>
+            <div class="faq-answer">
+              Yes! Our Growth and Enterprise tiers include dedicated Multi-Client Agency Workspaces. Each client gets their own isolated CMS credentials, custom LLM brand voice parameters, keyword clusters, and white-labeled audit report exports.
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         THE ZEN MANIFESTO SECTION
+         ========================================================================== -->
+    <section class="section section-divider" id="manifesto">
+      <div class="container">
+        
+        <div class="manifesto-card" style="max-width: 820px; margin: 0 auto; background: var(--nude-espresso); border: 1px solid var(--nude-sand); border-radius: var(--radius-xl); padding: 48px 36px; box-shadow: var(--shadow-console); color: var(--nude-bone);">
+          <div style="font-size: 11px; text-transform: uppercase; color: var(--nude-sand); font-weight: 700; letter-spacing: 0.1em; margin-bottom: 12px;">The Rank Monk Manifesto</div>
+          <h2 style="font-size: clamp(26px, 3.5vw, 36px); font-weight: 800; color: #FFFFFF; margin-bottom: 20px; line-height: 1.2;">
+            Organic growth should be a compounding flywheel, not an exhausting manual chore.
+          </h2>
+          
+          <div style="font-size: 15.5px; line-height: 1.7; display: flex; flex-direction: column; gap: 16px;">
+            <p style="color: #F1EDE6 !important;">
+              In 2026, the modern marketing stack has become a bloated monstrosity. Founders and growth teams pay over $700 every single month for 6 disconnected tools—logging in, copying between browser tabs, re-formatting markdown, pasting into CMSs, and praying Google doesn't penalize unverified AI output.
+            </p>
+            <p style="color: #F1EDE6 !important;">
+              Rank Monk was built on a singular premise: <strong style="color: #FFFFFF !important;">collapse the chaos into serenity</strong>. A single disciplined engine that monitors your domain's technical health, maps topical search voids, publishes human-grade long-form articles, commands ChatGPT citations, and repurposes content automatically.
+            </p>
+            <p style="font-weight: 700; color: var(--nude-sand) !important;">
+              Build great products. Let Rank Monk compound your organic presence.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         BOTTOM CTA BANNER
+         ========================================================================== -->
+    <section class="section" style="padding-bottom: 60px;">
+      <div class="container">
+        
+        <div class="cta-banner-card anim-beam-glow">
+          <h2 class="cta-banner-title">Have more questions? Join the Alpha cohort.</h2>
+          <p class="cta-banner-desc">
+            Test your domain against ChatGPT and Google benchmarks during our private alpha rollout.
+          </p>
+          <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;">
+            <button class="btn btn-sand btn-lg" onclick="showComingSoon('FAQ Bottom CTA')">Join Alpha Waitlist ⚡</button>
+            <a href="pricing.html" class="btn btn-secondary btn-lg">Founder Privilege</a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- ==========================================================================
+       FOOTER
+       ========================================================================== -->
+  <footer class="site-footer">
+    <div class="container">
+      
+      <div class="footer-cols-grid">
+        
+        <!-- Brand Info -->
+        <div>
+          <a href="index.html" class="brand-logo footer-brand-logo" style="margin-bottom: 14px;" aria-label="Rank Monk Home">
+            <img src="assets/rank-monk-logo-horizontal-light.png" alt="Rank Monk" class="brand-logo-img footer-logo-img">
+          </a>
+          <p class="footer-brand-desc">
+            The Zen Operating System for autonomous organic search and AI discovery. Engineered with discipline.
+          </p>
+        </div>
+
+        <!-- Col 2: Product -->
+        <div>
+          <div class="footer-col-title">Product</div>
+          <div class="footer-link-list">
+            <a href="features.html">Features Overview</a>
+            <a href="engines.html">6 AI Engines</a>
+            <a href="comparison.html">Comparison Matrix</a>
+            <a href="pricing.html">Pricing Plans</a>
+          </div>
+        </div>
+
+        <!-- Col 3: Solutions -->
+        <div>
+          <div class="footer-col-title">Solutions</div>
+          <div class="footer-link-list">
+            <a href="comparison.html">The Stack Collapse</a>
+            <a href="features.html#console">Multi-Client Agency</a>
+            <a href="features.html#disciplines">Workflow Disciplines</a>
+            <a href="pricing.html">Enterprise SLA</a>
+          </div>
+        </div>
+
+        <!-- Col 4: Integrations -->
+        <div>
+          <div class="footer-col-title">Integrations</div>
+          <div class="footer-link-list">
+            <a href="#">WordPress Sync</a>
+            <a href="#">Webflow CMS</a>
+            <a href="#">Shopify Engine</a>
+            <a href="#">Ghost Publishing</a>
+            <a href="#">REST Webhooks</a>
+          </div>
+        </div>
+
+        <!-- Col 5: Company -->
+        <div>
+          <div class="footer-col-title">Company</div>
+          <div class="footer-link-list">
+            <a href="#manifesto">Manifesto</a>
+            <a href="faq.html">FAQ Knowledge Base</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="mailto:support@rankmonk.com">Contact Support</a>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom-bar">
+        <div>© 2026 Rank Monk Inc. All rights reserved. Precision Organic Acquisition OS.</div>
+        <div style="display: flex; gap: 16px; align-items: center;">
+          <span style="display: inline-flex; align-items: center; gap: 6px; color: var(--nude-sand); font-size: 12px; font-weight: 600;">
+            <span style="width: 7px; height: 7px; border-radius: 50%; background: var(--nude-sand); box-shadow: 0 0 6px var(--nude-sand);"></span>
+            All AI Engines Operational
+          </span>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- ==========================================================================
+       INTERACTIVE SIMULATED AUDIT MODAL (HUD Style)
+       ========================================================================== -->
+  <!-- ==========================================================================
+       COMING SOON MODAL
+       ========================================================================== -->
+  <div class="coming-soon-modal-backdrop" id="auditModalBackdrop" onclick="if(event.target === this) closeComingSoonModal()">
+    <div class="coming-soon-modal-box anim-beam-glow">
+      <button class="modal-close-btn" onclick="closeComingSoonModal()" aria-label="Close modal">✕</button>
+      <div style="text-align: center;">
+        <div style="display: flex; justify-content: center; margin-bottom: 16px;">
+          <img src="assets/rank-monk-logo-stacked-light.png" alt="Rank Monk" style="height: 52px; width: auto; filter: drop-shadow(0 4px 16px rgba(0,0,0,0.4));">
+        </div>
+        <div class="coming-soon-pill-badge">✦ PRIVATE ALPHA IN PROGRESS</div>
+        <h3 style="font-size: 24px; font-weight: 800; color: #FFFFFF; margin: 12px 0 8px;">Rank Monk OS — Coming Soon</h3>
+        <p style="font-size: 14px; color: #F1EDE6; line-height: 1.6; margin-bottom: 24px;">
+          We are currently operating in stealth with our first cohort of private alpha operators. Public access & founder pricing will be revealed soon.
+        </p>
+        <form class="early-access-form" onsubmit="event.preventDefault(); handleWaitlistSubmit(this);">
+          <input type="email" class="early-access-input" placeholder="Enter work email for priority access" required>
+          <button type="submit" class="btn btn-sand">Join Waitlist ⚡</button>
+        </form>
+        <div class="early-access-perks" style="margin-top: 18px; color: var(--nude-stone);">
+          <span>✓ 50% Lifetime Founder Privilege</span>
+          <span>✓ Zero Spam Guaranteed</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Native App Bottom Navigation Bar -->
+  <nav class="mobile-app-bottom-bar" id="mobileBottomBar" aria-label="Mobile Navigation">
+    <a href="index.html" class="bottom-tab-item">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+      <span class="tab-label">Home</span>
+    </a>
+    <a href="features.html" class="bottom-tab-item">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+      </svg>
+      <span class="tab-label">Features</span>
+    </a>
+    <a href="engines.html" class="bottom-tab-item">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+      </svg>
+      <span class="tab-label">Engines</span>
+    </a>
+    <a href="comparison.html" class="bottom-tab-item">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="20" x2="18" y2="10"></line>
+        <line x1="12" y1="20" x2="12" y2="4"></line>
+        <line x1="6" y1="20" x2="6" y2="14"></line>
+      </svg>
+      <span class="tab-label">Compare</span>
+    </a>
+    <a href="pricing.html" class="bottom-tab-item">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="1" x2="12" y2="23"></line>
+        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+      </svg>
+      <span class="tab-label">Pricing</span>
+    </a>
+  </nav>
+
+  <!-- Core JavaScript -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

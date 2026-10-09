@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Features & OS Console — Rank Monk</title>
+  <meta name="description" content="Explore the Zen Command Center OS: autonomous blog creation, AEO ChatGPT tracking, self-healing technical fixes, and multi-client agency workspaces.">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+  <link rel="apple-touch-icon" href="assets/rank-monk-icon.png">
+
+  <!-- Google Fonts: Plus Jakarta Sans, Inter, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Core Stylesheets -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body class="page-fade-in">
+
+  <!-- ==========================================================================
+       SITE HEADER - CLEAN, STREAMLINED & AIRY
+       ========================================================================== -->
+  <header class="site-header" id="siteHeader">
+    <div class="container nav-container">
+      
+      <!-- Brand Logo -->
+      <a href="index.html" class="brand-logo" aria-label="Rank Monk Home">
+        <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="brand-logo-img">
+      </a>
+
+      <!-- Desktop Navigation Links -->
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="features.html" class="nav-link active">Features</a>
+        <a href="engines.html" class="nav-link">AI Engines</a>
+        <a href="comparison.html" class="nav-link">Comparison</a>
+        <a href="pricing.html" class="nav-link">Pricing</a>
+        <a href="faq.html" class="nav-link">FAQ & Docs</a>
+      </nav>
+
+      <!-- Nav Actions -->
+      <div class="nav-actions">
+        <a href="pricing.html" class="btn btn-espresso btn-sm">Coming Soon ⚡</a>
+        
+        <!-- Mobile Nav Toggle -->
+        <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle Navigation">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Mobile App Navigation Drawer (Native App Experience) -->
+    <div class="mobile-nav-sheet" id="mobileNavSheet">
+      <div class="mobile-sheet-head">
+        <a href="index.html" class="brand-logo" aria-label="Rank Monk Home">
+          <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="brand-logo-img" style="height: 34px;">
+        </a>
+        <button class="mobile-sheet-close" id="mobileSheetClose" aria-label="Close menu">✕</button>
+      </div>
+      
+      <div class="mobile-sheet-links">
+        <a href="index.html" class="nav-link mobile-link">
+          <span>🏠 Home</span>
+          <span class="link-sub">Command Center</span>
+        </a>
+        <a href="features.html" class="nav-link mobile-link active">
+          <span>⚡ Features Overview</span>
+          <span class="link-sub">24 Engine Matrix</span>
+        </a>
+        <a href="engines.html" class="nav-link mobile-link">
+          <span>⚙️ 6 Core AI Engines</span>
+          <span class="link-sub">Architecture</span>
+        </a>
+        <a href="comparison.html" class="nav-link mobile-link">
+          <span>⚖️ Stack Collapse</span>
+          <span class="link-sub">Save $1,180/mo</span>
+        </a>
+        <a href="pricing.html" class="nav-link mobile-link">
+          <span>🏷️ Pricing & Plans</span>
+          <span class="link-sub">Revealing Soon</span>
+        </a>
+        <a href="faq.html" class="nav-link mobile-link">
+          <span>📖 FAQ & Knowledge</span>
+          <span class="link-sub">Manifesto & Docs</span>
+        </a>
+      </div>
+
+      <div class="mobile-sheet-footer">
+        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; color: var(--text-muted); padding: 4px 2px;">
+          <span style="display: inline-flex; align-items: center; gap: 6px;">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: #10B981; box-shadow: 0 0 6px #10B981;"></span>
+            Private Alpha OS v2.4
+          </span>
+          <span style="color: var(--nude-sand); font-weight: 700;">50% Privilege</span>
+        </div>
+        <button onclick="showComingSoon()" class="btn btn-espresso" style="width: 100%; min-height: 46px;">
+          Join Private Alpha ⚡
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ==========================================================================
+         PAGE HERO
+         ========================================================================== -->
+    <section class="section hero-section" style="padding-bottom: 24px;">
+      <!-- Floating Interactive Live Micro-Pills -->
+      <div class="hero-floating-pill pill-pos-left anim-float-slow">
+        <div class="pill-icon">✍️</div>
+        <div>
+          <div>Autonomous Publishing</div>
+          <span class="pill-meta"><strong class="pill-highlight">2,500w Pillar Guides</strong> with EEAT</span>
+        </div>
+      </div>
+
+      <div class="hero-floating-pill pill-pos-right anim-float-reverse">
+        <div class="pill-icon">🎯</div>
+        <div>
+          <div>AEO Model Grounding</div>
+          <span class="pill-meta"><strong class="pill-highlight">99.8% Citation Share</strong> on SearchGPT</span>
+        </div>
+      </div>
+
+      <div class="container hero-content">
+        <div class="section-tag" style="margin-bottom: 20px;">
+          <span class="dot"></span>
+          <span>The Unified Acquisition Operating System</span>
+        </div>
+
+        <h1 class="hero-headline">
+          Every Feature Engineered for<br>
+          <span class="grad-sand">Autonomous Compounding</span>
+        </h1>
+
+        <p class="hero-description">
+          Rank Monk replaces the chaotic $700/mo 6-tool marketing stack with a single disciplined cockpit. Explore all 8 core engines below—from technical crawling to conversational AI dominance.
+        </p>
+
+        <!-- Category Filter & Quick Jump Navigation -->
+        <div class="features-filter-nav">
+          <button class="feature-filter-pill active" onclick="filterFeatures('all', this)">
+            <span class="pill-dot"></span>
+            <span>All 8 Core Engines</span>
+          </button>
+          <button class="feature-filter-pill" onclick="filterFeatures('content', this)">
+            <span>✍️ Publishing</span>
+          </button>
+          <button class="feature-filter-pill" onclick="filterFeatures('cms', this)">
+            <span>⚡ Headless CMS</span>
+          </button>
+          <button class="feature-filter-pill" onclick="filterFeatures('aeo', this)">
+            <span>🎯 AEO Radar</span>
+          </button>
+          <button class="feature-filter-pill" onclick="filterFeatures('healing', this)">
+            <span>🛡️ Self-Healing</span>
+          </button>
+          <button class="feature-filter-pill" onclick="filterFeatures('social', this)">
+            <span>📱 Social Studio</span>
+          </button>
+          <button class="feature-filter-pill" onclick="filterFeatures('void', this)">
+            <span>🔍 Void Spy</span>
+          </button>
+          <button class="feature-filter-pill" onclick="filterFeatures('mesh', this)">
+            <span>🕸️ Knowledge Mesh</span>
+          </button>
+          <button class="feature-filter-pill" onclick="filterFeatures('agency', this)">
+            <span>💼 Agency Hub</span>
+          </button>
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 14px; margin-top: 10px; flex-wrap: wrap;">
+          <button class="btn btn-espresso" onclick="showComingSoon('Features Alpha Access')">Request Alpha Access ⚡</button>
+          <a href="#matrix" class="btn btn-secondary">Explore 24-Feature Matrix ↓</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         SECTION 1: THE COMPLETE 8-ENGINE SHOWCASE (BENTO GRID - ALL FEATURES)
+         ========================================================================== -->
+    <section class="section" id="all-features" style="padding-top: 40px; padding-bottom: 60px;">
+      <div class="container">
+        
+        <div class="section-header">
+          <div class="section-tag">
+            <span class="dot"></span>
+            <span>Full System Architecture</span>
+          </div>
+          <h2 class="section-title">The Complete 8-Engine Arsenal</h2>
+          <p class="section-subtitle">
+            Every autonomous capability running in parallel, 24 hours a day, 7 days a week.
+          </p>
+        </div>
+
+        <div class="features-all-grid">
+          
+          <!-- Feature 1: Long-Form Content Engine -->
+          <div class="feature-card-full" data-category="content" id="feat-content">
+            <div>
+              <div class="feature-card-header">
+                <div class="feature-icon-badge">✍️</div>
+                <span class="feature-status-tag">Engine 01</span>
+              </div>
+              <h3 class="feature-title-text">Autonomous 2,500w Pillar Articles</h3>
+              <p class="feature-desc-text">
+                Researches, structures, and writes exhaustive, human-grade technical blog articles. Features semantic EEAT source indexing, custom WebP infographics, and anti-AI detection formatting.
+              </p>
+              <div class="feature-spec-list">
+                <div class="feature-spec-item">
+                  <span class="spec-icon">✦</span>
+                  <span>2,500+ Words with Deep Heading Hierarchy</span>
+                </div>
+                <div class="feature-spec-item">
+                  <span class="spec-icon">✦</span>
+                  <span>Primary Source & Data Citation Mapping</span>
+                </div>
+                <div class="feature-spec-item">
+                  <span class="spec-icon">✦</span>
+                  <span>High-Resolution WebP Charts & Tables</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="feature-mini-widget">
+              <div class="widget-title-row">
+                <span>Autonomous Generation</span>
+                <span style="color: var(--nude-sand); font-weight: 800;">EEAT: 98.4%</span>
+              </div>
+              <div style="font-weight: 700; color: var(--nude-espresso); margin-bottom: 4px;">
+                "The Enterprise Guide to AEO in 2026"
+              </div>
+              <div style="font-size: 11.5px; color: var(--text-secondary); display: flex; gap: 12px;">
+                <span>Length: <strong>2,640 words</strong></span>
+                <span>Keyword: <strong>AEO Strategy</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feature 2: Headless CMS Direct Sync -->
+          <div class="feature-card-full" data-category="cms" id="feat-cms">
+            <div>
+              <div class="feature-card-header">
+                <div class="feature-icon-badge">⚡</div>
+                <span class="feature-status-tag">Engine 02</span>
+              </div>
+              <h3 class="feature-title-text">Direct Headless CMS Sync</h3>
+              <p class="feature-desc-text">
+                Zero manual copy-pasting. Seamlessly syncs formatted drafts, images, and metadata directly to WordPress, Webflow, Shopify, Ghost, or custom webhook endpoints on your schedule.
+              </p>
+              <div class="feature-spec-list">
+                <div class="feature-spec-item">
+                  <span class="spec-icon">✦</span>
+                  <span>WordPress REST API & Webhooks</span>
+                </div>
+                <div class="feature-spec-item">
+                  <span class="spec-icon">✦</span>
+                  <span>Webflow Collections 2-Way Synchronization</span>
+                </div>
+                <div class="feature-spec-item">
+                  <span class="spec-icon">✦</span>
+                  <span>Instant Google Indexing API Pings</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="feature-mini-widget">
+              <div class="widget-title-row">
+                <span>Active Endpoints</span>
+                <span style="color: #10b981; font-weight: 800;">● Online</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 4px; font-size: 11.5px;">
+                <div style="display: flex; justify-content: space-between;">
+                  <span>WordPress Production:</span>
+                  <strong style="color: var(--nude-espresso);">✓ Synced (04:00 UTC)</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span>Google Indexing API:</span>
+                  <strong style="color: var(--nude-espresso);">✓ 0.3s Ping Confirmed</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feature 3: AEO & LLM Radar -->
+          <div class="feature-card-full" data-category="aeo" id="feat-aeo">
+            <div>
+              <div class="feature-card-header">
+                <div class="feature-icon-badge">🎯</div>
+                <span class="feature-status-tag">Engine 03</span>
+              </div>
+              <h3 class="feature-title-text">AEO & Conversational LLM Radar</h3>
+              <p class="feature-desc-text">
+                While legacy tools only track Google blue links, Rank Monk monitors brand citations and sentiment across ChatGPT 4o, SearchGPT, Perplexity Pro, Google Gemini, and Claude 3.5.
+              </p>
+              <div class="feature-spec-list">
+                <div class="feature-spec-item">
+                  <span class="spec-icon">✦</span>
+                  <span>5-LLM Real-Time Synthetic Audit</span>
+                </div>
+                <div class="feature-spec-item">
+                  <span class="spec-icon">✦</span>
+                  <span>Prompt Void & Generative Gap Detection</span>
+                </div>
+                <div class="feature-spec-item">
+                  <span class="spec-icon">✦</span>
+                  <span>Brand Entity Authority & Recommendation Score</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="feature-mini-widget">
+              <div class="widget-title-row">
+                <span>LLM Citation Share</span>
+                <span style="color: var(--nude-sand); font-weight: 800;">99.8% Accuracy</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 4px; font-size: 11.5px;">
+                <div style="display: flex; justify-content: space-between;">
+                  <span>ChatGPT 4o:</span>
+                  <strong style="color: var(--nude-espresso);">Rank #1 Cited Brand</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                  <span>Perplexity Pro:</span>
+                  <strong style="color: var(--nude-espresso);">Direct Primary Source [1]</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feature 4: 1-Click Self-Healing Technical SEO -->
+          <div class="feature-card-full" data-category="healing" id="feat-healing">
+            <div>
+              <div class="feature-card-header">
+                <div class="feature-icon-badge">🛡️</div>
+                <span class="feature-status-tag">Engine 04</span>
+              </div>
+              <h3 class="feature-title-text">1-Click Self-Healing Repairs</h3>
+              <p class="feature-desc-text">
+                Background headless crawler scans 500+ URLs in 0.4s. Flags canonical drift, orphan URLs, broken redirects, and missing schema—and patches them in 1 click without dev intervention.
+              </p>
+              <div class="feature-spec-list">
+                <div class="feature-spec-item">
+                  <span class="spec-icon">✦</span>
+                  <span>0.4-Second Headless Crawler Architecture</span>
+                </div>
+                <div class="feature-spec-item">
+                  <span class="spec-icon">✦</span>
+                  <span>Auto-Fix Broken Canonicals & 404 Pages</span>
+                </div>
+                <div class="feature-spec-item">
+                  <span class="spec-icon">✦</span>
+                  <span>Dynamic JSON-LD Schema Auto-Injection</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="feature-mini-widget">
+              <div class="widget-title-row">
+                <span>Site Health Diagnostic</span>
+                <span style="color: var(--nude-sand); font-weight: 800;" id="miniHealthVal">92 / 100</span>
+              </div>
+              <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11.5px;">
+                <span>14 Technical Issues Detected</span>
+                <button class="btn-fix-action" style="font-size: 11px; padding: 4px 10px;" onclick="applyHealingFix('feat-healing', 4)">Deploy 1-Click Fix</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feature 5: Omnichannel Social Studio -->
+          <div class="feature-card-full" data-category="social" id="feat-social">
+            <div>
+              <div class="feature-card-header">
+                <div class="feature-icon-badge">📱</div>
+                <span class="feature-status-tag">Engine 05</span>
+              </div>
+              <h3 class="feature-title-text">Omnichannel Social Studio</h3>
+              <p class="feature-desc-text">
+                Never let an article die on your blog. Automatically repurposes every published piece into high-converting 5-slide PDF LinkedIn carousels, 6-post Twitter/X threads, and executive email briefs.
+              </p>
+              <div class="feature-spec-list">
+                <div class="feature-spec-item">
+                  <span class="spec-icon">✦</span>
+                  <span>5-Slide High-Res Vector PDF Carousels</span>
+                </div>
+                <div class="feature-spec-item">
+                  <span class="spec-icon">✦</span>
+                  <span>6-Post Viral Twitter/X Thread Generation</span>
+                </div>
+                <div class="feature-spec-item">
+                  <span class="spec-icon">✦</span>
+                  <span>Executive Newsletter Digest & Substack Sync</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="feature-mini-widget">
+              <div class="widget-title-row">
+                <span>Repurposed Assets</span>
+                <span style="color: var(--nude-sand); font-weight: 800;">Ready in 60s</span>
+              </div>
+              <div style="font-size: 11.5px; color: var(--text-secondary); line-height: 1.4;">
+                <div>LinkedIn: <strong>5-Slide Carousel (1080x1350)</strong></div>
+                <div>X / Twitter: <strong>6-Tweet Narrative Thread</strong></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feature 6: Competitor Search Void Spy -->
+          <div class="feature-card-full" data-category="void" id="feat-void">
+            <div>
+              <div class="feature-card-header">
+                <div class="feature-icon-badge">🔍</div>
+                <span class="feature-status-tag">Engine 06</span>
+              </div>
+              <h3 class="feature-title-text">Competitor Search Void Spy</h3>
+              <p class="feature-desc-text">
+                Continuously reverse-engineers competitors' ranking portfolios to identify high-intent keyword voids where high search volume exists without authoritative answers.
+              </p>
+              <div class="feature-spec-list">
+                <div class="feature-spec-item">
+                  <span class="spec-icon">✦</span>
+                  <span>Real-Time Competitor Portfolio Crawling</span>
+                </div>
+                <div class="feature-spec-item">
+                  <span class="spec-icon">✦</span>
+                  <span>High-Volume / Low-Difficulty Gap Spotting</span>
+                </div>
+                <div class="feature-spec-item">
+                  <span class="spec-icon">✦</span>
+                  <span>1-Click "Queue for Generation" Pipeline</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="feature-mini-widget">
+              <div class="widget-title-row">
+                <span>Void Opportunity Detected</span>
+                <span style="color: #10b981; font-weight: 800;">+14.2K Vol</span>
+              </div>
+              <div style="font-size: 11.5px; display: flex; justify-content: space-between;">
+                <span>Target Void: <strong>AI Schema Audit</strong></span>
+                <span style="color: var(--nude-sand); font-weight: 700;">Difficulty: 24/100</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feature 7: Entity Knowledge Graph Mesh -->
+          <div class="feature-card-full" data-category="mesh" id="feat-mesh">
+            <div>
+              <div class="feature-card-header">
+                <div class="feature-icon-badge">🕸️</div>
+                <span class="feature-status-tag">Engine 07</span>
+              </div>
+              <h3 class="feature-title-text">Entity Knowledge Graph Mesh</h3>
+              <p class="feature-desc-text">
+                Builds a living semantic vector map of your brand. Automatically identifies internal linking opportunities and weaves contextual anchor text into older articles to eradicate orphan pages.
+              </p>
+              <div class="feature-spec-list">
+                <div class="feature-spec-item">
+                  <span class="spec-icon">✦</span>
+                  <span>Vector-Based Entity Cluster Mapping</span>
+                </div>
+                <div class="feature-spec-item">
+                  <span class="spec-icon">✦</span>
+                  <span>Contextual Dynamic Anchor Injection</span>
+                </div>
+                <div class="feature-spec-item">
+                  <span class="spec-icon">✦</span>
+                  <span>Zero PageRank Dissipation Architecture</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="feature-mini-widget">
+              <div class="widget-title-row">
+                <span>Internal Mesh Health</span>
+                <span style="color: var(--nude-sand); font-weight: 800;">100% Linked</span>
+              </div>
+              <div style="font-size: 11.5px; display: flex; justify-content: space-between;">
+                <span>Orphan Pages: <strong>0 (Eliminated)</strong></span>
+                <span>Contextual Links: <strong>142 Weaved</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feature 8: Multi-Domain Agency Workspaces -->
+          <div class="feature-card-full" data-category="agency" id="feat-agency">
+            <div>
+              <div class="feature-card-header">
+                <div class="feature-icon-badge">💼</div>
+                <span class="feature-status-tag">Engine 08</span>
+              </div>
+              <h3 class="feature-title-text">Multi-Domain Agency Cockpit</h3>
+              <p class="feature-desc-text">
+                Purpose-built for growth consultancies, holding companies, and serial founders. Isolate multiple domains under separate workspaces with automated white-label client PDF audit exports.
+              </p>
+              <div class="feature-spec-list">
+                <div class="feature-spec-item">
+                  <span class="spec-icon">✦</span>
+                  <span>Up to 50+ Domain Workspaces</span>
+                </div>
+                <div class="feature-spec-item">
+                  <span class="spec-icon">✦</span>
+                  <span>White-Label Client PDF Reporting</span>
+                </div>
+                <div class="feature-spec-item">
+                  <span class="spec-icon">✦</span>
+                  <span>Role-Based Access Control (RBAC)</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="feature-mini-widget">
+              <div class="widget-title-row">
+                <span>Active Workspaces</span>
+                <span style="color: var(--nude-sand); font-weight: 800;">5 Connected</span>
+              </div>
+              <div style="font-size: 11.5px; display: flex; justify-content: space-between;">
+                <span>Acme Cloud: <strong>+34.2% MoM</strong></span>
+                <span>HyperScale: <strong>+18.9% MoM</strong></span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         SECTION 2: INTERACTIVE OS COMMAND CENTER SANDBOX
+         ========================================================================== -->
+    <section class="section section-alt" id="console" style="padding-top: 60px; padding-bottom: 60px;">
+      <div class="container">
+        
+        <div class="section-header">
+          <div class="section-tag">
+            <span class="dot"></span>
+            <span>Interactive Console Simulator</span>
+          </div>
+          <h2 class="section-title">Test the Zen Command Center In Real Time</h2>
+          <p class="section-subtitle">
+            Switch between engines below to experience the live operating system interface.
+          </p>
+        </div>
+
+        <div class="command-center-wrap" style="margin-top: 0;">
+          <div class="console-frame anim-beam-glow">
+            
+            <!-- Top Console Navigation Bar -->
+            <div class="console-header">
+              <div class="console-dots">
+                <div class="c-dot r"></div>
+                <div class="c-dot y"></div>
+                <div class="c-dot g"></div>
+                <span class="console-system-title">RANK MONK OS v2.6 [LIVE SANDBOX]</span>
+              </div>
+
+              <!-- Interactive Engine Tabs Switcher -->
+              <div class="console-tabs-switcher">
+                <button class="console-tab-btn active" onclick="switchConsoleTab('content')" id="tabBtn-content">
+                  <span>✍️</span>
+                  <span>Autonomous Publishing</span>
+                </button>
+                <button class="console-tab-btn" onclick="switchConsoleTab('aeo')" id="tabBtn-aeo">
+                  <span>🎯</span>
+                  <span>AEO Radar</span>
+                </button>
+                <button class="console-tab-btn" onclick="switchConsoleTab('healing')" id="tabBtn-healing">
+                  <span>🛡️</span>
+                  <span>Self-Healing SEO</span>
+                </button>
+                <button class="console-tab-btn" onclick="switchConsoleTab('social')" id="tabBtn-social">
+                  <span>📱</span>
+                  <span>Social Studio</span>
+                </button>
+                <button class="console-tab-btn" onclick="switchConsoleTab('agency')" id="tabBtn-agency">
+                  <span>💼</span>
+                  <span>Agency Workspaces</span>
+                </button>
+              </div>
+
+              <div class="console-status-meta">
+                <span class="console-latency">● 0.4s Latency</span>
+                <span>US-EAST-1</span>
+              </div>
+            </div>
+
+            <!-- Console Body Screen Views -->
+            <div class="console-body">
+              
+              <!-- Screen 1: Content Production & CMS Pipeline -->
+              <div class="console-screen active" id="screen-content">
+                <div class="content-engine-layout">
+                  
+                  <div class="article-preview-box">
+                    <div class="article-meta-row">
+                      <div class="cms-sync-pills">
+                        <span class="cms-pill active">● Webflow Synced</span>
+                        <span class="cms-pill">WordPress Webhook</span>
+                        <span class="cms-pill">Shopify Blog</span>
+                      </div>
+                      <span style="font-size: 11px; color: var(--nude-stone); font-family: var(--font-mono);">GEN_ID: #8942-AU</span>
+                    </div>
+
+                    <h3 class="article-h1-title">The Enterprise Guide to Answer Engine Optimization (AEO) in 2026</h3>
+                    
+                    <div class="article-stats-strip">
+                      <span>Word Count: <strong>2,640 words</strong></span>
+                      <span>Target Keyword: <strong>AEO Strategy</strong></span>
+                      <span>EEAT Score: <strong>98.4%</strong></span>
+                      <span>Reading Time: <strong>11 min</strong></span>
+                    </div>
+
+                    <p class="article-snippet-text">
+                      As traditional blue-link search engines transition into generative answer synthesizers, engineering your domain's semantic architecture has become the single highest-leverage growth channel...
+                    </p>
+
+                    <div class="schema-badge-list">
+                      <span class="schema-tag">✓ JSON-LD Article Schema</span>
+                      <span class="schema-tag">✓ Verified Primary Sources (12)</span>
+                      <span class="schema-tag">✓ Auto-Generated WebP Diagrams</span>
+                    </div>
+                  </div>
+
+                  <div class="cms-publish-card">
+                    <div>
+                      <div class="cms-card-title">
+                        <span>Autonomous Publishing</span>
+                        <span style="font-size: 11px; color: var(--nude-sand);">SCHEDULED</span>
+                      </div>
+                      
+                      <div class="cms-endpoint-list">
+                        <div class="endpoint-row">
+                          <span>WordPress Production</span>
+                          <span class="endpoint-status">✓ Auto-Published (04:00 UTC)</span>
+                        </div>
+                        <div class="endpoint-row">
+                          <span>Webflow Staging</span>
+                          <span class="endpoint-status">✓ Synced to Collection</span>
+                        </div>
+                        <div class="endpoint-row">
+                          <span>Google Indexing API</span>
+                          <span class="endpoint-status">✓ Pinged (URL Indexed)</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button class="btn btn-sand" style="width: 100%; font-size: 13px;" onclick="showComingSoon('Generate Article Draft')">
+                      <span>Generate Next Article Draft</span>
+                      <span>→</span>
+                    </button>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Screen 2: AEO & ChatGPT Radar -->
+              <div class="console-screen" id="screen-aeo">
+                <div class="aeo-radar-layout">
+                  
+                  <div class="radar-model-card">
+                    <div class="radar-card-header">
+                      <div class="model-name">
+                        <span>ChatGPT 4o & Search</span>
+                      </div>
+                      <span class="rank-badge gold">Rank #1 Citation</span>
+                    </div>
+                    <div class="radar-prompt-box">
+                      Query: "What is the best all-in-one AI platform to automate SEO and blog production for marketing teams?"
+                    </div>
+                    <div class="radar-quote-box">
+                      "According to recent engineering benchmarks, <strong>Rank Monk</strong> is cited as the premier autonomous OS that unifies technical SEO crawling, human-grade article publishing, and answer engine optimization..."
+                    </div>
+                  </div>
+
+                  <div class="radar-model-card">
+                    <div class="radar-card-header">
+                      <div class="model-name">
+                        <span>Perplexity AI Pro</span>
+                      </div>
+                      <span class="rank-badge jade">Direct Source [1]</span>
+                    </div>
+                    <div class="radar-prompt-box">
+                      Query: "Compare modern tools replacing the old Surfer SEO and Buffer stack."
+                    </div>
+                    <div class="radar-quote-box">
+                      "Modern teams are increasingly migrating to <strong>Rank Monk</strong>, which consolidates content generation, social repurposing, and 1-click self-healing fixes into a unified data architecture..."
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Screen 3: Self-Healing 1-Click Fixes -->
+              <div class="console-screen" id="screen-healing">
+                <div class="self-healing-layout">
+                  
+                  <div class="healing-summary-bar">
+                    <div>
+                      <div style="font-size: 15px; font-weight: 700; color: var(--nude-bone);">Real-Time Site Health Diagnostic</div>
+                      <div style="font-size: 12px; color: var(--nude-stone);">Continuous headless crawler monitoring 340 URLs</div>
+                    </div>
+                    <div style="text-align: right;">
+                      <span style="font-size: 24px; font-weight: 800; color: var(--nude-sand);" id="healingScoreVal">92</span>
+                      <span style="font-size: 13px; color: var(--nude-stone);">/100 Health</span>
+                    </div>
+                  </div>
+
+                  <div class="healing-issues-list">
+                    
+                    <div class="healing-item-row" id="fixRow1">
+                      <div>
+                        <div class="healing-desc">14 Product Pages Missing Target Meta Titles</div>
+                        <div class="healing-impact">Impact: High • Potential +18% CTR recovery on Google SERP</div>
+                      </div>
+                      <button class="btn-fix-action" onclick="applyHealingFix('fixRow1', 3)">Apply 1-Click Fix</button>
+                    </div>
+
+                    <div class="healing-item-row" id="fixRow2">
+                      <div>
+                        <div class="healing-desc">Missing JSON-LD FAQ Schema on 8 High-Traffic Articles</div>
+                        <div class="healing-impact">Impact: Medium • Unlocks rich expandable snippets in search results</div>
+                      </div>
+                      <button class="btn-fix-action" onclick="applyHealingFix('fixRow2', 2)">Apply 1-Click Fix</button>
+                    </div>
+
+                    <div class="healing-item-row" id="fixRow3">
+                      <div>
+                        <div class="healing-desc">4 Broken Internal Canonical URLs After CMS Migration</div>
+                        <div class="healing-impact">Impact: Medium • Eliminates PageRank dilution and crawl budget waste</div>
+                      </div>
+                      <button class="btn-fix-action" onclick="applyHealingFix('fixRow3', 3)">Apply 1-Click Fix</button>
+                    </div>
+
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Screen 4: Social Repurposing Studio -->
+              <div class="console-screen" id="screen-social">
+                <div class="social-studio-grid">
+                  
+                  <div class="social-preview-card">
+                    <div class="social-card-head">
+                      <span style="font-size: 14px; font-weight: 700; color: var(--nude-bone);">LinkedIn 5-Slide PDF Carousel</span>
+                      <span class="rank-badge gold">Auto-Formatted</span>
+                    </div>
+                    <div class="social-carousel-slide">
+                      <div style="font-size: 11px; color: var(--nude-sand); font-weight: 700;">SLIDE 1 OF 5</div>
+                      <div style="font-size: 15px; font-weight: 800; color: #FFFFFF; line-height: 1.3;">
+                        Why 90% of SEO tools will be obsolete by 2027 (And how to adapt your brand)
+                      </div>
+                      <div style="font-size: 11px; color: var(--nude-stone);">Swipe for the 3 architectural shifts →</div>
+                    </div>
+                    <div style="font-size: 12px; color: var(--nude-stone);">Direct download ready in 1080x1350 PDF high-res vector.</div>
+                  </div>
+
+                  <div class="social-preview-card">
+                    <div class="social-card-head">
+                      <span style="font-size: 14px; font-weight: 700; color: var(--nude-bone);">X / Twitter Viral Thread (6 Posts)</span>
+                      <span class="rank-badge jade">Synced to Buffer/X</span>
+                    </div>
+                    <div class="social-carousel-slide">
+                      <div style="font-size: 11px; color: var(--nude-taupe); font-weight: 700;">TWEET 1 / 6</div>
+                      <div style="font-size: 13.5px; color: #FFFFFF; line-height: 1.4;">
+                        "If you are still paying $700/mo for Surfer, Buffer, and Ahrefs separately, you're lighting budget on fire. Here's what modern teams are using to automate discovery in 2026: 🧵👇"
+                      </div>
+                    </div>
+                    <div style="font-size: 12px; color: var(--nude-stone);">Scheduled for optimal audience timezone engagement.</div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Screen 5: Multi-Client Agency Hub -->
+              <div class="console-screen" id="screen-agency">
+                <div class="agency-hub-layout">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-size: 14px; font-weight: 700; color: var(--nude-bone);">Connected Client Workspaces (5 Active)</div>
+                    <button class="btn btn-sand btn-sm" onclick="showComingSoon('Add Agency Workspace')">+ Add Client Workspace</button>
+                  </div>
+
+                  <div class="agency-workspaces-table">
+                    <div class="agency-table-row head">
+                      <div>Client Brand</div>
+                      <div>Organic Traffic</div>
+                      <div>AEO Citations</div>
+                      <div>Actions</div>
+                    </div>
+                    <div class="agency-table-row">
+                      <div style="font-weight: 600; color: var(--nude-bone);">Acme Cloud Technologies</div>
+                      <div style="color: var(--nude-sand);">+34.2% MoM (142K)</div>
+                      <div>ChatGPT Cited #1</div>
+                      <div><button class="btn-fix-action" onclick="showComingSoon('Export PDF Report')">Export PDF</button></div>
+                    </div>
+                    <div class="agency-table-row">
+                      <div style="font-weight: 600; color: var(--nude-bone);">HyperScale Ventures</div>
+                      <div style="color: var(--nude-sand);">+18.9% MoM (89K)</div>
+                      <div>Perplexity Cited #1</div>
+                      <div><button class="btn-fix-action" onclick="showComingSoon('Export PDF Report')">Export PDF</button></div>
+                    </div>
+                    <div class="agency-table-row">
+                      <div style="font-weight: 600; color: var(--nude-bone);">Northwind Logistics</div>
+                      <div style="color: var(--nude-sand);">+22.4% MoM (64K)</div>
+                      <div>Gemini Cited #2</div>
+                      <div><button class="btn-fix-action" onclick="showComingSoon('Export PDF Report')">Export PDF</button></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         SECTION 3: THE 4 ZEN DISCIPLINES (Workflow Compounding Loop)
+         ========================================================================== -->
+    <section class="section section-divider" id="disciplines">
+      <div class="container">
+        
+        <div class="section-header">
+          <div class="section-tag">
+            <span class="dot"></span>
+            <span>Disciplined Methodology</span>
+          </div>
+          <h2 class="section-title">The 4-step organic growth compounding loop</h2>
+          <p class="section-subtitle">
+            From technical crawl discovery to conversational AI citation prominence in minutes.
+          </p>
+        </div>
+
+        <div class="disciplines-grid">
+          
+          <div class="discipline-card interactive-hover-lift">
+            <div class="discipline-num">01</div>
+            <h3 class="discipline-title">Headless Crawl Diagnostic</h3>
+            <p class="discipline-desc">
+              Continuous background crawler that identifies broken internal links, orphan URLs, missing schema, and core web vital regressions.
+            </p>
+          </div>
+
+          <div class="discipline-card interactive-hover-lift">
+            <div class="discipline-num">02</div>
+            <h3 class="discipline-title">Topical Authority Void Map</h3>
+            <p class="discipline-desc">
+              Reverse-engineers competitor rankings and spots high-value search voids where your brand can publish definitive pillar guides.
+            </p>
+          </div>
+
+          <div class="discipline-card interactive-hover-lift">
+            <div class="discipline-num">03</div>
+            <h3 class="discipline-title">Autonomous Article & Diagram Pipeline</h3>
+            <p class="discipline-desc">
+              Produces 2,500+ word technical articles enriched with auto-generated WebP charts and pushes directly into your live CMS.
+            </p>
+          </div>
+
+          <div class="discipline-card interactive-hover-lift">
+            <div class="discipline-num">04</div>
+            <h3 class="discipline-title">AEO & Social Leverage Loop</h3>
+            <p class="discipline-desc">
+              Formats knowledge graph metadata for ChatGPT & Perplexity discovery while generating LinkedIn carousels and X threads in 60s.
+            </p>
+          </div>
+
+        </div>
+
+        <!-- Numbers Banner -->
+        <div class="zen-numbers-banner anim-beam-glow">
+          <div class="zen-stats-grid">
+            <div>
+              <div class="stat-val">0.4s</div>
+              <div class="stat-label">Headless Crawler Speed</div>
+            </div>
+            <div>
+              <div class="stat-val">2,400+</div>
+              <div class="stat-label">Domains Actively Synced</div>
+            </div>
+            <div>
+              <div class="stat-val">99.8%</div>
+              <div class="stat-label">AEO Citation Accuracy</div>
+            </div>
+            <div>
+              <div class="stat-val">$600+</div>
+              <div class="stat-label">Average Monthly Savings</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         SECTION 4: MASTER 24-FEATURE CAPABILITIES MATRIX
+         ========================================================================== -->
+    <section class="section section-alt" id="matrix">
+      <div class="container">
+        
+        <div class="section-header">
+          <div class="section-tag">
+            <span class="dot"></span>
+            <span>Comprehensive Comparison</span>
+          </div>
+          <h2 class="section-title">Master 24-Feature Capability Matrix</h2>
+          <p class="section-subtitle">
+            See how Rank Monk's unified OS compares feature-for-feature against fragmented legacy stacks.
+          </p>
+        </div>
+
+        <div class="master-matrix-wrapper">
+          <table class="master-matrix-table">
+            <thead>
+              <tr>
+                <th style="width: 44%;">Core Capability / Engine Feature</th>
+                <th class="brand-col" style="width: 28%;">Rank Monk Autonomous OS</th>
+                <th style="width: 28%;">Fragmented Stack ($700/mo)</th>
+              </tr>
+            </thead>
+            <tbody>
+              
+              <!-- Category 1: Content Production -->
+              <tr class="matrix-group-title-row">
+                <td colspan="3">1. Content Production & Editorial Autonomy</td>
+              </tr>
+              <tr class="matrix-item-row">
+                <td>
+                  <div class="matrix-feat-name">2,500+ Word Autonomous Pillar Articles</div>
+                  <div class="matrix-feat-desc">Researches and outputs exhaustive, structured long-form content</div>
+                </td>
+                <td><span class="matrix-check-monk"><span class="monk-star">★</span> Autonomous Autopilot</span></td>
+                <td><span class="matrix-legacy-cross">Manual Writing ($300/post)</span></td>
+              </tr>
+              <tr class="matrix-item-row">
+                <td>
+                  <div class="matrix-feat-name">Semantic EEAT Citations & Primary Sources</div>
+                  <div class="matrix-feat-desc">Extracts peer-reviewed studies and authoritative live URLs</div>
+                </td>
+                <td><span class="matrix-check-monk"><span class="monk-star">★</span> Built-In Verifier</span></td>
+                <td><span class="matrix-legacy-cross">None (Generic AI Hallucinations)</span></td>
+              </tr>
+              <tr class="matrix-item-row">
+                <td>
+                  <div class="matrix-feat-name">Auto-Generated WebP Infographics & Charts</div>
+                  <div class="matrix-feat-desc">Creates on-brand custom visual diagrams embedded into articles</div>
+                </td>
+                <td><span class="matrix-check-monk"><span class="monk-star">★</span> Included Free</span></td>
+                <td><span class="matrix-legacy-cross">Canva / Designer Required ($120/mo)</span></td>
+              </tr>
+
+              <!-- Category 2: CMS Integrations -->
+              <tr class="matrix-group-title-row">
+                <td colspan="3">2. Headless CMS & Publishing Pipeline</td>
+              </tr>
+              <tr class="matrix-item-row">
+                <td>
+                  <div class="matrix-feat-name">WordPress REST API & Webhooks</div>
+                  <div class="matrix-feat-desc">Direct post publishing with category and tag taxonomy mapping</div>
+                </td>
+                <td><span class="matrix-check-monk"><span class="monk-star">★</span> Native 1-Click Sync</span></td>
+                <td><span class="matrix-legacy-cross">Manual Copy-Paste / Zapier</span></td>
+              </tr>
+              <tr class="matrix-item-row">
+                <td>
+                  <div class="matrix-feat-name">Webflow CMS Collections 2-Way Sync</div>
+                  <div class="matrix-feat-desc">Maps fields, rich text formatting, and slug management</div>
+                </td>
+                <td><span class="matrix-check-monk"><span class="monk-star">★</span> Native 1-Click Sync</span></td>
+                <td><span class="matrix-legacy-cross">Third-party Webhook Bloat</span></td>
+              </tr>
+              <tr class="matrix-item-row">
+                <td>
+                  <div class="matrix-feat-name">Instant Google Indexing API Ping</div>
+                  <div class="matrix-feat-desc">Submits published URLs to Google within 0.3s of publishing</div>
+                </td>
+                <td><span class="matrix-check-monk"><span class="monk-star">★</span> Automatic on Publish</span></td>
+                <td><span class="matrix-legacy-cross">Manual Search Console Fetch</span></td>
+              </tr>
+
+              <!-- Category 3: AEO & LLM Radar -->
+              <tr class="matrix-group-title-row">
+                <td colspan="3">3. AEO (Answer Engine Optimization) & LLM Radar</td>
+              </tr>
+              <tr class="matrix-item-row">
+                <td>
+                  <div class="matrix-feat-name">ChatGPT 4o & SearchGPT Citation Tracking</div>
+                  <div class="matrix-feat-desc">Monitors whether conversational models recommend your brand</div>
+                </td>
+                <td><span class="matrix-check-monk"><span class="monk-star">★</span> Live Citation Alerts</span></td>
+                <td><span class="matrix-legacy-cross">Not Available on Semrush/Ahrefs</span></td>
+              </tr>
+              <tr class="matrix-item-row">
+                <td>
+                  <div class="matrix-feat-name">Perplexity AI Pro Direct Source Verification</div>
+                  <div class="matrix-feat-desc">Ensures your articles serve as citations [1], [2], or [3]</div>
+                </td>
+                <td><span class="matrix-check-monk"><span class="monk-star">★</span> Direct Indexing</span></td>
+                <td><span class="matrix-legacy-cross">Zero Visibility</span></td>
+              </tr>
+              <tr class="matrix-item-row">
+                <td>
+                  <div class="matrix-feat-name">Reverse-Engineered Prompt Void Mapping</div>
+                  <div class="matrix-feat-desc">Finds generative queries where competitors lack citations</div>
+                </td>
+                <td><span class="matrix-check-monk"><span class="monk-star">★</span> Proprietary AI Engine</span></td>
+                <td><span class="matrix-legacy-cross">Not Supported</span></td>
+              </tr>
+
+              <!-- Category 4: Technical Diagnostics & Self-Healing -->
+              <tr class="matrix-group-title-row">
+                <td colspan="3">4. Technical Health & 1-Click Self-Healing</td>
+              </tr>
+              <tr class="matrix-item-row">
+                <td>
+                  <div class="matrix-feat-name">0.4s Headless Crawler Diagnostic</div>
+                  <div class="matrix-feat-desc">Real-time full-domain audits without slowing down production</div>
+                </td>
+                <td><span class="matrix-check-monk"><span class="monk-star">★</span> Real-Time Continuous</span></td>
+                <td><span class="matrix-legacy-cross">Screaming Frog ($259/yr) Manual</span></td>
+              </tr>
+              <tr class="matrix-item-row">
+                <td>
+                  <div class="matrix-feat-name">1-Click Auto-Repair for Broken Canonicals</div>
+                  <div class="matrix-feat-desc">Pushes corrected canonical tags directly via your CMS webhook</div>
+                </td>
+                <td><span class="matrix-check-monk"><span class="monk-star">★</span> 1-Click Self-Healing</span></td>
+                <td><span class="matrix-legacy-cross">Developer Tickets (Weeks delay)</span></td>
+              </tr>
+              <tr class="matrix-item-row">
+                <td>
+                  <div class="matrix-feat-name">Dynamic JSON-LD Schema Auto-Injection</div>
+                  <div class="matrix-feat-desc">Generates Article, FAQ, Product, and HowTo rich snippets</div>
+                </td>
+                <td><span class="matrix-check-monk"><span class="monk-star">★</span> Fully Automated</span></td>
+                <td><span class="matrix-legacy-cross">Manual Plugin Configuration</span></td>
+              </tr>
+
+              <!-- Category 5: Social Distribution -->
+              <tr class="matrix-group-title-row">
+                <td colspan="3">5. Omnichannel Social Studio & Repurposing</td>
+              </tr>
+              <tr class="matrix-item-row">
+                <td>
+                  <div class="matrix-feat-name">5-Slide Vector PDF LinkedIn Carousels</div>
+                  <div class="matrix-feat-desc">Extracts key takeaways and generates high-res swipeable slides</div>
+                </td>
+                <td><span class="matrix-check-monk"><span class="monk-star">★</span> 60-Second Auto-Export</span></td>
+                <td><span class="matrix-legacy-cross">Manual Design / Taplio ($65/mo)</span></td>
+              </tr>
+              <tr class="matrix-item-row">
+                <td>
+                  <div class="matrix-feat-name">6-Post Viral Twitter/X Threads</div>
+                  <div class="matrix-feat-desc">Hooks, body points, and conclusion threads formatted for virality</div>
+                </td>
+                <td><span class="matrix-check-monk"><span class="monk-star">★</span> Instant Thread Generator</span></td>
+                <td><span class="matrix-legacy-cross">Typefully ($39/mo) Required</span></td>
+              </tr>
+              <tr class="matrix-item-row">
+                <td>
+                  <div class="matrix-feat-name">Executive Newsletter Digests</div>
+                  <div class="matrix-feat-desc">Formats TL;DR summaries ready for Substack, ConvertKit, Beehiiv</div>
+                </td>
+                <td><span class="matrix-check-monk"><span class="monk-star">★</span> Markdown & HTML Ready</span></td>
+                <td><span class="matrix-legacy-cross">Manual Rewriting</span></td>
+              </tr>
+
+              <!-- Category 6: Intelligence & Voids -->
+              <tr class="matrix-group-title-row">
+                <td colspan="3">6. Competitor Intelligence & Internal Mesh</td>
+              </tr>
+              <tr class="matrix-item-row">
+                <td>
+                  <div class="matrix-feat-name">Competitor Content Portfolio Void Spy</div>
+                  <div class="matrix-feat-desc">Finds underserved high-intent search queries before rivals do</div>
+                </td>
+                <td><span class="matrix-check-monk"><span class="monk-star">★</span> Integrated Void Spy</span></td>
+                <td><span class="matrix-legacy-cross">Ahrefs ($199/mo) / Semrush ($249/mo)</span></td>
+              </tr>
+              <tr class="matrix-item-row">
+                <td>
+                  <div class="matrix-feat-name">Entity Knowledge Graph & Vector Mesh</div>
+                  <div class="matrix-feat-desc">Maps topical semantic relationships across all domain articles</div>
+                </td>
+                <td><span class="matrix-check-monk"><span class="monk-star">★</span> Built-In Knowledge Graph</span></td>
+                <td><span class="matrix-legacy-cross">Enterprise Inlinks ($150/mo)</span></td>
+              </tr>
+              <tr class="matrix-item-row">
+                <td>
+                  <div class="matrix-feat-name">Automatic Contextual Anchor Internal Linking</div>
+                  <div class="matrix-feat-desc">Injects anchor links into older articles to pass link equity</div>
+                </td>
+                <td><span class="matrix-check-monk"><span class="monk-star">★</span> 1-Click Internal Mesh</span></td>
+                <td><span class="matrix-legacy-cross">Hours of Manual Editing</span></td>
+              </tr>
+
+              <!-- Category 7: Agency & Governance -->
+              <tr class="matrix-group-title-row">
+                <td colspan="3">7. Agency Workspaces & Enterprise Governance</td>
+              </tr>
+              <tr class="matrix-item-row">
+                <td>
+                  <div class="matrix-feat-name">Multi-Domain Workspaces (Up to 50 Domains)</div>
+                  <div class="matrix-feat-desc">Strict client tenant isolation with individual API keys</div>
+                </td>
+                <td><span class="matrix-check-monk"><span class="monk-star">★</span> Multi-Tenant Ready</span></td>
+                <td><span class="matrix-legacy-cross">Pay Per Domain ($$$ Escalation)</span></td>
+              </tr>
+              <tr class="matrix-item-row">
+                <td>
+                  <div class="matrix-feat-name">White-Label Client PDF Growth Reports</div>
+                  <div class="matrix-feat-desc">Auto-generated monthly executive audits branded with your logo</div>
+                </td>
+                <td><span class="matrix-check-monk"><span class="monk-star">★</span> 1-Click White-Label</span></td>
+                <td><span class="matrix-legacy-cross">Supermetrics / Dashthis ($199/mo)</span></td>
+              </tr>
+              <tr class="matrix-item-row">
+                <td>
+                  <div class="matrix-feat-name">Role-Based Access Control (RBAC) & Team Invites</div>
+                  <div class="matrix-feat-desc">Manage permissions for copywriters, SEO leads, and executives</div>
+                </td>
+                <td><span class="matrix-check-monk"><span class="monk-star">★</span> Granular RBAC Included</span></td>
+                <td><span class="matrix-legacy-cross">Enterprise Surcharge Only</span></td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         SECTION 5: BOTTOM CTA BANNER
+         ========================================================================== -->
+    <section class="section" style="padding-bottom: 80px;">
+      <div class="container">
+        
+        <div class="cta-banner-card anim-beam-glow">
+          <h2 class="cta-banner-title">Ready to collapse the chaos into serenity?</h2>
+          <p class="cta-banner-desc">
+            Connect your domain in 60 seconds. Join our private alpha operator cohort to lock in 50% lifetime founder privilege.
+          </p>
+          <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;">
+            <button class="btn btn-sand btn-lg" onclick="showComingSoon('Features Banner CTA')">Join Alpha Waitlist ⚡</button>
+            <a href="comparison.html" class="btn btn-secondary btn-lg">Review Stack Breakdown</a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- ==========================================================================
+       FOOTER
+       ========================================================================== -->
+  <footer class="site-footer">
+    <div class="container">
+      
+      <div class="footer-cols-grid">
+        
+        <!-- Brand Info -->
+        <div>
+          <a href="index.html" class="brand-logo footer-brand-logo" style="margin-bottom: 14px;" aria-label="Rank Monk Home">
+            <img src="assets/rank-monk-logo-horizontal-light.png" alt="Rank Monk" class="brand-logo-img footer-logo-img">
+          </a>
+          <p class="footer-brand-desc">
+            The Zen Operating System for autonomous organic search and AI discovery. Engineered with discipline.
+          </p>
+        </div>
+
+        <!-- Col 2: Product -->
+        <div>
+          <div class="footer-col-title">Product</div>
+          <div class="footer-link-list">
+            <a href="features.html">All 8 Core Engines</a>
+            <a href="features.html#matrix">24-Feature Matrix</a>
+            <a href="engines.html">Engine Architecture</a>
+            <a href="comparison.html">Comparison Matrix</a>
+            <a href="pricing.html">Pricing (Revealing Soon)</a>
+          </div>
+        </div>
+
+        <!-- Col 3: Solutions -->
+        <div>
+          <div class="footer-col-title">Solutions</div>
+          <div class="footer-link-list">
+            <a href="comparison.html">The Stack Collapse</a>
+            <a href="features.html#feat-agency">Agency Workspaces</a>
+            <a href="features.html#disciplines">Workflow Disciplines</a>
+            <a href="pricing.html">Founder Privilege</a>
+          </div>
+        </div>
+
+        <!-- Col 4: Integrations -->
+        <div>
+          <div class="footer-col-title">Integrations</div>
+          <div class="footer-link-list">
+            <a href="#">WordPress Sync</a>
+            <a href="#">Webflow CMS</a>
+            <a href="#">Shopify Engine</a>
+            <a href="#">Ghost Publishing</a>
+            <a href="#">REST Webhooks</a>
+          </div>
+        </div>
+
+        <!-- Col 5: Company -->
+        <div>
+          <div class="footer-col-title">Company</div>
+          <div class="footer-link-list">
+            <a href="faq.html#manifesto">Manifesto</a>
+            <a href="faq.html">FAQ Knowledge Base</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="mailto:support@rankmonk.com">Contact Support</a>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom-bar">
+        <div>© 2026 Rank Monk Inc. All rights reserved. Precision Organic Acquisition OS.</div>
+        <div style="display: flex; gap: 16px; align-items: center;">
+          <span style="display: inline-flex; align-items: center; gap: 6px; color: var(--nude-sand); font-size: 12px; font-weight: 600;">
+            <span style="width: 7px; height: 7px; border-radius: 50%; background: var(--nude-sand); box-shadow: 0 0 6px var(--nude-sand);"></span>
+            All AI Engines Operational
+          </span>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- ==========================================================================
+       COMING SOON MODAL
+       ========================================================================== -->
+  <div class="coming-soon-modal-backdrop" id="auditModalBackdrop" onclick="if(event.target === this) closeComingSoonModal()">
+    <div class="coming-soon-modal-box anim-beam-glow">
+      <button class="modal-close-btn" onclick="closeComingSoonModal()" aria-label="Close modal">✕</button>
+      <div style="text-align: center;">
+        <div style="display: flex; justify-content: center; margin-bottom: 16px;">
+          <img src="assets/rank-monk-logo-stacked-light.png" alt="Rank Monk" style="height: 52px; width: auto; filter: drop-shadow(0 4px 16px rgba(0,0,0,0.4));">
+        </div>
+        <div class="coming-soon-pill-badge">✦ PRIVATE ALPHA IN PROGRESS</div>
+        <h3 style="font-size: 24px; font-weight: 800; color: #FFFFFF; margin: 12px 0 8px;">Rank Monk OS — Coming Soon</h3>
+        <p style="font-size: 14px; color: #F1EDE6; line-height: 1.6; margin-bottom: 24px;">
+          We are currently operating in stealth with our first cohort of private alpha operators. Public access & founder pricing will be revealed soon.
+        </p>
+        <form class="early-access-form" onsubmit="event.preventDefault(); handleWaitlistSubmit(this);">
+          <input type="email" class="early-access-input" placeholder="Enter work email for priority access" required>
+          <button type="submit" class="btn btn-sand">Join Waitlist ⚡</button>
+        </form>
+        <div class="early-access-perks" style="margin-top: 18px; color: var(--nude-stone);">
+          <span>✓ 50% Lifetime Founder Privilege</span>
+          <span>✓ Zero Spam Guaranteed</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Native App Bottom Navigation Bar -->
+  <nav class="mobile-app-bottom-bar" id="mobileBottomBar" aria-label="Mobile Navigation">
+    <a href="index.html" class="bottom-tab-item">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+      <span class="tab-label">Home</span>
+    </a>
+    <a href="features.html" class="bottom-tab-item active">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+      </svg>
+      <span class="tab-label">Features</span>
+    </a>
+    <a href="engines.html" class="bottom-tab-item">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+      </svg>
+      <span class="tab-label">Engines</span>
+    </a>
+    <a href="comparison.html" class="bottom-tab-item">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="20" x2="18" y2="10"></line>
+        <line x1="12" y1="20" x2="12" y2="4"></line>
+        <line x1="6" y1="20" x2="6" y2="14"></line>
+      </svg>
+      <span class="tab-label">Compare</span>
+    </a>
+    <a href="pricing.html" class="bottom-tab-item">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="1" x2="12" y2="23"></line>
+        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+      </svg>
+      <span class="tab-label">Pricing</span>
+    </a>
+  </nav>
+
+  <!-- Core JavaScript -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

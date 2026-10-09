@@ -1,0 +1,374 @@
+/* ==========================================================================
+   RANK MONK - BASE STYLESHEET
+   Aesthetic: Nude Palette (Warm Bone, Linen, Sandstone, Taupe, Deep Espresso)
+   ========================================================================== */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--header-h) + 24px);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  width: 100%;
+  background-color: var(--nude-bone);
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-page);
+  color: var(--text-body);
+  line-height: 1.6;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Subtle Architectural Ambient Lighting (Warm Sand & Linen Radiance) */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1200px;
+  height: 600px;
+  background: radial-gradient(circle at 50% 0%, rgba(203, 173, 141, 0.18) 0%, rgba(235, 227, 219, 0.3) 45%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Standard Container */
+.container {
+  width: 100%;
+  max-width: var(--max-w);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 20px;
+  padding-right: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+}
+
+/* Section Spacing */
+.section {
+  padding-top: 88px;
+  padding-bottom: 88px;
+  position: relative;
+  z-index: 1;
+}
+
+@media (min-width: 992px) {
+  .section {
+    padding-top: 116px;
+    padding-bottom: 116px;
+  }
+}
+
+.section-alt {
+  background-color: var(--nude-linen);
+  border-top: 1px solid var(--border-stone);
+  border-bottom: 1px solid var(--border-stone);
+}
+
+.section-divider {
+  border-top: 1px solid rgba(58, 45, 40, 0.1);
+  position: relative;
+}
+
+.section-divider::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 240px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--nude-sand) 50%, transparent 100%);
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--text-heading);
+  letter-spacing: -0.03em;
+}
+
+p {
+  color: var(--text-secondary);
+}
+
+/* Ensure all text inside dark containers is crisp, glowing bone/linen - NEVER black */
+.manifesto-card,
+[style*="background: var(--nude-espresso)"],
+[style*="background:var(--nude-espresso)"],
+[style*="background: #3A2D28"],
+[style*="background:#3A2D28"],
+.console-body,
+.cta-banner-card,
+.zen-numbers-banner,
+.matrix-table-wrap,
+.site-footer,
+.coming-soon-modal-box,
+.audit-modal-box,
+.stack-card.zen {
+  color: var(--nude-bone);
+}
+
+.manifesto-card p,
+[style*="background: var(--nude-espresso)"] p,
+[style*="background:var(--nude-espresso)"] p,
+[style*="background: #3A2D28"] p,
+[style*="background:#3A2D28"] p,
+.console-body p,
+.cta-banner-card p,
+.zen-numbers-banner p,
+.matrix-table-wrap p,
+.site-footer p,
+.coming-soon-modal-box p,
+.audit-modal-box p,
+.stack-card.zen p {
+  color: var(--nude-bone) !important;
+}
+
+[style*="background: var(--nude-espresso)"] strong,
+[style*="background:var(--nude-espresso)"] strong,
+.coming-soon-modal-box strong,
+.manifesto-card strong,
+.stack-card.zen strong {
+  color: #FFFFFF !important;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  outline: none;
+}
+
+img, svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Section Header Typography */
+.section-header {
+  text-align: center;
+  max-width: 760px;
+  margin: 0 auto 52px;
+}
+
+.section-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--nude-linen);
+  border: 1px solid var(--nude-stone);
+  color: var(--nude-espresso);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.section-tag.sand {
+  background: var(--brand-soft);
+  border-color: var(--nude-sand);
+  color: var(--nude-espresso);
+}
+
+.section-tag.taupe {
+  background: var(--brand-soft-taupe);
+  border-color: var(--nude-taupe);
+  color: var(--nude-espresso);
+}
+
+.section-tag .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--nude-sand);
+}
+
+.section-title {
+  font-size: clamp(30px, 4.4vw, 48px);
+  font-weight: 800;
+  margin-bottom: 16px;
+  color: var(--text-heading);
+  letter-spacing: -0.035em;
+}
+
+.section-subtitle {
+  font-size: clamp(16px, 1.8vw, 18.5px);
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* Gradient Highlights */
+.grad-sand {
+  background: linear-gradient(135deg, #3A2D28 20%, #A48374 65%, #CBAD8D 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.grad-gold-sand {
+  background: linear-gradient(135deg, #CBAD8D 0%, #BA9977 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+/* Luxury Nude Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 11px 22px;
+  border-radius: var(--radius-pill);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  user-select: none;
+  position: relative;
+}
+
+/* Deep Espresso Primary Button */
+.btn-espresso {
+  background: var(--nude-espresso);
+  color: var(--nude-bone);
+  font-weight: 700;
+  border: 1px solid rgba(203, 173, 141, 0.3);
+  box-shadow: 0 4px 16px rgba(58, 45, 40, 0.2);
+}
+
+.btn-espresso:hover {
+  background: #2A1F1B;
+  transform: translateY(-1.5px);
+  box-shadow: 0 8px 24px rgba(58, 45, 40, 0.28);
+  border-color: var(--nude-sand);
+}
+
+.btn-espresso:active {
+  transform: translateY(0);
+}
+
+/* Golden Sandstone Button */
+.btn-sand {
+  background: var(--nude-sand);
+  color: var(--nude-espresso);
+  font-weight: 700;
+  border: 1px solid rgba(58, 45, 40, 0.15);
+  box-shadow: var(--shadow-sand);
+}
+
+.btn-sand:hover {
+  background: #BA9977;
+  transform: translateY(-1.5px);
+  box-shadow: 0 10px 28px rgba(203, 173, 141, 0.45);
+}
+
+/* Crisp Clean Linen / Stone Secondary Button */
+.btn-secondary {
+  background: #FFFFFF;
+  color: var(--nude-espresso);
+  border: 1px solid var(--border-stone);
+  box-shadow: var(--shadow-xs);
+}
+
+.btn-secondary:hover {
+  background: var(--nude-linen);
+  border-color: var(--nude-taupe);
+  transform: translateY(-1.5px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Aliases for Nude Palette */
+.btn-gold {
+  background: var(--nude-sand);
+  color: var(--nude-espresso);
+  font-weight: 700;
+  border: 1px solid rgba(58, 45, 40, 0.15);
+  box-shadow: var(--shadow-sand);
+}
+
+.btn-gold:hover {
+  background: #BA9977;
+  transform: translateY(-1.5px);
+  box-shadow: 0 10px 28px rgba(203, 173, 141, 0.45);
+}
+
+.btn-glass {
+  background: #FFFFFF;
+  color: var(--nude-espresso);
+  border: 1px solid var(--border-stone);
+  box-shadow: var(--shadow-xs);
+}
+
+.btn-glass:hover {
+  background: var(--nude-linen);
+  border-color: var(--nude-taupe);
+  transform: translateY(-1.5px);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-sm {
+  padding: 7px 16px;
+  font-size: 13px;
+}
+
+.btn-lg {
+  padding: 13px 28px;
+  font-size: 15.5px;
+}
+
+/* Clean Card Base */
+.card-nude {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-stone);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-nude:hover {
+  border-color: var(--nude-taupe);
+  box-shadow: var(--shadow-card-hover);
+}

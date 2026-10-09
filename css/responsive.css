@@ -1,0 +1,805 @@
+/* ==========================================================================
+   RANK MONK - MASTER MOBILE & RESPONSIVE STYLESHEET
+   Engineered for Mobile App Feel, Fluid Breakpoints & Zero Overflow
+   (Tested across 320px - 1440px)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. GLOBAL MOBILE VARIABLES & UTILITIES
+   -------------------------------------------------------------------------- */
+:root {
+  --mobile-header-h: 60px;
+  --mobile-bottom-bar-h: 62px;
+  --touch-target-min: 44px;
+}
+
+/* --------------------------------------------------------------------------
+   2. DESKTOP HIDING FOR MOBILE-ONLY ELEMENTS
+   -------------------------------------------------------------------------- */
+.mobile-app-bottom-bar {
+  display: none;
+}
+
+.mobile-only {
+  display: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   3. TABLET & LAPTOP REFINEMENTS (max-width: 1080px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 1080px) {
+  .engines-bento-grid,
+  .disciplines-grid,
+  .pricing-cards-grid,
+  .features-all-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .footer-cols-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .footer-cols-grid > div:first-child {
+    grid-column: span 3;
+  }
+
+  .nav-links {
+    gap: 4px;
+  }
+
+  .nav-link {
+    padding: 6px 12px;
+    font-size: 13.5px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. MOBILE APP BREAKPOINT (max-width: 880px)
+      Transforms website into a seamless, native-feeling mobile app
+   -------------------------------------------------------------------------- */
+@media (max-width: 880px) {
+  /* Safe body offset for bottom tab bar */
+  body {
+    padding-bottom: calc(var(--mobile-bottom-bar-h) + env(safe-area-inset-bottom, 12px));
+  }
+
+  /* Compact Native Mobile Header */
+  .site-header {
+    height: var(--mobile-header-h);
+    padding: 0;
+  }
+
+  .nav-container {
+    height: 100%;
+    padding-left: 16px;
+    padding-right: 16px;
+    gap: 12px;
+  }
+
+  /* Brand Logo in Mobile Header */
+  .brand-logo-img {
+    height: 38px;
+    max-width: 190px;
+  }
+
+  .brand-title {
+    font-size: 18px;
+  }
+
+  /* Hide Desktop Nav & CTA in Header */
+  .nav-links {
+    display: none !important;
+  }
+
+  .nav-actions .btn {
+    display: none; /* Accessible from bottom bar or drawer */
+  }
+
+  /* Mobile Hamburger Toggle - App Style */
+  .mobile-nav-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: var(--radius-sm);
+    background: #FFFFFF;
+    border: 1px solid var(--border-stone);
+    color: var(--nude-espresso);
+    box-shadow: var(--shadow-xs);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-nav-toggle:active {
+    transform: scale(0.92);
+    background: var(--nude-linen);
+  }
+
+  /* ========================================================================
+     NATIVE APP BOTTOM NAVIGATION BAR (Fixed Thumb Dock)
+     ======================================================================== */
+  .mobile-app-bottom-bar {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: calc(var(--mobile-bottom-bar-h) + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 6px);
+    background: rgba(241, 237, 230, 0.94);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-top: 1px solid var(--border-stone);
+    box-shadow: 0 -4px 20px rgba(58, 45, 40, 0.08);
+    z-index: 990;
+    justify-content: space-around;
+    align-items: center;
+  }
+
+  .bottom-tab-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    flex: 1;
+    height: 100%;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .bottom-tab-item .tab-icon {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.2s ease, stroke 0.2s ease;
+  }
+
+  .bottom-tab-item:active {
+    transform: scale(0.88);
+  }
+
+  .bottom-tab-item.active {
+    color: var(--nude-espresso);
+    font-weight: 800;
+  }
+
+  .bottom-tab-item.active .tab-icon {
+    stroke: var(--nude-sand);
+    transform: translateY(-1px);
+  }
+
+  .bottom-tab-item.active::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    width: 14px;
+    height: 3px;
+    border-radius: var(--radius-pill);
+    background: var(--nude-sand);
+  }
+
+  /* ========================================================================
+     MOBILE APP DRAWER / FULL-SCREEN SHEET
+     ======================================================================== */
+  .mobile-nav-sheet {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    background: var(--nude-bone);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    padding: 18px 20px calc(80px + env(safe-area-inset-bottom, 16px));
+    transform: translateY(-100%);
+    opacity: 0;
+    visibility: hidden;
+    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+    z-index: 1005;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mobile-nav-sheet.open {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .mobile-sheet-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--border-stone);
+    margin-bottom: 18px;
+  }
+
+  .mobile-sheet-close {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--nude-linen);
+    border: 1px solid var(--border-stone);
+    color: var(--nude-espresso);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+
+  .mobile-sheet-close:active {
+    transform: scale(0.9);
+  }
+
+  .mobile-sheet-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .mobile-nav-sheet .nav-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 15.5px;
+    font-weight: 700;
+    padding: 14px 18px;
+    border-radius: var(--radius-md);
+    background: #FFFFFF;
+    border: 1px solid var(--border-stone);
+    color: var(--nude-espresso);
+    box-shadow: var(--shadow-xs);
+    transition: all 0.2s ease;
+  }
+
+  .mobile-nav-sheet .nav-link:active {
+    transform: scale(0.98);
+    background: var(--nude-linen);
+    border-color: var(--nude-sand);
+  }
+
+  .mobile-nav-sheet .nav-link.active {
+    background: var(--nude-espresso);
+    color: var(--nude-bone);
+    border-color: var(--nude-sand);
+  }
+
+  .mobile-nav-sheet .nav-link .link-sub {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+
+  .mobile-nav-sheet .nav-link.active .link-sub {
+    color: var(--nude-sand);
+  }
+
+  .mobile-sheet-footer {
+    margin-top: auto;
+    padding-top: 18px;
+    border-top: 1px solid var(--border-stone);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* ========================================================================
+     CONTENT STACKING & TOUCH GRIDS (Tablet / Mobile)
+     ======================================================================== */
+  .content-engine-layout,
+  .aeo-radar-layout,
+  .social-studio-grid,
+  .stack-collapse-grid,
+  .features-all-grid,
+  .engines-bento-grid,
+  .disciplines-grid,
+  .pricing-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .zen-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: 24px;
+  }
+
+  /* Matrix Tables - Smooth Horizontal Native Swipe */
+  .matrix-table-wrap,
+  .master-matrix-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: var(--radius-lg);
+    position: relative;
+  }
+
+  .matrix-header-row,
+  .matrix-data-row {
+    min-width: 640px;
+  }
+
+  .master-matrix-table {
+    min-width: 720px;
+  }
+
+  /* Add Mobile Swipe Indicator Hint */
+  .mobile-swipe-cue {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--nude-sand);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   5. SMARTPHONE VIEWS (max-width: 640px)
+      Pixel-perfect UI sizing, ergonomics, and spacing
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+  /* Container Padding */
+  .container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  /* Section Spacing */
+  .section {
+    padding-top: 48px;
+    padding-bottom: 48px;
+  }
+
+  .section-header {
+    margin-bottom: 32px;
+  }
+
+  .section-title {
+    font-size: clamp(26px, 7.2vw, 36px);
+    line-height: 1.18;
+    margin-bottom: 12px;
+  }
+
+  .section-subtitle {
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  /* ========================================================================
+     HERO SECTION ERGONOMICS
+     ======================================================================== */
+  .hero-section {
+    padding-top: 24px;
+    padding-bottom: 48px;
+  }
+
+  .hero-headline {
+    font-size: clamp(30px, 8.5vw, 42px);
+    line-height: 1.12;
+    letter-spacing: -0.035em;
+    margin-bottom: 16px;
+  }
+
+  .hero-description {
+    font-size: 15px;
+    line-height: 1.55;
+    margin-bottom: 24px;
+  }
+
+  .hero-pill-badge {
+    padding: 5px 12px;
+    font-size: 11.5px;
+    margin-bottom: 20px;
+  }
+
+  /* Scanner Form on Mobile - Card Style */
+  .hero-scanner-wrap {
+    margin-bottom: 16px;
+  }
+
+  .scanner-box {
+    flex-direction: column;
+    padding: 12px;
+    border-radius: var(--radius-lg);
+    gap: 10px;
+    background: #FFFFFF;
+    box-shadow: 0 10px 30px -6px rgba(58, 45, 40, 0.12);
+  }
+
+  .scanner-prefix-icon {
+    display: none;
+  }
+
+  .scanner-input {
+    width: 100%;
+    font-size: 15px;
+    text-align: center;
+    padding: 10px 8px;
+    min-height: var(--touch-target-min);
+  }
+
+  .scanner-btn {
+    width: 100%;
+    min-height: var(--touch-target-min);
+    font-size: 14.5px;
+    justify-content: center;
+    padding: 13px 20px;
+    border-radius: var(--radius-pill);
+  }
+
+  /* Hero Metric Chips */
+  .hero-metrics-strip {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .hero-metric-item {
+    font-size: 12px;
+    justify-content: center;
+    background: var(--nude-linen);
+    padding: 8px 12px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border-stone);
+  }
+
+  /* ========================================================================
+     COMMAND CENTER OS CONSOLE (Mobile App Experience)
+     ======================================================================== */
+  .command-center-wrap {
+    margin-top: 36px;
+  }
+
+  .console-frame {
+    border-radius: 18px;
+  }
+
+  .console-header {
+    padding: 12px 14px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .console-dots {
+    display: none; /* Maximize tab space */
+  }
+
+  .console-system-title {
+    margin: 0;
+    text-align: center;
+    font-size: 11px;
+  }
+
+  /* Smooth Horizontal Scrollable Console Tabs */
+  .console-tabs-switcher {
+    display: flex;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 3px;
+    gap: 4px;
+  }
+
+  .console-tabs-switcher::-webkit-scrollbar {
+    display: none;
+  }
+
+  .console-tab-btn {
+    padding: 6px 12px;
+    font-size: 11.5px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .console-status-meta {
+    justify-content: center;
+    font-size: 11px;
+  }
+
+  .console-body {
+    padding: 14px;
+    min-height: auto;
+  }
+
+  .article-preview-box,
+  .cms-publish-card,
+  .radar-model-card,
+  .social-preview-card {
+    padding: 16px;
+    border-radius: var(--radius-md);
+  }
+
+  .article-h1-title {
+    font-size: 17px;
+  }
+
+  .article-stats-strip {
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 11.5px;
+  }
+
+  /* Self-healing row on mobile */
+  .healing-summary-bar {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+    padding: 14px;
+  }
+
+  .healing-item-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .btn-fix-action {
+    width: 100%;
+    text-align: center;
+    min-height: 40px;
+  }
+
+  /* ========================================================================
+     STACK COLLAPSE & COMPARISON CARDS
+     ======================================================================== */
+  .stack-card {
+    padding: 24px 18px;
+    border-radius: var(--radius-lg);
+  }
+
+  .stack-title {
+    font-size: 20px;
+  }
+
+  .chaos-tools-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .chaos-tool-item {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  /* ========================================================================
+     BENTO GRIDS, ENGINES & DISCIPLINES
+     ======================================================================== */
+  .engine-bento-card,
+  .feature-card-full,
+  .discipline-card {
+    padding: 24px 18px;
+    border-radius: var(--radius-lg);
+  }
+
+  .engine-title,
+  .feature-title-text {
+    font-size: 18.5px;
+  }
+
+  .engine-icon-wrap,
+  .feature-icon-badge {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    font-size: 20px;
+  }
+
+  /* Zen Numbers Banner */
+  .zen-numbers-banner {
+    padding: 32px 18px;
+    border-radius: var(--radius-lg);
+    margin-top: 36px;
+  }
+
+  .zen-stats-grid {
+    grid-template-columns: 1fr 1fr;
+    row-gap: 22px;
+  }
+
+  .stat-val {
+    font-size: 32px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+  }
+
+  /* ========================================================================
+     PRICING PAGE CONTROLS
+     ======================================================================== */
+  .pricing-controls {
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .pricing-toggle-wrap {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .pricing-toggle-btn {
+    flex: 1;
+    text-align: center;
+    padding: 9px 12px;
+    font-size: 12.5px;
+  }
+
+  .pricing-card {
+    padding: 28px 20px;
+    border-radius: var(--radius-lg);
+  }
+
+  .pricing-card.featured {
+    transform: none; /* No scale overflow on mobile */
+  }
+
+  .price-figure {
+    font-size: 36px;
+  }
+
+  /* ========================================================================
+     FAQ & ACCORDIONS
+     ======================================================================== */
+  .faq-question-btn {
+    padding: 16px 18px;
+    font-size: 15px;
+    gap: 12px;
+  }
+
+  .faq-answer {
+    padding: 0 18px;
+    font-size: 13.5px;
+  }
+
+  .faq-item.active .faq-answer {
+    padding: 0 18px 18px;
+  }
+
+  /* ========================================================================
+     CTA BANNER CARD
+     ======================================================================== */
+  .cta-banner-card {
+    padding: 40px 18px;
+    border-radius: var(--radius-lg);
+    margin-bottom: 40px;
+  }
+
+  .cta-banner-title {
+    font-size: clamp(26px, 7vw, 36px);
+  }
+
+  .cta-banner-desc {
+    font-size: 15px;
+    margin-bottom: 24px;
+  }
+
+  .cta-banner-card .btn {
+    width: 100%;
+    min-height: var(--touch-target-min);
+  }
+
+  /* ========================================================================
+     FOOTER ERGONOMICS
+     ======================================================================== */
+  .site-footer {
+    padding-top: 48px;
+    padding-bottom: 32px;
+  }
+
+  .footer-cols-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    margin-bottom: 36px;
+  }
+
+  .footer-cols-grid > div:first-child {
+    grid-column: span 1;
+  }
+
+  .footer-bottom-bar {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+    font-size: 12px;
+  }
+
+  /* ========================================================================
+     COMING SOON / WAITLIST MODAL (Mobile Bottom Sheet Mode)
+     ======================================================================== */
+  .audit-modal-backdrop,
+  .coming-soon-modal-backdrop {
+    padding: 0;
+    align-items: flex-end; /* Mobile Bottom Sheet */
+  }
+
+  .audit-modal-box,
+  .coming-soon-modal-box {
+    max-width: 100% !important;
+    width: 100% !important;
+    border-radius: 24px 24px 0 0 !important;
+    padding: 28px 20px calc(24px + env(safe-area-inset-bottom, 12px)) !important;
+    transform: translateY(100%);
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.45);
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
+  }
+
+  .audit-modal-backdrop.open .audit-modal-box,
+  .coming-soon-modal-backdrop.open .coming-soon-modal-box {
+    transform: translateY(0);
+  }
+
+  .modal-close-btn {
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .early-access-form {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .early-access-input,
+  .early-access-form .btn {
+    width: 100%;
+    min-height: var(--touch-target-min);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   6. EXTRA COMPACT SMARTPHONES (max-width: 380px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 380px) {
+  .brand-logo-img {
+    height: 34px;
+    max-width: 160px;
+  }
+
+  .footer-logo-img {
+    height: 32px;
+    max-width: 155px;
+  }
+
+  .hero-headline {
+    font-size: 28px;
+  }
+
+  .hero-metrics-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .bottom-tab-item {
+    font-size: 9.5px;
+  }
+
+  .bottom-tab-item .tab-icon {
+    width: 18px;
+    height: 18px;
+  }
+}

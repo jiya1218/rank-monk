@@ -1,0 +1,105 @@
+/* ==========================================================================
+   RANK MONK - DESIGN TOKENS (COLOR PALETTE: NUDE)
+   Exact Hex Palette:
+   #3A2D28 (Deep Espresso Umber)
+   #A48374 (Warm Earth Taupe)
+   #CBAD8D (Warm Golden Sandstone)
+   #D1C7BD (Soft Stone Clay)
+   #EBE3DB (Warm Linen Cream)
+   #F1EDE6 (Pure Bone Pearl)
+   ========================================================================== */
+
+:root {
+  /* 1. Core Palette Swatches */
+  --nude-espresso: #3A2D28;
+  --nude-taupe: #A48374;
+  --nude-sand: #CBAD8D;
+  --nude-stone: #D1C7BD;
+  --nude-linen: #EBE3DB;
+  --nude-bone: #F1EDE6;
+
+  /* 2. Surfaces & Canvas */
+  --bg-page: #F1EDE6;
+  --bg-surface: #FFFFFF;
+  --bg-surface-warm: #EBE3DB;
+  --bg-surface-elevated: #FFFFFF;
+  --bg-surface-subtle: #F8F5F0;
+  --bg-surface-hover: #F5EFEB;
+  --bg-glass: rgba(241, 237, 230, 0.9);
+  
+  /* High-Contrast Dark Anchor Surfaces (Command Center & Footer) */
+  --bg-dark-console: #3A2D28;
+  --bg-dark-surface: #2E231F;
+  --bg-dark-elevated: #483933;
+  --bg-dark-glass: rgba(58, 45, 40, 0.94);
+
+  /* 3. Text Hierarchy (High-Contrast Crisp Black & Dark Umber) */
+  --text-heading: #080605;
+  --text-body: #110E0C;
+  --text-secondary: #221B17;
+  --text-muted: #382C26;
+  --text-subtle: #4D3D35;
+  --text-inverse: #FDFBF7;
+  --text-inverse-muted: #D1C7BD;
+
+  /* 4. Brand Accents & Highlights */
+  --brand-primary: #3A2D28;
+  --brand-accent: #CBAD8D;
+  --brand-accent-hover: #BA9977;
+  --brand-taupe: #A48374;
+  --brand-soft: rgba(203, 173, 141, 0.16);
+  --brand-soft-taupe: rgba(164, 131, 116, 0.14);
+
+  /* 5. Borders & Dividers */
+  --border-subtle: rgba(58, 45, 40, 0.08);
+  --border-medium: rgba(58, 45, 40, 0.15);
+  --border-stone: #D1C7BD;
+  --border-sand: #CBAD8D;
+  --border-dark: rgba(241, 237, 230, 0.12);
+  --border-dark-medium: rgba(241, 237, 230, 0.2);
+
+  /* 6. Shadows (Warm Architectural Diffuse) */
+  --shadow-xs: 0 1px 3px rgba(58, 45, 40, 0.04);
+  --shadow-sm: 0 3px 8px -1px rgba(58, 45, 40, 0.06), 0 1px 3px rgba(58, 45, 40, 0.03);
+  --shadow-card: 0 12px 30px -6px rgba(58, 45, 40, 0.07), 0 2px 6px -1px rgba(58, 45, 40, 0.03);
+  --shadow-card-hover: 0 20px 48px -10px rgba(58, 45, 40, 0.12), 0 4px 12px -2px rgba(58, 45, 40, 0.04);
+  --shadow-console: 0 28px 70px -15px rgba(58, 45, 40, 0.35);
+  --shadow-sand: 0 8px 24px -4px rgba(203, 173, 141, 0.35);
+
+  /* 7. Gradients */
+  --grad-sand-text: linear-gradient(135deg, #3A2D28 10%, #A48374 60%, #CBAD8D 100%);
+  --grad-sand-btn: linear-gradient(135deg, #CBAD8D 0%, #BA9977 100%);
+  --grad-espresso-btn: linear-gradient(135deg, #3A2D28 0%, #4D3C35 100%);
+  --grad-banner: linear-gradient(135deg, #3A2D28 0%, #2A1F1B 100%);
+  --grad-card-warm: linear-gradient(180deg, #FFFFFF 0%, #FAF7F2 100%);
+
+  /* 8. Typography */
+  --font-heading: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* 9. Layout Structure */
+  --max-w: 1220px;
+  --header-h: 72px;
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-pill: 9999px;
+
+  /* 10. Seamless Compatibility Aliases (Mapped Strictly to Nude Hexes) */
+  --gold-400: #CBAD8D;
+  --gold-300: #CBAD8D;
+  --gold-500: #BA9977;
+  --gold-border: rgba(203, 173, 141, 0.4);
+  --gold-soft: rgba(203, 173, 141, 0.15);
+  --jade-400: #A48374;
+  --jade-500: #8C6C5E;
+  --jade-border: rgba(164, 131, 116, 0.35);
+  --jade-soft: rgba(164, 131, 116, 0.12);
+  --text-white: #F1EDE6;
+  --grad-champagne: linear-gradient(135deg, #3A2D28 10%, #A48374 50%, #CBAD8D 100%);
+  --grad-gold-btn: linear-gradient(135deg, #CBAD8D 0%, #BA9977 100%);
+  --grad-jade-btn: linear-gradient(135deg, #A48374 0%, #8C6C5E 100%);
+}

@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Stack Collapse & Comparison — Rank Monk</title>
+  <meta name="description" content="Compare Rank Monk against Surfer SEO, Buffer, Ahrefs, and manual agencies. Calculate your toolchain cost savings and eliminate fragmented subscriptions.">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+  <link rel="apple-touch-icon" href="assets/rank-monk-icon.png">
+
+  <!-- Google Fonts: Plus Jakarta Sans, Inter, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Core Stylesheets -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body class="page-fade-in">
+
+  <!-- ==========================================================================
+       SITE HEADER
+       ========================================================================== -->
+  <header class="site-header" id="siteHeader">
+    <div class="container nav-container">
+      
+      <!-- Brand Logo -->
+      <a href="index.html" class="brand-logo" aria-label="Rank Monk Home">
+        <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="brand-logo-img">
+      </a>
+
+      <!-- Desktop Navigation Links -->
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="features.html" class="nav-link">Features</a>
+        <a href="engines.html" class="nav-link">AI Engines</a>
+        <a href="comparison.html" class="nav-link active">Comparison</a>
+        <a href="pricing.html" class="nav-link">Pricing</a>
+        <a href="faq.html" class="nav-link">FAQ & Docs</a>
+      </nav>
+
+      <!-- Nav Actions -->
+      <div class="nav-actions">
+        <a href="pricing.html" class="btn btn-espresso btn-sm">Coming Soon ⚡</a>
+        
+        <!-- Mobile Nav Toggle -->
+        <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle Navigation">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Mobile App Navigation Drawer (Native App Experience) -->
+    <div class="mobile-nav-sheet" id="mobileNavSheet">
+      <div class="mobile-sheet-head">
+        <a href="index.html" class="brand-logo" aria-label="Rank Monk Home">
+          <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="brand-logo-img" style="height: 34px;">
+        </a>
+        <button class="mobile-sheet-close" id="mobileSheetClose" aria-label="Close menu">✕</button>
+      </div>
+      
+      <div class="mobile-sheet-links">
+        <a href="index.html" class="nav-link mobile-link">
+          <span>🏠 Home</span>
+          <span class="link-sub">Command Center</span>
+        </a>
+        <a href="features.html" class="nav-link mobile-link">
+          <span>⚡ Features Overview</span>
+          <span class="link-sub">24 Engine Matrix</span>
+        </a>
+        <a href="engines.html" class="nav-link mobile-link">
+          <span>⚙️ 6 Core AI Engines</span>
+          <span class="link-sub">Architecture</span>
+        </a>
+        <a href="comparison.html" class="nav-link mobile-link active">
+          <span>⚖️ Stack Collapse</span>
+          <span class="link-sub">Save $1,180/mo</span>
+        </a>
+        <a href="pricing.html" class="nav-link mobile-link">
+          <span>🏷️ Pricing & Plans</span>
+          <span class="link-sub">Revealing Soon</span>
+        </a>
+        <a href="faq.html" class="nav-link mobile-link">
+          <span>📖 FAQ & Knowledge</span>
+          <span class="link-sub">Manifesto & Docs</span>
+        </a>
+      </div>
+
+      <div class="mobile-sheet-footer">
+        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; color: var(--text-muted); padding: 4px 2px;">
+          <span style="display: inline-flex; align-items: center; gap: 6px;">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: #10B981; box-shadow: 0 0 6px #10B981;"></span>
+            Private Alpha OS v2.4
+          </span>
+          <span style="color: var(--nude-sand); font-weight: 700;">50% Privilege</span>
+        </div>
+        <button onclick="showComingSoon()" class="btn btn-espresso" style="width: 100%; min-height: 46px;">
+          Join Private Alpha ⚡
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ==========================================================================
+         HERO SECTION
+         ========================================================================== -->
+    <section class="section hero-section">
+      <!-- Floating Interactive Live Micro-Pills -->
+      <div class="hero-floating-pill pill-pos-left anim-float-slow">
+        <div class="pill-icon">💰</div>
+        <div>
+          <div>Annual Savings</div>
+          <span class="pill-meta"><strong class="pill-highlight">+$7,116 / yr</strong> Net Savings</span>
+        </div>
+      </div>
+
+      <div class="hero-floating-pill pill-pos-right anim-float-reverse">
+        <div class="pill-icon">⏱️</div>
+        <div>
+          <div>Time Reclaimed</div>
+          <span class="pill-meta"><strong class="pill-highlight">42 hrs / month</strong> Saved</span>
+        </div>
+      </div>
+
+      <div class="container hero-content">
+        <div class="section-tag">
+          <span class="dot"></span>
+          <span>The Stack Collapse</span>
+        </div>
+
+        <h1 class="hero-headline">
+          From $780/mo Tool Chaos to<br>
+          <span class="grad-sand">Zen Architectural Serenity</span>
+        </h1>
+
+        <p class="hero-description">
+          Consolidate disparate logins, broken Zapier zaps, and manual copy-pasting into one disciplined, autonomous organic operating system.
+        </p>
+
+        <div style="display: flex; justify-content: center; gap: 12px; margin-top: 24px; flex-wrap: wrap;">
+          <a href="#calculator" class="btn btn-espresso">Calculate Your Stack Savings ↓</a>
+          <button class="btn btn-secondary" onclick="runLiveAudit('stripe.com')">Live HUD Stack Audit ⚡</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         INTERACTIVE TOOLCHAIN COST & TIME SAVINGS CALCULATOR
+         ========================================================================== -->
+    <section class="section section-divider" id="calculator">
+      <div class="container">
+        
+        <div class="section-header">
+          <div class="section-tag">
+            <span class="dot"></span>
+            <span>Interactive ROI Calculator</span>
+          </div>
+          <h2 class="section-title">Calculate what your current stack truly costs</h2>
+          <p class="section-subtitle">
+            Select the tools your team currently uses to calculate monthly waste and annual savings.
+          </p>
+        </div>
+
+        <div style="max-width: 900px; margin: 0 auto; background: #FFFFFF; border: 1px solid var(--border-stone); border-radius: var(--radius-xl); padding: 36px 32px; box-shadow: var(--shadow-card);" class="anim-beam-glow">
+          
+          <h3 style="font-size: 19px; font-weight: 800; color: var(--text-heading); margin-bottom: 20px;">
+            Select your current subscriptions:
+          </h3>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 32px;" id="calcToolList">
+            
+            <label style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-stone); background: var(--nude-linen); cursor: pointer; user-select: none;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" checked data-cost="89" data-hours="8" class="calc-checkbox" style="width: 18px; height: 18px; accent-color: var(--nude-espresso);" onchange="updateStackCalc()">
+                <span style="font-weight: 700; color: var(--text-heading);">Surfer SEO</span>
+              </div>
+              <span style="font-size: 13px; font-weight: 700; color: #E53E3E;">$89/mo</span>
+            </label>
+
+            <label style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-stone); background: var(--nude-linen); cursor: pointer; user-select: none;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" checked data-cost="60" data-hours="6" class="calc-checkbox" style="width: 18px; height: 18px; accent-color: var(--nude-espresso);" onchange="updateStackCalc()">
+                <span style="font-weight: 700; color: var(--text-heading);">Buffer / Hootsuite</span>
+              </div>
+              <span style="font-size: 13px; font-weight: 700; color: #E53E3E;">$60/mo</span>
+            </label>
+
+            <label style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-stone); background: var(--nude-linen); cursor: pointer; user-select: none;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" checked data-cost="24" data-hours="5" class="calc-checkbox" style="width: 18px; height: 18px; accent-color: var(--nude-espresso);" onchange="updateStackCalc()">
+                <span style="font-weight: 700; color: var(--text-heading);">Canva Pro</span>
+              </div>
+              <span style="font-size: 13px; font-weight: 700; color: #E53E3E;">$24/mo</span>
+            </label>
+
+            <label style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-stone); background: var(--nude-linen); cursor: pointer; user-select: none;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" checked data-cost="199" data-hours="5" class="calc-checkbox" style="width: 18px; height: 18px; accent-color: var(--nude-espresso);" onchange="updateStackCalc()">
+                <span style="font-weight: 700; color: var(--text-heading);">Ahrefs Standard</span>
+              </div>
+              <span style="font-size: 13px; font-weight: 700; color: #E53E3E;">$199/mo</span>
+            </label>
+
+            <label style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-stone); background: var(--nude-linen); cursor: pointer; user-select: none;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" checked data-cost="30" data-hours="4" class="calc-checkbox" style="width: 18px; height: 18px; accent-color: var(--nude-espresso);" onchange="updateStackCalc()">
+                <span style="font-weight: 700; color: var(--text-heading);">SEO WP Plugins</span>
+              </div>
+              <span style="font-size: 13px; font-weight: 700; color: #E53E3E;">$30/mo</span>
+            </label>
+
+            <label style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-stone); background: var(--nude-linen); cursor: pointer; user-select: none;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" checked data-cost="380" data-hours="14" class="calc-checkbox" style="width: 18px; height: 18px; accent-color: var(--nude-espresso);" onchange="updateStackCalc()">
+                <span style="font-weight: 700; color: var(--text-heading);">Freelance Writers</span>
+              </div>
+              <span style="font-size: 13px; font-weight: 700; color: #E53E3E;">$380/mo</span>
+            </label>
+
+          </div>
+
+          <!-- Dynamic Output Card -->
+          <div style="background: var(--nude-espresso); border: 1px solid var(--nude-sand); border-radius: var(--radius-lg); padding: 28px 24px; color: var(--nude-bone); display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; text-align: center;">
+            <div>
+              <div style="font-size: 12px; text-transform: uppercase; color: var(--nude-stone); font-weight: 700; letter-spacing: 0.05em;">Current Stack Cost</div>
+              <div style="font-size: 36px; font-weight: 800; color: #FCA5A5; margin-top: 4px;" id="calcCurrentCost">$782/mo</div>
+              <div style="font-size: 12px; color: var(--nude-stone); margin-top: 2px;">$9,384 per year</div>
+            </div>
+
+            <div>
+              <div style="font-size: 12px; text-transform: uppercase; color: var(--nude-stone); font-weight: 700; letter-spacing: 0.05em;">Manual Hours Lost</div>
+              <div style="font-size: 36px; font-weight: 800; color: #FCD34D; margin-top: 4px;" id="calcHoursWasted">42 hrs</div>
+              <div style="font-size: 12px; color: var(--nude-stone); margin-top: 2px;">copy-pasting & sync</div>
+            </div>
+
+            <div>
+              <div style="font-size: 12px; text-transform: uppercase; color: var(--nude-stone); font-weight: 700; letter-spacing: 0.05em;">Net Annual Savings</div>
+              <div style="font-size: 36px; font-weight: 800; color: var(--nude-sand); margin-top: 4px;" id="calcNetSavings">+$7,116/yr</div>
+              <div style="font-size: 12px; color: var(--nude-sand); margin-top: 2px;">Switching to Rank Monk (Revealing Soon)</div>
+            </div>
+          </div>
+
+          <div style="text-align: center; margin-top: 28px;">
+            <a href="pricing.html" class="btn btn-espresso btn-lg">Collapse Your Stack Now ⚡</a>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         CHAOS VS ZEN SIDE-BY-SIDE
+         ========================================================================== -->
+    <section class="section section-divider">
+      <div class="container">
+        
+        <div class="section-header">
+          <div class="section-tag">
+            <span class="dot"></span>
+            <span>Architectural Contrast</span>
+          </div>
+          <h2 class="section-title">Why the old stack breaks down at scale</h2>
+          <p class="section-subtitle">
+            Fragmented tools create siloed data. Rank Monk creates compound flywheel authority.
+          </p>
+        </div>
+
+        <div class="stack-collapse-grid">
+          
+          <!-- Chaos Stack -->
+          <div class="stack-card chaos">
+            <div class="stack-badge chaos">The Fragmented Stack • Chaos</div>
+            <h3 class="stack-title">6 Tools. $780/mo. 42 Hours Wasted.</h3>
+            <p class="stack-price-sub">Multiple logins, copy-pasting between tabs, broken sync, and disconnected data silos.</p>
+
+            <div class="chaos-tools-grid">
+              <div class="chaos-tool-item">
+                <span>Surfer SEO</span>
+                <span class="chaos-tool-price">$89/mo</span>
+              </div>
+              <div class="chaos-tool-item">
+                <span>Buffer Social</span>
+                <span class="chaos-tool-price">$60/mo</span>
+              </div>
+              <div class="chaos-tool-item">
+                <span>Canva Pro</span>
+                <span class="chaos-tool-price">$24/mo</span>
+              </div>
+              <div class="chaos-tool-item">
+                <span>Ahrefs Standard</span>
+                <span class="chaos-tool-price">$199/mo</span>
+              </div>
+              <div class="chaos-tool-item">
+                <span>CMS Hosting</span>
+                <span class="chaos-tool-price">$30/mo</span>
+              </div>
+              <div class="chaos-tool-item">
+                <span>Freelance Writers</span>
+                <span class="chaos-tool-price">$380/mo</span>
+              </div>
+            </div>
+
+            <div style="font-size: 13.5px; color: #C53030; line-height: 1.6; font-weight: 600;">
+              ❌ Manual copy-pasting between Google Docs and WordPress<br>
+              ❌ Zero coverage or tracking for ChatGPT & Perplexity AEO<br>
+              ❌ No self-healing code fixes for technical SEO errors
+            </div>
+          </div>
+
+          <!-- Zen Stack -->
+          <div class="stack-card zen">
+            <div class="stack-badge zen">The Rank Monk OS • Serenity</div>
+            <h3 class="stack-title">1 Platform. Revealing Soon. 100% Autonomous.</h3>
+            <p class="stack-price-sub">A disciplined, all-in-one AI engine that turns your domain into an organic compounding machine.</p>
+
+            <div class="zen-benefits-list">
+              <div class="zen-benefit-item">
+                <div class="zen-check-icon">✓</div>
+                <div><strong>Human-Grade Blog Engine:</strong> 2,500+ word articles with custom WebP headers, EEAT citations, and 1-click CMS auto-publishing.</div>
+              </div>
+              <div class="zen-benefit-item">
+                <div class="zen-check-icon">✓</div>
+                <div><strong>AEO & Answer Engine Radar:</strong> Ensure your domain is cited as the definitive authority across ChatGPT, Perplexity, and Claude.</div>
+              </div>
+              <div class="zen-benefit-item">
+                <div class="zen-check-icon">✓</div>
+                <div><strong>Self-Healing Technical SEO:</strong> Headless crawler that detects missing metadata and broken links with instant 1-click repair.</div>
+              </div>
+              <div class="zen-benefit-item">
+                <div class="zen-check-icon">✓</div>
+                <div><strong>Social Media Repurposing Studio:</strong> Turns high-ranking articles into LinkedIn carousels and X threads in under 60 seconds.</div>
+              </div>
+            </div>
+
+            <a href="pricing.html" class="btn btn-sand" style="width: 100%;">Ascend to Zen OS →</a>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         FEATURE MATRIX TABLE
+         ========================================================================== -->
+    <section class="section section-divider">
+      <div class="container">
+        
+        <div class="section-header">
+          <div class="section-tag">
+            <span class="dot"></span>
+            <span>Feature Matrix</span>
+          </div>
+          <h2 class="section-title">Head-to-head capability comparison</h2>
+          <p class="section-subtitle">
+            Every operational requirement compared against single-purpose point solutions.
+          </p>
+        </div>
+
+        <div class="matrix-table-wrap">
+          <div class="matrix-header-row">
+            <div>Feature / Architecture</div>
+            <div class="matrix-brand-col">Rank Monk</div>
+            <div>Surfer SEO</div>
+            <div>Buffer</div>
+            <div>Ahrefs</div>
+          </div>
+
+          <div class="matrix-data-row">
+            <div style="font-weight: 700;">Unified OS (SEO + CMS + Social)</div>
+            <div class="matrix-check-highlight">✓ Yes (All-in-One)</div>
+            <div class="matrix-muted-val">✗ SEO Only</div>
+            <div class="matrix-muted-val">✗ Social Only</div>
+            <div class="matrix-muted-val">✗ Data Only</div>
+          </div>
+
+          <div class="matrix-data-row">
+            <div style="font-weight: 700;">AEO & ChatGPT Citation Radar</div>
+            <div class="matrix-check-highlight">✓ Included</div>
+            <div class="matrix-muted-val">✗ No</div>
+            <div class="matrix-muted-val">✗ No</div>
+            <div class="matrix-muted-val">✗ No</div>
+          </div>
+
+          <div class="matrix-data-row">
+            <div style="font-weight: 700;">Direct 1-Click CMS Auto-Sync</div>
+            <div class="matrix-check-highlight">✓ WP, Webflow, Shopify</div>
+            <div class="matrix-muted-val">✗ Manual Copy</div>
+            <div class="matrix-muted-val">✗ No</div>
+            <div class="matrix-muted-val">✗ No</div>
+          </div>
+
+          <div class="matrix-data-row">
+            <div style="font-weight: 700;">Social Media Studio (Carousels)</div>
+            <div class="matrix-check-highlight">✓ Automated</div>
+            <div class="matrix-muted-val">✗ No</div>
+            <div class="matrix-muted-val">✓ Schedule Only</div>
+            <div class="matrix-muted-val">✗ No</div>
+          </div>
+
+          <div class="matrix-data-row">
+            <div style="font-weight: 700;">Self-Healing Technical 1-Click Fixes</div>
+            <div class="matrix-check-highlight">✓ Autonomous</div>
+            <div class="matrix-muted-val">✗ Audit Only</div>
+            <div class="matrix-muted-val">✗ No</div>
+            <div class="matrix-muted-val">✗ Audit Only</div>
+          </div>
+
+          <div class="matrix-data-row">
+            <div style="font-weight: 700;">Competitor Keyword Gap Intelligence</div>
+            <div class="matrix-check-highlight">✓ Automated Void Map</div>
+            <div class="matrix-muted-val">✗ Basic</div>
+            <div class="matrix-muted-val">✗ No</div>
+            <div class="matrix-muted-val">✓ Manual Reports</div>
+          </div>
+
+          <div class="matrix-data-row">
+            <div style="font-weight: 700; color: var(--nude-bone);">Typical Monthly Cost</div>
+            <div style="color: var(--nude-sand); font-weight: 800; font-size: 15px;">Revealing Soon</div>
+            <div class="matrix-muted-val">$89/mo</div>
+            <div class="matrix-muted-val">$60/mo</div>
+            <div class="matrix-muted-val">$199/mo</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         BOTTOM CTA BANNER
+         ========================================================================== -->
+    <section class="section" style="padding-bottom: 60px;">
+      <div class="container">
+        
+        <div class="cta-banner-card anim-beam-glow">
+          <h2 class="cta-banner-title">Stop paying $780/mo across disconnected tabs.</h2>
+          <p class="cta-banner-desc">
+            Migrate in under 3 minutes. Join our private alpha operator cohort to lock in 50% lifetime founder privilege.
+          </p>
+          <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;">
+            <button class="btn btn-sand btn-lg" onclick="showComingSoon('Comparison Bottom CTA')">Join Alpha Waitlist ⚡</button>
+            <a href="pricing.html" class="btn btn-secondary btn-lg">Founder Privilege</a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- ==========================================================================
+       FOOTER
+       ========================================================================== -->
+  <footer class="site-footer">
+    <div class="container">
+      
+      <div class="footer-cols-grid">
+        
+        <!-- Brand Info -->
+        <div>
+          <a href="index.html" class="brand-logo footer-brand-logo" style="margin-bottom: 14px;" aria-label="Rank Monk Home">
+            <img src="assets/rank-monk-logo-horizontal-light.png" alt="Rank Monk" class="brand-logo-img footer-logo-img">
+          </a>
+          <p class="footer-brand-desc">
+            The Zen Operating System for autonomous organic search and AI discovery. Engineered with discipline.
+          </p>
+        </div>
+
+        <!-- Col 2: Product -->
+        <div>
+          <div class="footer-col-title">Product</div>
+          <div class="footer-link-list">
+            <a href="features.html">Features Overview</a>
+            <a href="engines.html">6 AI Engines</a>
+            <a href="comparison.html">Comparison Matrix</a>
+            <a href="pricing.html">Pricing Plans</a>
+          </div>
+        </div>
+
+        <!-- Col 3: Solutions -->
+        <div>
+          <div class="footer-col-title">Solutions</div>
+          <div class="footer-link-list">
+            <a href="comparison.html">The Stack Collapse</a>
+            <a href="features.html#console">Multi-Client Agency</a>
+            <a href="features.html#disciplines">Workflow Disciplines</a>
+            <a href="pricing.html">Enterprise SLA</a>
+          </div>
+        </div>
+
+        <!-- Col 4: Integrations -->
+        <div>
+          <div class="footer-col-title">Integrations</div>
+          <div class="footer-link-list">
+            <a href="#">WordPress Sync</a>
+            <a href="#">Webflow CMS</a>
+            <a href="#">Shopify Engine</a>
+            <a href="#">Ghost Publishing</a>
+            <a href="#">REST Webhooks</a>
+          </div>
+        </div>
+
+        <!-- Col 5: Company -->
+        <div>
+          <div class="footer-col-title">Company</div>
+          <div class="footer-link-list">
+            <a href="faq.html#manifesto">Manifesto</a>
+            <a href="faq.html">FAQ Knowledge Base</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="mailto:support@rankmonk.com">Contact Support</a>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom-bar">
+        <div>© 2026 Rank Monk Inc. All rights reserved. Precision Organic Acquisition OS.</div>
+        <div style="display: flex; gap: 16px; align-items: center;">
+          <span style="display: inline-flex; align-items: center; gap: 6px; color: var(--nude-sand); font-size: 12px; font-weight: 600;">
+            <span style="width: 7px; height: 7px; border-radius: 50%; background: var(--nude-sand); box-shadow: 0 0 6px var(--nude-sand);"></span>
+            All AI Engines Operational
+          </span>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- ==========================================================================
+       COMING SOON MODAL
+       ========================================================================== -->
+  <div class="coming-soon-modal-backdrop" id="auditModalBackdrop" onclick="if(event.target === this) closeComingSoonModal()">
+    <div class="coming-soon-modal-box anim-beam-glow">
+      <button class="modal-close-btn" onclick="closeComingSoonModal()" aria-label="Close modal">✕</button>
+      <div style="text-align: center;">
+        <div style="display: flex; justify-content: center; margin-bottom: 16px;">
+          <img src="assets/rank-monk-logo-stacked-light.png" alt="Rank Monk" style="height: 52px; width: auto; filter: drop-shadow(0 4px 16px rgba(0,0,0,0.4));">
+        </div>
+        <div class="coming-soon-pill-badge">✦ PRIVATE ALPHA IN PROGRESS</div>
+        <h3 style="font-size: 24px; font-weight: 800; color: #FFFFFF; margin: 12px 0 8px;">Rank Monk OS — Coming Soon</h3>
+        <p style="font-size: 14px; color: #F1EDE6; line-height: 1.6; margin-bottom: 24px;">
+          We are currently operating in stealth with our first cohort of private alpha operators. Public access & founder pricing will be revealed soon.
+        </p>
+        <form class="early-access-form" onsubmit="event.preventDefault(); handleWaitlistSubmit(this);">
+          <input type="email" class="early-access-input" placeholder="Enter work email for priority access" required>
+          <button type="submit" class="btn btn-sand">Join Waitlist ⚡</button>
+        </form>
+        <div class="early-access-perks" style="margin-top: 18px; color: var(--nude-stone);">
+          <span>✓ 50% Lifetime Founder Privilege</span>
+          <span>✓ Zero Spam Guaranteed</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Native App Bottom Navigation Bar -->
+  <nav class="mobile-app-bottom-bar" id="mobileBottomBar" aria-label="Mobile Navigation">
+    <a href="index.html" class="bottom-tab-item">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+      <span class="tab-label">Home</span>
+    </a>
+    <a href="features.html" class="bottom-tab-item">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+      </svg>
+      <span class="tab-label">Features</span>
+    </a>
+    <a href="engines.html" class="bottom-tab-item">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+      </svg>
+      <span class="tab-label">Engines</span>
+    </a>
+    <a href="comparison.html" class="bottom-tab-item active">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="20" x2="18" y2="10"></line>
+        <line x1="12" y1="20" x2="12" y2="4"></line>
+        <line x1="6" y1="20" x2="6" y2="14"></line>
+      </svg>
+      <span class="tab-label">Compare</span>
+    </a>
+    <a href="pricing.html" class="bottom-tab-item">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="1" x2="12" y2="23"></line>
+        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+      </svg>
+      <span class="tab-label">Pricing</span>
+    </a>
+  </nav>
+
+  <!-- Core JavaScript -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
