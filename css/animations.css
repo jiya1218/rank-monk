@@ -1,9 +1,136 @@
 /* ==========================================================================
    RANK MONK - ADVANCED MOTION & ANIMATION SYSTEM
-   Curated Micro-Interactions, Floating Dynamics, and Parallax Effects
+   Curated Micro-Interactions, Floating Dynamics, Aurora Mesh & Kinetic Geometry
    ========================================================================== */
 
-/* 1. KEYFRAME DEFINITIONS */
+/* --------------------------------------------------------------------------
+   1. KEYFRAME DEFINITIONS
+   -------------------------------------------------------------------------- */
+
+/* Ambient Aurora Mesh Morph & Drift */
+@keyframes auroraOrb1 {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translate(50px, -30px) scale(1.12);
+    opacity: 0.75;
+  }
+  100% {
+    transform: translate(-35px, 25px) scale(0.95);
+    opacity: 0.5;
+  }
+}
+
+@keyframes auroraOrb2 {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translate(-45px, 35px) scale(1.1);
+    opacity: 0.65;
+  }
+  100% {
+    transform: translate(40px, -20px) scale(0.9);
+    opacity: 0.4;
+  }
+}
+
+@keyframes auroraOrb3 {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate(30px, 45px) scale(1.15);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate(-30px, -25px) scale(0.92);
+    opacity: 0.48;
+  }
+}
+
+@keyframes auroraOrbCenter {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 0.68;
+  }
+}
+
+/* Sacred Cyber-Zen Orbital Rotations */
+@keyframes orbitRotateCW {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes orbitRotateCCW {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+/* Concentric Zen Ripple Wave Expansion */
+@keyframes zenRipplePulse {
+  0% {
+    transform: scale(0.45);
+    opacity: 0.8;
+    stroke-width: 2px;
+  }
+  65% {
+    opacity: 0.35;
+    stroke-width: 1.2px;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+    stroke-width: 0.4px;
+  }
+}
+
+/* Flowing Growth Stream Vectors */
+@keyframes streamFlow {
+  0% {
+    stroke-dashoffset: 420;
+    opacity: 0.15;
+  }
+  45% {
+    opacity: 0.9;
+  }
+  85% {
+    opacity: 0.4;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0.15;
+  }
+}
+
+/* Text Shimmer Sweep */
+@keyframes gradShimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
 
 /* Gentle Floating for Hero Micro-Cards */
 @keyframes floatSlow {
@@ -33,7 +160,7 @@
   }
 }
 
-/* Zen Concentric Aura Breathing */
+/* Zen Concentric Aura Breathing (Legacy SVG) */
 @keyframes auraBreathe {
   0%, 100% {
     transform: translate(-50%, -50%) scale(1) rotate(0deg);
@@ -73,7 +200,43 @@
     box-shadow: 0 8px 28px -4px rgba(58, 45, 40, 0.08), 0 0 0 1px rgba(203, 173, 141, 0.25);
   }
   50% {
-    box-shadow: 0 14px 40px -4px rgba(203, 173, 141, 0.3), 0 0 0 2px rgba(203, 173, 141, 0.6);
+    box-shadow: 0 14px 40px -4px rgba(203, 173, 141, 0.35), 0 0 0 2px rgba(203, 173, 141, 0.7);
+  }
+}
+
+/* Beacon Ring Wave */
+@keyframes pulseBeaconRing {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+/* Satellite Node Glow Pulse */
+@keyframes satGlowPulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 3px rgba(203, 173, 141, 0.6));
+    opacity: 0.85;
+  }
+  50% {
+    filter: drop-shadow(0 0 9px rgba(203, 173, 141, 1));
+    opacity: 1;
+  }
+}
+
+/* Console Glow Pedestal Breathing */
+@keyframes consoleGlowBreathe {
+  0%, 100% {
+    opacity: 0.45;
+    transform: translateX(-50%) scale(0.96);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateX(-50%) scale(1.04);
   }
 }
 
@@ -99,8 +262,377 @@
   }
 }
 
-/* 2. UTILITY ANIMATION CLASSES */
+/* --------------------------------------------------------------------------
+   2. AMBIENT AURORA & BACKGROUND ANIMATION LAYERS
+   -------------------------------------------------------------------------- */
 
+.hero-aurora-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.aurora-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  -webkit-filter: blur(80px);
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.aurora-orb-1 {
+  top: -60px;
+  left: 32%;
+  width: 580px;
+  height: 440px;
+  background: radial-gradient(circle, rgba(203, 173, 141, 0.48) 0%, rgba(203, 173, 141, 0.15) 55%, transparent 75%);
+  animation: auroraOrb1 16s ease-in-out infinite alternate;
+}
+
+.aurora-orb-2 {
+  top: 40px;
+  left: 5%;
+  width: 480px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(164, 131, 116, 0.35) 0%, rgba(164, 131, 116, 0.1) 55%, transparent 75%);
+  animation: auroraOrb2 20s ease-in-out infinite alternate;
+}
+
+.aurora-orb-3 {
+  top: 20px;
+  right: 5%;
+  width: 500px;
+  height: 420px;
+  background: radial-gradient(circle, rgba(235, 227, 219, 0.75) 0%, rgba(203, 173, 141, 0.3) 50%, transparent 75%);
+  animation: auroraOrb3 18s ease-in-out infinite alternate;
+}
+
+.aurora-orb-center {
+  top: 320px;
+  left: 50%;
+  width: 760px;
+  height: 380px;
+  background: radial-gradient(ellipse at center, rgba(203, 173, 141, 0.28) 0%, rgba(235, 227, 219, 0.18) 50%, transparent 75%);
+  animation: auroraOrbCenter 12s ease-in-out infinite alternate;
+}
+
+/* --------------------------------------------------------------------------
+   3. INTERACTIVE CANVAS (KINETIC PARTICLES & CONSTELLATION MESH)
+   -------------------------------------------------------------------------- */
+.hero-interactive-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* --------------------------------------------------------------------------
+   4. ARCHITECTURAL MATRIX GRID WITH CURSOR SPOTLIGHT
+   -------------------------------------------------------------------------- */
+.hero-grid-matrix {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.65;
+  background-image: 
+    radial-gradient(rgba(58, 45, 40, 0.08) 1.2px, transparent 1.2px),
+    linear-gradient(to right, rgba(203, 173, 141, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(203, 173, 141, 0.05) 1px, transparent 1px);
+  background-size: 32px 32px, 64px 64px, 64px 64px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at var(--mouse-x, 50%) var(--mouse-y, 35%), black 20%, rgba(0, 0, 0, 0.4) 55%, transparent 85%);
+  mask-image: radial-gradient(ellipse 70% 60% at var(--mouse-x, 50%) var(--mouse-y, 35%), black 20%, rgba(0, 0, 0, 0.4) 55%, transparent 85%);
+  transition: opacity 0.3s ease;
+}
+
+/* --------------------------------------------------------------------------
+   5. SACRED CYBER-ZEN CONCENTRIC ORBITAL GEOMETRY SVG
+   -------------------------------------------------------------------------- */
+.hero-zen-geometry {
+  position: absolute;
+  top: 38%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 1180px;
+  max-width: 96vw;
+  height: 760px;
+  pointer-events: none;
+  z-index: 0;
+  overflow: visible;
+}
+
+.hero-rings-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.orbit-group-cw {
+  transform-origin: 600px 380px;
+  animation: orbitRotateCW 48s linear infinite;
+}
+
+.orbit-group-ccw {
+  transform-origin: 600px 380px;
+  animation: orbitRotateCCW 62s linear infinite;
+}
+
+.zen-ripple-ring {
+  transform-origin: 600px 380px;
+  transform-box: fill-box;
+  animation: zenRipplePulse 7s cubic-bezier(0.12, 0.8, 0.32, 1) infinite;
+}
+
+.zen-ripple-ring.ripple-1 {
+  animation-delay: 0s;
+}
+
+.zen-ripple-ring.ripple-2 {
+  animation-delay: 2.3s;
+}
+
+.zen-ripple-ring.ripple-3 {
+  animation-delay: 4.6s;
+}
+
+.sat-node {
+  transition: transform 0.3s ease;
+}
+
+.glow-node {
+  animation: satGlowPulse 3s ease-in-out infinite;
+}
+
+.stream-line {
+  animation: streamFlow 5.5s ease-in-out infinite;
+}
+
+.stream-line.stream-2 {
+  animation-delay: 2.6s;
+}
+
+/* --------------------------------------------------------------------------
+   6. SHIMMER TEXT & LIVE BEACONS
+   -------------------------------------------------------------------------- */
+.grad-shimmer-text {
+  background: linear-gradient(
+    135deg,
+    #3A2D28 0%,
+    #7B5848 22%,
+    #CBAD8D 45%,
+    #FFF4E6 52%,
+    #CBAD8D 58%,
+    #7B5848 78%,
+    #3A2D28 100%
+  );
+  background-size: 240% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradShimmer 7.5s ease-in-out infinite;
+  display: inline-block;
+}
+
+/* Live Badge Beacon */
+.live-beacon {
+  position: relative;
+  width: 10px;
+  height: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 4px;
+}
+
+.beacon-core {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10B981;
+  box-shadow: 0 0 8px #10B981;
+}
+
+.beacon-wave {
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 1.5px solid #10B981;
+  animation: pulseBeaconRing 2.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+/* Console Halo Pedestal */
+.console-glow-pedestal {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(203, 173, 141, 0.4) 0%, rgba(203, 173, 141, 0.12) 55%, transparent 75%);
+  filter: blur(40px);
+  -webkit-filter: blur(40px);
+  pointer-events: none;
+  z-index: 0;
+  animation: consoleGlowBreathe 9s ease-in-out infinite alternate;
+}
+
+/* --------------------------------------------------------------------------
+   7. HERO FLOATING LIVE-STATUS PILLS (FROSTED GLASS 3D LIFT)
+   -------------------------------------------------------------------------- */
+.hero-floating-pill {
+  position: absolute;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 18px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(203, 173, 141, 0.35);
+  border-radius: var(--radius-pill);
+  box-shadow: 
+    0 16px 36px -8px rgba(58, 45, 40, 0.12),
+    0 2px 6px rgba(58, 45, 40, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0 rgba(203, 173, 141, 0.2);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-heading);
+  white-space: nowrap;
+  pointer-events: auto;
+  cursor: default;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+  will-change: transform;
+}
+
+.hero-floating-pill:hover {
+  transform: translateY(-5px) scale(1.04) !important;
+  border-color: var(--nude-sand);
+  box-shadow: 
+    0 24px 50px -10px rgba(203, 173, 141, 0.4),
+    0 4px 12px rgba(58, 45, 40, 0.08),
+    inset 0 1px 0 #FFFFFF;
+  background: #FFFFFF;
+}
+
+.hero-floating-pill .pill-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  background: var(--nude-linen);
+  border: 1px solid var(--border-stone);
+  color: var(--nude-espresso);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.hero-floating-pill .pill-text-block {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.hero-floating-pill .pill-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-heading);
+  line-height: 1.25;
+}
+
+.hero-floating-pill .pill-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.hero-floating-pill .pill-highlight {
+  color: var(--nude-espresso);
+  font-weight: 800;
+}
+
+.hero-floating-pill .pill-badge-tag {
+  background: rgba(203, 173, 141, 0.2);
+  color: var(--nude-espresso);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 9999px;
+  margin-left: 6px;
+  letter-spacing: 0.02em;
+  display: inline-block;
+}
+
+/* Pill Live Pulsing Dots */
+.pill-status-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid #FFFFFF;
+}
+
+.pill-status-dot.pulse-green {
+  background: #10B981;
+  box-shadow: 0 0 6px #10B981;
+}
+
+.pill-status-dot.pulse-gold {
+  background: #CBAD8D;
+  box-shadow: 0 0 6px #CBAD8D;
+}
+
+.pill-status-dot.pulse-amber {
+  background: #F59E0B;
+  box-shadow: 0 0 6px #F59E0B;
+}
+
+/* Specific Pill Placements in Hero */
+.pill-pos-left {
+  top: 18%;
+  left: 2%;
+}
+
+.pill-pos-right {
+  top: 22%;
+  right: 2%;
+}
+
+.pill-pos-bottom {
+  bottom: 8%;
+  left: 5%;
+}
+
+.pill-pos-bottom-right {
+  bottom: 8%;
+  right: 5%;
+}
+
+/* On screens <= 1024px, maintain visibility with responsive scaling rather than hiding */
+@media (max-width: 1024px) {
+  .hero-floating-pill {
+    /* Responsive styling handled in responsive.css */
+    display: flex;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   8. UTILITY ANIMATION CLASSES & MOTION EXTRAS
+   -------------------------------------------------------------------------- */
 .anim-float-slow {
   animation: floatSlow 5.5s ease-in-out infinite;
 }
@@ -121,91 +653,7 @@
   animation: beamGlow 3.5s ease-in-out infinite;
 }
 
-/* 3. HERO FLOATING LIVE-STATUS PILLS */
-.hero-floating-pill {
-  position: absolute;
-  z-index: 4;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 18px;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border-stone);
-  border-radius: var(--radius-pill);
-  box-shadow: 0 16px 36px -8px rgba(58, 45, 40, 0.12), 0 2px 6px rgba(58, 45, 40, 0.04);
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-heading);
-  white-space: nowrap;
-  pointer-events: auto;
-  cursor: default;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.hero-floating-pill:hover {
-  transform: translateY(-4px) scale(1.03) !important;
-  border-color: var(--nude-sand);
-  box-shadow: 0 20px 44px -8px rgba(203, 173, 141, 0.35);
-  background: #FFFFFF;
-}
-
-.hero-floating-pill .pill-icon {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  background: var(--nude-linen);
-  border: 1px solid var(--border-stone);
-  color: var(--nude-espresso);
-  flex-shrink: 0;
-}
-
-.hero-floating-pill .pill-meta {
-  font-size: 11px;
-  color: var(--text-muted);
-  font-weight: 600;
-  display: block;
-}
-
-.hero-floating-pill .pill-highlight {
-  color: var(--nude-espresso);
-  font-weight: 800;
-}
-
-/* Specific Pill Placements in Hero */
-.pill-pos-left {
-  top: 18%;
-  left: 2%;
-}
-
-.pill-pos-right {
-  top: 22%;
-  right: 2%;
-}
-
-.pill-pos-bottom {
-  bottom: 8%;
-  left: 6%;
-}
-
-.pill-pos-bottom-right {
-  bottom: 8%;
-  right: 5%;
-}
-
-/* Hide hero floating pills on small screens to prevent clipping */
-@media (max-width: 1024px) {
-  .hero-floating-pill {
-    display: none;
-  }
-}
-
-/* 4. TYPEWRITER CARET & ROTATING TEXT */
+/* Typewriter Caret */
 .typewriter-cursor {
   display: inline-block;
   margin-left: 2px;
@@ -214,7 +662,7 @@
   animation: blinkCursor 0.9s infinite;
 }
 
-/* 5. INTERACTIVE CARD HOVER & SHIMMER LIFTS */
+/* Interactive Card Lift */
 .interactive-hover-lift {
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
 }
@@ -229,3 +677,111 @@
 .page-fade-in {
   animation: entranceFadeUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* --------------------------------------------------------------------------
+   9. HIGH-TECH COMMAND CENTER & BENTO RADAR ANIMATIONS
+   -------------------------------------------------------------------------- */
+
+/* 360-degree continuous radar scanner beam */
+@keyframes radarSweep {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Pulsing radar target blips */
+@keyframes radarBlip {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.9;
+    box-shadow: 0 0 10px var(--nude-sand);
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 1;
+    box-shadow: 0 0 22px rgba(203, 173, 141, 0.8), 0 0 35px rgba(203, 173, 141, 0.4);
+  }
+}
+
+/* Ambient luxury gold breathing on console edge */
+@keyframes consoleBorderPulse {
+  0%, 100% {
+    border-color: rgba(203, 173, 141, 0.25);
+    box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.65), 0 0 30px rgba(203, 173, 141, 0.1);
+  }
+  50% {
+    border-color: rgba(203, 173, 141, 0.5);
+    box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.7), 0 0 45px rgba(203, 173, 141, 0.22);
+  }
+}
+
+/* Chaos alert red pulse */
+@keyframes chaosAlarmPulse {
+  0%, 100% {
+    border-color: rgba(239, 68, 68, 0.3);
+    box-shadow: 0 10px 30px rgba(239, 68, 68, 0.08);
+  }
+  50% {
+    border-color: rgba(239, 68, 68, 0.6);
+    box-shadow: 0 10px 40px rgba(239, 68, 68, 0.2);
+  }
+}
+
+/* Zen gold radiant aura pulse */
+@keyframes zenAuraPulse {
+  0%, 100% {
+    border-color: rgba(203, 173, 141, 0.4);
+    box-shadow: 0 20px 50px -10px rgba(58, 45, 40, 0.4), 0 0 35px rgba(203, 173, 141, 0.18);
+  }
+  50% {
+    border-color: rgba(203, 173, 141, 0.7);
+    box-shadow: 0 25px 60px -10px rgba(58, 45, 40, 0.5), 0 0 55px rgba(203, 173, 141, 0.32);
+  }
+}
+
+/* Telemetry ECG / Crawler pulse wave */
+@keyframes telemetryDash {
+  0% {
+    stroke-dashoffset: 200;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Shimmer shine sweep across card tops */
+@keyframes cardSheenSweep {
+  0% {
+    transform: translateX(-100%) rotate(25deg);
+  }
+  100% {
+    transform: translateX(250%) rotate(25deg);
+  }
+}
+
+/* Energy conduit pulse connecting Chaos to Zen */
+@keyframes energyConduitPulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(0.97);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.03);
+    filter: drop-shadow(0 0 12px var(--nude-sand));
+  }
+}
+
+/* Typing cursor blink */
+@keyframes terminalCursor {
+  0%, 49% {
+    opacity: 1;
+  }
+  50%, 100% {
+    opacity: 0;
+  }
+}
+

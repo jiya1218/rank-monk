@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contact · Rank Monk</title>
+  <meta name="description" content="Talk to the Rank Monk team about plans, support or partnerships.">
+  <link rel="icon" href="img/logo.png">
+  <script>
+    /* set theme before paint to avoid a flash */
+    try {
+      var t = localStorage.getItem("rankmonk-theme") ||
+        (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", t);
+    } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div id="site-header"></div>
+
+<main>
+<section class="page-hero">
+  <div class="container">
+    <div class="crumbs"><a href="index.html">Home</a> / Contact</div>
+    <span class="eyebrow">Get in touch</span>
+    <h1>Let's talk about your <span class="accent">next</span> climb.</h1>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container contact-grid">
+    <div class="contact-info">
+      <div class="info-item"><h4>Sales & plans</h4><p>Not sure which plan fits? Tell us about your business and we will recommend one.</p></div>
+      <div class="info-item"><h4>Support</h4><p>Already a customer? Priority support is included on Grow and Scale.</p></div>
+      <div class="info-item"><h4>Email</h4><p>hello@rankmonk.example</p></div>
+      <div class="info-item"><h4>Hours</h4><p>Monday to Friday, 9am to 6pm IST.</p></div>
+    </div>
+
+    <div class="contact-card">
+      <form data-form="contact" data-endpoint="/api/contact" data-success="Thank you. A real person will reply within one working day.">
+        <div class="form-row">
+          <div class="field"><label for="c-name">Full name</label><input id="c-name" name="name" required placeholder="Jane Doe"></div>
+          <div class="field"><label for="c-email">Work email</label><input id="c-email" name="email" type="email" required placeholder="jane@company.com"></div>
+        </div>
+        <div class="field"><label for="c-topic">What can we help with?</label>
+          <select id="c-topic" name="topic">
+            <option>Choosing a plan</option><option>Technical question</option><option>Billing</option><option>Partnership</option>
+          </select></div>
+        <div class="field"><label for="c-msg">Your message</label><textarea id="c-msg" name="message" placeholder="Tell us a little about what you are building…"></textarea></div>
+        <button class="btn btn-primary btn-block" type="submit">Send message</button>
+        <p class="form-msg"></p>
+      </form>
+    </div>
+  </div>
+</section>
+</main>
+
+<div id="site-footer"></div>
+<script src="js/main.js"></script>
+</body>
+</html>

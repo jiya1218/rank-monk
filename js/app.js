@@ -7,7 +7,94 @@ document.addEventListener('DOMContentLoaded', () => {
   initMobileNav();
   initHeaderScroll();
   initHeroScanner();
+  initHeroCanvas();
+  initHeroSpotlight();
+  initHeroParallax();
+  initConsoleAutoplay();
 });
+
+/* --------------------------------------------------------------------------
+   0. KINETIC CONSTELLATION HERO CANVAS ANIMATION
+   -------------------------------------------------------------------------- */
+function initHeroCanvas() {
+  const canvas = document.getElementById('heroCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  let width = (canvas.width = canvas.parentElement ? canvas.parentElement.offsetWidth : window.innerWidth);
+  let height = (canvas.height = canvas.parentElement ? canvas.parentElement.offsetHeight : 640);
+
+  function onResize() {
+    if (!canvas.parentElement) return;
+    width = canvas.width = canvas.parentElement.offsetWidth;
+    height = canvas.height = canvas.parentElement.offsetHeight;
+  }
+  window.addEventListener('resize', onResize);
+
+  const count = Math.min(32, Math.floor(width / 38));
+  const particles = [];
+  const palette = [
+    'rgba(203, 173, 141, 0.5)',
+    'rgba(185, 139, 106, 0.45)',
+    'rgba(164, 131, 116, 0.35)',
+    'rgba(216, 192, 158, 0.4)'
+  ];
+
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      radius: Math.random() * 2 + 1,
+      color: palette[Math.floor(Math.random() * palette.length)]
+    });
+  }
+
+  function frame() {
+    ctx.clearRect(0, 0, width, height);
+
+    // Subtle connecting lines
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        if (d < 115) {
+          const alpha = (1 - d / 115) * 0.16;
+          ctx.strokeStyle = `rgba(185, 139, 106, ${alpha})`;
+          ctx.lineWidth = 0.8;
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // Nodes
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+
+      if (p.x < 0) p.x = width;
+      if (p.x > width) p.x = 0;
+      if (p.y < 0) p.y = height;
+      if (p.y > height) p.y = 0;
+
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  requestAnimationFrame(frame);
+}
 
 /* --------------------------------------------------------------------------
    1. MOBILE NAVIGATION DRAWER & APP MENU
@@ -123,12 +210,335 @@ function initHeroScanner() {
 }
 
 /* --------------------------------------------------------------------------
-   4. ZEN COMMAND CENTER INTERACTIVE TABS (Content / AEO / Healing / Social / Agency)
+   3B. INTERACTIVE HERO CANVAS (Kinetic Particles & Constellation Growth Field)
    -------------------------------------------------------------------------- */
-function switchConsoleTab(tabKey) {
-  const tabs = ['content', 'aeo', 'healing', 'social', 'agency'];
-  
-  tabs.forEach(key => {
+function initHeroCanvas() {
+  const canvas = document.getElementById('heroCanvas');
+  const heroSection = document.getElementById('heroSection');
+  if (!canvas || !heroSection) return;
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  let width = 0;
+  let height = 0;
+  let dpr = 1;
+  let animationId = null;
+  let isVisible = true;
+  let particles = [];
+  const palette = ['#CBAD8D', '#A48374', '#D1C7BD', '#EBE3DB'];
+
+  const mouse = {
+    x: -9999,
+    y: -9999,
+    active: false,
+    radius: 140
+  };
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    width = heroSection.offsetWidth;
+    height = heroSection.offsetHeight;
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function createParticles() {
+    particles = [];
+    const count = width > 768 ? Math.min(50, Math.floor(width / 24)) : 22;
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.45,
+        vy: -0.15 - Math.random() * 0.35,
+        radius: Math.random() * 1.8 + 1.2,
+        baseAlpha: Math.random() * 0.4 + 0.3,
+        alpha: 0.4,
+        pulseOffset: Math.random() * Math.PI * 2,
+        pulseSpeed: 0.02 + Math.random() * 0.03,
+        color: palette[Math.floor(Math.random() * palette.length)]
+      });
+    }
+  }
+
+  heroSection.addEventListener('mousemove', (e) => {
+    const rect = heroSection.getBoundingClientRect();
+    mouse.x = e.clientX - rect.left;
+    mouse.y = e.clientY - rect.top;
+    mouse.active = true;
+  });
+
+  heroSection.addEventListener('mouseleave', () => {
+    mouse.active = false;
+    mouse.x = -9999;
+    mouse.y = -9999;
+  });
+
+  let t = 0;
+  function render() {
+    if (!isVisible) return;
+    t += 0.02;
+    ctx.clearRect(0, 0, width, height);
+
+    if (mouse.active) {
+      const grad = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, mouse.radius);
+      grad.addColorStop(0, 'rgba(203, 173, 141, 0.16)');
+      grad.addColorStop(0.5, 'rgba(203, 173, 141, 0.05)');
+      grad.addColorStop(1, 'rgba(203, 173, 141, 0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(mouse.x, mouse.y, mouse.radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+
+      p.x += p.vx + Math.sin(t + p.pulseOffset) * 0.2;
+      p.y += p.vy;
+
+      if (mouse.active) {
+        const dx = p.x - mouse.x;
+        const dy = p.y - mouse.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist < mouse.radius && dist > 1) {
+          const force = (1 - dist / mouse.radius) * 1.6;
+          p.x += (dx / dist) * force;
+          p.y += (dy / dist) * force;
+        }
+      }
+
+      if (p.x < -20) p.x = width + 20;
+      if (p.x > width + 20) p.x = -20;
+      if (p.y < -20) p.y = height + 20;
+      if (p.y > height + 20) p.y = -20;
+
+      p.alpha = Math.max(0.15, Math.min(0.85, p.baseAlpha + Math.sin(t * 1.5 + p.pulseOffset) * 0.2));
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.alpha;
+      ctx.fill();
+      ctx.restore();
+
+      if (mouse.active) {
+        const dMouse = Math.hypot(p.x - mouse.x, p.y - mouse.y);
+        if (dMouse < 110) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(mouse.x, mouse.y);
+          ctx.strokeStyle = '#CBAD8D';
+          ctx.globalAlpha = (1 - dMouse / 110) * 0.28;
+          ctx.lineWidth = 0.9;
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      for (let j = i + 1; j < particles.length; j++) {
+        const p2 = particles[j];
+        const dx = p.x - p2.x;
+        const dy = p.y - p2.y;
+        const dist = Math.hypot(dx, dy);
+        const maxDist = width > 768 ? 120 : 90;
+
+        if (dist < maxDist) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.strokeStyle = '#CBAD8D';
+          ctx.globalAlpha = (1 - dist / maxDist) * 0.22;
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+    }
+
+    animationId = requestAnimationFrame(render);
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      isVisible = entry.isIntersecting;
+      if (isVisible) {
+        cancelAnimationFrame(animationId);
+        animationId = requestAnimationFrame(render);
+      } else {
+        cancelAnimationFrame(animationId);
+      }
+    });
+  }, { threshold: 0.05 });
+
+  observer.observe(heroSection);
+
+  resize();
+  createParticles();
+  animationId = requestAnimationFrame(render);
+
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      resize();
+      createParticles();
+    }, 150);
+  }, { passive: true });
+}
+
+/* --------------------------------------------------------------------------
+   3C. HERO ARCHITECTURAL GRID SPOTLIGHT
+   -------------------------------------------------------------------------- */
+function initHeroSpotlight() {
+  const heroSection = document.getElementById('heroSection');
+  if (!heroSection) return;
+
+  heroSection.addEventListener('mousemove', (e) => {
+    const rect = heroSection.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    heroSection.style.setProperty('--mouse-x', `${x.toFixed(1)}%`);
+    heroSection.style.setProperty('--mouse-y', `${y.toFixed(1)}%`);
+  }, { passive: true });
+}
+
+/* --------------------------------------------------------------------------
+   3D. HERO FLOATING PILLS 3D PARALLAX TILT
+   -------------------------------------------------------------------------- */
+function initHeroParallax() {
+  const heroSection = document.getElementById('heroSection');
+  if (!heroSection) return;
+  const pills = heroSection.querySelectorAll('.hero-floating-pill');
+  if (!pills.length) return;
+
+  heroSection.addEventListener('mousemove', (e) => {
+    if (window.innerWidth <= 1024) return;
+    const rect = heroSection.getBoundingClientRect();
+    const nx = (e.clientX - rect.left - rect.width / 2) / (rect.width / 2);
+    const ny = (e.clientY - rect.top - rect.height / 2) / (rect.height / 2);
+
+    pills.forEach(pill => {
+      const depth = parseFloat(pill.getAttribute('data-depth')) || 1;
+      const shiftX = nx * depth * 14;
+      const shiftY = ny * depth * 12;
+      pill.style.transform = `translate3d(${shiftX}px, ${shiftY}px, 0)`;
+    });
+  }, { passive: true });
+
+  heroSection.addEventListener('mouseleave', () => {
+    pills.forEach(pill => {
+      pill.style.transform = '';
+    });
+  });
+}
+
+/* --------------------------------------------------------------------------
+   3E. QUICK FILL DOMAIN FROM HERO CHIPS
+   -------------------------------------------------------------------------- */
+function quickFillDomain(domain) {
+  const input = document.getElementById('heroScannerInput');
+  if (input) {
+    input.value = domain;
+    input.focus();
+    input.style.transition = 'box-shadow 0.3s ease, border-color 0.3s ease';
+    input.style.boxShadow = '0 0 0 3px rgba(203, 173, 141, 0.45)';
+    setTimeout(() => {
+      input.style.boxShadow = '';
+    }, 900);
+  }
+  showComingSoon(domain);
+}
+
+/* --------------------------------------------------------------------------
+   4. ZEN COMMAND CENTER SEAMLESS ENGINE (Auto-Cycle, Progress Bars, Stream Mode)
+   -------------------------------------------------------------------------- */
+const consoleTabs = ['content', 'aeo', 'healing', 'social', 'agency'];
+let currentConsoleTabIndex = 0;
+let consoleAutoplayActive = true;
+let consoleViewMode = 'auto'; // 'auto' or 'stream'
+let autoplayTimer = null;
+let progressStartTime = 0;
+let progressAnimFrameId = null;
+const CYCLE_DURATION = 4500; // 4.5s per engine screen
+
+function initConsoleAutoplay() {
+  const consoleFrame = document.getElementById('mainConsoleFrame') || document.querySelector('.console-frame');
+  if (!consoleFrame) return;
+
+  // Pause on hover so users can inspect details peacefully
+  consoleFrame.addEventListener('mouseenter', () => {
+    pauseConsoleAutoplay(true);
+  });
+
+  consoleFrame.addEventListener('mouseleave', () => {
+    if (consoleViewMode === 'auto') {
+      resumeConsoleAutoplay();
+    }
+  });
+
+  // Start auto-cycle loop
+  startConsoleCycle();
+}
+
+function startConsoleCycle() {
+  if (!consoleAutoplayActive || consoleViewMode !== 'auto') return;
+  progressStartTime = Date.now();
+  cancelAnimationFrame(progressAnimFrameId);
+  animateProgressBar();
+
+  clearTimeout(autoplayTimer);
+  autoplayTimer = setTimeout(() => {
+    if (consoleAutoplayActive && consoleViewMode === 'auto') {
+      currentConsoleTabIndex = (currentConsoleTabIndex + 1) % consoleTabs.length;
+      switchConsoleTab(consoleTabs[currentConsoleTabIndex], false);
+      startConsoleCycle();
+    }
+  }, CYCLE_DURATION);
+}
+
+function animateProgressBar() {
+  if (!consoleAutoplayActive || consoleViewMode !== 'auto') return;
+  const activeTabKey = consoleTabs[currentConsoleTabIndex];
+  const activeBtn = document.getElementById(`tabBtn-${activeTabKey}`);
+  const bar = activeBtn ? activeBtn.querySelector('.tab-progress-bar') : null;
+
+  if (bar) {
+    const elapsed = Date.now() - progressStartTime;
+    const pct = Math.min(100, (elapsed / CYCLE_DURATION) * 100);
+    bar.style.width = `${pct}%`;
+
+    if (elapsed < CYCLE_DURATION && consoleAutoplayActive) {
+      progressAnimFrameId = requestAnimationFrame(animateProgressBar);
+    }
+  }
+}
+
+function resetProgressBars() {
+  cancelAnimationFrame(progressAnimFrameId);
+  consoleTabs.forEach(key => {
+    const btn = document.getElementById(`tabBtn-${key}`);
+    const bar = btn ? btn.querySelector('.tab-progress-bar') : null;
+    if (bar) bar.style.width = '0%';
+  });
+}
+
+function switchConsoleTab(tabKey, manual = true) {
+  const targetIndex = consoleTabs.indexOf(tabKey);
+  if (targetIndex !== -1) {
+    currentConsoleTabIndex = targetIndex;
+  }
+
+  resetProgressBars();
+
+  consoleTabs.forEach(key => {
     const btn = document.getElementById(`tabBtn-${key}`);
     const screen = document.getElementById(`screen-${key}`);
     
@@ -139,6 +549,65 @@ function switchConsoleTab(tabKey) {
       screen.classList.toggle('active', key === tabKey);
     }
   });
+
+  if (manual) {
+    clearTimeout(autoplayTimer);
+    if (consoleAutoplayActive && consoleViewMode === 'auto') {
+      startConsoleCycle();
+    }
+  }
+}
+
+function pauseConsoleAutoplay(isHover = false) {
+  clearTimeout(autoplayTimer);
+  cancelAnimationFrame(progressAnimFrameId);
+  const pauseBtn = document.getElementById('cyclePauseBtn');
+  const timerText = document.getElementById('cycleTimerText');
+  if (!isHover) {
+    consoleAutoplayActive = false;
+    if (pauseBtn) pauseBtn.textContent = '▶';
+    if (timerText) timerText.textContent = 'Auto-cycle paused';
+  }
+}
+
+function resumeConsoleAutoplay() {
+  consoleAutoplayActive = true;
+  const pauseBtn = document.getElementById('cyclePauseBtn');
+  const timerText = document.getElementById('cycleTimerText');
+  if (pauseBtn) pauseBtn.textContent = '⏸';
+  if (timerText) timerText.textContent = 'Auto-advancing every 4.5s';
+  startConsoleCycle();
+}
+
+function toggleConsoleAutoplay() {
+  if (consoleAutoplayActive) {
+    pauseConsoleAutoplay(false);
+  } else {
+    resumeConsoleAutoplay();
+  }
+}
+
+function setConsoleViewMode(mode) {
+  consoleViewMode = mode;
+  const consoleFrame = document.getElementById('mainConsoleFrame') || document.querySelector('.console-frame');
+  const btnAuto = document.getElementById('btnModeAuto');
+  const btnStream = document.getElementById('btnModeStream');
+
+  if (btnAuto) btnAuto.classList.toggle('active', mode === 'auto');
+  if (btnStream) btnStream.classList.toggle('active', mode === 'stream');
+
+  if (consoleFrame) {
+    if (mode === 'stream') {
+      consoleFrame.classList.add('console-view-stream');
+      pauseConsoleAutoplay(false);
+      const timerText = document.getElementById('cycleTimerText');
+      if (timerText) timerText.textContent = 'Streaming all 5 engines';
+    } else {
+      consoleFrame.classList.remove('console-view-stream');
+      switchConsoleTab(consoleTabs[currentConsoleTabIndex], false);
+      resumeConsoleAutoplay();
+    }
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -154,23 +623,29 @@ function applyHealingFix(rowId, boostPoints = 3) {
 
   const btn = row.querySelector('.btn-fix-action');
   if (btn) {
-    btn.textContent = '✓ Deployed to CMS';
-    btn.style.background = 'var(--nude-sand)';
-    btn.style.color = 'var(--nude-espresso)';
+    btn.innerHTML = '<span>✓ Auto-Patched (0.4s)</span>';
+    btn.style.background = '#10B981';
+    btn.style.color = '#FFFFFF';
+    btn.style.boxShadow = '0 0 14px rgba(16, 185, 129, 0.6)';
     btn.disabled = true;
     btn.style.cursor = 'default';
   }
 
-  row.style.borderColor = 'var(--nude-sand)';
-  if (row.classList.contains('healing-item-row')) {
-    row.style.background = 'rgba(203, 173, 141, 0.12)';
-  }
+  row.style.borderColor = '#10B981';
+  row.style.background = 'rgba(16, 185, 129, 0.12)';
 
   if (currentHealingScore < 100) {
     currentHealingScore = Math.min(100, currentHealingScore + boostPoints);
     if (scoreEl) {
       scoreEl.textContent = currentHealingScore;
-      if (currentHealingScore === 100) scoreEl.style.color = 'var(--nude-sand)';
+      scoreEl.style.transform = 'scale(1.2)';
+      setTimeout(() => {
+        scoreEl.style.transform = 'scale(1)';
+      }, 300);
+      if (currentHealingScore === 100) {
+        scoreEl.style.color = '#34D399';
+        scoreEl.style.textShadow = '0 0 20px #34D399';
+      }
     }
     if (miniScoreEl) {
       miniScoreEl.textContent = `${currentHealingScore} / 100`;
@@ -186,14 +661,14 @@ let currentCurrency = 'USD';
 
 const pricingRates = {
   USD: {
-    free: { monthly: "$0", annual: "$0" },
-    starter: { monthly: "$189", annual: "$151" },
-    growth: { monthly: "$599", annual: "$479" }
+    starter: { monthly: "$200", annual: "$160" },
+    pro: { monthly: "$500", annual: "$400" },
+    agency: { monthly: "$1,000", annual: "$800" }
   },
   INR: {
-    free: { monthly: "₹0", annual: "₹0" },
-    starter: { monthly: "₹14,999", annual: "₹11,999" },
-    growth: { monthly: "₹47,999", annual: "₹38,399" }
+    starter: { monthly: "₹16,500", annual: "₹13,200" },
+    pro: { monthly: "₹41,500", annual: "₹33,200" },
+    agency: { monthly: "₹82,500", annual: "₹66,000" }
   }
 };
 
@@ -213,21 +688,24 @@ function setCurrency(curr) {
 
 function updatePricingCards() {
   const rates = pricingRates[currentCurrency];
+  if (!rates) return;
   
-  const elFree = document.getElementById('priceVal-free');
   const elStarter = document.getElementById('priceVal-starter');
-  const elGrowth = document.getElementById('priceVal-growth');
+  const elPro = document.getElementById('priceVal-pro');
+  const elAgency = document.getElementById('priceVal-agency');
 
-  if (elFree) elFree.textContent = rates.free[currentBilling];
   if (elStarter) elStarter.textContent = rates.starter[currentBilling];
-  if (elGrowth) elGrowth.textContent = rates.growth[currentBilling];
+  if (elPro) elPro.textContent = rates.pro[currentBilling];
+  if (elAgency) elAgency.textContent = rates.agency[currentBilling];
 
   const pStarter = document.getElementById('pricePeriod-starter');
-  const pGrowth = document.getElementById('pricePeriod-growth');
+  const pPro = document.getElementById('pricePeriod-pro');
+  const pAgency = document.getElementById('pricePeriod-agency');
 
   const periodText = currentBilling === 'monthly' ? 'per month • billed monthly' : 'per month • billed annually (Save 20%)';
   if (pStarter) pStarter.textContent = periodText;
-  if (pGrowth) pGrowth.textContent = periodText;
+  if (pPro) pPro.textContent = periodText;
+  if (pAgency) pAgency.textContent = periodText;
 }
 
 /* --------------------------------------------------------------------------
@@ -406,4 +884,40 @@ window.updateRoiCalc = updateRoiCalc;
 window.filterFaqQuestions = filterFaqQuestions;
 window.handleWaitlistSubmit = handleWaitlistSubmit;
 window.filterFeatures = filterFeatures;
+window.quickFillDomain = quickFillDomain;
+window.toggleConsoleAutoplay = toggleConsoleAutoplay;
+window.setConsoleViewMode = setConsoleViewMode;
+
+/* --------------------------------------------------------------------------
+   13. LIGHT / DARK THEME TOGGLE (Local Storage & System Preference)
+   -------------------------------------------------------------------------- */
+const THEME_KEY = "rankmonk-theme";
+
+function applyTheme(t) {
+  document.documentElement.setAttribute("data-theme", t);
+  const btn = document.getElementById("theme-toggle");
+  if (btn) {
+    btn.setAttribute("aria-label", t === "dark" ? "Switch to light mode" : "Switch to dark mode");
+    btn.textContent = t === "dark" ? "☀" : "☾";
+  }
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute("data-theme") || "light";
+  const next = current === "dark" ? "light" : "dark";
+  try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+  applyTheme(next);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const themeBtn = document.getElementById("theme-toggle");
+  if (themeBtn) {
+    themeBtn.addEventListener("click", toggleTheme);
+    const initialTheme = document.documentElement.getAttribute("data-theme") || "light";
+    applyTheme(initialTheme);
+  }
+});
+
+window.toggleTheme = toggleTheme;
+
 

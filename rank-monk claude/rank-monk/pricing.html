@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pricing · Rank Monk</title>
+  <meta name="description" content="Three simple plans from $50 a month. Video billed separately.">
+  <link rel="icon" href="img/logo.png">
+  <script>
+    /* set theme before paint to avoid a flash */
+    try {
+      var t = localStorage.getItem("rankmonk-theme") ||
+        (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", t);
+    } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div id="site-header"></div>
+
+<main>
+<section class="page-hero">
+  <div class="container">
+    <div class="crumbs"><a href="index.html">Home</a> / Pricing</div>
+    <span class="eyebrow">Pricing</span>
+    <h1>Pick your pace. <span class="accent">Change it</span> whenever.</h1>
+    <p class="lead">Three plans, no hidden tiers. Every plan includes the full platform. Only the volume changes.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="pricing-grid">
+      <div class="plan"><div class="plan-name">Seed</div><div class="price">$50<small> / month</small></div>
+        <p>For a solo founder getting started.</p>
+        <ul>
+          <li>1 website</li><li>8 blog articles a month</li><li>60 social posts a month</li>
+          <li>Monthly SEO audit</li><li>AI search tracking for 10 questions</li><li>Email support</li>
+        </ul>
+        <a class="btn btn-ghost btn-block" href="signup.html">Choose Seed</a></div>
+      <div class="plan featured"><span class="plan-tag">Most chosen</span><div class="plan-name">Grow</div><div class="price">$200<small> / month</small></div>
+        <p>For growing brands that want steady momentum.</p>
+        <ul>
+          <li>5 websites</li><li>30 blog articles a month</li><li>Unlimited social scheduling</li>
+          <li>30 AI images a month</li><li>Weekly SEO audits + AI fixes</li>
+          <li>AI search tracking for 50 questions</li><li>Reports with your logo</li><li>Priority support</li>
+        </ul>
+        <a class="btn btn-primary btn-block" href="signup.html">Choose Grow</a></div>
+      <div class="plan"><div class="plan-name">Scale</div><div class="price">$700<small> / month</small></div>
+        <p>For agencies and teams running many brands.</p>
+        <ul>
+          <li>15 websites</li><li>100 blog articles a month</li><li>Unlimited social scheduling</li>
+          <li>100 AI images a month</li><li>Daily SEO audits + AI fixes</li>
+          <li>AI search tracking for 200 questions</li><li>White-label reports</li><li>API access</li><li>Dedicated success manager</li>
+        </ul>
+        <a class="btn btn-ghost btn-block" href="signup.html">Choose Scale</a></div>
+    </div>
+    <p class="pricing-note"><strong>AI videos are billed separately.</strong> Each 25–30 second video costs about $3–4 and is charged on top of your plan. Images are included in your plan.</p>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-head center"><span class="eyebrow">Questions</span><h2>Good questions, <span class="accent">straight</span> answers.</h2></div>
+    <div class="faq">
+      <details open><summary>Can I change plans later?</summary><p>Yes. Upgrade or downgrade at any time from your dashboard. Changes apply from your next billing date.</p></details>
+      <details><summary>Why are videos billed separately?</summary><p>Video generation costs more to produce than text or images, so we charge per clip. You only pay for the videos you actually make, roughly $3–4 each for a 25–30 second clip.</p></details>
+      <details><summary>Do I need to connect my website?</summary><p>To publish automatically, yes. You can also copy finished articles and paste them anywhere, and every plan includes the audit and AI search features.</p></details>
+      <details><summary>What happens to unused blog articles?</summary><p>Allowances reset each month. Unused articles do not roll over, but you can switch plans at any time if your needs change.</p></details>
+      <details><summary>Is there a contract?</summary><p>No. All plans are month-to-month and you can cancel from your account page at any time.</p></details>
+    </div>
+  </div>
+</section>
+</main>
+
+<div id="site-footer"></div>
+<script src="js/main.js"></script>
+</body>
+</html>

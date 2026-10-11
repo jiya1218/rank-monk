@@ -1,105 +1,147 @@
 /* ==========================================================================
-   RANK MONK - DESIGN TOKENS (COLOR PALETTE: NUDE)
-   Exact Hex Palette:
-   #3A2D28 (Deep Espresso Umber)
-   #A48374 (Warm Earth Taupe)
-   #CBAD8D (Warm Golden Sandstone)
-   #D1C7BD (Soft Stone Clay)
-   #EBE3DB (Warm Linen Cream)
-   #F1EDE6 (Pure Bone Pearl)
+   RANK MONK - MASTER DESIGN TOKENS (EDITORIAL ZEN PALETTE)
+   Typography: Fraunces (Editorial Serif) & Instrument Sans
+   Palette: Warm Bone, Linen, Cream, Sandstone, Mocha & Deep Espresso
+   Light & Dark Theme Compatible via [data-theme]
    ========================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@500;700&display=swap");
 
 :root {
   /* 1. Core Palette Swatches */
-  --nude-espresso: #3A2D28;
-  --nude-taupe: #A48374;
-  --nude-sand: #CBAD8D;
-  --nude-stone: #D1C7BD;
-  --nude-linen: #EBE3DB;
-  --nude-bone: #F1EDE6;
+  --bg: #f8f3ec;
+  --bg-alt: #f1e8dc;
+  --card: #fffcf7;
+  --ink: #2b1b12;
+  --muted: #6f5a4c;
+  --line: #e4d6c6;
+  --espresso: #3b2519;
+  --mocha: #7a5242;
+  --tan: #b98b6a;
+  --sand: #d8c09e;
+  --cream: #fbf6ef;
+  --success: #5d7a4f;
+
+  /* Aliases for legacy & component styles */
+  --nude-espresso: #3b2519;
+  --nude-taupe: #7a5242;
+  --nude-sand: #b98b6a;
+  --nude-stone: #d8c09e;
+  --nude-linen: #f1e8dc;
+  --nude-bone: #f8f3ec;
 
   /* 2. Surfaces & Canvas */
-  --bg-page: #F1EDE6;
-  --bg-surface: #FFFFFF;
-  --bg-surface-warm: #EBE3DB;
-  --bg-surface-elevated: #FFFFFF;
-  --bg-surface-subtle: #F8F5F0;
-  --bg-surface-hover: #F5EFEB;
-  --bg-glass: rgba(241, 237, 230, 0.9);
+  --bg-page: var(--bg);
+  --bg-surface: var(--card);
+  --bg-surface-warm: var(--bg-alt);
+  --bg-surface-elevated: var(--card);
+  --bg-surface-subtle: #FAF7F2;
+  --bg-surface-hover: #F3ECE2;
+  --bg-glass: rgba(248, 243, 236, 0.92);
   
-  /* High-Contrast Dark Anchor Surfaces (Command Center & Footer) */
-  --bg-dark-console: #3A2D28;
-  --bg-dark-surface: #2E231F;
-  --bg-dark-elevated: #483933;
-  --bg-dark-glass: rgba(58, 45, 40, 0.94);
+  /* High-Contrast Dark Anchor Surfaces */
+  --bg-dark-console: #3b2519;
+  --bg-dark-surface: #241912;
+  --bg-dark-elevated: #452e21;
+  --bg-dark-glass: rgba(43, 27, 18, 0.94);
 
-  /* 3. Text Hierarchy (High-Contrast Crisp Black & Dark Umber) */
-  --text-heading: #080605;
-  --text-body: #110E0C;
-  --text-secondary: #221B17;
-  --text-muted: #382C26;
-  --text-subtle: #4D3D35;
-  --text-inverse: #FDFBF7;
-  --text-inverse-muted: #D1C7BD;
+  /* 3. Text Hierarchy */
+  --text-heading: var(--ink);
+  --text-body: var(--ink);
+  --text-secondary: var(--muted);
+  --text-muted: var(--muted);
+  --text-subtle: #8a7364;
+  --text-inverse: var(--cream);
+  --text-inverse-muted: var(--sand);
 
-  /* 4. Brand Accents & Highlights */
-  --brand-primary: #3A2D28;
-  --brand-accent: #CBAD8D;
-  --brand-accent-hover: #BA9977;
-  --brand-taupe: #A48374;
-  --brand-soft: rgba(203, 173, 141, 0.16);
-  --brand-soft-taupe: rgba(164, 131, 116, 0.14);
+  /* 4. Brand Accents */
+  --brand-primary: var(--espresso);
+  --brand-accent: var(--tan);
+  --brand-accent-hover: var(--mocha);
+  --brand-taupe: var(--mocha);
+  --brand-soft: rgba(185, 139, 106, 0.16);
 
   /* 5. Borders & Dividers */
-  --border-subtle: rgba(58, 45, 40, 0.08);
-  --border-medium: rgba(58, 45, 40, 0.15);
-  --border-stone: #D1C7BD;
-  --border-sand: #CBAD8D;
-  --border-dark: rgba(241, 237, 230, 0.12);
-  --border-dark-medium: rgba(241, 237, 230, 0.2);
+  --border-subtle: var(--line);
+  --border-medium: rgba(122, 82, 66, 0.22);
+  --border-stone: var(--line);
+  --border-sand: var(--tan);
+  --border-dark: rgba(248, 243, 236, 0.14);
 
-  /* 6. Shadows (Warm Architectural Diffuse) */
-  --shadow-xs: 0 1px 3px rgba(58, 45, 40, 0.04);
-  --shadow-sm: 0 3px 8px -1px rgba(58, 45, 40, 0.06), 0 1px 3px rgba(58, 45, 40, 0.03);
-  --shadow-card: 0 12px 30px -6px rgba(58, 45, 40, 0.07), 0 2px 6px -1px rgba(58, 45, 40, 0.03);
-  --shadow-card-hover: 0 20px 48px -10px rgba(58, 45, 40, 0.12), 0 4px 12px -2px rgba(58, 45, 40, 0.04);
-  --shadow-console: 0 28px 70px -15px rgba(58, 45, 40, 0.35);
-  --shadow-sand: 0 8px 24px -4px rgba(203, 173, 141, 0.35);
+  /* 6. Shadows */
+  --shadow: 0 18px 40px -22px rgba(59, 37, 25, 0.35);
+  --shadow-xs: 0 1px 3px rgba(59, 37, 25, 0.05);
+  --shadow-sm: 0 3px 8px -1px rgba(59, 37, 25, 0.08);
+  --shadow-card: 0 12px 32px -8px rgba(59, 37, 25, 0.08);
+  --shadow-card-hover: 0 20px 48px -10px rgba(59, 37, 25, 0.16);
+  --shadow-console: 0 28px 70px -15px rgba(27, 18, 12, 0.5);
 
-  /* 7. Gradients */
-  --grad-sand-text: linear-gradient(135deg, #3A2D28 10%, #A48374 60%, #CBAD8D 100%);
-  --grad-sand-btn: linear-gradient(135deg, #CBAD8D 0%, #BA9977 100%);
-  --grad-espresso-btn: linear-gradient(135deg, #3A2D28 0%, #4D3C35 100%);
-  --grad-banner: linear-gradient(135deg, #3A2D28 0%, #2A1F1B 100%);
-  --grad-card-warm: linear-gradient(180deg, #FFFFFF 0%, #FAF7F2 100%);
-
-  /* 8. Typography */
-  --font-heading: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  /* 7. Typography (Editorial Fraunces + Clean Instrument Sans) */
+  --font-heading: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-body: 'Instrument Sans', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+  --serif: var(--font-heading);
+  --sans: var(--font-body);
 
-  /* 9. Layout Structure */
-  --max-w: 1220px;
-  --header-h: 72px;
+  /* 8. Layout Structure */
+  --max-w: 1180px;
+  --header-h: 76px;
   --radius-xs: 6px;
   --radius-sm: 10px;
   --radius-md: 14px;
   --radius-lg: 20px;
-  --radius-xl: 28px;
+  --radius-xl: 26px;
   --radius-pill: 9999px;
+  --radius: 18px;
 
-  /* 10. Seamless Compatibility Aliases (Mapped Strictly to Nude Hexes) */
-  --gold-400: #CBAD8D;
-  --gold-300: #CBAD8D;
-  --gold-500: #BA9977;
-  --gold-border: rgba(203, 173, 141, 0.4);
-  --gold-soft: rgba(203, 173, 141, 0.15);
-  --jade-400: #A48374;
-  --jade-500: #8C6C5E;
-  --jade-border: rgba(164, 131, 116, 0.35);
-  --jade-soft: rgba(164, 131, 116, 0.12);
-  --text-white: #F1EDE6;
-  --grad-champagne: linear-gradient(135deg, #3A2D28 10%, #A48374 50%, #CBAD8D 100%);
-  --grad-gold-btn: linear-gradient(135deg, #CBAD8D 0%, #BA9977 100%);
-  --grad-jade-btn: linear-gradient(135deg, #A48374 0%, #8C6C5E 100%);
+  /* 9. Component Compatibility Tokens */
+  --gold-400: var(--tan);
+  --gold-300: var(--sand);
+  --gold-500: var(--mocha);
+  --gold-border: rgba(185, 139, 106, 0.4);
+  --gold-soft: rgba(185, 139, 106, 0.15);
+  --jade-400: var(--tan);
+  --jade-500: var(--mocha);
+  --jade-border: rgba(122, 82, 66, 0.3);
+  --jade-soft: rgba(122, 82, 66, 0.12);
+  --text-white: var(--cream);
+  --grad-champagne: linear-gradient(135deg, var(--espresso) 0%, var(--mocha) 50%, var(--tan) 100%);
+  --grad-sand-text: linear-gradient(135deg, var(--espresso) 0%, var(--mocha) 60%, var(--tan) 100%);
+  --grad-sand-btn: linear-gradient(135deg, var(--tan) 0%, var(--mocha) 100%);
+  --grad-gold-btn: linear-gradient(135deg, var(--tan) 0%, var(--mocha) 100%);
+  --grad-espresso-btn: linear-gradient(135deg, var(--espresso) 0%, #25160E 100%);
+}
+
+/* ==========================================================================
+   DARK THEME SPECIFICATION (via [data-theme="dark"])
+   ========================================================================== */
+[data-theme="dark"] {
+  --bg: #170f0a;
+  --bg-alt: #1f150e;
+  --card: #241912;
+  --ink: #f4eadf;
+  --muted: #b8a291;
+  --line: #3b2a20;
+  --espresso: #2a1a12;
+  --mocha: #d8b898;
+  --tan: #c9a27e;
+  --sand: #5a4232;
+  --cream: #f3e8dc;
+  --success: #9bbd87;
+  
+  --bg-page: var(--bg);
+  --bg-surface: var(--card);
+  --bg-surface-warm: var(--bg-alt);
+  --bg-surface-elevated: #2e2017;
+  --bg-surface-subtle: #1c130d;
+  --bg-glass: rgba(23, 15, 10, 0.92);
+  --bg-dark-console: #140d08;
+  
+  --text-heading: var(--ink);
+  --text-body: var(--ink);
+  --text-secondary: var(--muted);
+  --text-muted: var(--muted);
+  --border-subtle: var(--line);
+  --border-stone: var(--line);
+  --shadow: 0 18px 40px -22px rgba(0, 0, 0, 0.7);
 }

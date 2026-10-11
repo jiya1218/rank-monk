@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Start climbing · Rank Monk</title>
+  <meta name="description" content="Create your Rank Monk account in about ten minutes.">
+  <link rel="icon" href="img/logo.png">
+  <script>
+    /* set theme before paint to avoid a flash */
+    try {
+      var t = localStorage.getItem("rankmonk-theme") ||
+        (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", t);
+    } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div id="site-header"></div>
+
+<main class="container auth-wrap">
+  <div class="auth-card">
+    <span class="eyebrow">Start climbing</span>
+    <h1>Create your <span class="accent">account</span></h1>
+    <p>Set up in about ten minutes. Cancel anytime.</p>
+    <form data-form="signup" data-endpoint="/api/auth/signup" data-success="Welcome aboard. Check your inbox to confirm.">
+      <div class="form-row">
+        <div class="field"><label for="s-name">Full name</label><input id="s-name" name="name" required placeholder="Jane Doe"></div>
+        <div class="field"><label for="s-site">Website</label><input id="s-site" name="website" type="url" placeholder="https://yoursite.com"></div>
+      </div>
+      <div class="field"><label for="s-email">Work email</label><input id="s-email" name="email" type="email" required placeholder="you@company.com"></div>
+      <div class="field"><label for="s-pass">Password</label><input id="s-pass" name="password" type="password" minlength="8" required placeholder="At least 8 characters"></div>
+      <div class="field"><label for="s-plan">Plan</label>
+        <select id="s-plan" name="plan">
+          <option value="seed">Seed · $50 / month</option>
+          <option value="grow" selected>Grow · $200 / month</option>
+          <option value="scale">Scale · $700 / month</option>
+        </select></div>
+      <button class="btn btn-primary btn-block" type="submit">Create account</button>
+      <p class="form-msg"></p>
+    </form>
+    <p class="auth-foot">Already a member? <a class="link-arrow" href="login.html">Log in</a></p>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+<script src="js/main.js"></script>
+</body>
+</html>

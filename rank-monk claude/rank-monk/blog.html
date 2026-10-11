@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Journal · Rank Monk</title>
+  <meta name="description" content="Practical ideas on search, social, AI visibility and steady growth.">
+  <link rel="icon" href="img/logo.png">
+  <script>
+    /* set theme before paint to avoid a flash */
+    try {
+      var t = localStorage.getItem("rankmonk-theme") ||
+        (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", t);
+    } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div id="site-header"></div>
+
+<main>
+<section class="page-hero">
+  <div class="container">
+    <div class="crumbs"><a href="index.html">Home</a> / Journal</div>
+    <span class="eyebrow">The journal</span>
+    <h1>Notes on being <span class="accent">found</span>.</h1>
+    <p class="lead">Practical ideas on search, social, AI visibility and the calm way to grow.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <a class="featured-post" href="blog-post.html">
+      <div class="post-cover c1"></div>
+      <div class="post-body">
+        <div class="post-meta">Featured · 9 min read</div>
+        <h2>The climb is slow. The compounding is not.</h2>
+        <p>Why consistent, modest effort is the most reliable way to grow search and AI visibility, and how to set it up so it keeps going without you.</p>
+        <span class="link-arrow">Read the feature →</span>
+      </div>
+    </a>
+
+    <div class="search-row">
+      <div class="chips">
+        <button class="chip on" data-filter="all" type="button">All</button>
+        <button class="chip" data-filter="search" type="button">Search</button>
+        <button class="chip" data-filter="ai" type="button">AI visibility</button>
+        <button class="chip" data-filter="social" type="button">Social</button>
+      </div>
+      <input class="search-input" id="blog-search" type="search" placeholder="Search articles…" aria-label="Search articles">
+    </div>
+
+    <div class="blog-grid">
+      <a class="post-card" href="blog-post.html" data-cat="search">
+        <div class="post-cover c1"></div>
+        <div class="post-body">
+          <div class="post-meta">Search · 7 min read</div>
+          <h3>The quiet ranking habit that beats every trick</h3>
+          <p>Small, steady updates to one page each week outperform a yearly content overhaul. Here is a simple routine you can keep.</p>
+          <span class="link-arrow">Read article →</span>
+        </div>
+      </a>
+      <a class="post-card" href="blog-post.html" data-cat="ai">
+        <div class="post-cover c2"></div>
+        <div class="post-body">
+          <div class="post-meta">AI visibility · 6 min read</div>
+          <h3>How to get recommended by AI assistants</h3>
+          <p>Answer engines reward clear, well-sourced answers. Learn the structure that makes your brand easy to quote.</p>
+          <span class="link-arrow">Read article →</span>
+        </div>
+      </a>
+      <a class="post-card" href="blog-post.html" data-cat="social">
+        <div class="post-cover c3"></div>
+        <div class="post-body">
+          <div class="post-meta">Social · 5 min read</div>
+          <h3>Posting less, reaching more: a calmer content week</h3>
+          <p>A three-post rhythm, one visual, and a review block on Friday. The schedule that keeps founders sane.</p>
+          <span class="link-arrow">Read article →</span>
+        </div>
+      </a>
+      <a class="post-card" href="blog-post.html" data-cat="search">
+        <div class="post-cover c1"></div>
+        <div class="post-body">
+          <div class="post-meta">Content · 8 min read</div>
+          <h3>Why your best articles are hiding in plain sight</h3>
+          <p>Old posts are a goldmine. Learn how to refresh them so they earn traffic again without starting from scratch.</p>
+          <span class="link-arrow">Read article →</span>
+        </div>
+      </a>
+      <a class="post-card" href="blog-post.html" data-cat="ai">
+        <div class="post-cover c2"></div>
+        <div class="post-body">
+          <div class="post-meta">AI visibility · 6 min read</div>
+          <h3>Questions your customers ask AI, and how to answer them</h3>
+          <p>Build a list of the real questions buyers type into assistants, then publish the clearest answer on the web.</p>
+          <span class="link-arrow">Read article →</span>
+        </div>
+      </a>
+      <a class="post-card" href="blog-post.html" data-cat="social">
+        <div class="post-cover c3"></div>
+        <div class="post-body">
+          <div class="post-meta">Video · 4 min read</div>
+          <h3>Short video for the feed: a 30-second plan</h3>
+          <p>Hook in three seconds, one idea, one call to action. A simple framework for short clips that people finish.</p>
+          <span class="link-arrow">Read article →</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+</main>
+
+<div id="site-footer"></div>
+<script src="js/main.js"></script>
+</body>
+</html>

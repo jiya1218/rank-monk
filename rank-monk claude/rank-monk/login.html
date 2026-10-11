@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Log in · Rank Monk</title>
+  <meta name="description" content="Log in to your Rank Monk dashboard.">
+  <link rel="icon" href="img/logo.png">
+  <script>
+    /* set theme before paint to avoid a flash */
+    try {
+      var t = localStorage.getItem("rankmonk-theme") ||
+        (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", t);
+    } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div id="site-header"></div>
+
+<main class="container auth-wrap">
+  <div class="auth-card">
+    <span class="eyebrow">Welcome back</span>
+    <h1>Log in to your <span class="accent">dashboard</span></h1>
+    <p>Pick up where you left off.</p>
+    <form data-form="login" data-endpoint="/api/auth/login" data-success="Signing you in…">
+      <div class="field"><label for="l-email">Email</label><input id="l-email" name="email" type="email" required placeholder="you@company.com"></div>
+      <div class="field"><label for="l-pass">Password</label><input id="l-pass" name="password" type="password" required placeholder="••••••••"></div>
+      <div style="text-align:right;margin:-6px 0 18px"><a class="link-arrow" href="#" style="font-size:0.9rem">Forgot password?</a></div>
+      <button class="btn btn-primary btn-block" type="submit">Log in</button>
+      <p class="form-msg"></p>
+    </form>
+    <div class="divider">or</div>
+    <button class="btn btn-ghost btn-block" type="button">Continue with Google</button>
+    <p class="auth-foot">New here? <a class="link-arrow" href="signup.html">Create an account</a></p>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+<script src="js/main.js"></script>
+</body>
+</html>

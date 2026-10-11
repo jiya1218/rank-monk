@@ -3,18 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <title>6 Core AI Engines — Rank Monk</title>
-  <meta name="description" content="Discover the 6 autonomous engines powering Rank Monk: Blog & CMS sync, AEO radar, 1-click self-healing SEO, social repurposing, competitor gap spy, and internal linking graphs.">
+  <title>AI Engines · Rank Monk</title>
+  <meta name="description" content="Discover the 6 autonomous engines powering Rank Monk: Blog & CMS sync, AEO radar, 1-click self-healing SEO, social repurposing, and knowledge graphs.">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
   <link rel="apple-touch-icon" href="assets/rank-monk-icon.png">
 
-  <!-- Google Fonts: Plus Jakarta Sans, Inter, JetBrains Mono -->
+  <!-- Anti-Flash Theme Script -->
+  <script>
+    try {
+      var t = localStorage.getItem("rankmonk-theme") ||
+        (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", t);
+    } catch (e) {}
+  </script>
+
+  <!-- Google Fonts: Fraunces & Instrument Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 
   <!-- Core Stylesheets -->
   <link rel="stylesheet" href="css/variables.css">
@@ -31,26 +40,25 @@
   <header class="site-header" id="siteHeader">
     <div class="container nav-container">
       
-      <!-- Brand Logo -->
-      <a href="index.html" class="brand-logo" aria-label="Rank Monk Home">
-        <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="brand-logo-img">
+      <a href="index.html" class="brand" aria-label="Rank Monk home">
+        <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="brand-logo-img logo-light">
+        <img src="assets/rank-monk-logo-horizontal-light.png" alt="Rank Monk" class="brand-logo-img logo-dark">
       </a>
 
-      <!-- Desktop Navigation Links -->
       <nav class="nav-links">
         <a href="index.html" class="nav-link">Home</a>
         <a href="features.html" class="nav-link">Features</a>
         <a href="engines.html" class="nav-link active">AI Engines</a>
-        <a href="comparison.html" class="nav-link">Comparison</a>
+        <a href="comparison.html" class="nav-link">Stack Collapse</a>
         <a href="pricing.html" class="nav-link">Pricing</a>
-        <a href="faq.html" class="nav-link">FAQ & Docs</a>
+        <a href="faq.html" class="nav-link">FAQ</a>
       </nav>
 
-      <!-- Nav Actions -->
       <div class="nav-actions">
-        <a href="pricing.html" class="btn btn-espresso btn-sm">Coming Soon ⚡</a>
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle theme">☾</button>
+        <a href="pricing.html" class="btn btn-ghost btn-sm">Log in</a>
+        <a href="pricing.html" class="btn btn-primary btn-sm">Start climbing</a>
         
-        <!-- Mobile Nav Toggle -->
         <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle Navigation">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -62,221 +70,120 @@
 
     </div>
 
-    <!-- Mobile App Navigation Drawer (Native App Experience) -->
+    <!-- Mobile Drawer -->
     <div class="mobile-nav-sheet" id="mobileNavSheet">
       <div class="mobile-sheet-head">
-        <a href="index.html" class="brand-logo" aria-label="Rank Monk Home">
-          <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="brand-logo-img" style="height: 34px;">
+        <a href="index.html" class="brand">
+          <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="brand-logo-img logo-light" style="height: 32px;">
+          <img src="assets/rank-monk-logo-horizontal-light.png" alt="Rank Monk" class="brand-logo-img logo-dark" style="height: 32px;">
         </a>
-        <button class="mobile-sheet-close" id="mobileSheetClose" aria-label="Close menu">✕</button>
+        <button class="mobile-sheet-close" id="mobileSheetClose">✕</button>
       </div>
-      
       <div class="mobile-sheet-links">
-        <a href="index.html" class="nav-link mobile-link">
-          <span>🏠 Home</span>
-          <span class="link-sub">Command Center</span>
-        </a>
-        <a href="features.html" class="nav-link mobile-link">
-          <span>⚡ Features Overview</span>
-          <span class="link-sub">24 Engine Matrix</span>
-        </a>
-        <a href="engines.html" class="nav-link mobile-link active">
-          <span>⚙️ 6 Core AI Engines</span>
-          <span class="link-sub">Architecture</span>
-        </a>
-        <a href="comparison.html" class="nav-link mobile-link">
-          <span>⚖️ Stack Collapse</span>
-          <span class="link-sub">Save $1,180/mo</span>
-        </a>
-        <a href="pricing.html" class="nav-link mobile-link">
-          <span>🏷️ Pricing & Plans</span>
-          <span class="link-sub">Revealing Soon</span>
-        </a>
-        <a href="faq.html" class="nav-link mobile-link">
-          <span>📖 FAQ & Knowledge</span>
-          <span class="link-sub">Manifesto & Docs</span>
-        </a>
-      </div>
-
-      <div class="mobile-sheet-footer">
-        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; color: var(--text-muted); padding: 4px 2px;">
-          <span style="display: inline-flex; align-items: center; gap: 6px;">
-            <span style="width: 6px; height: 6px; border-radius: 50%; background: #10B981; box-shadow: 0 0 6px #10B981;"></span>
-            Private Alpha OS v2.4
-          </span>
-          <span style="color: var(--nude-sand); font-weight: 700;">50% Privilege</span>
-        </div>
-        <button onclick="showComingSoon()" class="btn btn-espresso" style="width: 100%; min-height: 46px;">
-          Join Private Alpha ⚡
-        </button>
+        <a href="index.html" class="nav-link mobile-link"><span>🏠 Home</span></a>
+        <a href="features.html" class="nav-link mobile-link"><span>⚡ Features</span></a>
+        <a href="engines.html" class="nav-link mobile-link active"><span>⚙️ AI Engines</span></a>
+        <a href="comparison.html" class="nav-link mobile-link"><span>⚖️ Stack Collapse</span></a>
+        <a href="pricing.html" class="nav-link mobile-link"><span>🏷️ Pricing</span></a>
+        <a href="faq.html" class="nav-link mobile-link"><span>📖 FAQ</span></a>
       </div>
     </div>
   </header>
 
   <main>
     <!-- ==========================================================================
-         HERO SECTION
+         PAGE HERO
          ========================================================================== -->
-    <section class="section hero-section">
-      <!-- Floating Interactive Live Micro-Pills -->
-      <div class="hero-floating-pill pill-pos-left anim-float-slow">
-        <div class="pill-icon">🚀</div>
-        <div>
-          <div>Content Engine</div>
-          <span class="pill-meta"><strong class="pill-highlight">2,500w In-Depth Articles</strong></span>
-        </div>
-      </div>
-
-      <div class="hero-floating-pill pill-pos-right anim-float-reverse">
-        <div class="pill-icon">🌐</div>
-        <div>
-          <div>AEO Knowledge Graph</div>
-          <span class="pill-meta"><strong class="pill-highlight">94.2% LLM Citation Share</strong></span>
-        </div>
-      </div>
-
-      <div class="container hero-content">
-        <div class="section-tag">
-          <span class="dot"></span>
-          <span>Core AI Engines</span>
-        </div>
-
-        <h1 class="hero-headline">
-          Six Dedicated Engines.<br>
-          <span class="grad-sand">One Autonomous OS.</span>
-        </h1>
-
-        <p class="hero-description">
-          Engineered with mathematical discipline to handle content creation, schema synthesis, technical crawler monitoring, and social distribution without human bottlenecks.
-        </p>
-
-        <div style="display: flex; justify-content: center; gap: 12px; margin-top: 24px; flex-wrap: wrap;">
-          <a href="#engines-grid" class="btn btn-espresso">Inspect All 6 Engines ↓</a>
-          <button class="btn btn-secondary" onclick="runLiveAudit('openai.com')">Test Engine Diagnostic ⚡</button>
-        </div>
+    <section class="page-hero">
+      <div class="container">
+        <div class="crumbs"><a href="index.html">Home</a> / AI Engines</div>
+        <span class="eyebrow">Engine Architecture</span>
+        <h1>Six dedicated engines. <span class="accent">One</span> unified OS.</h1>
+        <p class="lead">Engineered to execute your entire organic acquisition loop with zero human drag, 24 hours a day, 7 days a week.</p>
       </div>
     </section>
 
     <!-- ==========================================================================
-         THE 6 CORE ENGINES DETAILED BENTO GRID
+         6 DEDICATED ENGINES
          ========================================================================== -->
-    <section class="section section-divider" id="engines-grid">
+    <section class="section" id="engines-grid">
       <div class="container">
         
-        <div class="section-header">
-          <div class="section-tag">
-            <span class="dot"></span>
-            <span>Architectural Breakdown</span>
-          </div>
-          <h2 class="section-title">Deep dive into each autonomous subsystem</h2>
-          <p class="section-subtitle">
-            Every engine is designed to operate autonomously 24/7 or trigger via custom REST webhooks.
-          </p>
-        </div>
+        <div style="text-align: center;"><div class="swipe-hint-pill"><span>Swipe engines ↔</span></div></div>
 
-        <div class="engines-bento-grid">
+        <div class="bento">
           
-          <!-- Engine 1: Blog & CMS Sync -->
-          <div class="engine-bento-card interactive-hover-lift">
-            <div>
-              <div class="engine-icon-wrap">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-              </div>
-              <h3 class="engine-title">1. Autonomous Blog & CMS Sync</h3>
-              <p class="engine-desc">
-                Creates comprehensive, 2,500+ word guides rich with original diagrams, citations, and semantic entity density. Automatically pushes to WordPress, Webflow, Shopify, or Ghost without copy-pasting.
-              </p>
-            </div>
-            <div class="engine-preview-pill">
-              <span style="font-size: 11px; color: var(--nude-sand); font-weight: 700;">● ZERO MANUAL COPY-PASTING</span>
-              <div style="font-size: 12px; color: var(--text-secondary); margin-top: 3px;">Auto-injected into live CMS collections</div>
-            </div>
-          </div>
+          <!-- Engine 1 -->
+          <article class="tile half">
+            <div class="ico">📝</div>
+            <h3>1. Autonomous Blog & CMS Synapse</h3>
+            <p>Generates in-depth 2,500+ word articles with verified citations, custom diagrams, and auto-publishes directly to WordPress, Webflow, Shopify, or Ghost via secure webhooks.</p>
+            <ul>
+              <li>Entity & demand research</li>
+              <li>Auto JSON-LD schema</li>
+              <li>Direct webhook auto-publishing</li>
+            </ul>
+          </article>
 
-          <!-- Engine 2: AEO & Answer Engine Radar -->
-          <div class="engine-bento-card interactive-hover-lift">
-            <div>
-              <div class="engine-icon-wrap">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
-              </div>
-              <h3 class="engine-title">2. AEO & ChatGPT Radar</h3>
-              <p class="engine-desc">
-                Tracks how leading conversational models (ChatGPT, Perplexity, Claude, Gemini) evaluate your domain. Injects direct Q&A entities so LLMs cite your brand as the primary authority source.
-              </p>
-            </div>
-            <div class="engine-preview-pill">
-              <span style="font-size: 11px; color: var(--nude-taupe); font-weight: 700;">● 94.2% AI CITATION SHARE</span>
-              <div style="font-size: 12px; color: var(--text-secondary); margin-top: 3px;">Monitored across 5 major LLM architectures</div>
-            </div>
-          </div>
+          <!-- Engine 2 -->
+          <article class="tile half dark">
+            <div class="ico">🎯</div>
+            <h3>2. AEO & LLM Citation Radar</h3>
+            <p>Tracks your brand visibility across ChatGPT 4o, Perplexity Pro, and Claude 3.5 Sonnet to secure top footnote citations and dominate generative conversational answers.</p>
+            <ul>
+              <li>Footnote monitoring across 4 LLMs</li>
+              <li>Authority gap identification</li>
+              <li>Conversational prompt mapping</li>
+            </ul>
+          </article>
 
-          <!-- Engine 3: Self-Healing Technical SEO -->
-          <div class="engine-bento-card interactive-hover-lift">
-            <div>
-              <div class="engine-icon-wrap">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-              </div>
-              <h3 class="engine-title">3. Self-Healing Technical SEO</h3>
-              <p class="engine-desc">
-                Headless background crawler scanning all pages for missing meta titles, empty descriptions, broken links, and core web vitals regressions with instant 1-click self-healing code remedies.
-              </p>
-            </div>
-            <div class="engine-preview-pill">
-              <span style="font-size: 11px; color: var(--nude-sand); font-weight: 700;">● 1-CLICK RESOLUTION</span>
-              <div style="font-size: 12px; color: var(--text-secondary); margin-top: 3px;">Repairs executed via webhook or REST API</div>
-            </div>
-          </div>
+          <!-- Engine 3 -->
+          <article class="tile half">
+            <div class="ico">🛡️</div>
+            <h3>3. Self-Healing Technical Crawler</h3>
+            <p>Scans URLs with headless Chromium to discover missing titles, canonical errors, and broken redirects with instant 1-click autonomous code remedies.</p>
+            <ul>
+              <li>Headless Chromium audit</li>
+              <li>1-click code remedy injection</li>
+              <li>Core Web Vitals monitoring</li>
+            </ul>
+          </article>
 
-          <!-- Engine 4: Social Repurposing Studio -->
-          <div class="engine-bento-card interactive-hover-lift">
-            <div>
-              <div class="engine-icon-wrap">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path></svg>
-              </div>
-              <h3 class="engine-title">4. Social Repurposing Studio</h3>
-              <p class="engine-desc">
-                Extract maximum compound value from every ranking blog post. Automatically produces high-engagement LinkedIn PDF carousels, Twitter/X threads, and newsletter summaries in under 60 seconds.
-              </p>
-            </div>
-            <div class="engine-preview-pill">
-              <span style="font-size: 11px; color: var(--nude-taupe); font-weight: 700;">● MULTI-FORMAT EXPORT</span>
-              <div style="font-size: 12px; color: var(--text-secondary); margin-top: 3px;">Carousels, threads, and newsletters in 1 tap</div>
-            </div>
-          </div>
+          <!-- Engine 4 -->
+          <article class="tile half">
+            <div class="ico">📱</div>
+            <h3>4. Omnichannel Social Studio</h3>
+            <p>Extracts 5-slide LinkedIn PDF carousels, 6-post viral X threads, and newsletter summaries from your blogs in under 60 seconds.</p>
+            <ul>
+              <li>LinkedIn carousels & X threads</li>
+              <li>Platform-native tone matching</li>
+              <li>Automated peak-time calendar</li>
+            </ul>
+          </article>
 
-          <!-- Engine 5: Competitor Gap Spy -->
-          <div class="engine-bento-card interactive-hover-lift">
-            <div>
-              <div class="engine-icon-wrap">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-              </div>
-              <h3 class="engine-title">5. Competitor Gap Intelligence</h3>
-              <p class="engine-desc">
-                Reverse-engineers competitor domain authority. Pinpoints high-intent, low-difficulty keyword voids where competitors rank weakly, allowing your brand to publish and capture uncontested traffic.
-              </p>
-            </div>
-            <div class="engine-preview-pill">
-              <span style="font-size: 11px; color: var(--nude-sand); font-weight: 700;">● LOW-COMPETITION SURGES</span>
-              <div style="font-size: 12px; color: var(--text-secondary); margin-top: 3px;">Discovers 20+ immediate ranking voids</div>
-            </div>
-          </div>
+          <!-- Engine 5 -->
+          <article class="tile half">
+            <div class="ico">🔍</div>
+            <h3>5. Competitor Semantic Gap Spy</h3>
+            <p>Monitors what your competitors are ranking for and where AI models cite them instead of you, creating automatic counter-strategies.</p>
+            <ul>
+              <li>Real-time ranking telemetry</li>
+              <li>Semantic gap mapping</li>
+              <li>Counter-article generation</li>
+            </ul>
+          </article>
 
-          <!-- Engine 6: Schema & Internal Link Graph -->
-          <div class="engine-bento-card interactive-hover-lift">
-            <div>
-              <div class="engine-icon-wrap">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-              </div>
-              <h3 class="engine-title">6. Knowledge Graph & Internal Linking</h3>
-              <p class="engine-desc">
-                Constructs an interconnected web of topical authority. Automatically injects contextual internal hyperlinks between related articles and formats nested JSON-LD schema markups.
-              </p>
-            </div>
-            <div class="engine-preview-pill">
-              <span style="font-size: 11px; color: var(--nude-taupe); font-weight: 700;">● PAGERANK OPTIMIZATION</span>
-              <div style="font-size: 12px; color: var(--text-secondary); margin-top: 3px;">Boosts crawl efficiency and topic cluster depth</div>
-            </div>
-          </div>
+          <!-- Engine 6 -->
+          <article class="tile half dark">
+            <div class="ico">👥</div>
+            <h3>6. Multi-Tenant Agency Hub</h3>
+            <p>Designed for agencies managing 5 to 50 client websites. Switch brand workspaces, manage separate queues, and export white-label reports in seconds.</p>
+            <ul>
+              <li>Multi-client unified dashboard</li>
+              <li>White-label client portal</li>
+              <li>Custom domain branding</li>
+            </ul>
+          </article>
 
         </div>
 
@@ -284,172 +191,96 @@
     </section>
 
     <!-- ==========================================================================
-         BOTTOM CTA BANNER
+         CTA BAND
          ========================================================================== -->
-    <section class="section" style="padding-bottom: 60px;">
+    <section class="section" style="padding-top: 20px;">
       <div class="container">
-        
-        <div class="cta-banner-card anim-beam-glow">
-          <h2 class="cta-banner-title">Deploy the autonomous OS on your domain.</h2>
-          <p class="cta-banner-desc">
-            Stop juggling 6 disconnected tools and start compounding organic search traffic. Private alpha enrollment is now open.
-          </p>
-          <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;">
-            <button class="btn btn-sand btn-lg" onclick="showComingSoon('Engines Bottom CTA')">Join Alpha Waitlist ⚡</button>
-            <a href="pricing.html" class="btn btn-secondary btn-lg">Founder Privilege</a>
+        <div class="cta-band">
+          <div>
+            <h2>Ready to put these engines to work?</h2>
+            <p>Start your 14-day trial or review transparent pricing options.</p>
+          </div>
+          <div class="cta-actions">
+            <a href="pricing.html" class="btn btn-primary">View Plans & Pricing</a>
+            <a href="features.html" class="btn btn-ghost">Full Features Breakdown</a>
           </div>
         </div>
-
       </div>
     </section>
   </main>
 
   <!-- ==========================================================================
-       FOOTER
+       SITE FOOTER
        ========================================================================== -->
   <footer class="site-footer">
     <div class="container">
-      
-      <div class="footer-cols-grid">
-        
-        <!-- Brand Info -->
-        <div>
-          <a href="index.html" class="brand-logo footer-brand-logo" style="margin-bottom: 14px;" aria-label="Rank Monk Home">
-            <img src="assets/rank-monk-logo-horizontal-light.png" alt="Rank Monk" class="brand-logo-img footer-logo-img">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="brand">
+            <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="brand-logo-img logo-light" style="height: 38px;">
+            <img src="assets/rank-monk-logo-horizontal-light.png" alt="Rank Monk" class="brand-logo-img logo-dark" style="height: 38px;">
           </a>
-          <p class="footer-brand-desc">
-            The Zen Operating System for autonomous organic search and AI discovery. Engineered with discipline.
+          <p class="footer-desc">
+            Content, search, social and AI visibility, handled. So you can get back to building what matters.
           </p>
         </div>
-
-        <!-- Col 2: Product -->
         <div>
-          <div class="footer-col-title">Product</div>
-          <div class="footer-link-list">
-            <a href="features.html">Features Overview</a>
-            <a href="engines.html">6 AI Engines</a>
-            <a href="comparison.html">Comparison Matrix</a>
-            <a href="pricing.html">Pricing Plans</a>
-          </div>
+          <h4>Product</h4>
+          <ul>
+            <li><a href="features.html">Features</a></li>
+            <li><a href="engines.html">AI Engines</a></li>
+            <li><a href="comparison.html">Stack Collapse</a></li>
+            <li><a href="pricing.html">Pricing</a></li>
+          </ul>
         </div>
-
-        <!-- Col 3: Solutions -->
         <div>
-          <div class="footer-col-title">Solutions</div>
-          <div class="footer-link-list">
-            <a href="comparison.html">The Stack Collapse</a>
-            <a href="features.html#console">Multi-Client Agency</a>
-            <a href="features.html#disciplines">Workflow Disciplines</a>
-            <a href="pricing.html">Enterprise SLA</a>
-          </div>
+          <h4>Pages</h4>
+          <ul>
+            <li><a href="faq.html">FAQ & Docs</a></li>
+            <li><a href="pricing.html">Start Trial</a></li>
+            <li><a href="pricing.html">Log In</a></li>
+            <li><a href="features.html">CMS Integrations</a></li>
+          </ul>
         </div>
-
-        <!-- Col 4: Integrations -->
         <div>
-          <div class="footer-col-title">Integrations</div>
-          <div class="footer-link-list">
-            <a href="#">WordPress Sync</a>
-            <a href="#">Webflow CMS</a>
-            <a href="#">Shopify Engine</a>
-            <a href="#">Ghost Publishing</a>
-            <a href="#">REST Webhooks</a>
-          </div>
-        </div>
-
-        <!-- Col 5: Company -->
-        <div>
-          <div class="footer-col-title">Company</div>
-          <div class="footer-link-list">
-            <a href="faq.html#manifesto">Manifesto</a>
-            <a href="faq.html">FAQ Knowledge Base</a>
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Service</a>
-            <a href="mailto:support@rankmonk.com">Contact Support</a>
-          </div>
-        </div>
-
-      </div>
-
-      <div class="footer-bottom-bar">
-        <div>© 2026 Rank Monk Inc. All rights reserved. Precision Organic Acquisition OS.</div>
-        <div style="display: flex; gap: 16px; align-items: center;">
-          <span style="display: inline-flex; align-items: center; gap: 6px; color: var(--nude-sand); font-size: 12px; font-weight: 600;">
-            <span style="width: 7px; height: 7px; border-radius: 50%; background: var(--nude-sand); box-shadow: 0 0 6px var(--nude-sand);"></span>
-            All AI Engines Operational
-          </span>
+          <h4>Company</h4>
+          <ul>
+            <li><a href="index.html">Manifesto</a></li>
+            <li><a href="faq.html">Security & Privacy</a></li>
+          </ul>
         </div>
       </div>
-
+      <div class="footer-bottom">
+        <span>© 2026 Rank Monk. All rights reserved.</span>
+        <span>Made for founders who want to be found.</span>
+      </div>
     </div>
   </footer>
 
-  <!-- ==========================================================================
-       COMING SOON MODAL
-       ========================================================================== -->
-  <div class="coming-soon-modal-backdrop" id="auditModalBackdrop" onclick="if(event.target === this) closeComingSoonModal()">
-    <div class="coming-soon-modal-box anim-beam-glow">
-      <button class="modal-close-btn" onclick="closeComingSoonModal()" aria-label="Close modal">✕</button>
-      <div style="text-align: center;">
-        <div style="display: flex; justify-content: center; margin-bottom: 16px;">
-          <img src="assets/rank-monk-logo-stacked-light.png" alt="Rank Monk" style="height: 52px; width: auto; filter: drop-shadow(0 4px 16px rgba(0,0,0,0.4));">
-        </div>
-        <div class="coming-soon-pill-badge">✦ PRIVATE ALPHA IN PROGRESS</div>
-        <h3 style="font-size: 24px; font-weight: 800; color: #FFFFFF; margin: 12px 0 8px;">Rank Monk OS — Coming Soon</h3>
-        <p style="font-size: 14px; color: #F1EDE6; line-height: 1.6; margin-bottom: 24px;">
-          We are currently operating in stealth with our first cohort of private alpha operators. Public access & founder pricing will be revealed soon.
-        </p>
-        <form class="early-access-form" onsubmit="event.preventDefault(); handleWaitlistSubmit(this);">
-          <input type="email" class="early-access-input" placeholder="Enter work email for priority access" required>
-          <button type="submit" class="btn btn-sand">Join Waitlist ⚡</button>
-        </form>
-        <div class="early-access-perks" style="margin-top: 18px; color: var(--nude-stone);">
-          <span>✓ 50% Lifetime Founder Privilege</span>
-          <span>✓ Zero Spam Guaranteed</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Native App Bottom Navigation Bar -->
-  <nav class="mobile-app-bottom-bar" id="mobileBottomBar" aria-label="Mobile Navigation">
+  <!-- Native Mobile App Bottom Tab Bar (Fixed Dock) -->
+  <nav class="mobile-app-bottom-bar" aria-label="Mobile Bottom Navigation">
     <a href="index.html" class="bottom-tab-item">
-      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-        <polyline points="9 22 9 12 15 12 15 22"></polyline>
-      </svg>
-      <span class="tab-label">Home</span>
+      <span class="tab-icon">🏠</span>
+      <span>Home</span>
     </a>
     <a href="features.html" class="bottom-tab-item">
-      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-      </svg>
-      <span class="tab-label">Features</span>
+      <span class="tab-icon">⚡</span>
+      <span>Features</span>
     </a>
     <a href="engines.html" class="bottom-tab-item active">
-      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="3"></circle>
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-      </svg>
-      <span class="tab-label">Engines</span>
+      <span class="tab-icon">⚙️</span>
+      <span>Engines</span>
     </a>
     <a href="comparison.html" class="bottom-tab-item">
-      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="18" y1="20" x2="18" y2="10"></line>
-        <line x1="12" y1="20" x2="12" y2="4"></line>
-        <line x1="6" y1="20" x2="6" y2="14"></line>
-      </svg>
-      <span class="tab-label">Compare</span>
+      <span class="tab-icon">⚖️</span>
+      <span>Compare</span>
     </a>
     <a href="pricing.html" class="bottom-tab-item">
-      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="12" y1="1" x2="12" y2="23"></line>
-        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-      </svg>
-      <span class="tab-label">Pricing</span>
+      <span class="tab-icon">🏷️</span>
+      <span>Pricing</span>
     </a>
   </nav>
 
-  <!-- Core JavaScript -->
-  <script type="module" src="js/app.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>

@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard · Rank Monk</title>
+  <meta name="description" content="Your Rank Monk dashboard preview.">
+  <link rel="icon" href="img/logo.png">
+  <script>
+    /* set theme before paint to avoid a flash */
+    try {
+      var t = localStorage.getItem("rankmonk-theme") ||
+        (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", t);
+    } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div id="site-header"></div>
+
+<main class="app">
+  <aside class="app-side">
+    <a class="on" href="dashboard.html">Overview</a>
+    <a href="#">Blog articles</a>
+    <a href="#">Social calendar</a>
+    <a href="#">Media studio</a>
+    <a href="#">SEO audits</a>
+    <a href="#">AI visibility</a>
+    <a href="#">Reports</a>
+    <a href="#">Settings</a>
+  </aside>
+  <section class="app-main">
+    <div class="app-head">
+      <div>
+        <span class="eyebrow">Good morning, Jane</span>
+        <h1>Your week at a glance</h1>
+      </div>
+      <a class="btn btn-primary btn-sm" href="#">+ New article</a>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi"><small>Organic visits</small><div class="v">18.4k</div><div class="d">▲ 23% vs last month</div></div>
+      <div class="kpi"><small>Articles live</small><div class="v">42</div><div class="d">▲ 6 this week</div></div>
+      <div class="kpi"><small>AI mentions</small><div class="v">38</div><div class="d">▲ 11 this month</div></div>
+      <div class="kpi"><small>Audit health</small><div class="v">86</div><div class="d">▲ 4 points</div></div>
+    </div>
+
+    <div class="app-grid">
+      <div class="panel">
+        <h3>Visits, last 8 weeks</h3>
+        <div class="mini-bars">
+          <span style="height:30%"></span><span style="height:38%"></span><span style="height:44%"></span><span style="height:52%"></span>
+          <span style="height:60%"></span><span style="height:71%"></span><span style="height:80%"></span><span style="height:94%"></span>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Up next</h3>
+        <ul class="queue">
+          <li><div>Post: 3 tips for busy founders<br><small>Instagram · Tomorrow, 9:00</small></div><span class="status ok">Scheduled</span></li>
+          <li><div>Article: pricing page rewrite<br><small>Blog · Draft ready</small></div><span class="status">Review</span></li>
+          <li><div>Audit fix: 6 meta titles<br><small>SEO · Ready to apply</small></div><span class="status">New</span></li>
+          <li><div>Video: product walkthrough<br><small>Media studio · Rendering</small></div><span class="status">In progress</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="site-footer"></div>
+<script src="js/main.js"></script>
+</body>
+</html>

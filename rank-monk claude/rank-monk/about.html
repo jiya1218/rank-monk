@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>About · Rank Monk</title>
+  <meta name="description" content="The story and team behind Rank Monk.">
+  <link rel="icon" href="img/logo.png">
+  <script>
+    /* set theme before paint to avoid a flash */
+    try {
+      var t = localStorage.getItem("rankmonk-theme") ||
+        (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", t);
+    } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div id="site-header"></div>
+
+<main>
+<section class="page-hero">
+  <div class="container">
+    <div class="crumbs"><a href="index.html">Home</a> / About</div>
+    <span class="eyebrow">Our story</span>
+    <h1>Built by people who were <span class="accent">tired</span> of guessing.</h1>
+    <p class="lead">We kept watching good businesses lose ground to noisier competitors. Not because their work was weaker, but because nobody had time to be found. Rank Monk exists to give that time back.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head left"><span class="eyebrow">What we believe</span><h2>Growth should be steady, <span class="accent">not</span> exhausting.</h2></div>
+    <div class="values">
+      <div class="value"><div class="n">I.</div><h3>Patience is a strategy</h3><p>Search and AI visibility compound slowly. We build for the long climb, not the quick spike.</p></div>
+      <div class="value"><div class="n">II.</div><h3>Your voice stays yours</h3><p>Automation should sound like you on your best day. We never publish what you would not say.</p></div>
+      <div class="value"><div class="n">III.</div><h3>Clear beats clever</h3><p>Plain-English reports, honest prices and no hidden tiers. You should always know what you are paying for.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-head"><span class="eyebrow">The people</span><h2>A small team with a big obsession.</h2></div>
+    <div class="team">
+      <div class="member"><div class="avatar">A</div><h4>Aarav Mehta</h4><small>Co-founder & CEO</small><p>Ran a content agency for eight years before building the tools he wished he had.</p></div>
+      <div class="member"><div class="avatar">N</div><h4>Nisha Rao</h4><small>Head of Product</small><p>Former search engineer who believes every feature should earn its place on the screen.</p></div>
+      <div class="member"><div class="avatar">K</div><h4>Kabir Shah</h4><small>Lead Engineer</small><p>Makes the systems behind every article, post and audit run quietly and reliably.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="cta-band">
+      <div><h2>Want to climb with us?</h2><p>Start on the Seed plan and move up as your business grows.</p></div>
+      <div class="cta-actions"><a class="btn btn-primary" href="signup.html">Start climbing</a><a class="btn btn-ghost" href="contact.html">Say hello</a></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<div id="site-footer"></div>
+<script src="js/main.js"></script>
+</body>
+</html>

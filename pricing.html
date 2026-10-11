@@ -3,18 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <title>Disciplined Pricing — Rank Monk</title>
-  <meta name="description" content="Transparent, predictable pricing for autonomous organic search and AEO dominance. 14-day free trial on all plans. No credit card required.">
+  <title>Pricing & Plans · Rank Monk</title>
+  <meta name="description" content="Pick your pace. Three simple plans from $50 a month with no hidden tiers. Rank Monk autonomous organic growth.">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
   <link rel="apple-touch-icon" href="assets/rank-monk-icon.png">
 
-  <!-- Google Fonts: Plus Jakarta Sans, Inter, JetBrains Mono -->
+  <!-- Anti-Flash Theme Script -->
+  <script>
+    try {
+      var t = localStorage.getItem("rankmonk-theme") ||
+        (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", t);
+    } catch (e) {}
+  </script>
+
+  <!-- Google Fonts: Fraunces & Instrument Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 
   <!-- Core Stylesheets -->
   <link rel="stylesheet" href="css/variables.css">
@@ -22,35 +31,121 @@
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/animations.css">
   <link rel="stylesheet" href="css/responsive.css">
+  <style>
+    .billing-toggle-bar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      margin: 36px 0 20px;
+      flex-wrap: wrap;
+    }
+    .toggle-group {
+      display: inline-flex;
+      background: var(--card, #fffcf7);
+      border: 1px solid var(--line, #e4d6c6);
+      border-radius: 999px;
+      padding: 4px;
+      gap: 4px;
+    }
+    .toggle-btn {
+      border: none;
+      background: transparent;
+      padding: 8px 18px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--muted, #6f5a4c);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: var(--font-body, 'Instrument Sans', sans-serif);
+    }
+    .toggle-btn.active {
+      background: #FFFFFF !important;
+      color: #000000 !important;
+      -webkit-text-fill-color: #000000 !important;
+      border: 1.5px solid #000000 !important;
+      font-weight: 700 !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    [data-theme="dark"] .toggle-btn.active {
+      background: #FFFFFF !important;
+      color: #000000 !important;
+      -webkit-text-fill-color: #000000 !important;
+      border: 1.5px solid #000000 !important;
+    }
+    .badge-discount {
+      background: rgba(93, 122, 79, 0.2);
+      color: var(--success, #5d7a4f);
+      font-size: 0.78rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-left: 4px;
+      font-weight: 700;
+    }
+    /* Comparison Table Styling */
+    .compare-wrap {
+      margin-top: 60px;
+      overflow-x: auto;
+      background: var(--card, #fffcf7);
+      border: 1px solid var(--line, #e4d6c6);
+      border-radius: 24px;
+      padding: 28px;
+    }
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.95rem;
+    }
+    .compare-table th,
+    .compare-table td {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line, #e4d6c6);
+    }
+    .compare-table th {
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      color: var(--ink, #2b1b12);
+      background: var(--bg-alt, #f1e8dc);
+    }
+    .compare-table tr:last-child td {
+      border-bottom: none;
+    }
+    .check-yes {
+      color: var(--success, #5d7a4f);
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+  </style>
 </head>
 <body class="page-fade-in">
 
   <!-- ==========================================================================
-       SITE HEADER
+       SITE HEADER - CLEAN & BORDERLESS
        ========================================================================== -->
   <header class="site-header" id="siteHeader">
     <div class="container nav-container">
       
-      <!-- Brand Logo -->
-      <a href="index.html" class="brand-logo" aria-label="Rank Monk Home">
-        <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="brand-logo-img">
+      <a href="index.html" class="brand" aria-label="Rank Monk home">
+        <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="brand-logo-img logo-light">
+        <img src="assets/rank-monk-logo-horizontal-light.png" alt="Rank Monk" class="brand-logo-img logo-dark">
       </a>
 
-      <!-- Desktop Navigation Links -->
       <nav class="nav-links">
         <a href="index.html" class="nav-link">Home</a>
         <a href="features.html" class="nav-link">Features</a>
         <a href="engines.html" class="nav-link">AI Engines</a>
-        <a href="comparison.html" class="nav-link">Comparison</a>
+        <a href="comparison.html" class="nav-link">Stack Collapse</a>
         <a href="pricing.html" class="nav-link active">Pricing</a>
-        <a href="faq.html" class="nav-link">FAQ & Docs</a>
+        <a href="faq.html" class="nav-link">FAQ</a>
       </nav>
 
-      <!-- Nav Actions -->
       <div class="nav-actions">
-        <a href="#plans" class="btn btn-espresso btn-sm">Coming Soon ⚡</a>
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle theme">☾</button>
+        <a href="#plans" class="btn btn-ghost btn-sm">Log in</a>
+        <a href="#plans" class="btn btn-primary btn-sm">Start climbing</a>
         
-        <!-- Mobile Nav Toggle -->
         <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle Navigation">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -62,486 +157,369 @@
 
     </div>
 
-    <!-- Mobile App Navigation Drawer (Native App Experience) -->
+    <!-- Mobile Drawer -->
     <div class="mobile-nav-sheet" id="mobileNavSheet">
       <div class="mobile-sheet-head">
-        <a href="index.html" class="brand-logo" aria-label="Rank Monk Home">
-          <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="brand-logo-img" style="height: 34px;">
+        <a href="index.html" class="brand">
+          <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="brand-logo-img logo-light" style="height: 32px;">
+          <img src="assets/rank-monk-logo-horizontal-light.png" alt="Rank Monk" class="brand-logo-img logo-dark" style="height: 32px;">
         </a>
-        <button class="mobile-sheet-close" id="mobileSheetClose" aria-label="Close menu">✕</button>
+        <button class="mobile-sheet-close" id="mobileSheetClose">✕</button>
       </div>
-      
       <div class="mobile-sheet-links">
-        <a href="index.html" class="nav-link mobile-link">
-          <span>🏠 Home</span>
-          <span class="link-sub">Command Center</span>
-        </a>
-        <a href="features.html" class="nav-link mobile-link">
-          <span>⚡ Features Overview</span>
-          <span class="link-sub">24 Engine Matrix</span>
-        </a>
-        <a href="engines.html" class="nav-link mobile-link">
-          <span>⚙️ 6 Core AI Engines</span>
-          <span class="link-sub">Architecture</span>
-        </a>
-        <a href="comparison.html" class="nav-link mobile-link">
-          <span>⚖️ Stack Collapse</span>
-          <span class="link-sub">Save $1,180/mo</span>
-        </a>
-        <a href="pricing.html" class="nav-link mobile-link active">
-          <span>🏷️ Pricing & Plans</span>
-          <span class="link-sub">Revealing Soon</span>
-        </a>
-        <a href="faq.html" class="nav-link mobile-link">
-          <span>📖 FAQ & Knowledge</span>
-          <span class="link-sub">Manifesto & Docs</span>
-        </a>
-      </div>
-
-      <div class="mobile-sheet-footer">
-        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; color: var(--text-muted); padding: 4px 2px;">
-          <span style="display: inline-flex; align-items: center; gap: 6px;">
-            <span style="width: 6px; height: 6px; border-radius: 50%; background: #10B981; box-shadow: 0 0 6px #10B981;"></span>
-            Private Alpha OS v2.4
-          </span>
-          <span style="color: var(--nude-sand); font-weight: 700;">50% Privilege</span>
-        </div>
-        <button onclick="showComingSoon()" class="btn btn-espresso" style="width: 100%; min-height: 46px;">
-          Join Private Alpha ⚡
-        </button>
+        <a href="index.html" class="nav-link mobile-link"><span>🏠 Home</span></a>
+        <a href="features.html" class="nav-link mobile-link"><span>⚡ Features</span></a>
+        <a href="engines.html" class="nav-link mobile-link"><span>⚙️ AI Engines</span></a>
+        <a href="comparison.html" class="nav-link mobile-link"><span>⚖️ Stack Collapse</span></a>
+        <a href="pricing.html" class="nav-link mobile-link active"><span>🏷️ Pricing</span></a>
+        <a href="faq.html" class="nav-link mobile-link"><span>📖 FAQ</span></a>
       </div>
     </div>
   </header>
 
   <main>
     <!-- ==========================================================================
-         HERO SECTION
+         PAGE HERO
          ========================================================================== -->
-    <section class="section hero-section">
-      <!-- Floating Interactive Live Micro-Pills -->
-      <div class="hero-floating-pill pill-pos-left anim-float-slow">
-        <div class="pill-icon">⏳</div>
-        <div>
-          <div>Founding Alpha Cohort</div>
-          <span class="pill-meta"><strong class="pill-highlight">500 Spots Reserved</strong></span>
-        </div>
-      </div>
-
-      <div class="hero-floating-pill pill-pos-right anim-float-reverse">
-        <div class="pill-icon">✦</div>
-        <div>
-          <div>Pricing Architecture</div>
-          <span class="pill-meta"><strong class="pill-highlight">Revealing Soon</strong></span>
-        </div>
-      </div>
-
-      <div class="container hero-content">
-        <div class="section-tag">
-          <span class="dot"></span>
-          <span>Early Access & Founding Cohort</span>
-        </div>
-
-        <h1 class="hero-headline">
-          Disciplined Pricing<br>
-          <span class="grad-sand">Revealing Soon</span>
-        </h1>
-
-        <p class="hero-description">
-          We are fine-tuning our autonomous operating system alongside our first cohort of private alpha operators. Public pricing tiers and locked-in founder privileges will be unveiled soon. Reserve your priority invitation today.
-        </p>
-
-        <!-- VIP Early Access Waitlist Box -->
-        <div class="early-access-box anim-beam-glow">
-          <div style="font-size: 11.5px; text-transform: uppercase; font-weight: 800; color: var(--nude-taupe); letter-spacing: 0.06em; margin-bottom: 12px;">
-            ✦ Founding Members List • 50% Lifetime Founder Privilege
-          </div>
-          <form class="early-access-form" id="pricingWaitlistForm" onsubmit="event.preventDefault(); window.handleWaitlistSubmit && window.handleWaitlistSubmit(this);">
-            <input type="email" class="early-access-input" placeholder="Enter your work email for priority access" required>
-            <button type="submit" class="btn btn-espresso">Join Founding Cohort ⚡</button>
-          </form>
-          <div class="early-access-perks">
-            <span>✓ 50% Lifetime Founder Discount</span>
-            <span>✓ Guaranteed Priority Activation</span>
-            <span>✓ 1-on-1 Founder Onboarding</span>
-            <span>✓ Zero Setup Fees</span>
-          </div>
-        </div>
+    <section class="page-hero">
+      <div class="container">
+        <div class="crumbs"><a href="index.html">Home</a> / Pricing</div>
+        <span class="eyebrow">Disciplined Pricing</span>
+        <h1>Pick your pace. <span class="accent">Change it</span> whenever.</h1>
+        <p class="lead">Three plans, no hidden tiers. Every plan includes the full autonomous platform. Only the volume changes.</p>
       </div>
     </section>
 
     <!-- ==========================================================================
-         PRICING CARDS GRID (REVEALING SOON ARCHITECTURE)
+         PRICING PLANS SECTION: $50, $200, $700 ARCHITECTURE
          ========================================================================== -->
-    <section class="section" id="plans" style="padding-top: 20px;">
+    <section class="section" id="plans">
       <div class="container">
         
-        <div class="pricing-cards-grid">
+        <!-- Interactive Billing & Currency Controls -->
+        <div class="billing-toggle-bar">
+          <div class="toggle-group" id="cycleGroup">
+            <button class="toggle-btn active" id="btnMonthly" onclick="setBillingCycle('monthly')">Monthly Billing</button>
+            <button class="toggle-btn" id="btnAnnual" onclick="setBillingCycle('annual')">
+              Annual Billing <span class="badge-discount">Save 20%</span>
+            </button>
+          </div>
+          <div class="toggle-group" id="currGroup">
+            <button class="toggle-btn active" id="btnUSD" onclick="setCurrency('USD')">USD ($)</button>
+            <button class="toggle-btn" id="btnINR" onclick="setCurrency('INR')">INR (₹)</button>
+          </div>
+        </div>
+
+        <div style="text-align: center;"><div class="swipe-hint-pill"><span>Swipe plans ↔</span></div></div>
+
+        <div class="pricing-grid">
           
-          <!-- Plan 1: Free Diagnostic -->
-          <div class="pricing-card interactive-hover-lift">
-            <div>
-              <div class="revealing-soon-pill">✦ Revealing Soon</div>
-              <div class="price-title">Free Diagnostic</div>
-              <div class="price-desc">Test your domain health and experience the autonomous engine.</div>
-              <div class="price-figure-revealing">Revealing Soon</div>
-              <div class="price-period">forever free diagnostic • no credit card required</div>
-
-              <div class="price-feature-list">
-                <div class="price-feat-item">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  <span>1 Connected Domain</span>
-                </div>
-                <div class="price-feat-item">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  <span>3 AI Blog Articles (2,500w)</span>
-                </div>
-                <div class="price-feat-item">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  <span>Initial AEO Citation Audit</span>
-                </div>
-                <div class="price-feat-item">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  <span>WordPress & Webflow Sync</span>
-                </div>
-              </div>
-            </div>
-
-            <button class="btn btn-secondary price-cta-btn" onclick="showComingSoon('Free Diagnostic Plan')">Request Early Access</button>
+          <!-- Plan 1: Seed ($50) -->
+          <div class="plan">
+            <div class="plan-name">Seed</div>
+            <div class="price"><span id="p-seed">$50</span><small id="sub-seed"> / month</small></div>
+            <p>For a solo founder or focused single-brand operator getting started.</p>
+            <ul>
+              <li><strong>1 Website Connection</strong> (WordPress, Webflow, Shopify)</li>
+              <li><strong>8 Autonomous Blog Articles</strong> / mo (2,000w+ in your voice)</li>
+              <li><strong>60 Social Posts</strong> scheduled / mo</li>
+              <li>Monthly technical SEO audit with 1-click fixes</li>
+              <li>AI search tracking for 10 questions across ChatGPT & Perplexity</li>
+              <li>Email & community support</li>
+            </ul>
+            <button class="btn btn-ghost btn-block" onclick="selectPlan('Seed ($50)')">Choose Seed ($50)</button>
           </div>
 
-          <!-- Plan 2: Starter OS (Featured) -->
-          <div class="pricing-card featured interactive-hover-lift">
-            <div class="popular-ribbon">Founding Member Tier</div>
-            <div>
-              <div class="revealing-soon-pill" style="background: rgba(203, 173, 141, 0.25); color: var(--nude-sand); border-color: var(--nude-sand);">✦ Revealing Soon</div>
-              <div class="price-title">Starter OS</div>
-              <div class="price-desc">For high-velocity founders and growing single-brand operators.</div>
-              <div class="price-figure-revealing" style="color: var(--nude-sand);">Revealing Soon</div>
-              <div class="price-period" style="color: var(--nude-stone);">locked-in founder rate for first 500 teams</div>
-
-              <div class="price-feature-list">
-                <div class="price-feat-item">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  <span><strong>3 Domains</strong> Managed</span>
-                </div>
-                <div class="price-feat-item">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  <span><strong>30 Articles</strong> / month</span>
-                </div>
-                <div class="price-feat-item">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  <span>Full Social Studio Repurposing</span>
-                </div>
-                <div class="price-feat-item">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  <span>AEO ChatGPT & Perplexity Index</span>
-                </div>
-                <div class="price-feat-item">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  <span>1-Click Self-Healing Fixes</span>
-                </div>
-              </div>
-            </div>
-
-            <button class="btn btn-sand price-cta-btn" onclick="showComingSoon('Starter OS Founding Member')">Join Founding Cohort ⚡</button>
+          <!-- Plan 2: Grow ($200) - Most Chosen -->
+          <div class="plan featured">
+            <span class="plan-tag">Most Chosen</span>
+            <div class="plan-name">Grow</div>
+            <div class="price"><span id="p-grow">$200</span><small id="sub-grow"> / month</small></div>
+            <p>For growing brands that want steady, high-velocity organic momentum.</p>
+            <ul>
+              <li><strong>5 Website Connections</strong></li>
+              <li><strong>30 Autonomous Blog Articles</strong> / mo</li>
+              <li>Unlimited social scheduling & automated repurposing</li>
+              <li><strong>30 AI Images included</strong> each month</li>
+              <li>Weekly SEO audits + 1-click autonomous code remedies</li>
+              <li>AI search tracking for 50 questions across 4 LLMs</li>
+              <li>Reports branded with your logo</li>
+              <li>Priority support</li>
+            </ul>
+            <button class="btn btn-primary btn-block" onclick="selectPlan('Grow ($200)')">Choose Grow ($200)</button>
           </div>
 
-          <!-- Plan 3: Growth -->
-          <div class="pricing-card interactive-hover-lift">
-            <div>
-              <div class="revealing-soon-pill">✦ Revealing Soon</div>
-              <div class="price-title">Growth Tier</div>
-              <div class="price-desc">For scaling startups and boutique growth marketing agencies.</div>
-              <div class="price-figure-revealing">Revealing Soon</div>
-              <div class="price-period">priority agency bandwidth & multi-domain</div>
-
-              <div class="price-feature-list">
-                <div class="price-feat-item">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  <span><strong>15 Client Domains</strong></span>
-                </div>
-                <div class="price-feat-item">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  <span><strong>120 AI Articles</strong> / month</span>
-                </div>
-                <div class="price-feat-item">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  <span>White-Label Audit Reports</span>
-                </div>
-                <div class="price-feat-item">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  <span>Competitor Gap Intelligence</span>
-                </div>
-                <div class="price-feat-item">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  <span>Priority 24/7 Slack Support</span>
-                </div>
-              </div>
-            </div>
-
-            <button class="btn btn-secondary price-cta-btn" onclick="showComingSoon('Growth Agency Tier')">Request Agency Access</button>
+          <!-- Plan 3: Scale ($700) -->
+          <div class="plan">
+            <div class="plan-name">Scale</div>
+            <div class="price"><span id="p-scale">$700</span><small id="sub-scale"> / month</small></div>
+            <p>For agencies and operators running multiple fast-growing brands.</p>
+            <ul>
+              <li><strong>15 Website Connections</strong></li>
+              <li><strong>100 Autonomous Blog Articles</strong> / mo</li>
+              <li>Unlimited social scheduling</li>
+              <li><strong>100 AI Images included</strong> each month</li>
+              <li>Daily technical crawlers + auto code remedies</li>
+              <li>AI search tracking for 200 questions</li>
+              <li>White-label reports & client portal</li>
+              <li>Full API access & custom webhooks</li>
+              <li>Dedicated success manager</li>
+            </ul>
+            <button class="btn btn-ghost btn-block" onclick="selectPlan('Scale ($700)')">Choose Scale ($700)</button>
           </div>
 
-          <!-- Plan 4: Enterprise -->
-          <div class="pricing-card interactive-hover-lift">
-            <div>
-              <div class="revealing-soon-pill">✦ Revealing Soon</div>
-              <div class="price-title">Enterprise</div>
-              <div class="price-desc">Custom volume, multi-seat agency networks, and custom LLM tuning.</div>
-              <div class="price-figure-revealing">Revealing Soon</div>
-              <div class="price-period">tailored SLA, custom nodes & private LLMs</div>
+        </div>
 
-              <div class="price-feature-list">
-                <div class="price-feat-item">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  <span>Unlimited Client Domains</span>
-                </div>
-                <div class="price-feat-item">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  <span>Bespoke LLM Brand Voice Tuning</span>
-                </div>
-                <div class="price-feat-item">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  <span>Full REST API & Webhooks</span>
-                </div>
-                <div class="price-feat-item">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                  <span>Custom Security, SSO & SLA</span>
-                </div>
-              </div>
-            </div>
+        <div class="pricing-note">
+          <strong>AI videos are billed separately.</strong> Each 25–30 second video costs approximately $3–4 and is billed on usage. High-definition images, blog posts, social schedules, and crawler fixes are fully included in your monthly plan.
+        </div>
 
-            <button class="btn btn-secondary price-cta-btn" onclick="showComingSoon('Enterprise SLA')">Talk to Engineering</button>
-          </div>
-
+        <!-- Full Feature Comparison Matrix -->
+        <div class="compare-wrap">
+          <h3 style="font-family: var(--font-heading); font-size: 1.5rem; color: var(--ink); margin-bottom: 20px;">
+            Full Feature Comparison
+          </h3>
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th>Platform Feature</th>
+                <th>Seed ($50)</th>
+                <th>Grow ($200)</th>
+                <th>Scale ($700)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Connected CMS Domains</td>
+                <td>1 Domain</td>
+                <td>5 Domains</td>
+                <td>15 Domains</td>
+              </tr>
+              <tr>
+                <td>Autonomous Pillar Articles</td>
+                <td>8 / month</td>
+                <td>30 / month</td>
+                <td>100 / month</td>
+              </tr>
+              <tr>
+                <td>Social Repurposing (LinkedIn/X)</td>
+                <td>60 Posts / mo</td>
+                <td><span class="check-yes">✓ Unlimited</span></td>
+                <td><span class="check-yes">✓ Unlimited</span></td>
+              </tr>
+              <tr>
+                <td>AI Media Generation (Images)</td>
+                <td>Standard</td>
+                <td>30 / month</td>
+                <td>100 / month</td>
+              </tr>
+              <tr>
+                <td>AI Search Visibility (AEO Radar)</td>
+                <td>10 Questions</td>
+                <td>50 Questions</td>
+                <td>200 Questions</td>
+              </tr>
+              <tr>
+                <td>Self-Healing Technical Audits</td>
+                <td>Monthly</td>
+                <td>Weekly + Auto-Fix</td>
+                <td>Daily + Auto-Fix</td>
+              </tr>
+              <tr>
+                <td>White-Label Client Reports</td>
+                <td>—</td>
+                <td><span class="check-yes">✓ Included</span></td>
+                <td><span class="check-yes">✓ Custom Branding</span></td>
+              </tr>
+              <tr>
+                <td>Multi-Tenant Agency Workspaces</td>
+                <td>—</td>
+                <td>—</td>
+                <td><span class="check-yes">✓ Unlimited</span></td>
+              </tr>
+              <tr>
+                <td>API Access & Webhooks</td>
+                <td>—</td>
+                <td>—</td>
+                <td><span class="check-yes">✓ Full Access</span></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
       </div>
     </section>
 
     <!-- ==========================================================================
-         INTERACTIVE TRAFFIC & ORGANIC ROI VALUE ESTIMATOR
+         FAQ SECTION
          ========================================================================== -->
-    <section class="section section-divider">
+    <section class="section section-alt">
       <div class="container">
-        
         <div class="section-header">
-          <div class="section-tag">
-            <span class="dot"></span>
-            <span>Organic Traffic ROI Estimator</span>
-          </div>
-          <h2 class="section-title">See your projected organic acquisition value</h2>
-          <p class="section-subtitle">
-            Drag the slider to adjust monthly publishing volume and view the equivalent Google Ads CPC value.
-          </p>
+          <span class="eyebrow">Questions</span>
+          <h2>Good questions, <span class="accent">straight</span> answers.</h2>
+          <p class="lead" style="margin:0 auto">Clear answers about plans, billing, and switching anytime.</p>
         </div>
 
-        <div style="max-width: 820px; margin: 0 auto; background: #FFFFFF; border: 1px solid var(--border-stone); border-radius: var(--radius-xl); padding: 36px 32px; box-shadow: var(--shadow-card);" class="anim-beam-glow">
-          
-          <div style="margin-bottom: 28px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-              <span style="font-weight: 800; font-size: 16px; color: var(--text-heading);">Monthly Autonomous Articles Published:</span>
-              <span style="font-size: 24px; font-weight: 800; color: var(--nude-espresso);" id="sliderValDisplay">30 articles</span>
-            </div>
-            <input type="range" min="10" max="150" value="30" step="10" id="roiSlider" style="width: 100%; height: 8px; border-radius: 4px; accent-color: var(--nude-espresso); cursor: pointer;" oninput="updateRoiCalc(this.value)">
-            <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin-top: 6px;">
-              <span>10 articles/mo</span>
-              <span>50 articles/mo</span>
-              <span>100 articles/mo</span>
-              <span>150 articles/mo</span>
-            </div>
-          </div>
-
-          <div style="background: var(--nude-espresso); border: 1px solid var(--nude-sand); border-radius: var(--radius-lg); padding: 24px; color: var(--nude-bone); display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 18px; text-align: center;">
-            <div>
-              <div style="font-size: 11px; text-transform: uppercase; color: var(--nude-stone); font-weight: 700;">Est. Monthly Organic Visits</div>
-              <div style="font-size: 32px; font-weight: 800; color: var(--nude-sand); margin-top: 4px;" id="roiTrafficEst">45,000</div>
-              <div style="font-size: 11px; color: var(--nude-stone);">compounding over 6 months</div>
-            </div>
-            <div>
-              <div style="font-size: 11px; text-transform: uppercase; color: var(--nude-stone); font-weight: 700;">Equivalent Google Ads Value</div>
-              <div style="font-size: 32px; font-weight: 800; color: #FCD34D; margin-top: 4px;" id="roiAdsVal">$31,500 / mo</div>
-              <div style="font-size: 11px; color: var(--nude-stone);">based on average $0.70 CPC</div>
-            </div>
-            <div>
-              <div style="font-size: 11px; text-transform: uppercase; color: var(--nude-stone); font-weight: 700;">Net Founder ROI Advantage</div>
-              <div style="font-size: 32px; font-weight: 800; color: #6EE7B7; margin-top: 4px;" id="roiNetMultiplier">Alpha Upside</div>
-              <div style="font-size: 11px; color: var(--nude-stone);">with 50% lifetime founder rate</div>
-            </div>
-          </div>
-
+        <div class="faq-clean">
+          <details open>
+            <summary>Can I upgrade or downgrade whenever I want?</summary>
+            <p>Yes. Upgrade or downgrade at any time directly inside your account. Upgrades take effect immediately with prorated billing, and downgrades apply to your next renewal cycle.</p>
+          </details>
+          <details>
+            <summary>Why are video generations billed separately?</summary>
+            <p>Video rendering carries distinct computational GPU costs. To keep baseline subscriptions affordable ($50/mo), you only pay for videos you actually render (~$3–4 per 25-30 second video). All AI image generation and 2,000w+ articles are completely covered in your plan.</p>
+          </details>
+          <details>
+            <summary>Do I have to connect my website?</summary>
+            <p>To have Rank Monk auto-publish drafts directly to your CMS (WordPress, Webflow, Shopify, Ghost), yes. However, you can also manually copy markdown and HTML directly without connecting if your infrastructure is restricted.</p>
+          </details>
+          <details>
+            <summary>What happens to unused blog article allowances?</summary>
+            <p>Article quotas reset on each monthly billing cycle to maintain high generation quality and fresh topic research. If you need more articles in a month, you can easily top up or upgrade to Grow.</p>
+          </details>
+          <details>
+            <summary>Are there any long-term contracts?</summary>
+            <p>No. All subscriptions are strictly month-to-month unless you explicitly choose annual billing for the 20% discount. You can cancel at any time with a single click.</p>
+          </details>
         </div>
-
       </div>
     </section>
 
     <!-- ==========================================================================
-         BOTTOM CTA BANNER
+         CTA BAND
          ========================================================================== -->
-    <section class="section" style="padding-bottom: 60px;">
+    <section class="section" style="padding-top: 20px;">
       <div class="container">
-        
-        <div class="cta-banner-card anim-beam-glow">
-          <h2 class="cta-banner-title">Join the exclusive founding cohort.</h2>
-          <p class="cta-banner-desc">
-            Locked-in 50% lifetime pricing will be revealed to priority members first. Reserve your invitation before private alpha concludes.
-          </p>
-          <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;">
-            <button class="btn btn-sand btn-lg" onclick="showComingSoon('Founding VIP Privilege')">Claim Founding Privilege ⚡</button>
-            <a href="faq.html" class="btn btn-secondary btn-lg">Explore Architecture FAQ</a>
+        <div class="cta-band">
+          <div>
+            <h2>Ready to start climbing?</h2>
+            <p>Set up your domain in under three minutes. Cancel anytime.</p>
+          </div>
+          <div class="cta-actions">
+            <a href="#plans" class="btn btn-primary" onclick="selectPlan('Grow ($200)')">Start on Grow ($200)</a>
+            <a href="features.html" class="btn btn-ghost">Explore Features</a>
           </div>
         </div>
-
       </div>
     </section>
   </main>
 
   <!-- ==========================================================================
-       FOOTER
+       SITE FOOTER
        ========================================================================== -->
   <footer class="site-footer">
     <div class="container">
-      
-      <div class="footer-cols-grid">
-        
-        <!-- Brand Info -->
-        <div>
-          <a href="index.html" class="brand-logo footer-brand-logo" style="margin-bottom: 14px;" aria-label="Rank Monk Home">
-            <img src="assets/rank-monk-logo-horizontal-light.png" alt="Rank Monk" class="brand-logo-img footer-logo-img">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="brand">
+            <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="brand-logo-img logo-light" style="height: 38px;">
+            <img src="assets/rank-monk-logo-horizontal-light.png" alt="Rank Monk" class="brand-logo-img logo-dark" style="height: 38px;">
           </a>
-          <p class="footer-brand-desc">
-            The Zen Operating System for autonomous organic search and AI discovery. Engineered with discipline.
+          <p class="footer-desc">
+            Content, search, social and AI visibility, handled. So you can get back to building what matters.
           </p>
         </div>
-
-        <!-- Col 2: Product -->
         <div>
-          <div class="footer-col-title">Product</div>
-          <div class="footer-link-list">
-            <a href="features.html">Features Overview</a>
-            <a href="engines.html">6 AI Engines</a>
-            <a href="comparison.html">Comparison Matrix</a>
-            <a href="pricing.html">Pricing Plans</a>
-          </div>
+          <h4>Product</h4>
+          <ul>
+            <li><a href="features.html">Features</a></li>
+            <li><a href="engines.html">AI Engines</a></li>
+            <li><a href="comparison.html">Stack Collapse</a></li>
+            <li><a href="pricing.html">Pricing</a></li>
+          </ul>
         </div>
-
-        <!-- Col 3: Solutions -->
         <div>
-          <div class="footer-col-title">Solutions</div>
-          <div class="footer-link-list">
-            <a href="comparison.html">The Stack Collapse</a>
-            <a href="features.html#console">Multi-Client Agency</a>
-            <a href="features.html#disciplines">Workflow Disciplines</a>
-            <a href="pricing.html">Enterprise SLA</a>
-          </div>
+          <h4>Pages</h4>
+          <ul>
+            <li><a href="faq.html">FAQ & Docs</a></li>
+            <li><a href="pricing.html">Start Trial</a></li>
+            <li><a href="pricing.html">Log In</a></li>
+            <li><a href="features.html">CMS Integrations</a></li>
+          </ul>
         </div>
-
-        <!-- Col 4: Integrations -->
         <div>
-          <div class="footer-col-title">Integrations</div>
-          <div class="footer-link-list">
-            <a href="#">WordPress Sync</a>
-            <a href="#">Webflow CMS</a>
-            <a href="#">Shopify Engine</a>
-            <a href="#">Ghost Publishing</a>
-            <a href="#">REST Webhooks</a>
-          </div>
-        </div>
-
-        <!-- Col 5: Company -->
-        <div>
-          <div class="footer-col-title">Company</div>
-          <div class="footer-link-list">
-            <a href="faq.html#manifesto">Manifesto</a>
-            <a href="faq.html">FAQ Knowledge Base</a>
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Service</a>
-            <a href="mailto:support@rankmonk.com">Contact Support</a>
-          </div>
-        </div>
-
-      </div>
-
-      <div class="footer-bottom-bar">
-        <div>© 2026 Rank Monk Inc. All rights reserved. Precision Organic Acquisition OS.</div>
-        <div style="display: flex; gap: 16px; align-items: center;">
-          <span style="display: inline-flex; align-items: center; gap: 6px; color: var(--nude-sand); font-size: 12px; font-weight: 600;">
-            <span style="width: 7px; height: 7px; border-radius: 50%; background: var(--nude-sand); box-shadow: 0 0 6px var(--nude-sand);"></span>
-            All AI Engines Operational
-          </span>
+          <h4>Company</h4>
+          <ul>
+            <li><a href="index.html">Manifesto</a></li>
+            <li><a href="faq.html">Security & Privacy</a></li>
+          </ul>
         </div>
       </div>
-
+      <div class="footer-bottom">
+        <span>© 2026 Rank Monk. All rights reserved.</span>
+        <span>Made for founders who want to be found.</span>
+      </div>
     </div>
   </footer>
 
-  <!-- ==========================================================================
-       COMING SOON MODAL
-       ========================================================================== -->
-  <div class="coming-soon-modal-backdrop" id="auditModalBackdrop" onclick="if(event.target === this) closeComingSoonModal()">
-    <div class="coming-soon-modal-box anim-beam-glow">
-      <button class="modal-close-btn" onclick="closeComingSoonModal()" aria-label="Close modal">✕</button>
-      <div style="text-align: center;">
-        <div style="display: flex; justify-content: center; margin-bottom: 16px;">
-          <img src="assets/rank-monk-logo-stacked-light.png" alt="Rank Monk" style="height: 52px; width: auto; filter: drop-shadow(0 4px 16px rgba(0,0,0,0.4));">
-        </div>
-        <div class="coming-soon-pill-badge">✦ PRIVATE ALPHA IN PROGRESS</div>
-        <h3 style="font-size: 24px; font-weight: 800; color: #FFFFFF; margin: 12px 0 8px;">Rank Monk OS — Coming Soon</h3>
-        <p style="font-size: 14px; color: #F1EDE6; line-height: 1.6; margin-bottom: 24px;">
-          We are currently operating in stealth with our first cohort of private alpha operators. Public access & founder pricing will be revealed soon.
-        </p>
-        <form class="early-access-form" onsubmit="event.preventDefault(); handleWaitlistSubmit(this);">
-          <input type="email" class="early-access-input" placeholder="Enter work email for priority access" required>
-          <button type="submit" class="btn btn-sand">Join Waitlist ⚡</button>
-        </form>
-        <div class="early-access-perks" style="margin-top: 18px; color: var(--nude-stone);">
-          <span>✓ 50% Lifetime Founder Privilege</span>
-          <span>✓ Zero Spam Guaranteed</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Native App Bottom Navigation Bar -->
-  <nav class="mobile-app-bottom-bar" id="mobileBottomBar" aria-label="Mobile Navigation">
+  <!-- Native Mobile App Bottom Tab Bar (Fixed Dock) -->
+  <nav class="mobile-app-bottom-bar" aria-label="Mobile Bottom Navigation">
     <a href="index.html" class="bottom-tab-item">
-      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-        <polyline points="9 22 9 12 15 12 15 22"></polyline>
-      </svg>
-      <span class="tab-label">Home</span>
+      <span class="tab-icon">🏠</span>
+      <span>Home</span>
     </a>
     <a href="features.html" class="bottom-tab-item">
-      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-      </svg>
-      <span class="tab-label">Features</span>
+      <span class="tab-icon">⚡</span>
+      <span>Features</span>
     </a>
     <a href="engines.html" class="bottom-tab-item">
-      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="3"></circle>
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-      </svg>
-      <span class="tab-label">Engines</span>
+      <span class="tab-icon">⚙️</span>
+      <span>Engines</span>
     </a>
     <a href="comparison.html" class="bottom-tab-item">
-      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="18" y1="20" x2="18" y2="10"></line>
-        <line x1="12" y1="20" x2="12" y2="4"></line>
-        <line x1="6" y1="20" x2="6" y2="14"></line>
-      </svg>
-      <span class="tab-label">Compare</span>
+      <span class="tab-icon">⚖️</span>
+      <span>Compare</span>
     </a>
     <a href="pricing.html" class="bottom-tab-item active">
-      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="12" y1="1" x2="12" y2="23"></line>
-        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-      </svg>
-      <span class="tab-label">Pricing</span>
+      <span class="tab-icon">🏷️</span>
+      <span>Pricing</span>
     </a>
   </nav>
 
-  <!-- Core JavaScript -->
-  <script type="module" src="js/app.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    var currentCycle = 'monthly';
+    var currentCurrency = 'USD';
+
+    var pricingData = {
+      monthly: {
+        USD: { seed: '$50', grow: '$200', scale: '$700', period: ' / month' },
+        INR: { seed: '₹4,100', grow: '₹16,500', scale: '₹58,000', period: ' / month' }
+      },
+      annual: {
+        USD: { seed: '$40', grow: '$160', scale: '$560', period: ' / month (billed annually)' },
+        INR: { seed: '₹3,300', grow: '₹13,200', scale: '₹46,400', period: ' / month (billed annually)' }
+      }
+    };
+
+    function updatePricingDisplay() {
+      var d = pricingData[currentCycle][currentCurrency];
+      document.getElementById('p-seed').textContent = d.seed;
+      document.getElementById('p-grow').textContent = d.grow;
+      document.getElementById('p-scale').textContent = d.scale;
+      document.getElementById('sub-seed').textContent = d.period;
+      document.getElementById('sub-grow').textContent = d.period;
+      document.getElementById('sub-scale').textContent = d.period;
+    }
+
+    function setBillingCycle(c) {
+      currentCycle = c;
+      document.getElementById('btnMonthly').classList.toggle('active', c === 'monthly');
+      document.getElementById('btnAnnual').classList.toggle('active', c === 'annual');
+      updatePricingDisplay();
+    }
+
+    function setCurrency(curr) {
+      currentCurrency = curr;
+      document.getElementById('btnUSD').classList.toggle('active', curr === 'USD');
+      document.getElementById('btnINR').classList.toggle('active', curr === 'INR');
+      updatePricingDisplay();
+    }
+
+    function selectPlan(plan) {
+      alert('Selected ' + plan + ' Plan (' + currentCycle + '). Connecting to instant onboarding...');
+    }
+  </script>
 </body>
 </html>
