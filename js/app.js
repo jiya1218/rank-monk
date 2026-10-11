@@ -666,9 +666,9 @@ const pricingRates = {
     agency: { monthly: "$1,000", annual: "$800" }
   },
   INR: {
-    starter: { monthly: "₹16,500", annual: "₹13,200" },
-    pro: { monthly: "₹41,500", annual: "₹33,200" },
-    agency: { monthly: "₹82,500", annual: "₹66,000" }
+    starter: { monthly: "₹7,999", annual: "₹6,399" },
+    pro: { monthly: "₹14,999", annual: "₹11,999" },
+    agency: { monthly: "₹29,999", annual: "₹23,999" }
   }
 };
 
