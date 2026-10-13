@@ -657,14 +657,9 @@ function applyHealingFix(rowId, boostPoints = 3) {
    6. PRICING CONTROLS (Monthly / Yearly & USD / INR)
    -------------------------------------------------------------------------- */
 let currentBilling = 'monthly';
-let currentCurrency = 'USD';
+let currentCurrency = 'INR';
 
 const pricingRates = {
-  USD: {
-    starter: { monthly: "$200", annual: "$160" },
-    pro: { monthly: "$500", annual: "$400" },
-    agency: { monthly: "$1,000", annual: "$800" }
-  },
   INR: {
     starter: { monthly: "₹7,999", annual: "₹6,399" },
     pro: { monthly: "₹14,999", annual: "₹11,999" },
@@ -680,9 +675,7 @@ function setBillingCycle(cycle) {
 }
 
 function setCurrency(curr) {
-  currentCurrency = curr;
-  document.getElementById('btnCurrencyUSD')?.classList.toggle('active', curr === 'USD');
-  document.getElementById('btnCurrencyINR')?.classList.toggle('active', curr === 'INR');
+  currentCurrency = 'INR';
   updatePricingCards();
 }
 

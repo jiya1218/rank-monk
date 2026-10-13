@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Pricing & Plans · Rank Monk</title>
-  <meta name="description" content="Pick your pace. Three simple plans from $50 a month with no hidden tiers. Rank Monk autonomous organic growth.">
+  <meta name="description" content="Pick your pace. Three simple plans from ₹7,999 a month with no hidden tiers. Rank Monk autonomous organic growth.">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon.png">
@@ -191,12 +191,12 @@
     </section>
 
     <!-- ==========================================================================
-         PRICING PLANS SECTION: $50, $200, $700 ARCHITECTURE
+         PRICING PLANS SECTION: ₹7,999, ₹14,999, ₹29,999 ARCHITECTURE
          ========================================================================== -->
     <section class="section" id="plans">
       <div class="container">
         
-        <!-- Interactive Billing & Currency Controls -->
+        <!-- Interactive Billing Controls -->
         <div class="billing-toggle-bar">
           <div class="toggle-group" id="cycleGroup">
             <button class="toggle-btn active" id="btnMonthly" onclick="setBillingCycle('monthly')">Monthly Billing</button>
@@ -204,9 +204,8 @@
               Annual Billing <span class="badge-discount">Save 20%</span>
             </button>
           </div>
-          <div class="toggle-group" id="currGroup">
-            <button class="toggle-btn active" id="btnUSD" onclick="setCurrency('USD')">USD ($)</button>
-            <button class="toggle-btn" id="btnINR" onclick="setCurrency('INR')">INR (₹)</button>
+          <div class="toggle-group" id="currGroup" style="pointer-events: none;">
+            <button class="toggle-btn active" id="btnINR" style="cursor: default;">INR (₹)</button>
           </div>
         </div>
 
@@ -214,10 +213,10 @@
 
         <div class="pricing-grid">
           
-          <!-- Plan 1: Seed ($50) -->
+          <!-- Plan 1: Seed (₹7,999) -->
           <div class="plan">
             <div class="plan-name">Seed</div>
-            <div class="price"><span id="p-seed">$50</span><small id="sub-seed"> / month</small></div>
+            <div class="price"><span id="p-seed">₹7,999</span><small id="sub-seed"> / month</small></div>
             <p>For a solo founder or focused single-brand operator getting started.</p>
             <ul>
               <li><strong>1 Website Connection</strong> (WordPress, Webflow, Shopify)</li>
@@ -227,14 +226,14 @@
               <li>AI search tracking for 10 questions across ChatGPT & Perplexity</li>
               <li>Email & community support</li>
             </ul>
-            <button class="btn btn-ghost btn-block" onclick="selectPlan('Seed ($50)')">Choose Seed ($50)</button>
+            <button class="btn btn-ghost btn-block" id="btnPlanSeed" onclick="selectPlan('Seed')">Choose Seed (₹7,999)</button>
           </div>
 
-          <!-- Plan 2: Grow ($200) - Most Chosen -->
+          <!-- Plan 2: Grow (₹14,999) - Most Chosen -->
           <div class="plan featured">
             <span class="plan-tag">Most Chosen</span>
             <div class="plan-name">Grow</div>
-            <div class="price"><span id="p-grow">$200</span><small id="sub-grow"> / month</small></div>
+            <div class="price"><span id="p-grow">₹14,999</span><small id="sub-grow"> / month</small></div>
             <p>For growing brands that want steady, high-velocity organic momentum.</p>
             <ul>
               <li><strong>5 Website Connections</strong></li>
@@ -246,13 +245,13 @@
               <li>Reports branded with your logo</li>
               <li>Priority support</li>
             </ul>
-            <button class="btn btn-primary btn-block" onclick="selectPlan('Grow ($200)')">Choose Grow ($200)</button>
+            <button class="btn btn-primary btn-block" id="btnPlanGrow" onclick="selectPlan('Grow')">Choose Grow (₹14,999)</button>
           </div>
 
-          <!-- Plan 3: Scale ($700) -->
+          <!-- Plan 3: Scale (₹29,999) -->
           <div class="plan">
             <div class="plan-name">Scale</div>
-            <div class="price"><span id="p-scale">$700</span><small id="sub-scale"> / month</small></div>
+            <div class="price"><span id="p-scale">₹29,999</span><small id="sub-scale"> / month</small></div>
             <p>For agencies and operators running multiple fast-growing brands.</p>
             <ul>
               <li><strong>15 Website Connections</strong></li>
@@ -265,13 +264,13 @@
               <li>Full API access & custom webhooks</li>
               <li>Dedicated success manager</li>
             </ul>
-            <button class="btn btn-ghost btn-block" onclick="selectPlan('Scale ($700)')">Choose Scale ($700)</button>
+            <button class="btn btn-ghost btn-block" id="btnPlanScale" onclick="selectPlan('Scale')">Choose Scale (₹29,999)</button>
           </div>
 
         </div>
 
         <div class="pricing-note">
-          <strong>AI videos are billed separately.</strong> Each 25–30 second video costs approximately $3–4 and is billed on usage. High-definition images, blog posts, social schedules, and crawler fixes are fully included in your monthly plan.
+          <strong>AI videos are billed separately.</strong> Each 25–30 second video costs approximately ₹299–₹349 and is billed on usage. High-definition images, blog posts, social schedules, and crawler fixes are fully included in your monthly plan.
         </div>
 
         <!-- Full Feature Comparison Matrix -->
@@ -283,9 +282,9 @@
             <thead>
               <tr>
                 <th>Platform Feature</th>
-                <th>Seed ($50)</th>
-                <th>Grow ($200)</th>
-                <th>Scale ($700)</th>
+                <th>Seed (₹7,999)</th>
+                <th>Grow (₹14,999)</th>
+                <th>Scale (₹29,999)</th>
               </tr>
             </thead>
             <tbody>
@@ -368,7 +367,7 @@
           </details>
           <details>
             <summary>Why are video generations billed separately?</summary>
-            <p>Video rendering carries distinct computational GPU costs. To keep baseline subscriptions affordable ($50/mo), you only pay for videos you actually render (~$3–4 per 25-30 second video). All AI image generation and 2,000w+ articles are completely covered in your plan.</p>
+            <p>Video rendering carries distinct computational GPU costs. To keep baseline subscriptions affordable (₹7,999/mo), you only pay for videos you actually render (~₹299–₹349 per 25-30 second video). All AI image generation and 2,000w+ articles are completely covered in your plan.</p>
           </details>
           <details>
             <summary>Do I have to connect my website?</summary>
@@ -397,7 +396,7 @@
             <p>Set up your domain in under three minutes. Cancel anytime.</p>
           </div>
           <div class="cta-actions">
-            <a href="#plans" class="btn btn-primary" onclick="selectPlan('Grow ($200)')">Start on Grow ($200)</a>
+            <a href="#plans" class="btn btn-primary" onclick="selectPlan('Grow')">Start on Grow (₹14,999)</a>
             <a href="features.html" class="btn btn-ghost">Explore Features</a>
           </div>
         </div>
@@ -480,27 +479,33 @@
   <script src="js/app.js"></script>
   <script>
     var currentCycle = 'monthly';
-    var currentCurrency = 'USD';
+    var currentCurrency = 'INR';
 
     var pricingData = {
       monthly: {
-        USD: { seed: '$50', grow: '$200', scale: '$700', period: ' / month' },
-        INR: { seed: '₹7,999', grow: '₹14,999', scale: '₹29,999', period: ' / month' }
+        seed: '₹7,999', grow: '₹14,999', scale: '₹29,999', period: ' / month',
+        btnSeed: 'Choose Seed (₹7,999)', btnGrow: 'Choose Grow (₹14,999)', btnScale: 'Choose Scale (₹29,999)'
       },
       annual: {
-        USD: { seed: '$40', grow: '$160', scale: '$560', period: ' / month (billed annually)' },
-        INR: { seed: '₹6,399', grow: '₹11,999', scale: '₹23,999', period: ' / month (billed annually)' }
+        seed: '₹6,399', grow: '₹11,999', scale: '₹23,999', period: ' / month (billed annually)',
+        btnSeed: 'Choose Seed (₹6,399/mo)', btnGrow: 'Choose Grow (₹11,999/mo)', btnScale: 'Choose Scale (₹23,999/mo)'
       }
     };
 
     function updatePricingDisplay() {
-      var d = pricingData[currentCycle][currentCurrency];
+      var d = pricingData[currentCycle];
       document.getElementById('p-seed').textContent = d.seed;
       document.getElementById('p-grow').textContent = d.grow;
       document.getElementById('p-scale').textContent = d.scale;
       document.getElementById('sub-seed').textContent = d.period;
       document.getElementById('sub-grow').textContent = d.period;
       document.getElementById('sub-scale').textContent = d.period;
+      var bSeed = document.getElementById('btnPlanSeed');
+      var bGrow = document.getElementById('btnPlanGrow');
+      var bScale = document.getElementById('btnPlanScale');
+      if (bSeed) bSeed.textContent = d.btnSeed;
+      if (bGrow) bGrow.textContent = d.btnGrow;
+      if (bScale) bScale.textContent = d.btnScale;
     }
 
     function setBillingCycle(c) {
@@ -511,9 +516,7 @@
     }
 
     function setCurrency(curr) {
-      currentCurrency = curr;
-      document.getElementById('btnUSD').classList.toggle('active', curr === 'USD');
-      document.getElementById('btnINR').classList.toggle('active', curr === 'INR');
+      currentCurrency = 'INR';
       updatePricingDisplay();
     }
 
