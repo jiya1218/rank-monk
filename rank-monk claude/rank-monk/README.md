@@ -7,7 +7,7 @@ editor's live server (recommended for Antigravity).
 ```
 index.html        Home
 features.html     Features (all modules)
-pricing.html      Pricing: Seed $50, Grow $200, Scale $700
+pricing.html      Pricing: Seed ₹7,999, Grow ₹14,999, Scale ₹29,999
 about.html        Story and team
 blog.html         Journal listing (search + category filter)
 blog-post.html    Single article layout

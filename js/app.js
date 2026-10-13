@@ -654,7 +654,7 @@ function applyHealingFix(rowId, boostPoints = 3) {
 }
 
 /* --------------------------------------------------------------------------
-   6. PRICING CONTROLS (Monthly / Yearly & USD / INR)
+   6. PRICING CONTROLS (Monthly / Yearly & INR)
    -------------------------------------------------------------------------- */
 let currentBilling = 'monthly';
 let currentCurrency = 'INR';
@@ -774,11 +774,11 @@ function updateStackCalc() {
   const hoursEl = document.getElementById('calcHoursWasted');
   const savingsEl = document.getElementById('calcNetSavings');
 
-  if (costEl) costEl.textContent = `$${totalCost}/mo`;
+  if (costEl) costEl.textContent = `₹${totalCost.toLocaleString()}/mo`;
   if (hoursEl) hoursEl.textContent = `${totalHours} hrs`;
   if (savingsEl) {
-    const annualSavings = Math.max(0, (totalCost - 189) * 12);
-    savingsEl.textContent = `+$${annualSavings.toLocaleString()}/yr`;
+    const annualSavings = Math.max(0, (totalCost - 14999) * 12);
+    savingsEl.textContent = `+₹${annualSavings.toLocaleString()}/yr`;
   }
 }
 
@@ -793,12 +793,12 @@ function updateRoiCalc(val) {
   const multiplierEl = document.getElementById('roiNetMultiplier');
 
   const estVisits = count * 1500;
-  const cpcVal = Math.round(estVisits * 0.70);
-  const netMultiplier = Math.max(1, Math.round(cpcVal / 189));
+  const cpcVal = Math.round(estVisits * 55); // estimated CPC value in INR
+  const netMultiplier = Math.max(1, Math.round(cpcVal / 14999));
 
   if (sliderDisplay) sliderDisplay.textContent = `${count} articles`;
   if (trafficEl) trafficEl.textContent = estVisits.toLocaleString();
-  if (adsValEl) adsValEl.textContent = `$${cpcVal.toLocaleString()} / mo`;
+  if (adsValEl) adsValEl.textContent = `₹${cpcVal.toLocaleString()} / mo`;
   if (multiplierEl) multiplierEl.textContent = `${netMultiplier}x Alpha`;
 }
 
