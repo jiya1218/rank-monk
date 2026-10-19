@@ -56,20 +56,21 @@
 }
 
 .brand-logo-img {
-  height: 42px;
+  height: 52px;
   width: auto;
-  max-width: 240px;
+  max-width: 280px;
   object-fit: contain;
   display: block;
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .footer-brand .brand-logo-img {
-  height: 48px !important;
+  height: 60px !important;
+  max-width: 300px;
 }
 
 .mobile-sheet-head .brand-logo-img {
-  height: 38px !important;
+  height: 46px !important;
 }
 
 .brand:hover .brand-logo-img,

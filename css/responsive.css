@@ -79,8 +79,8 @@
 
   /* Brand Logo in Mobile Header */
   .brand-logo-img {
-    height: 38px;
-    max-width: 190px;
+    height: 46px;
+    max-width: 220px;
   }
 
   .brand-title {
@@ -1452,13 +1452,13 @@
    -------------------------------------------------------------------------- */
 @media (max-width: 380px) {
   .brand-logo-img {
-    height: 34px;
-    max-width: 160px;
+    height: 40px;
+    max-width: 190px;
   }
 
   .footer-logo-img {
-    height: 32px;
-    max-width: 155px;
+    height: 42px;
+    max-width: 195px;
   }
 
   .hero-headline {
@@ -1557,8 +1557,8 @@
   }
 
   .brand-logo-img {
-    height: 32px !important;
-    max-width: 170px !important;
+    height: 40px !important;
+    max-width: 190px !important;
   }
 
   .nav-links {
