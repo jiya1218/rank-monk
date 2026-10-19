@@ -661,9 +661,9 @@ let currentCurrency = 'INR';
 
 const pricingRates = {
   INR: {
-    starter: { monthly: "₹7,999", annual: "₹6,399" },
-    pro: { monthly: "₹14,999", annual: "₹11,999" },
-    agency: { monthly: "₹29,999", annual: "₹23,999" }
+    starter: { monthly: "₹10,000", annual: "₹8,000" },
+    pro: { monthly: "₹20,000", annual: "₹16,000" },
+    agency: { monthly: "₹40,000", annual: "₹32,000" }
   }
 };
 
@@ -777,7 +777,7 @@ function updateStackCalc() {
   if (costEl) costEl.textContent = `₹${totalCost.toLocaleString()}/mo`;
   if (hoursEl) hoursEl.textContent = `${totalHours} hrs`;
   if (savingsEl) {
-    const annualSavings = Math.max(0, (totalCost - 14999) * 12);
+    const annualSavings = Math.max(0, (totalCost - 20000) * 12);
     savingsEl.textContent = `+₹${annualSavings.toLocaleString()}/yr`;
   }
 }
@@ -794,7 +794,7 @@ function updateRoiCalc(val) {
 
   const estVisits = count * 1500;
   const cpcVal = Math.round(estVisits * 55); // estimated CPC value in INR
-  const netMultiplier = Math.max(1, Math.round(cpcVal / 14999));
+  const netMultiplier = Math.max(1, Math.round(cpcVal / 20000));
 
   if (sliderDisplay) sliderDisplay.textContent = `${count} articles`;
   if (trafficEl) trafficEl.textContent = estVisits.toLocaleString();
