@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log In · Rank Monk OS</title>
+  <meta name="description" content="Sign in to your Rank Monk OS console. Autonomous organic visibility, blog drafting, AEO radar and headless SEO crawling.">
+  <link rel="icon" type="image/png" href="assets/favicon-32x32.png">
+  <script>
+    (function() {
+      try {
+        var saved = localStorage.getItem('rankmonk-theme');
+        var theme = saved || 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body class="auth-page">
+
+  <!-- Top Auth Nav -->
+  <header class="auth-nav">
+    <a href="index.html" class="brand" aria-label="Rank Monk home">
+      <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="brand-logo-img logo-light">
+      <img src="assets/rank-monk-logo-horizontal-light.png" alt="Rank Monk" class="brand-logo-img logo-dark">
+    </a>
+
+    <div style="display: flex; align-items: center; gap: 14px;">
+      <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="Toggle theme">◑</button>
+      <a href="index.html" class="btn btn-secondary" style="font-size: 0.85rem; padding: 8px 16px;">← Back to Site</a>
+    </div>
+  </header>
+
+  <!-- Centered Luxury Auth Box -->
+  <main class="auth-container">
+    <div class="auth-card">
+      <div class="auth-eyebrow">Rank Monk OS · Console Access</div>
+      <h1>Enter the <span style="font-style: italic; font-family: var(--font-heading); color: var(--tan);">Sanctuary</span></h1>
+      <p class="auth-sub">Continuous, quiet organic visibility handled by autonomous loops.</p>
+
+      <!-- Instant 1-Click Demo Login Banner -->
+      <div class="demo-access-banner">
+        <div class="demo-access-info">
+          <span class="icon">✨</span>
+          <div class="txt">
+            Instant Demo Access
+            <span>Jane Doe · Grow Plan (₹20,000/mo)</span>
+          </div>
+        </div>
+        <button id="demoLoginBtn" class="btn-demo-quick" type="button">Enter Demo →</button>
+      </div>
+
+      <!-- Auth Form -->
+      <form id="loginForm" class="auth-form" onsubmit="handleLoginSubmit(event)">
+        <div class="auth-field">
+          <label for="loginEmail">Work Email</label>
+          <input type="email" id="loginEmail" required placeholder="founder@company.com" autocomplete="email">
+        </div>
+
+        <div class="auth-field">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" required placeholder="••••••••••••" autocomplete="current-password">
+        </div>
+
+        <div class="auth-meta">
+          <label class="auth-remember">
+            <input type="checkbox" id="rememberMe" checked>
+            <span>Remember this device</span>
+          </label>
+          <a href="#" class="auth-forgot" onclick="alert('Password reset instructions will be sent to your work email.'); return false;">Forgot password?</a>
+        </div>
+
+        <button type="submit" id="loginSubmitBtn" class="btn-auth-submit">
+          <span>Sign In to Console</span>
+          <span>→</span>
+        </button>
+
+        <div id="authErrorMsg" style="display:none; color: #d9534f; font-size: 0.85rem; text-align: center; margin-top: 6px;"></div>
+      </form>
+
+      <div class="auth-divider">Or continue with</div>
+
+      <button type="button" class="btn-social-auth" onclick="handleGoogleLogin()">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.8-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.28v3.15C3.27 21.36 7.33 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.28C.46 8.2 0 10.04 0 12s.46 3.8 1.28 5.42l4-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.27 2.64 1.28 6.58l4 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>
+        <span>Continue with Google Workspace</span>
+      </button>
+
+      <p class="auth-footer-text">
+        New to Rank Monk? <a href="signup.html">Start 14-day trial →</a>
+      </p>
+    </div>
+  </main>
+
+  <script src="js/rankmonk-state.js"></script>
+  <script>
+    // Theme Switcher
+    const themeBtn = document.getElementById('themeToggleBtn');
+    if (themeBtn) {
+      themeBtn.addEventListener('click', () => {
+        const cur = document.documentElement.getAttribute('data-theme') || 'light';
+        const next = cur === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('rankmonk-theme', next);
+      });
+    }
+
+    // Instant Demo Login
+    document.getElementById('demoLoginBtn').addEventListener('click', () => {
+      RankMonkState.demoLogin();
+      window.location.href = 'dashboard.html';
+    });
+
+    // Form Submit
+    async function handleLoginSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const pass = document.getElementById('loginPassword').value.trim();
+      const errBox = document.getElementById('authErrorMsg');
+      const btn = document.getElementById('loginSubmitBtn');
+
+      errBox.style.display = 'none';
+      btn.innerHTML = '<span>Verifying credentials...</span>';
+      btn.style.opacity = '0.7';
+
+      try {
+        await RankMonkState.login(email, pass);
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        btn.innerHTML = '<span>Sign In to Console</span><span>→</span>';
+        btn.style.opacity = '1';
+        errBox.innerText = err.message || 'Login failed. Please check your credentials.';
+        errBox.style.display = 'block';
+      }
+    }
+
+    function handleGoogleLogin() {
+      RankMonkState.demoLogin();
+      window.location.href = 'dashboard.html';
+    }
+  </script>
+</body>
+</html>

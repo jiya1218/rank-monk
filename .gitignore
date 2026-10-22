@@ -5,3 +5,5 @@ dist/
 .env
 .env.local
 .env.*.local
+bedrock-long-term-api-key.csv
+*.csv

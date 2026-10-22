@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Start Trial · Rank Monk OS</title>
+  <meta name="description" content="Set up your Rank Monk OS autonomous organic growth account. Replace 5 fragmented tools with one disciplined loop.">
+  <link rel="icon" type="image/png" href="assets/favicon-32x32.png">
+  <script>
+    (function() {
+      try {
+        var saved = localStorage.getItem('rankmonk-theme');
+        var theme = saved || 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body class="auth-page">
+
+  <!-- Top Auth Nav -->
+  <header class="auth-nav">
+    <a href="index.html" class="brand" aria-label="Rank Monk home">
+      <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="brand-logo-img logo-light">
+      <img src="assets/rank-monk-logo-horizontal-light.png" alt="Rank Monk" class="brand-logo-img logo-dark">
+    </a>
+
+    <div style="display: flex; align-items: center; gap: 14px;">
+      <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="Toggle theme">◑</button>
+      <a href="login.html" class="btn btn-secondary" style="font-size: 0.85rem; padding: 8px 16px;">Log In →</a>
+    </div>
+  </header>
+
+  <!-- Centered Onboarding Card -->
+  <main class="auth-container">
+    <div class="auth-card" style="max-width: 540px;">
+      <div class="auth-eyebrow">Zero Fluff · 14-Day Full Access Trial</div>
+      <h1>Start Your <span style="font-style: italic; font-family: var(--font-heading); color: var(--tan);">Growth Engine</span></h1>
+      <p class="auth-sub">Replace Surfer, Ahrefs, Buffer, Jasper, and freelancers with one autonomous loop.</p>
+
+      <form id="signupForm" class="auth-form" onsubmit="handleSignupSubmit(event)">
+        
+        <div class="auth-row-split">
+          <div class="auth-field">
+            <label for="signupName">Full Name</label>
+            <input type="text" id="signupName" required placeholder="Jane Doe" autocomplete="name">
+          </div>
+          <div class="auth-field">
+            <label for="signupDomain">Primary Website Domain</label>
+            <input type="text" id="signupDomain" required placeholder="example.com">
+          </div>
+        </div>
+
+        <div class="auth-row-split">
+          <div class="auth-field">
+            <label for="signupEmail">Work Email</label>
+            <input type="email" id="signupEmail" required placeholder="founder@example.com" autocomplete="email">
+          </div>
+          <div class="auth-field">
+            <label for="signupPassword">Password</label>
+            <input type="password" id="signupPassword" required minlength="6" placeholder="At least 6 characters" autocomplete="new-password">
+          </div>
+        </div>
+
+        <!-- Plan Choice Selection -->
+        <div class="auth-field">
+          <label>Select Your Platform Tier (Billed Monthly, Cancel Anytime)</label>
+          <div class="plan-select-grid">
+            <label class="plan-option-label" id="planSeedLabel">
+              <input type="radio" name="selectedPlan" value="seed">
+              <span class="p-name">Seed</span>
+              <span class="p-price">₹10,000<small style="font-size: 10px; font-weight: normal;">/mo</small></span>
+              <span style="font-size: 10px; color: var(--muted); display: block; margin-top: 2px;">1 Site · 8 Blogs</span>
+            </label>
+
+            <label class="plan-option-label selected" id="planGrowLabel">
+              <input type="radio" name="selectedPlan" value="grow" checked>
+              <span class="p-name">Grow ★</span>
+              <span class="p-price">₹20,000<small style="font-size: 10px; font-weight: normal;">/mo</small></span>
+              <span style="font-size: 10px; color: var(--muted); display: block; margin-top: 2px;">5 Sites · 25 Blogs</span>
+            </label>
+
+            <label class="plan-option-label" id="planScaleLabel">
+              <input type="radio" name="selectedPlan" value="scale">
+              <span class="p-name">Scale</span>
+              <span class="p-price">₹40,000<small style="font-size: 10px; font-weight: normal;">/mo</small></span>
+              <span style="font-size: 10px; color: var(--muted); display: block; margin-top: 2px;">Unlimited Sites</span>
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" id="signupSubmitBtn" class="btn-auth-submit">
+          <span>Provision Rank Monk Engine</span>
+          <span>→</span>
+        </button>
+
+        <div id="signupErrorMsg" style="display:none; color: #d9534f; font-size: 0.85rem; text-align: center; margin-top: 6px;"></div>
+      </form>
+
+      <p class="auth-footer-text">
+        Already registered? <a href="login.html">Log in here →</a>
+      </p>
+    </div>
+  </main>
+
+  <script src="js/rankmonk-state.js"></script>
+  <script>
+    // Theme Switcher
+    const themeBtn = document.getElementById('themeToggleBtn');
+    if (themeBtn) {
+      themeBtn.addEventListener('click', () => {
+        const cur = document.documentElement.getAttribute('data-theme') || 'light';
+        const next = cur === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('rankmonk-theme', next);
+      });
+    }
+
+    // Pre-select plan from URL query (?plan=seed|grow|scale)
+    const urlParams = new URLSearchParams(window.location.search);
+    const planParam = (urlParams.get('plan') || 'grow').toLowerCase();
+    const radio = document.querySelector(`input[name="selectedPlan"][value="${planParam}"]`);
+    if (radio) {
+      radio.checked = true;
+      document.querySelectorAll('.plan-option-label').forEach(l => l.classList.remove('selected'));
+      radio.closest('.plan-option-label').classList.add('selected');
+    }
+
+    // Update label classes on radio click
+    document.querySelectorAll('input[name="selectedPlan"]').forEach(inp => {
+      inp.addEventListener('change', () => {
+        document.querySelectorAll('.plan-option-label').forEach(l => l.classList.remove('selected'));
+        inp.closest('.plan-option-label').classList.add('selected');
+      });
+    });
+
+    // Form Submit
+    async function handleSignupSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('signupName').value.trim();
+      const domain = document.getElementById('signupDomain').value.trim();
+      const email = document.getElementById('signupEmail').value.trim();
+      const pass = document.getElementById('signupPassword').value.trim();
+      const selectedPlan = document.querySelector('input[name="selectedPlan"]:checked')?.value || 'grow';
+      const errBox = document.getElementById('signupErrorMsg');
+      const btn = document.getElementById('signupSubmitBtn');
+
+      errBox.style.display = 'none';
+      btn.innerHTML = '<span>Provisioning autonomous workspace...</span>';
+      btn.style.opacity = '0.7';
+
+      try {
+        await RankMonkState.signup({
+          name: name,
+          email: email,
+          password: pass,
+          domain: domain,
+          plan: selectedPlan
+        });
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        btn.innerHTML = '<span>Provision Rank Monk Engine</span><span>→</span>';
+        btn.style.opacity = '1';
+        errBox.innerText = err.message || 'Signup failed. Please try again.';
+        errBox.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>
