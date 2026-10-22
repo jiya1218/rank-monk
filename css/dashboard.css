@@ -1652,53 +1652,65 @@ body.dash-shell {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(185, 139, 106, 0.08);
-  border: 1px dashed var(--rm-gold);
-  border-radius: 12px;
-  padding: 12px 14px;
+  background: rgba(185, 139, 106, 0.12);
+  border: 1.5px dashed var(--rm-gold);
+  border-radius: 14px;
+  padding: 14px 16px;
   margin-bottom: 22px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(185, 139, 106, 0.1);
+}
+
+.demo-access-banner:hover {
+  background: rgba(185, 139, 106, 0.18);
+  border-color: #9c6e4e;
 }
 
 .demo-access-info {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .demo-access-info .icon {
-  font-size: 1.25rem;
+  font-size: 1.4rem;
 }
 
 .demo-access-info .txt {
-  font-size: 0.82rem;
+  font-size: 0.88rem;
   font-weight: 800;
-  color: var(--rm-ink-primary);
+  color: #111c26;
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
 .demo-access-info .txt span {
-  font-size: 0.72rem;
-  font-weight: 500;
-  color: var(--rm-ink-secondary);
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #637083;
 }
 
 .btn-demo-quick {
-  background: var(--rm-navy) !important;
+  background-color: #111c26 !important;
   color: #ffffff !important;
-  border: none !important;
-  padding: 7px 12px !important;
-  border-radius: 8px !important;
-  font-size: 0.78rem !important;
+  border: 1px solid #111c26 !important;
+  padding: 10px 18px !important;
+  border-radius: 10px !important;
+  font-size: 0.84rem !important;
   font-weight: 700 !important;
   cursor: pointer !important;
-  transition: all 0.2s ease;
-  white-space: nowrap;
+  transition: all 0.2s ease !important;
+  white-space: nowrap !important;
+  box-shadow: 0 4px 12px rgba(17, 28, 38, 0.2) !important;
 }
 
 .btn-demo-quick:hover {
-  background: var(--rm-gold) !important;
+  background-color: #b98b6a !important;
+  border-color: #b98b6a !important;
+  color: #ffffff !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 16px rgba(185, 139, 106, 0.35) !important;
 }
 
 .auth-meta {

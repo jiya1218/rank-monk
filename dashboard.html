@@ -1193,8 +1193,8 @@
   <!-- ========================================================================
        APPLICATION LOGIC & REAL ENGINE INTERACTIVITY
        ======================================================================== -->
-  <script src="js/rankmonk-ai.js"></script>
-  <script src="js/rankmonk-state.js"></script>
+  <script src="js/rankmonk-ai.js?v=20261023_rev4"></script>
+  <script src="js/rankmonk-state.js?v=20261023_rev4"></script>
   <script>
     // Tab Navigation
     function navigateTab(tabName) {
@@ -1749,7 +1749,9 @@
     });
 
     // Auto-render
-    RankMonkState.subscribe(() => renderAll());
+    if (window.RankMonkState && typeof window.RankMonkState.subscribe === 'function') {
+      window.RankMonkState.subscribe(() => renderAll());
+    }
     renderAll();
   </script>
 </body>
