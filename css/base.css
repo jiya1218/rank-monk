@@ -51,7 +51,8 @@ body::before {
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 1200px;
+  width: 100%;
+  max-width: 1200px;
   height: 600px;
   background: radial-gradient(circle at 50% 0%, rgba(203, 173, 141, 0.18) 0%, rgba(235, 227, 219, 0.3) 45%, transparent 70%);
   pointer-events: none;
@@ -93,7 +94,7 @@ body::before {
 }
 
 .section-alt {
-  background-color: var(--nude-linen);
+  background-color: var(--bg-alt);
   border-top: 1px solid var(--border-stone);
   border-bottom: 1px solid var(--border-stone);
 }

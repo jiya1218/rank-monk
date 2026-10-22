@@ -144,4 +144,11 @@
   --border-subtle: var(--line);
   --border-stone: var(--line);
   --shadow: 0 18px 40px -22px rgba(0, 0, 0, 0.7);
+
+  --nude-espresso: #f4eadf;
+  --nude-taupe: #d8b898;
+  --nude-sand: #c9a27e;
+  --nude-stone: #5a4232;
+  --nude-linen: #1f150e;
+  --nude-bone: #170f0a;
 }
