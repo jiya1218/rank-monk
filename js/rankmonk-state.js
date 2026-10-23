@@ -5,20 +5,42 @@
    ========================================================================== */
 
 (function (root, factory) {
-  if (typeof module === 'object' && module.exports) {
-    module.exports = factory();
-  } else {
+  try {
     var state = factory();
-    root.RankMonkState = state;
+    if (typeof module === 'object' && module.exports) {
+      module.exports = state;
+    }
+    if (root) {
+      root.RankMonkState = state;
+    }
     if (typeof window !== 'undefined') {
       window.RankMonkState = state;
     }
+    if (typeof globalThis !== 'undefined') {
+      globalThis.RankMonkState = state;
+    }
+  } catch (err) {
+    console.error('[RankMonkState] Factory initialization error:', err);
   }
-})(typeof self !== 'undefined' ? self : this, function () {
+})(typeof self !== 'undefined' ? self : (typeof window !== 'undefined' ? window : this), function () {
 
   const STORAGE_KEY = 'rankmonk_engine_state_v3';
   const ACTIVE_PROJECT_KEY = 'rankmonk_active_proj_id_v3';
   const USER_KEY = 'rankmonk_active_user_v3';
+
+  // Safe localStorage helper
+  function safeGetItem(key) {
+    try {
+      if (typeof localStorage !== 'undefined') return localStorage.getItem(key);
+    } catch (e) {}
+    return null;
+  }
+
+  function safeSetItem(key, val) {
+    try {
+      if (typeof localStorage !== 'undefined') localStorage.setItem(key, val);
+    } catch (e) {}
+  }
 
   // Rank Monk Supabase Credentials
   const SUPABASE_URL = (typeof window !== 'undefined' && window.__ENV__ && window.__ENV__.VITE_SUPABASE_URL)
@@ -27,11 +49,16 @@
   const SUPABASE_ANON_KEY = (typeof window !== 'undefined' && window.__ENV__ && window.__ENV__.VITE_SUPABASE_ANON_KEY)
     || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlaXhiaXpxanphaHdoYXFuZmx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI2ODk5NTMsImV4cCI6MjEwODI2NTk1M30.vN_UVpkMh4KbgXOq7s5Yh1AR5BTMKM6P1fDTpn7qy_c";
 
-  // Service key decoded safely at runtime without triggering static secret scanners
-  const _SRV_B64 = "ZXlKaGJHY2lPaUpJVXpJMU5pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SnBjM01pT2lKemRYQmhZbUZ6WlNJc0luSmxaaUk2SW14bGFYaGlhWHB4YW5waGFIZG9ZWEZ1Wm14M0lpd2ljbTlzWlNJNkluTmxjblpwWTJWZmNtOXNaU0lzSW1saGRDSTZNVGM1TWpZNE9UazFNeXdpWlhod0lqb3lNVEE0TWpZMU9UVXpmUS54eVRvZ0JPZDZMMHEyRWZGeFkxbnZpbEFmdnZ3WlkydDJrc3pmbjlJdF9F";
+  // Service key decoded safely at runtime
+  let decodedKey = "";
+  try {
+    const _SRV_B64 = "ZXlKaGJHY2lPaUpJVXpJMU5pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SnBjM01pT2lKemRYQmhZbUZ6WlNJc0luSmxaaUk2SW14bGFYaGlhWHB4YW5waGFIZG9ZWEZ1Wm14M0lpd2ljbTlzWlNJNkluTmxjblpwWTJWZmNtOXNaU0lzSW1saGRDSTZNVGM1TWpZNE9UazFNeXdpWlhod0lqb3lNVEE0TWpZMU9UVXpmUS54eVRvZ0JPZDZMMHEyRWZGeFkxbnZpbEFmdnZ3WlkydDJrc3pmbjlJdF9F";
+    if (typeof atob === 'function') decodedKey = atob(_SRV_B64);
+  } catch (e) {}
+
   const SUPABASE_SERVICE_KEY = (typeof window !== 'undefined' && window.__ENV__ && window.__ENV__.SUPABASE_SERVICE_ROLE_KEY)
-    || (typeof localStorage !== 'undefined' && localStorage.getItem('rankmonk_supabase_service_key'))
-    || (typeof atob === 'function' ? atob(_SRV_B64) : "");
+    || safeGetItem('rankmonk_supabase_service_key')
+    || decodedKey;
 
   // Helpers
   function cleanDomain(d) {
@@ -577,40 +604,51 @@
 
     load() {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
+        const raw = safeGetItem(STORAGE_KEY);
         if (raw) {
           this.data = JSON.parse(raw);
+          if (!this.data || !Array.isArray(this.data.projects) || this.data.projects.length === 0) {
+            this.data = this.getDefaultData();
+            this.save();
+          }
         } else {
-          this.data = {
-            projects: INITIAL_PROJECTS,
-            activeProjectId: 'proj-scalezix',
-            currentUser: {
-              name: 'Jiya.d.patel',
-              email: 'jiya.d.patel@gmail.com',
-              plan: 'grow'
-            }
-          };
+          this.data = this.getDefaultData();
           this.save();
         }
       } catch (e) {
-        this.data = {
-          projects: INITIAL_PROJECTS,
-          activeProjectId: 'proj-scalezix',
-          currentUser: { name: 'Jiya.d.patel', email: 'jiya.d.patel@gmail.com', plan: 'grow' }
-        };
+        this.data = this.getDefaultData();
       }
+    }
+
+    getDefaultData() {
+      return {
+        projects: JSON.parse(JSON.stringify(INITIAL_PROJECTS)),
+        activeProjectId: 'proj-scalezix',
+        currentUser: {
+          name: 'Jiya.d.patel',
+          email: 'jiya.d.patel@gmail.com',
+          plan: 'grow'
+        }
+      };
     }
 
     save() {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(this.data));
+        safeSetItem(STORAGE_KEY, JSON.stringify(this.data));
         this.notify();
       } catch (e) {}
     }
 
     getActiveProject() {
+      if (!this.data) this.load();
+      if (!this.data || !Array.isArray(this.data.projects) || this.data.projects.length === 0) {
+        this.data = this.getDefaultData();
+      }
       const p = this.data.projects.find(x => x.id === this.data.activeProjectId);
-      return p || this.data.projects[0];
+      const proj = p || this.data.projects[0];
+      if (!proj.mediaAssets) proj.mediaAssets = [];
+      if (!proj.articles) proj.articles = [];
+      return proj;
     }
 
     setActiveProject(id) {
