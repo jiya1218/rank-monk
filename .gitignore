@@ -7,3 +7,4 @@ dist/
 .env.*.local
 bedrock-long-term-api-key.csv
 *.csv
+generated_images/
