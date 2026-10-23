@@ -936,7 +936,7 @@
     }
 
     // Create New Blog Article
-    createArticle(title, keyword, tone, country, wordCount) {
+    createArticle(title, keyword, tone, country, wordCount, content) {
       const proj = this.getActiveProject();
       if (!proj) return null;
       if (!proj.articles) proj.articles = [];
@@ -948,6 +948,8 @@
         country: country || 'United States',
         tone: tone || 'Professional',
         wordCount: parseInt(wordCount, 10) || 1400,
+        content: content || '',
+        model: 'Amazon Nova Pro (AWS Bedrock)',
         status: 'Published',
         date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
         engines: ['Google', 'ChatGPT', 'Perplexity']
