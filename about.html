@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>About Rank Monk · The Zen OS for Autonomous Growth</title>
+  <meta name="description" content="Learn about Rank Monk's mission to replace fragmented SEO tools with quiet, disciplined autonomous search and AI visibility.">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+  <link rel="apple-touch-icon" href="assets/rank-monk-icon.png">
+
+  <!-- Anti-Flash Theme Script -->
+  <script>
+    try {
+      var t = localStorage.getItem("rankmonk-theme") ||
+        (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", t);
+    } catch (e) {}
+  </script>
+
+  <!-- Google Fonts: Fraunces & Instrument Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <!-- Core Stylesheets -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body class="page-fade-in">
+
+  <!-- SITE HEADER -->
+  <header class="site-header" id="siteHeader">
+    <div class="container nav-container">
+      <a href="index.html" class="brand" aria-label="Rank Monk home">
+        <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="brand-logo-img logo-light">
+        <img src="assets/rank-monk-logo-horizontal-light.png" alt="Rank Monk" class="brand-logo-img logo-dark">
+      </a>
+
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="features.html" class="nav-link">Features</a>
+        <a href="engines.html" class="nav-link">AI Engines</a>
+        <a href="comparison.html" class="nav-link">Stack Collapse</a>
+        <a href="pricing.html" class="nav-link">Pricing</a>
+        <a href="about.html" class="nav-link active">About</a>
+        <a href="faq.html" class="nav-link">FAQ</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle theme">☾</button>
+        <a href="login.html" class="btn btn-ghost btn-sm">Log in</a>
+        <a href="signup.html" class="btn btn-primary btn-sm">Start climbing</a>
+        
+        <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle Navigation">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Drawer -->
+    <div class="mobile-nav-sheet" id="mobileNavSheet">
+      <div class="mobile-sheet-head">
+        <a href="index.html" class="brand">
+          <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="brand-logo-img logo-light" style="height: 44px;">
+          <img src="assets/rank-monk-logo-horizontal-light.png" alt="Rank Monk" class="brand-logo-img logo-dark" style="height: 44px;">
+        </a>
+        <button class="mobile-sheet-close" id="mobileSheetClose">✕</button>
+      </div>
+      <div class="mobile-sheet-links">
+        <a href="index.html" class="nav-link mobile-link"><span>🏠 Home</span></a>
+        <a href="features.html" class="nav-link mobile-link"><span>⚡ Features</span></a>
+        <a href="engines.html" class="nav-link mobile-link"><span>⚙️ AI Engines</span></a>
+        <a href="comparison.html" class="nav-link mobile-link"><span>⚖️ Stack Collapse</span></a>
+        <a href="pricing.html" class="nav-link mobile-link"><span>🏷️ Pricing</span></a>
+        <a href="about.html" class="nav-link mobile-link active"><span>🧘 About</span></a>
+        <a href="faq.html" class="nav-link mobile-link"><span>📖 FAQ</span></a>
+        <a href="login.html" class="nav-link mobile-link"><span>🔑 Log in</span></a>
+        <a href="signup.html" class="btn btn-primary btn-block" style="margin-top: 14px;">Start climbing</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- PAGE HERO -->
+    <section class="page-hero">
+      <div class="container">
+        <div class="crumbs"><a href="index.html">Home</a> / About</div>
+        <span class="eyebrow">The Zen Philosophy</span>
+        <h1>Peace of mind in a world of <span class="accent">search noise</span>.</h1>
+        <p class="lead">Rank Monk was built on a simple conviction: modern founders should not spend 20 hours a week juggling 6 fragmented SEO dashboards or paying exorbitant ₹1.4L agency retainers.</p>
+      </div>
+    </section>
+
+    <!-- MISSION & VISION SECTION -->
+    <section class="section">
+      <div class="container">
+        <div class="grid grid-2" style="gap: 48px; align-items: center;">
+          <div>
+            <span class="eyebrow">Our Mission</span>
+            <h2 style="font-size: 2.2rem; font-family: var(--font-heading); margin: 12px 0 20px;">To replace chaotic tool sprawl with quiet, autonomous organic growth.</h2>
+            <p style="font-size: 1.05rem; line-height: 1.7; color: var(--muted); margin-bottom: 16px;">
+              Between 2020 and 2024, organic marketing fractured into dozens of disconnected point solutions: Surfer for outlines, Ahrefs for backlink metrics, Jasper for raw text, Buffer for social queuing, and specialized agencies for technical fixes.
+            </p>
+            <p style="font-size: 1.05rem; line-height: 1.7; color: var(--muted); margin-bottom: 24px;">
+              Then generative AI engines arrived—ChatGPT Search, Perplexity Pro, Google Gemini 2.0, and Claude Citations. Suddenly, traditional keyword stuffing ceased working. Rank Monk was born to collapse this fragmented stack into a single, disciplined autonomous loop.
+            </p>
+            <div style="display: flex; gap: 24px; flex-wrap: wrap;">
+              <div>
+                <div style="font-size: 2.4rem; font-weight: 900; color: var(--tan); font-family: var(--font-heading);">94%</div>
+                <div style="font-size: 0.85rem; color: var(--muted); font-weight: 600;">Founders saw rank surges in 90 days</div>
+              </div>
+              <div>
+                <div style="font-size: 2.4rem; font-weight: 900; color: var(--tan); font-family: var(--font-heading);">14 hrs</div>
+                <div style="font-size: 0.85rem; color: var(--muted); font-weight: 600;">Saved per week per operator</div>
+              </div>
+              <div>
+                <div style="font-size: 2.4rem; font-weight: 900; color: var(--tan); font-family: var(--font-heading);">₹1.39L</div>
+                <div style="font-size: 0.85rem; color: var(--muted); font-weight: 600;">Replaced monthly agency cost</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="background: var(--card); border: 1px solid var(--line); border-radius: 24px; padding: 36px; box-shadow: var(--shadow-card);">
+            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
+              <img src="assets/rank-monk-icon.png" alt="Rank Monk Emblem" style="height: 64px; width: 64px; border-radius: 16px;">
+              <div>
+                <h3 style="font-size: 1.25rem; margin: 0; font-family: var(--font-heading);">The Rank Monk Way</h3>
+                <div style="font-size: 0.82rem; color: var(--muted);">Disciplined · Autonomous · Quiet</div>
+              </div>
+            </div>
+            <ul style="display: flex; flex-direction: column; gap: 16px; font-size: 0.95rem; line-height: 1.6; color: var(--ink); padding-left: 20px;">
+              <li><strong>Zero Prompt Engineering Required:</strong> The engine audits your site structure and brand voice automatically.</li>
+              <li><strong>Complete Engine Symbiosis:</strong> We optimize for traditional Google Search and next-generation Answer Engines (ChatGPT & Perplexity) simultaneously.</li>
+              <li><strong>Transparent Indian Pricing:</strong> Predictable monthly plans (₹10,000 · ₹20,000 · ₹40,000/mo) with no lock-ins.</li>
+              <li><strong>Sovereign Architecture:</strong> Your data and brand voice memories belong exclusively to your workspace.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CORE PRINCIPLES -->
+    <section class="section section-alt">
+      <div class="container">
+        <div style="text-align: center; max-width: 680px; margin: 0 auto 52px;">
+          <span class="eyebrow">Our Tenets</span>
+          <h2 style="font-family: var(--font-heading); font-size: 2.4rem; margin: 12px 0 16px;">Three Guiding Tenets</h2>
+          <p class="lead">How we design software for builders who value focus over clutter.</p>
+        </div>
+
+        <div class="grid grid-3" style="gap: 28px;">
+          <div class="card" style="padding: 32px; border-radius: 20px; background: var(--card);">
+            <div style="font-size: 2rem; margin-bottom: 14px;">🧘</div>
+            <h3 style="font-family: var(--font-heading); font-size: 1.35rem; margin-bottom: 10px;">1. Calm Autonomy</h3>
+            <p style="font-size: 0.92rem; color: var(--muted); line-height: 1.65;">
+              Software should work silently in the background. Rank Monk crawls your endpoints, detects missing meta descriptions, auto-injects schema, and schedules high-value authority content without asking you 20 questions a day.
+            </p>
+          </div>
+
+          <div class="card" style="padding: 32px; border-radius: 20px; background: var(--card);">
+            <div style="font-size: 2rem; margin-bottom: 14px;">💎</div>
+            <h3 style="font-family: var(--font-heading); font-size: 1.35rem; margin-bottom: 10px;">2. High-Density Utility</h3>
+            <p style="font-size: 0.92rem; color: var(--muted); line-height: 1.65;">
+              Both human readers and LLM crawlers penalize fluffy filler. We engineer long-form pillar articles packed with verified schemas, comparison tables, and actionable frameworks that answer buyer intent on the first scroll.
+            </p>
+          </div>
+
+          <div class="card" style="padding: 32px; border-radius: 20px; background: var(--card);">
+            <div style="font-size: 2rem; margin-bottom: 14px;">🛡️</div>
+            <h3 style="font-family: var(--font-heading); font-size: 1.35rem; margin-bottom: 10px;">3. Ethical Citation Health</h3>
+            <p style="font-size: 0.92rem; color: var(--muted); line-height: 1.65;">
+              No black-hat manipulation or toxic PBN networks. We build clean, high-DR referring backlink profiles, genuine EEAT signals, and structured data that makes LLMs cite your brand naturally as the top authority.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA STRIP -->
+    <section class="section" style="text-align: center; padding: 70px 0;">
+      <div class="container" style="max-width: 720px;">
+        <h2 style="font-family: var(--font-heading); font-size: 2.2rem; margin-bottom: 16px;">Ready to experience quiet, continuous growth?</h2>
+        <p class="lead" style="margin-bottom: 28px;">Join fast-growing SaaS startups, D2C brands, and solo operators who replaced tool fatigue with Rank Monk.</p>
+        <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
+          <a href="signup.html" class="btn btn-primary">Start Climbing from ₹10,000/mo</a>
+          <a href="pricing.html" class="btn btn-ghost">View All Plans</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- UNIVERSAL 5-COLUMN RANK MONK FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="brand" aria-label="Rank Monk home">
+            <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="brand-logo-img logo-light" style="height: 52px;">
+            <img src="assets/rank-monk-logo-horizontal-light.png" alt="Rank Monk" class="brand-logo-img logo-dark" style="height: 52px;">
+          </a>
+          <p class="footer-desc">
+            The Zen OS for Autonomous Organic Growth. Replaces fragmented SEO, content, and agency retainers with a continuous, quiet growth loop.
+          </p>
+          <div style="margin-top: 14px; font-size: 0.8rem; font-weight: 700; color: var(--tan);">
+            Plans: ₹10,000 · ₹20,000 · ₹40,000 / mo
+          </div>
+        </div>
+
+        <div>
+          <h4>Product</h4>
+          <ul>
+            <li><a href="features.html">Features Overview</a></li>
+            <li><a href="pricing.html">Pricing & Plans</a></li>
+            <li><a href="engines.html">AI Engines Console</a></li>
+            <li><a href="comparison.html">Stack Collapse</a></li>
+            <li><a href="changelog.html">Changelog</a></li>
+            <li><a href="roadmap.html">Product Roadmap</a></li>
+            <li><a href="eeat-analysis.html">Free EEAT Analyzer</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4>Use Cases</h4>
+          <ul>
+            <li><a href="use-cases.html#agencies">For Digital Agencies</a></li>
+            <li><a href="use-cases.html#solo">For Solo Founders</a></li>
+            <li><a href="use-cases.html#freelancers">For Freelancers</a></li>
+            <li><a href="use-cases.html#d2c">For D2C Brands</a></li>
+            <li><a href="use-cases.html#saas">For SaaS Startups</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="blog.html">Blog & Guides</a></li>
+            <li><a href="help-center.html">Help Center</a></li>
+            <li><a href="api-docs.html">Developer API</a></li>
+            <li><a href="case-studies.html">Case Studies</a></li>
+            <li><a href="glossary.html">SEO Glossary</a></li>
+            <li><a href="faq.html">FAQ Sanctuary</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4>Company</h4>
+          <ul>
+            <li><a href="about.html">About Rank Monk</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+            <li><a href="affiliate.html">Affiliate Program</a></li>
+            <li><a href="careers.html">Careers</a></li>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms of Service</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2026 Rank Monk. All rights reserved.</span>
+        <span>Made with Zen precision for founders who want to be found.</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Native Mobile App Bottom Tab Bar -->
+  <nav class="mobile-app-bottom-bar" aria-label="Mobile Bottom Navigation">
+    <a href="index.html" class="bottom-tab-item">
+      <span class="tab-icon">🏠</span>
+      <span>Home</span>
+    </a>
+    <a href="features.html" class="bottom-tab-item">
+      <span class="tab-icon">⚡</span>
+      <span>Features</span>
+    </a>
+    <a href="pricing.html" class="bottom-tab-item">
+      <span class="tab-icon">🏷️</span>
+      <span>Pricing</span>
+    </a>
+    <a href="about.html" class="bottom-tab-item active">
+      <span class="tab-icon">🧘</span>
+      <span>About</span>
+    </a>
+    <a href="dashboard" class="bottom-tab-item">
+      <span class="tab-icon">🎛️</span>
+      <span>Console</span>
+    </a>
+  </nav>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

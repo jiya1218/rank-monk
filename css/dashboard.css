@@ -1876,4 +1876,216 @@ body.dash-shell {
   margin-top: 2px;
 }
 
+/* --------------------------------------------------------------------------
+   7. NATIVE MOBILE APP EXPERIENCE: BOTTOM TAB DOCK & BACKDROP
+   -------------------------------------------------------------------------- */
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 19, 26, 0.72);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  z-index: 99;
+  opacity: 0;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sidebar-backdrop.active {
+  display: block;
+  opacity: 1;
+}
+
+.dash-mobile-bottom-bar {
+  display: none;
+}
+
+@media (max-width: 880px) {
+  body.dash-shell {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 12px));
+  }
+
+  .dash-mobile-bottom-bar {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: calc(60px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: #111c26;
+    border-top: 1px solid #1e2f42;
+    z-index: 90;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.35);
+    justify-content: space-around;
+    align-items: center;
+  }
+
+  .mobile-tab-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    background: none;
+    border: none;
+    padding: 6px 4px;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .mobile-tab-btn.active,
+  .mobile-tab-btn:active {
+    color: var(--rm-gold, #c5a059);
+  }
+
+  .mobile-tab-btn .tab-btn-icon {
+    font-size: 1.18rem;
+    line-height: 1;
+  }
+
+  .mobile-tab-btn .tab-btn-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  /* Modals as Native Mobile Bottom Sheets */
+  .modal-dialog {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    border-radius: 24px 24px 0 0 !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 12px)) !important;
+    animation: slideUpModal 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+
+  @keyframes slideUpModal {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .dash-topbar {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .dash-topbar-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   8. ADS MANAGER & POPUP MENUS
+   -------------------------------------------------------------------------- */
+.ads-platform-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--rm-card-border);
+  padding-bottom: 12px;
+}
+
+.ads-tab-btn {
+  padding: 8px 18px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--rm-ink-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ads-tab-btn.active {
+  background: #111c26;
+  color: #fff;
+}
+
+.ads-metric-cards-5 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 1100px) {
+  .ads-metric-cards-5 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .ads-metric-cards-5 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ad-preview-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px;
+  margin-top: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+}
+
+.ad-preview-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 800;
+  color: #475569;
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.ad-preview-headline {
+  color: #1a0dab;
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+  margin-bottom: 4px;
+}
+
+.ad-preview-url {
+  color: #006621;
+  font-size: 0.82rem;
+  margin-bottom: 4px;
+}
+
+.ad-preview-desc {
+  color: #4d5156;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.popover-menu-item {
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.popover-menu-item:hover {
+  background: #243547;
+  color: var(--rm-gold, #c5a059);
+}
+
+
 

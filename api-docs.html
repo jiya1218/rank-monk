@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Developer API Documentation — Rank Monk Autonomous Search Platform</title>
+  <meta name="description" content="Official REST API reference for Rank Monk. Integrate autonomous crawling, AWS Bedrock blog generation, and AEO citations into your CI/CD and CMS.">
+  <link rel="icon" type="image/png" href="assets/rank-monk-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/footer.css">
+  <style>
+    .api-hero { padding: 80px 24px 30px; text-align: center; max-width: 800px; margin: 0 auto; }
+    .api-layout { display: grid; grid-template-columns: 240px 1fr; gap: 40px; margin-bottom: 90px; }
+    .api-sidebar { position: sticky; top: 100px; height: fit-content; background: #faf8f5; border: 1px solid #efeae1; border-radius: 14px; padding: 20px; }
+    .api-nav-link { display: block; padding: 8px 12px; font-size: 0.88rem; color: #64748b; text-decoration: none; border-radius: 8px; margin-bottom: 4px; font-weight: 600; }
+    .api-nav-link:hover, .api-nav-link.active { color: #111c26; background: #efeae1; }
+    .api-endpoint-card { background: #ffffff; border: 1.5px solid #efeae1; border-radius: 16px; padding: 28px; margin-bottom: 30px; }
+    .endpoint-badge { display: inline-block; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 6px; margin-right: 8px; }
+    .badge-post { background: #dbeafe; color: #1d4ed8; }
+    .badge-get { background: #dcfce7; color: #15803d; }
+    .code-block { background: #0c131a; color: #e2e8f0; border-radius: 12px; padding: 18px 22px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; overflow-x: auto; margin: 14px 0; line-height: 1.6; }
+    @media (max-width: 900px) {
+      .api-layout { grid-template-columns: 1fr; }
+      .api-sidebar { display: none; }
+    }
+  </style>
+</head>
+<body class="page-shell">
+  <!-- Navigation Header -->
+  <header class="site-header">
+    <div class="header-inner container">
+      <a href="index.html" class="brand-logo-link">
+        <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="logo-img" style="height: 38px;">
+      </a>
+      <nav class="nav-links">
+        <a href="features.html">Features</a>
+        <a href="engines.html">Engines</a>
+        <a href="eeat-analysis.html">Free EEAT Audit</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="about.html">About</a>
+      </nav>
+      <div class="nav-actions">
+        <a href="login.html" class="btn btn-ghost">Log In</a>
+        <a href="dashboard" class="btn btn-primary">Open Console →</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="api-hero">
+      <div class="pill-badge" style="display: inline-block; margin-bottom: 12px;">DEVELOPER PLATFORM v2.2</div>
+      <h1 class="hero-title" style="font-size: 2.8rem; margin-bottom: 12px;">Rank Monk Developer API</h1>
+      <p class="hero-sub" style="font-size: 1.1rem; color: #64748b;">
+        Automate your search intelligence programmatically. Trigger deep audits, synthesize Bedrock content, and monitor AEO citations via RESTful webhooks.
+      </p>
+    </section>
+
+    <div class="api-layout">
+      <!-- Sidebar Navigation -->
+      <aside class="api-sidebar">
+        <div style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 10px;">Quick Links</div>
+        <a href="#authentication" class="api-nav-link active">Authentication</a>
+        <a href="#endpoint-crawl" class="api-nav-link">POST /api/seo/crawl</a>
+        <a href="#endpoint-blogs" class="api-nav-link">POST /api/blogs/generate</a>
+        <a href="#endpoint-aeo" class="api-nav-link">POST /api/aeo/scan</a>
+        <a href="#endpoint-eeat" class="api-nav-link">GET /api/eeat-analysis</a>
+        <a href="#rate-limits" class="api-nav-link">Rate Limits & Errors</a>
+      </aside>
+
+      <!-- Documentation Content -->
+      <div class="api-content">
+        <!-- Auth Section -->
+        <div class="api-endpoint-card" id="authentication">
+          <h2 style="font-size: 1.4rem; margin: 0 0 10px;">Authentication</h2>
+          <p style="font-size: 0.9rem; color: #64748b; line-height: 1.6;">
+            Authenticate API requests by including your workspace API key in the <code>Authorization</code> header using the Bearer scheme.
+          </p>
+          <div class="code-block">
+Authorization: Bearer rm_live_99d8b37f42c8e10
+Content-Type: application/json</div>
+        </div>
+
+        <!-- 1. Crawl Endpoint -->
+        <div class="api-endpoint-card" id="endpoint-crawl">
+          <div style="display: flex; align-items: center; margin-bottom: 10px;">
+            <span class="endpoint-badge badge-post">POST</span>
+            <code style="font-weight: 800; font-size: 1.05rem;">/api/seo/crawl</code>
+          </div>
+          <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 14px;">
+            Initiates an immediate technical crawl on the specified domain, inspecting SSL certificates, title/meta lengths, Core Web Vitals, and header hierarchy.
+          </p>
+
+          <h4 style="font-size: 0.9rem; margin-bottom: 6px;">Request Payload:</h4>
+          <div class="code-block">{
+  "url": "https://rankmonk.com"
+}</div>
+
+          <h4 style="font-size: 0.9rem; margin-bottom: 6px;">Sample Response (200 OK):</h4>
+          <div class="code-block">{
+  "success": true,
+  "audit": {
+    "url": "https://rankmonk.com",
+    "score": 94,
+    "responseTimeMs": 342,
+    "isSsl": true,
+    "h1Count": 1,
+    "hasSitemap": true,
+    "hasRobotsTxt": true,
+    "issues": [],
+    "auditedAt": "2026-10-26T01:30:00Z"
+  }
+}</div>
+        </div>
+
+        <!-- 2. Blog Generate Endpoint -->
+        <div class="api-endpoint-card" id="endpoint-blogs">
+          <div style="display: flex; align-items: center; margin-bottom: 10px;">
+            <span class="endpoint-badge badge-post">POST</span>
+            <code style="font-weight: 800; font-size: 1.05rem;">/api/blogs/generate</code>
+          </div>
+          <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 14px;">
+            Synthesizes a complete, publication-ready article powered by AWS Bedrock (Amazon Nova Pro). Includes title, H2 outlines, FAQ schema, and reading time.
+          </p>
+
+          <h4 style="font-size: 0.9rem; margin-bottom: 6px;">Request Payload:</h4>
+          <div class="code-block">{
+  "keyword": "Autonomous SEO in 2026",
+  "tone": "Authoritative & Disciplined",
+  "wordCountTarget": 1800,
+  "includeFaq": true,
+  "includeToc": true
+}</div>
+
+          <h4 style="font-size: 0.9rem; margin-bottom: 6px;">Sample Response:</h4>
+          <div class="code-block">{
+  "success": true,
+  "article": {
+    "id": "art_17926900_92f1",
+    "title": "The Definitive 2026 Guide to Autonomous SEO",
+    "slug": "definitive-2026-guide-autonomous-seo",
+    "word_count": 1840,
+    "seo_score": 96,
+    "reading_time": "8 min read",
+    "model_used": "amazon.nova-pro-v1:0"
+  }
+}</div>
+        </div>
+
+        <!-- 3. AEO Scan Endpoint -->
+        <div class="api-endpoint-card" id="endpoint-aeo">
+          <div style="display: flex; align-items: center; margin-bottom: 10px;">
+            <span class="endpoint-badge badge-post">POST</span>
+            <code style="font-weight: 800; font-size: 1.05rem;">/api/aeo/scan</code>
+          </div>
+          <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 14px;">
+            Simulates brand visibility and citation rankings across ChatGPT Search, Perplexity AI, Claude 3.5, and Google Gemini AI Overviews.
+          </p>
+
+          <h4 style="font-size: 0.9rem; margin-bottom: 6px;">Request Payload:</h4>
+          <div class="code-block">{
+  "brandName": "Rank Monk",
+  "domain": "rankmonk.com",
+  "query": "Best autonomous SEO tools 2026"
+}</div>
+        </div>
+
+        <!-- Rate Limits -->
+        <div class="api-endpoint-card" id="rate-limits">
+          <h2 style="font-size: 1.4rem; margin: 0 0 10px;">Rate Limits & Plan Quotas</h2>
+          <p style="font-size: 0.9rem; color: #64748b; line-height: 1.6;">
+            - <strong>Seed (₹10,000/mo):</strong> 60 API requests/minute, 15 autonomous blog syntheses/mo.<br>
+            - <strong>Grow (₹20,000/mo):</strong> 240 API requests/minute, 45 autonomous blog syntheses/mo.<br>
+            - <strong>Scale (₹40,000/mo):</strong> 1,200 API requests/minute, 120 autonomous blog syntheses/mo, dedicated webhooks.
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Universal 5-Column Footer -->
+  <footer class="site-footer">
+    <div class="footer-inner container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="footer-logo">
+            <img src="assets/rank-monk-logo-horizontal-light.png" alt="Rank Monk" style="height: 34px;">
+          </a>
+          <p class="footer-tagline">The Zen OS for Autonomous Organic Growth. Autonomous blog drafting, technical SEO audits, backlink pitching, and AEO citations.</p>
+          <div class="footer-pricing-badge">
+            Plans starting at <strong>₹10,000 / month</strong>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4 class="footer-title">Platform</h4>
+          <ul class="footer-links">
+            <li><a href="features.html">Core Features</a></li>
+            <li><a href="engines.html">Autonomous Engines</a></li>
+            <li><a href="eeat-analysis.html">Free EEAT Diagnostic</a></li>
+            <li><a href="use-cases.html">Use Cases & Verticals</a></li>
+            <li><a href="roadmap.html">Product Roadmap</a></li>
+            <li><a href="changelog.html">Changelog & Updates</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4 class="footer-title">Resources</h4>
+          <ul class="footer-links">
+            <li><a href="blog.html">Growth & AEO Blog</a></li>
+            <li><a href="case-studies.html">Customer Case Studies</a></li>
+            <li><a href="glossary.html">SEO & GEO Glossary</a></li>
+            <li><a href="api-docs.html">Developer API Docs</a></li>
+            <li><a href="comparison.html">Rank Monk vs Agencies</a></li>
+            <li><a href="faq.html">Help & FAQ</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4 class="footer-title">Company</h4>
+          <ul class="footer-links">
+            <li><a href="about.html">About Rank Monk</a></li>
+            <li><a href="careers.html">Careers & Culture</a></li>
+            <li><a href="contact.html">Contact Engineering</a></li>
+            <li><a href="affiliate.html">Partner & Affiliate Program</a></li>
+            <li><a href="pricing.html">Pricing (₹10k - ₹40k)</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4 class="footer-title">Trust & Compliance</h4>
+          <ul class="footer-links">
+            <li><a href="terms.html">Terms of Service</a></li>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="help-center.html">Help & Documentation</a></li>
+            <li><a href="login.html">Client Portal Login</a></li>
+            <li><a href="signup.html">Create Workspace</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="footer-copyright">
+          © 2026 Rank Monk. All rights reserved. Powered by AWS Bedrock Enterprise Intelligence.
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Mobile App Dock -->
+  <nav class="mobile-app-dock" aria-label="Mobile Navigation">
+    <a href="index.html" class="dock-btn">
+      <span class="dock-icon">🏠</span>
+      <span class="dock-lbl">Home</span>
+    </a>
+    <a href="features.html" class="dock-btn">
+      <span class="dock-icon">⚡</span>
+      <span class="dock-lbl">Features</span>
+    </a>
+    <a href="pricing.html" class="dock-btn">
+      <span class="dock-icon">🏷️</span>
+      <span class="dock-lbl">Pricing</span>
+    </a>
+    <a href="eeat-analysis.html" class="dock-btn">
+      <span class="dock-icon">🛡️</span>
+      <span class="dock-lbl">EEAT</span>
+    </a>
+    <a href="dashboard" class="dock-btn active">
+      <span class="dock-icon">📊</span>
+      <span class="dock-lbl">Console</span>
+    </a>
+  </nav>
+</body>
+</html>

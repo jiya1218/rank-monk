@@ -1,97 +1,32 @@
 import { resolve } from 'path';
-import { defineConfig, loadEnv } from 'vite';
-import { BedrockRuntimeClient, ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
+import { defineConfig } from 'vite';
+import app from './server/app.js';
 
-function bedrockPlugin() {
+function productionBackendPlugin() {
   return {
-    name: 'bedrock-api-handler',
+    name: 'rankmonk-backend-api-plugin',
     configureServer(server) {
-      const env = loadEnv('', process.cwd(), '');
-      const BEDROCK_TOKEN = env.AWS_BEARER_TOKEN_BEDROCK || env.VITE_BEDROCK_API_KEY || process.env.AWS_BEARER_TOKEN_BEDROCK || '';
-
-      // 1. Text Generation Endpoint via AWS Bedrock (amazon.nova-pro-v1:0)
-      server.middlewares.use('/api/bedrock/generate', async (req, res) => {
-        if (req.method !== 'POST') {
-          res.statusCode = 405;
-          return res.end('Method Not Allowed');
-        }
-
-        let body = '';
-        req.on('data', chunk => body += chunk);
-        req.on('end', async () => {
-          try {
-            const data = JSON.parse(body || '{}');
-            const prompt = data.prompt || 'Generate a short SEO guide';
-            process.env.AWS_BEARER_TOKEN_BEDROCK = BEDROCK_TOKEN;
-
-            const client = new BedrockRuntimeClient({ region: 'us-east-1' });
-            const cmd = new ConverseCommand({
-              modelId: 'amazon.nova-pro-v1:0',
-              messages: [{ role: 'user', content: [{ text: prompt }] }],
-              inferenceConfig: {
-                maxTokens: data.maxTokens || 2000,
-                temperature: data.temperature ?? 0.7
-              }
-            });
-
-            const result = await client.send(cmd);
-            const text = result.output.message.content[0].text;
-            res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify({
-              success: true,
-              text,
-              model: 'amazon.nova-pro-v1:0 (AWS Bedrock)',
-              timestamp: new Date().toISOString()
-            }));
-          } catch (err) {
-            console.error('[Bedrock Server] Error:', err);
-            res.statusCode = 500;
-            res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify({ success: false, error: err.message }));
+      // Clean URLs rewrite (e.g. /dashboard -> /dashboard.html, /pricing -> /pricing.html)
+      server.middlewares.use((req, res, next) => {
+        if (req.method === 'GET' && !req.url.startsWith('/api') && !req.url.includes('.')) {
+          const [pathPart, queryPart] = req.url.split('?');
+          const clean = pathPart.replace(/^\//, '');
+          if (clean) {
+            req.url = '/' + clean + '.html' + (queryPart ? '?' + queryPart : '');
           }
-        });
+        }
+        next();
       });
 
-      // 2. Media Studio Image Generation Endpoint
-      server.middlewares.use('/api/bedrock/generate-image', async (req, res) => {
-        if (req.method !== 'POST') {
-          res.statusCode = 405;
-          return res.end('Method Not Allowed');
-        }
-
-        let body = '';
-        req.on('data', chunk => body += chunk);
-        req.on('end', async () => {
-          try {
-            const data = JSON.parse(body || '{}');
-            const prompt = data.prompt || 'Zen Monk logo aesthetic';
-            const width = data.width || 1024;
-            const height = data.height || 1024;
-            const seed = Math.floor(Math.random() * 1000000);
-
-            const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${width}&height=${height}&seed=${seed}&nologo=true&enhance=true`;
-
-            res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify({
-              success: true,
-              imageUrl,
-              prompt,
-              dimensions: `${width}x${height}`,
-              created_at: new Date().toISOString()
-            }));
-          } catch (err) {
-            res.statusCode = 500;
-            res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify({ success: false, error: err.message }));
-          }
-        });
-      });
+      // Mount Express full-stack API server directly on Vite middleware
+      server.middlewares.use(app);
+      console.log('⚡ [Vite Server] Rank Monk Production Backend API mounted on /api');
     }
   };
 }
 
 export default defineConfig({
-  plugins: [bedrockPlugin()],
+  plugins: [productionBackendPlugin()],
   server: {
     port: 3000,
   },
@@ -107,6 +42,21 @@ export default defineConfig({
         login: resolve(__dirname, 'login.html'),
         signup: resolve(__dirname, 'signup.html'),
         dashboard: resolve(__dirname, 'dashboard.html'),
+        about: resolve(__dirname, 'about.html'),
+        contact: resolve(__dirname, 'contact.html'),
+        terms: resolve(__dirname, 'terms.html'),
+        privacy: resolve(__dirname, 'privacy.html'),
+        eeatAnalysis: resolve(__dirname, 'eeat-analysis.html'),
+        useCases: resolve(__dirname, 'use-cases.html'),
+        roadmap: resolve(__dirname, 'roadmap.html'),
+        changelog: resolve(__dirname, 'changelog.html'),
+        affiliate: resolve(__dirname, 'affiliate.html'),
+        careers: resolve(__dirname, 'careers.html'),
+        blog: resolve(__dirname, 'blog.html'),
+        helpCenter: resolve(__dirname, 'help-center.html'),
+        apiDocs: resolve(__dirname, 'api-docs.html'),
+        caseStudies: resolve(__dirname, 'case-studies.html'),
+        glossary: resolve(__dirname, 'glossary.html'),
       },
     },
   },

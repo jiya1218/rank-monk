@@ -24,9 +24,18 @@
   }
 })(typeof self !== 'undefined' ? self : (typeof window !== 'undefined' ? window : this), function () {
 
-  const STORAGE_KEY = 'rankmonk_engine_state_v3';
-  const ACTIVE_PROJECT_KEY = 'rankmonk_active_proj_id_v3';
-  const USER_KEY = 'rankmonk_active_user_v3';
+  const STORAGE_KEY = 'rankmonk_engine_state_v6';
+  const ACTIVE_PROJECT_KEY = 'rankmonk_active_proj_id_v6';
+  const USER_KEY = 'rankmonk_active_user_v6';
+
+  // Purge legacy storage states to prevent stale domain leaks
+  try {
+    if (typeof localStorage !== 'undefined') {
+      ['rankmonk_engine_state_v1', 'rankmonk_engine_state_v2', 'rankmonk_engine_state_v3', 'rankmonk_engine_state_v4', 'rankmonk_engine_state_v5', 'solospider_engine_state'].forEach(k => {
+        try { localStorage.removeItem(k); } catch(e){}
+      });
+    }
+  } catch (e) {}
 
   // Safe localStorage helper
   function safeGetItem(key) {
@@ -494,17 +503,17 @@
   // --- Initial Default Projects (Pure clean data without fake numbers) ---
   const INITIAL_PROJECTS = [
     {
-      id: 'proj-scalezix',
-      name: 'Scalezix',
-      domain: 'scalezix.com',
-      website: 'scalezix.com',
-      industry: 'Organic AI Growth & Automation Software',
-      businessCategory: 'Enterprise Search & LLM Engine Optimization',
-      targetAudience: 'Agency founders, Series-A SaaS founders, and Head of Organic Growth seeking autonomous visibility.',
-      brand_logo_url: 'assets/rank-monk-logo-horizontal-light.png',
-      favicon_url: 'https://www.google.com/s2/favicons?domain=scalezix.com&sz=128',
-      palette: ['#111c26', '#1e2d3c', '#2c3e50', '#b98b6a', '#c49866', '#10b981'],
-      competitors: ['SurferSEO', 'Ahrefs', 'Jasper', 'Semrush', 'Buffer'],
+      id: 'proj-rankmonk',
+      name: 'Rank Monk',
+      domain: 'rankmonk.com',
+      website: 'rankmonk.com',
+      industry: 'The Zen OS for Autonomous Organic Growth',
+      businessCategory: 'Autonomous SEO, AEO & GEO Optimization Software',
+      targetAudience: 'Growth engineers, modern founders, agencies, and digital operators scaling organic search visibility.',
+      brand_logo_url: 'assets/rank-monk-logo-horizontal.png',
+      favicon_url: 'assets/rank-monk-icon.png',
+      palette: ['#0c131a', '#111c26', '#c5a059', '#b98b6a', '#f8f7f4', '#10b981'],
+      competitors: ['Ahrefs', 'Semrush', 'SurferSEO', 'Jasper', 'BrightEdge'],
       voiceSliders: {
         professionalCasual: 20,
         friendlyFormal: 25,
@@ -512,23 +521,23 @@
         premiumAccessible: 15,
         simpleComplex: 25
       },
-      voiceTags: ['Authoritative', 'Strategic', 'Data-Driven', 'Clear'],
-      gscConnected: false, // EXACT matching SoloSpider screenshot: GSC Required lock!
+      voiceTags: ['Zen', 'Authoritative', 'Strategic', 'Data-Driven', 'Clear'],
+      gscConnected: false, // GSC Required lock matching SoloSpider spec
       crawledPages: [
         {
-          url: 'https://scalezix.com',
-          title: 'Scalezix | High-Velocity Organic Growth & Generative AI Optimization',
-          meta_desc: 'Scalezix replaces fragmented SEO tools with an autonomous growth loop powering visibility on Google, ChatGPT and Perplexity.',
-          h1: 'Get Found By People. Get Chosen By AI.',
+          url: 'https://rankmonk.com',
+          title: 'Rank Monk — The Zen OS for Autonomous Organic Growth',
+          meta_desc: 'Scale your organic search traffic, AEO citations, and rankings autonomously with Rank Monk.',
+          h1: 'The Zen OS for Autonomous Organic Growth',
           word_count: 1850,
           status_code: 200,
           schema_types: ['Organization', 'SoftwareApplication'],
           crawled_at: new Date().toISOString()
         },
         {
-          url: 'https://scalezix.com/pricing',
-          title: 'Pricing & Plans · Scalezix',
-          meta_desc: 'Scalezix plans starting at ₹10,000/month. No agency retainers.',
+          url: 'https://rankmonk.com/pricing',
+          title: 'Pricing & Plans — Rank Monk',
+          meta_desc: 'Rank Monk plans starting at ₹10,000/month. No agency retainers.',
           h1: 'Simple, transparent growth plans.',
           word_count: 940,
           status_code: 200,
@@ -536,23 +545,23 @@
           crawled_at: new Date().toISOString()
         },
         {
-          url: 'https://scalezix.com/features',
-          title: 'Scalezix Features | Autonomous Marketing OS',
-          meta_desc: '', // Real missing meta description!
+          url: 'https://rankmonk.com/features',
+          title: 'Autonomous Features — Rank Monk',
+          meta_desc: 'Autonomous blog drafting, technical crawler audits, and AEO citations.',
           h1: 'Everything you need to dominate organic search and AI answers.',
           word_count: 1420,
           status_code: 200,
-          schema_types: [],
+          schema_types: ['SoftwareApplication'],
           crawled_at: new Date().toISOString()
         },
         {
-          url: 'https://scalezix.com/blog',
-          title: 'Scalezix Features | Autonomous Marketing OS', // Real duplicate title!
-          meta_desc: 'Insights, search benchmarks, and growth playbooks.',
-          h1: '', // Real missing H1!
-          word_count: 620,
+          url: 'https://rankmonk.com/eeat-analysis',
+          title: 'Free EEAT Diagnostic — Rank Monk',
+          meta_desc: 'Audit your website Experience, Expertise, Authoritativeness, and Trustworthiness.',
+          h1: 'Audit your website EEAT signals in seconds.',
+          word_count: 820,
           status_code: 200,
-          schema_types: [],
+          schema_types: ['WebApplication'],
           crawled_at: new Date().toISOString()
         }
       ],
@@ -610,6 +619,19 @@
           if (!this.data || !Array.isArray(this.data.projects) || this.data.projects.length === 0) {
             this.data = this.getDefaultData();
             this.save();
+          } else {
+            this.data.projects.forEach(p => {
+              if (!p.name || p.name.toLowerCase().includes('scalezix') || !p.domain || p.domain.toLowerCase().includes('scalezix')) {
+                p.name = 'Rank Monk';
+                p.domain = 'rankmonk.com';
+                p.website = 'rankmonk.com';
+                p.industry = 'The Zen OS for Autonomous Organic Growth';
+                p.businessCategory = 'Autonomous SEO, AEO & GEO Optimization Software';
+                p.targetAudience = 'Growth engineers, modern founders, agencies, and digital operators scaling organic search visibility.';
+                p.brand_logo_url = 'assets/rank-monk-logo-horizontal.png';
+                p.favicon_url = 'assets/rank-monk-icon.png';
+              }
+            });
           }
         } else {
           this.data = this.getDefaultData();
@@ -623,10 +645,10 @@
     getDefaultData() {
       return {
         projects: JSON.parse(JSON.stringify(INITIAL_PROJECTS)),
-        activeProjectId: 'proj-scalezix',
+        activeProjectId: 'proj-rankmonk',
         currentUser: {
-          name: 'Jiya.d.patel',
-          email: 'jiya.d.patel@gmail.com',
+          name: 'Rank Monk Architect',
+          email: 'zen@rankmonk.com',
           plan: 'grow'
         }
       };

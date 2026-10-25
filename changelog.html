@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Changelog · Rank Monk Engine Updates</title>
+  <meta name="description" content="Read what's new in Rank Monk OS. Release history, engine improvements, and autonomous SEO features.">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+  <link rel="apple-touch-icon" href="assets/rank-monk-icon.png">
+
+  <!-- Anti-Flash Theme Script -->
+  <script>
+    try {
+      var t = localStorage.getItem("rankmonk-theme") ||
+        (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", t);
+    } catch (e) {}
+  </script>
+
+  <!-- Google Fonts: Fraunces & Instrument Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <!-- Core Stylesheets -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body class="page-fade-in">
+
+  <!-- SITE HEADER -->
+  <header class="site-header" id="siteHeader">
+    <div class="container nav-container">
+      <a href="index.html" class="brand" aria-label="Rank Monk home">
+        <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="brand-logo-img logo-light">
+        <img src="assets/rank-monk-logo-horizontal-light.png" alt="Rank Monk" class="brand-logo-img logo-dark">
+      </a>
+
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="features.html" class="nav-link">Features</a>
+        <a href="engines.html" class="nav-link">AI Engines</a>
+        <a href="comparison.html" class="nav-link">Stack Collapse</a>
+        <a href="pricing.html" class="nav-link">Pricing</a>
+        <a href="changelog.html" class="nav-link active">Changelog</a>
+        <a href="faq.html" class="nav-link">FAQ</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle theme">☾</button>
+        <a href="login.html" class="btn btn-ghost btn-sm">Log in</a>
+        <a href="signup.html" class="btn btn-primary btn-sm">Start climbing</a>
+        
+        <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle Navigation">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- PAGE HERO -->
+    <section class="page-hero">
+      <div class="container">
+        <div class="crumbs"><a href="index.html">Home</a> / Product / Changelog</div>
+        <span class="eyebrow">Continuous Evolution</span>
+        <h1>Engine Changelog & <span class="accent">Releases</span>.</h1>
+        <p class="lead">Every update, enhancement, and optimization shipped to the Rank Monk autonomous platform.</p>
+      </div>
+    </section>
+
+    <!-- RELEASES LIST -->
+    <section class="section">
+      <div class="container" style="max-width: 860px;">
+        
+        <!-- v2.2.0 -->
+        <div style="background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 32px; margin-bottom: 32px; box-shadow: var(--shadow-sm);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 1.25rem; font-weight: 900; font-family: var(--font-heading); color: #111c26;">Version 2.2.0</span>
+              <span class="badge-status published">Latest Release</span>
+            </div>
+            <span style="font-size: 0.85rem; color: var(--muted); font-weight: 600;">October 24, 2026</span>
+          </div>
+          <p style="font-size: 0.95rem; color: var(--ink); line-height: 1.6; margin-bottom: 16px;">
+            Major release introducing multi-model AEO radar simulation, AI Ads Manager, and Media Studio with aspect ratio selection:
+          </p>
+          <ul style="padding-left: 20px; font-size: 0.9rem; line-height: 1.7; color: var(--muted);">
+            <li><strong>AEO Radar Simulator:</strong> Test search queries against ChatGPT-4o, Perplexity Pro, Claude 3.5 Sonnet, and Gemini 2.0 with citation probability scores.</li>
+            <li><strong>AI Ads Manager:</strong> Generate high-converting Google Search & Meta ad copies with live headline previews and budget simulators.</li>
+            <li><strong>Media Studio Visual Synthesizer:</strong> Generate 1:1, 16:9, and 9:16 aspect ratio brand assets powered by enterprise generative gateways.</li>
+            <li><strong>Bulk Blog Generator:</strong> Batch-generate up to 5 pillar articles with distinct keywords in a single click.</li>
+          </ul>
+        </div>
+
+        <!-- v2.0.0 -->
+        <div style="background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 32px; margin-bottom: 32px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 1.25rem; font-weight: 900; font-family: var(--font-heading); color: #111c26;">Version 2.0.0</span>
+              <span class="badge-status" style="background: rgba(99, 102, 241, 0.15); color: #6366f1;">Bedrock Core</span>
+            </div>
+            <span style="font-size: 0.85rem; color: var(--muted); font-weight: 600;">October 15, 2026</span>
+          </div>
+          <ul style="padding-left: 20px; font-size: 0.9rem; line-height: 1.7; color: var(--muted);">
+            <li><strong>AWS Bedrock Amazon Nova Pro:</strong> Switched default generative backbone to Amazon Nova Pro (<code>amazon.nova-pro-v1:0</code>) with long-term bearer token authentication.</li>
+            <li><strong>1-Click Code Remedies:</strong> Automatically patch missing meta tags and duplicate titles in project crawl state.</li>
+            <li><strong>Supabase Multi-Tenant Engine:</strong> PostgreSQL schema synchronization for projects, articles, and crawl runs.</li>
+          </ul>
+        </div>
+
+        <!-- v1.5.0 -->
+        <div style="background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 32px; margin-bottom: 32px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+            <span style="font-size: 1.25rem; font-weight: 900; font-family: var(--font-heading); color: #111c26;">Version 1.5.0</span>
+            <span style="font-size: 0.85rem; color: var(--muted); font-weight: 600;">September 28, 2026</span>
+          </div>
+          <ul style="padding-left: 20px; font-size: 0.9rem; line-height: 1.7; color: var(--muted);">
+            <li><strong>5-Axis Linguistic Brand Sliders:</strong> Calibrate Professional-Casual, Friendly-Formal, Bold-Subtle, Premium-Accessible, and Simple-Complex tones.</li>
+            <li><strong>Competitor Intelligence Watchlist:</strong> Add rival domains to track keyword gaps and backlink distribution.</li>
+            <li><strong>Google Search Console OAuth:</strong> View real-time search reach and organic impression trends directly.</li>
+          </ul>
+        </div>
+
+        <!-- v1.0.0 -->
+        <div style="background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 32px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+            <span style="font-size: 1.25rem; font-weight: 900; font-family: var(--font-heading); color: #111c26;">Version 1.0.0</span>
+            <span style="font-size: 0.85rem; color: var(--muted); font-weight: 600;">August 18, 2026</span>
+          </div>
+          <p style="font-size: 0.9rem; color: var(--muted); line-height: 1.6;">
+            Initial commercial release of Rank Monk OS. Established the Zen OS architecture, 3 predictable INR plans (₹10,000, ₹20,000, ₹40,000), and automated technical site audits.
+          </p>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- UNIVERSAL 5-COLUMN RANK MONK FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="brand" aria-label="Rank Monk home">
+            <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="brand-logo-img logo-light" style="height: 52px;">
+            <img src="assets/rank-monk-logo-horizontal-light.png" alt="Rank Monk" class="brand-logo-img logo-dark" style="height: 52px;">
+          </a>
+          <p class="footer-desc">
+            The Zen OS for Autonomous Organic Growth. Replaces fragmented SEO, content, and agency retainers with a continuous, quiet growth loop.
+          </p>
+          <div style="margin-top: 14px; font-size: 0.8rem; font-weight: 700; color: var(--tan);">
+            Plans: ₹10,000 · ₹20,000 · ₹40,000 / mo
+          </div>
+        </div>
+
+        <div>
+          <h4>Product</h4>
+          <ul>
+            <li><a href="features.html">Features Overview</a></li>
+            <li><a href="pricing.html">Pricing & Plans</a></li>
+            <li><a href="engines.html">AI Engines Console</a></li>
+            <li><a href="comparison.html">Stack Collapse</a></li>
+            <li><a href="changelog.html">Changelog</a></li>
+            <li><a href="roadmap.html">Product Roadmap</a></li>
+            <li><a href="eeat-analysis.html">Free EEAT Analyzer</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4>Use Cases</h4>
+          <ul>
+            <li><a href="use-cases.html#agencies">For Digital Agencies</a></li>
+            <li><a href="use-cases.html#solo">For Solo Founders</a></li>
+            <li><a href="use-cases.html#freelancers">For Freelancers</a></li>
+            <li><a href="use-cases.html#d2c">For D2C Brands</a></li>
+            <li><a href="use-cases.html#saas">For SaaS Startups</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="blog.html">Blog & Guides</a></li>
+            <li><a href="help-center.html">Help Center</a></li>
+            <li><a href="api-docs.html">Developer API</a></li>
+            <li><a href="case-studies.html">Case Studies</a></li>
+            <li><a href="glossary.html">SEO Glossary</a></li>
+            <li><a href="faq.html">FAQ Sanctuary</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4>Company</h4>
+          <ul>
+            <li><a href="about.html">About Rank Monk</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+            <li><a href="affiliate.html">Affiliate Program</a></li>
+            <li><a href="careers.html">Careers</a></li>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms of Service</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2026 Rank Monk. All rights reserved.</span>
+        <span>Made with Zen precision for founders who want to be found.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

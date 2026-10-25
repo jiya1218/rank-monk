@@ -228,6 +228,84 @@ DESCRIPTION: <optimized description>`;
     };
   }
 
+  // 5. Production Backend API Methods
+  async function apiFetch(endpoint, options = {}) {
+    const res = await fetch(endpoint, {
+      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+      ...options
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: res.statusText }));
+      throw new Error(err.error || `API request failed with status ${res.status}`);
+    }
+    return await res.json();
+  }
+
+  async function crawlWebsite(url) {
+    return await apiFetch('/api/seo/crawl', {
+      method: 'POST',
+      body: JSON.stringify({ url })
+    });
+  }
+
+  async function runEEATAudit(url) {
+    return await apiFetch(`/api/eeat-analysis?url=${encodeURIComponent(url)}`);
+  }
+
+  async function generateColdPitch(data) {
+    return await apiFetch('/api/backlinks/generate-pitch', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async function generateAdCampaign(data) {
+    return await apiFetch('/api/ads/generate', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async function generateSocialPosts(data) {
+    return await apiFetch('/api/social/generate', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async function bulkGenerateArticles(topics, brandName) {
+    return await apiFetch('/api/blogs/bulk-generate', {
+      method: 'POST',
+      body: JSON.stringify({ topics, brandName })
+    });
+  }
+
+  async function createCheckoutOrder(planId, email, couponCode) {
+    return await apiFetch('/api/checkout/razorpay-order', {
+      method: 'POST',
+      body: JSON.stringify({ planId, email, couponCode })
+    });
+  }
+
+  async function verifyCheckoutPayment(data) {
+    return await apiFetch('/api/checkout/verify', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async function fetchStats(range = '30d') {
+    return await apiFetch(`/api/stats?range=${range}`);
+  }
+
+  async function toggleGSC() {
+    return await apiFetch('/api/stats/toggle-gsc', { method: 'POST' });
+  }
+
+  async function fetchNotifications() {
+    return await apiFetch('/api/notifications');
+  }
+
   return {
     isBedrockConfigured,
     generateText,
@@ -235,6 +313,18 @@ DESCRIPTION: <optimized description>`;
     generateImage,
     scanAeoPrompt,
     suggestSeoFix,
+    // Backend API Integrations
+    crawlWebsite,
+    runEEATAudit,
+    generateColdPitch,
+    generateAdCampaign,
+    generateSocialPosts,
+    bulkGenerateArticles,
+    createCheckoutOrder,
+    verifyCheckoutPayment,
+    fetchStats,
+    toggleGSC,
+    fetchNotifications,
     bedrockInfo: {
       keyName: BEDROCK_KEY_NAME,
       keyPrefix: BEDROCK_API_KEY.slice(0, 10) + '...',
