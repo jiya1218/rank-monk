@@ -16,6 +16,7 @@ import mediaRouter from './routes/media.js';
 import checkoutRouter from './routes/checkout.js';
 import notificationsRouter from './routes/notifications.js';
 import supportRouter from './routes/support.js';
+import brandRouter from './routes/brand.js';
 import { generateText } from './services/bedrock.js';
 
 const apiRouter = express.Router();
@@ -40,6 +41,7 @@ apiRouter.use('/media', mediaRouter);
 apiRouter.use('/checkout', checkoutRouter);
 apiRouter.use('/notifications', notificationsRouter);
 apiRouter.use('/support', supportRouter);
+apiRouter.use('/brand', brandRouter);
 
 // Legacy/Compatibility endpoints for bedrock
 apiRouter.post('/bedrock/generate', async (req, res) => {

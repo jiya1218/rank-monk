@@ -4471,8 +4471,8 @@
 .plan {
   background: var(--card, #fffcf7);
   border: 1px solid var(--line, #e4d6c6);
-  border-radius: 24px;
-  padding: 40px 34px;
+  border-radius: 20px;
+  padding: 28px 24px;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -4485,11 +4485,11 @@
 .plan.featured {
   background: var(--espresso, #3b2519);
   border-color: var(--espresso, #3b2519);
-  transform: translateY(-14px);
+  transform: translateY(-10px);
   box-shadow: 0 24px 50px -12px rgba(59, 37, 25, 0.35);
 }
 .plan.featured:hover {
-  transform: translateY(-18px);
+  transform: translateY(-14px);
 }
 .plan.featured h3,
 .plan.featured .price,
@@ -4506,19 +4506,19 @@
 }
 .plan-tag {
   position: absolute;
-  top: -13px;
-  left: 34px;
+  top: -12px;
+  left: 24px;
   background: var(--tan, #b98b6a);
   color: #1b120c;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  padding: 6px 14px;
+  padding: 5px 12px;
   border-radius: 999px;
 }
 .plan-name {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
   color: var(--tan, #b98b6a);
@@ -4526,28 +4526,29 @@
 }
 .price {
   font-family: var(--font-heading);
-  font-size: 3.6rem;
+  font-size: 2.85rem;
   line-height: 1;
-  margin: 14px 0 6px;
+  margin: 10px 0 2px;
   color: var(--ink, #2b1b12);
 }
 .price small {
   font-family: var(--font-body);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: var(--muted, #6f5a4c);
   font-weight: 500;
 }
 .plan ul {
   list-style: none;
   padding: 0;
-  margin: 26px 0 30px;
+  margin: 14px 0 18px;
   flex: 1;
 }
 .plan li {
-  padding: 9px 0 9px 26px;
+  padding: 7px 0 7px 22px;
   position: relative;
   border-bottom: 1px dashed var(--line, #e4d6c6);
-  font-size: 0.97rem;
+  font-size: 0.88rem;
+  line-height: 1.35;
   color: var(--muted, #6f5a4c);
 }
 .plan li::before {

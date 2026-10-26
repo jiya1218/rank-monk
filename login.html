@@ -75,7 +75,8 @@
           window.RankMonkState.demoLogin();
         }
       } catch (e) {}
-      window.location.href = 'dashboard';
+      var hasOnboarded = localStorage.getItem('rankmonk_has_onboarded');
+      window.location.href = hasOnboarded ? 'dashboard' : 'onboarding';
     }
 
     // Prefill helper for testing
@@ -218,9 +219,11 @@
             console.warn('[RankMonk] Remote sync skipped, session activated locally:', syncErr);
           }
         }
-        window.location.href = 'dashboard';
+        const hasOnboarded = localStorage.getItem('rankmonk_has_onboarded');
+        window.location.href = hasOnboarded ? 'dashboard' : 'onboarding';
       } catch (err) {
-        window.location.href = 'dashboard';
+        const hasOnboarded = localStorage.getItem('rankmonk_has_onboarded');
+        window.location.href = hasOnboarded ? 'dashboard' : 'onboarding';
       }
     }
 

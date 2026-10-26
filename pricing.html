@@ -83,6 +83,33 @@
       margin-left: 4px;
       font-weight: 700;
     }
+    /* Compact Pricing Cards */
+    .pricing-grid {
+      align-items: start !important;
+      gap: 20px !important;
+      margin-top: 24px !important;
+    }
+    .plan {
+      padding: 28px 24px !important;
+      border-radius: 20px !important;
+    }
+    .plan p {
+      margin: 8px 0 12px !important;
+      font-size: 0.88rem !important;
+      line-height: 1.4 !important;
+    }
+    .price {
+      font-size: 2.8rem !important;
+      margin: 10px 0 2px !important;
+    }
+    .plan ul {
+      margin: 14px 0 18px !important;
+    }
+    .plan li {
+      padding: 7px 0 7px 20px !important;
+      font-size: 0.87rem !important;
+      line-height: 1.35 !important;
+    }
     /* Comparison Table Styling */
     .compare-wrap {
       margin-top: 60px;
@@ -244,14 +271,14 @@
           <div class="plan">
             <div class="plan-name">Seed</div>
             <div class="price"><span id="p-seed">₹10,000</span><small id="sub-seed"> / month</small></div>
-            <p>For a solo founder or focused single-brand operator getting started.</p>
+            <p>Ideal for solo creators and founders getting started.</p>
             <ul>
-              <li><strong>1 Website Connection</strong> (WordPress, Webflow, Shopify)</li>
-              <li><strong>8 Autonomous Blog Articles</strong> / mo (2,000w+ in your voice)</li>
-              <li><strong>60 Social Posts</strong> scheduled / mo</li>
-              <li>Monthly technical SEO audit with 1-click fixes</li>
-              <li>AI search tracking for 10 questions across ChatGPT & Perplexity</li>
-              <li>Email & community support</li>
+              <li><strong>SEO Audit:</strong> Up to 200 pages / scan & 2 rescans</li>
+              <li><strong>5 Auto-fixes</strong> per day (1-click code remedies)</li>
+              <li><strong>Automatic Audit Report</strong> (Instant PDF & Web)</li>
+              <li><strong>Real-time Prompt & Keyword Recs</strong> (5 tracked)</li>
+              <li><strong>4 AI Prompt Agents</strong> (AEO / GEO Radar)</li>
+              <li><strong>Social Auto-Scheduling</strong> & 8 blogs / mo</li>
             </ul>
             <button class="btn btn-ghost btn-block" id="btnPlanSeed" onclick="selectPlan('Seed')">Choose Seed (₹10,000)</button>
           </div>
@@ -261,16 +288,14 @@
             <span class="plan-tag">Most Chosen</span>
             <div class="plan-name">Grow</div>
             <div class="price"><span id="p-grow">₹20,000</span><small id="sub-grow"> / month</small></div>
-            <p>For growing brands that want steady, high-velocity organic momentum.</p>
+            <p>Designed for fast-growing brands needing deeper AI velocity.</p>
             <ul>
-              <li><strong>5 Website Connections</strong></li>
-              <li><strong>30 Autonomous Blog Articles</strong> / mo</li>
-              <li>Unlimited social scheduling & automated repurposing</li>
-              <li><strong>30 AI Images included</strong> each month</li>
-              <li>Weekly SEO audits + 1-click autonomous code remedies</li>
-              <li>AI search tracking for 50 questions across 4 LLMs</li>
-              <li>Reports branded with your logo</li>
-              <li>Priority support</li>
+              <li><strong>SEO Audit:</strong> Up to 300 pages / scan & 4 rescans</li>
+              <li><strong>7 Auto-fixes</strong> per day (1-click code remedies)</li>
+              <li><strong>Automatic Audit Reports</strong> (Weekly executive insights)</li>
+              <li><strong>Real-time Prompt & Keyword Recs</strong> (10 tracked)</li>
+              <li><strong>4 AI Prompt Agents</strong> across 4 LLMs</li>
+              <li><strong>Unlimited Social Auto-Scheduling</strong> & 30 blogs / mo</li>
             </ul>
             <button class="btn btn-primary btn-block" id="btnPlanGrow" onclick="selectPlan('Grow')">Choose Grow (₹20,000)</button>
           </div>
@@ -279,17 +304,14 @@
           <div class="plan">
             <div class="plan-name">Scale</div>
             <div class="price"><span id="p-scale">₹40,000</span><small id="sub-scale"> / month</small></div>
-            <p>For agencies and operators running multiple fast-growing brands.</p>
+            <p>Built for power creators and high-volume operators.</p>
             <ul>
-              <li><strong>15 Website Connections</strong></li>
-              <li><strong>100 Autonomous Blog Articles</strong> / mo</li>
-              <li>Unlimited social scheduling</li>
-              <li><strong>100 AI Images included</strong> each month</li>
-              <li>Daily technical crawlers + auto code remedies</li>
-              <li>AI search tracking for 200 questions</li>
-              <li>White-label reports & client portal</li>
-              <li>Full API access & custom webhooks</li>
-              <li>Dedicated success manager</li>
+              <li><strong>SEO Audit:</strong> Up to 500 pages / scan & 6 rescans</li>
+              <li><strong>10 Auto-fixes</strong> per day (1-click code remedies)</li>
+              <li><strong>Continuous Automatic Audit Reports</strong></li>
+              <li><strong>Real-time Prompt & Keyword Recs</strong> (15 tracked)</li>
+              <li><strong>4 AI Prompt Agents</strong> + custom queries</li>
+              <li><strong>Unlimited Social Auto-Scheduling</strong> & 100 blogs / mo</li>
             </ul>
             <button class="btn btn-ghost btn-block" id="btnPlanScale" onclick="selectPlan('Scale')">Choose Scale (₹40,000)</button>
           </div>
@@ -297,7 +319,7 @@
         </div>
 
         <div class="pricing-note">
-          <strong>AI videos are billed separately.</strong> Each 25–30 second video costs approximately ₹299–₹349 and is billed on usage. High-definition images, blog posts, social schedules, and crawler fixes are fully included in your monthly plan.
+          <strong>Everything you need in one autonomous platform.</strong> Deep SEO audits, automated code fixes, real-time keyword & prompt tracking, social scheduling, and video improvement walkthroughs are included in your plan. Additional custom AI video generations are available on-demand (~₹299–₹349).
         </div>
 
         <!-- Full Feature Comparison Matrix -->
@@ -316,58 +338,94 @@
             </thead>
             <tbody>
               <tr>
-                <td>Connected CMS Domains</td>
-                <td>1 Domain</td>
-                <td>5 Domains</td>
-                <td>15 Domains</td>
+                <td>Target Website / Brand</td>
+                <td>1 Website</td>
+                <td>1 Website</td>
+                <td>1 Website</td>
               </tr>
               <tr>
-                <td>Autonomous Pillar Articles</td>
+                <td>SEO Audit Crawl Depth</td>
+                <td>Up to 200 pages / scan</td>
+                <td>Up to 300 pages / scan</td>
+                <td>Up to 500 pages / scan</td>
+              </tr>
+              <tr>
+                <td>Automated Re-Scans</td>
+                <td>2 re-scans / month</td>
+                <td>4 re-scans / month</td>
+                <td>6 re-scans / month</td>
+              </tr>
+              <tr>
+                <td>Daily 1-Click & Auto-Fixes</td>
+                <td>5 auto-fixes / day</td>
+                <td>7 auto-fixes / day</td>
+                <td>10 auto-fixes / day</td>
+              </tr>
+              <tr>
+                <td>RankMonk Automatic Audit Reports</td>
+                <td>Instant PDF & Web</td>
+                <td>Weekly Executive Briefs</td>
+                <td>Continuous Deep Reports</td>
+              </tr>
+              <tr>
+                <td>Real-Time Prompt & Keyword Recommendations</td>
+                <td><span class="check-yes">✓ Included</span> (5 Tracked)</td>
+                <td><span class="check-yes">✓ Included</span> (10 Tracked)</td>
+                <td><span class="check-yes">✓ Included</span> (15 Tracked)</td>
+              </tr>
+              <tr>
+                <td>AI Prompt Agents (ChatGPT, Perplexity, Claude, Gemini)</td>
+                <td>4 Prompt Agents</td>
+                <td>4 Prompt Agents</td>
+                <td>4 Prompt Agents</td>
+              </tr>
+              <tr>
+                <td>Prompt Auto-Generations</td>
+                <td>5 / month</td>
+                <td>8 / month</td>
+                <td>12 / month</td>
+              </tr>
+              <tr>
+                <td>Social Media Auto-Scheduling</td>
+                <td>30 posts / month</td>
+                <td><span class="check-yes">✓ Unlimited</span></td>
+                <td><span class="check-yes">✓ Unlimited</span></td>
+              </tr>
+              <tr>
+                <td>Automated Social Repurposing</td>
+                <td>Standard</td>
+                <td><span class="check-yes">✓ Automated</span></td>
+                <td><span class="check-yes">✓ Advanced Multi-Channel</span></td>
+              </tr>
+              <tr>
+                <td>Autonomous SEO Blog Articles</td>
                 <td>8 / month</td>
                 <td>30 / month</td>
                 <td>100 / month</td>
               </tr>
               <tr>
-                <td>Social Repurposing (LinkedIn/X)</td>
-                <td>60 Posts / mo</td>
-                <td><span class="check-yes">✓ Unlimited</span></td>
-                <td><span class="check-yes">✓ Unlimited</span></td>
-              </tr>
-              <tr>
-                <td>AI Media Generation (Images)</td>
+                <td>AI Image Generation</td>
                 <td>Standard</td>
                 <td>30 / month</td>
                 <td>100 / month</td>
               </tr>
               <tr>
-                <td>AI Search Visibility (AEO Radar)</td>
-                <td>10 Questions</td>
-                <td>50 Questions</td>
-                <td>200 Questions</td>
+                <td>Team Member Collaboration</td>
+                <td>3 Team Members</td>
+                <td>5 Team Members</td>
+                <td>8 Team Members</td>
               </tr>
               <tr>
-                <td>Self-Healing Technical Audits</td>
-                <td>Monthly</td>
-                <td>Weekly + Auto-Fix</td>
-                <td>Daily + Auto-Fix</td>
-              </tr>
-              <tr>
-                <td>White-Label Client Reports</td>
-                <td>—</td>
+                <td>SEO & Search Visibility Analytics</td>
                 <td><span class="check-yes">✓ Included</span></td>
-                <td><span class="check-yes">✓ Custom Branding</span></td>
+                <td><span class="check-yes">✓ Included</span></td>
+                <td><span class="check-yes">✓ Included</span></td>
               </tr>
               <tr>
-                <td>Multi-Tenant Agency Workspaces</td>
-                <td>—</td>
-                <td>—</td>
-                <td><span class="check-yes">✓ Unlimited</span></td>
-              </tr>
-              <tr>
-                <td>API Access & Webhooks</td>
-                <td>—</td>
-                <td>—</td>
-                <td><span class="check-yes">✓ Full Access</span></td>
+                <td>Support & Guidance</td>
+                <td>Email & Community</td>
+                <td>Priority Support</td>
+                <td>Dedicated Support & Onboarding</td>
               </tr>
             </tbody>
           </table>
@@ -393,16 +451,16 @@
             <p>Yes. Upgrade or downgrade at any time directly inside your account. Upgrades take effect immediately with prorated billing, and downgrades apply to your next renewal cycle.</p>
           </details>
           <details>
-            <summary>Why are video generations billed separately?</summary>
-            <p>Video rendering carries distinct computational GPU costs. To keep baseline subscriptions affordable (₹10,000/mo), you only pay for videos you actually render (~₹299–₹349 per 25-30 second video). All AI image generation and 2,000w+ articles are completely covered in your plan.</p>
+            <summary>How do the automatic audit and video improvement reports work?</summary>
+            <p>Rank Monk continuously crawls your website, analyzes technical SEO issues, and synthesizes automated improvement reports. It also generates an actionable AI video walkthrough detailing exact code fixes, tag updates, and keyword opportunities you can implement with one click.</p>
           </details>
           <details>
-            <summary>Do I have to connect my website?</summary>
-            <p>To have Rank Monk auto-publish drafts directly to your CMS (WordPress, Webflow, Shopify, Ghost), yes. However, you can also manually copy markdown and HTML directly without connecting if your infrastructure is restricted.</p>
+            <summary>Is Rank Monk built for individual creators and solo businesses?</summary>
+            <p>Yes. Every plan is crafted specifically for individual founders, solo creators, and growing businesses focusing on 1 website. You get an autonomous organic growth machine running crawls, keyword tracking, social scheduling, and content drafting for your brand without needing an agency retainer.</p>
           </details>
           <details>
-            <summary>What happens to unused blog article allowances?</summary>
-            <p>Article quotas reset on each monthly billing cycle to maintain high generation quality and fresh topic research. If you need more articles in a month, you can easily top up or upgrade to Grow.</p>
+            <summary>How does social media auto-scheduling work?</summary>
+            <p>Whenever you publish an article or resolve an SEO milestone, Rank Monk automatically drafts and schedules engaging social posts across LinkedIn, X (Twitter), and other channels based on your predefined calendar and brand voice.</p>
           </details>
           <details>
             <summary>Are there any long-term contracts?</summary>

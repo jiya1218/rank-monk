@@ -646,6 +646,11 @@
               <h3>Quick Actions</h3>
             </div>
             <div class="quick-actions-col">
+              <button class="quick-action-card-btn" onclick="window.location.href='onboarding';">
+                <div class="quick-action-icon-wrap" style="background: rgba(197, 160, 89, 0.15); color: #c5a059;">🌐</div>
+                <div class="quick-action-txt">Connect New Website</div>
+              </button>
+
               <button class="quick-action-card-btn" onclick="navigateTab('seo')">
                 <div class="quick-action-icon-wrap green">⚡</div>
                 <div class="quick-action-txt">Run SEO Audit</div>
@@ -1373,8 +1378,8 @@
       <div class="dash-view-panel" id="panel-reports">
         <div class="dash-panel-card">
           <div class="panel-card-head">
-            <h3>Automated Executive & Client Reports</h3>
-            <button class="btn-primary-top" onclick="alert('Generating white-label PDF executive brief.');">+ Export PDF Brief</button>
+            <h3>Automated SEO & Video Improvement Reports</h3>
+            <button class="btn-primary-top" onclick="alert('Generating automated PDF audit report...');">+ Export PDF Report</button>
           </div>
           <div class="issues-feed">
             <div class="issue-item">
@@ -1382,7 +1387,7 @@
                 <span class="issue-icon">📑</span>
                 <span class="issue-name">October 2026 Executive Growth Brief</span>
               </div>
-              <button class="btn-fix-sm" onclick="alert('Downloading client PDF report...');">Download PDF</button>
+              <button class="btn-fix-sm" onclick="alert('Downloading PDF audit report...');">Download PDF</button>
             </div>
             <div class="issue-item">
               <div class="issue-left">
@@ -1494,10 +1499,10 @@
               <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Starter Tier</div>
               <div style="font-size: 1.35rem; font-weight: 900; margin-top: 4px; color: #111c26;">Seed (₹10,000<span style="font-size: 11px; font-weight: 600; color: #64748b;">/mo</span>)</div>
               <ul style="font-size: 11px; color: #64748b; margin: 10px 0 16px; padding-left: 16px; line-height: 1.6;">
-                <li>1 Connected Domain</li>
-                <li>8 Autonomous Blogs / mo</li>
-                <li>60 Social Posts / mo</li>
-                <li>Monthly SEO Crawler</li>
+                <li>1 Website (200 pages / scan)</li>
+                <li>5 Daily Auto-Fixes & 2 Rescans</li>
+                <li>Real-time Prompt Recs (5 Tracked)</li>
+                <li>30 Social Posts & 8 Blogs</li>
               </ul>
               <button class="btn-fix-sm" style="width: 100%; justify-content: center;" onclick="changePlan('Seed', '₹10,000')">Switch to Seed</button>
             </div>
@@ -1508,23 +1513,23 @@
               <div style="font-size: 10px; font-weight: 800; color: var(--rm-gold, #c5a059); text-transform: uppercase;">Most Popular</div>
               <div style="font-size: 1.35rem; font-weight: 900; margin-top: 4px; color: #111c26;">Grow (₹20,000<span style="font-size: 11px; font-weight: 600; color: #64748b;">/mo</span>)</div>
               <ul style="font-size: 11px; color: #475569; margin: 10px 0 16px; padding-left: 16px; line-height: 1.6;">
-                <li>5 Connected Domains</li>
-                <li>30 Autonomous Blogs / mo</li>
-                <li>30 AI Visuals included</li>
-                <li>Weekly Audits + 1-Click Fixes</li>
+                <li>1 Website (300 pages / scan)</li>
+                <li>7 Daily Auto-Fixes & 4 Rescans</li>
+                <li>Real-time Prompt Recs (10 Tracked)</li>
+                <li>Unlimited Social & 30 Blogs</li>
               </ul>
               <button class="btn-primary-top" style="width: 100%; justify-content: center; background: #10b981; border-color: #10b981; cursor: default;">✓ Active Tier</button>
             </div>
 
             <!-- Scale -->
             <div style="padding: 18px; background: #faf8f5; border: 1.5px solid #efeae1; border-radius: 14px; position: relative;">
-              <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Agency & Scale</div>
+              <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Power & Scale</div>
               <div style="font-size: 1.35rem; font-weight: 900; margin-top: 4px; color: #111c26;">Scale (₹40,000<span style="font-size: 11px; font-weight: 600; color: #64748b;">/mo</span>)</div>
               <ul style="font-size: 11px; color: #64748b; margin: 10px 0 16px; padding-left: 16px; line-height: 1.6;">
-                <li>15 Connected Domains</li>
-                <li>100 Autonomous Blogs / mo</li>
-                <li>100 AI Visuals included</li>
-                <li>Daily Crawlers + White-Label PDF</li>
+                <li>1 Website (500 pages / scan)</li>
+                <li>10 Daily Auto-Fixes & 6 Rescans</li>
+                <li>Real-time Prompt Recs (15 Tracked)</li>
+                <li>Unlimited Social & 100 Blogs</li>
               </ul>
               <button class="btn-primary-top" style="width: 100%; justify-content: center;" onclick="changePlan('Scale', '₹40,000')">Upgrade to Scale →</button>
             </div>
@@ -3046,12 +3051,20 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
       // Dropdown Domains
       const dd = document.getElementById('wsDropdownItems');
       if (dd) {
-        dd.innerHTML = RankMonkState.data.projects.map(p => `
+        const itemsHtml = RankMonkState.data.projects.map(p => `
           <div onclick="RankMonkState.setActiveProject('${p.id}'); toggleWorkspaceDropdown(); renderAll();" style="padding: 6px 8px; font-size: 11px; font-weight: 700; color: ${p.id === RankMonkState.data.activeProjectId ? 'var(--rm-gold)' : '#fff'}; cursor: pointer; border-radius: 6px; display: flex; justify-content: space-between;">
             <span>${p.domain}</span>
             ${p.id === RankMonkState.data.activeProjectId ? '<span>✔</span>' : ''}
           </div>
         `).join('');
+
+        const addNewHtml = `
+          <div onclick="window.location.href='onboarding';" style="margin-top: 6px; padding: 7px 8px; font-size: 11px; font-weight: 800; color: #10b981; border-top: 1px solid #243547; cursor: pointer; display: flex; align-items: center; gap: 6px; border-radius: 6px;">
+            <span>⚡</span>
+            <span>+ Connect New Website</span>
+          </div>
+        `;
+        dd.innerHTML = itemsHtml + addNewHtml;
       }
     }
 

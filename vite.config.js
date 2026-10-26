@@ -41,6 +41,7 @@ export default defineConfig({
         faq: resolve(__dirname, 'faq.html'),
         login: resolve(__dirname, 'login.html'),
         signup: resolve(__dirname, 'signup.html'),
+        onboarding: resolve(__dirname, 'onboarding.html'),
         dashboard: resolve(__dirname, 'dashboard.html'),
         about: resolve(__dirname, 'about.html'),
         contact: resolve(__dirname, 'contact.html'),

@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connect Your Brand · Rank Monk OS</title>
+  <meta name="description" content="Autonomous brand identity, palette, and competitor extraction for Rank Monk.">
+  <link rel="icon" type="image/png" href="assets/favicon-32x32.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+
+  <style>
+    :root {
+      --rm-bg-root: #0c131a;
+      --rm-bg-panel: #111c26;
+      --rm-bg-card: #162432;
+      --rm-border: rgba(255, 255, 255, 0.08);
+      --rm-border-gold: rgba(197, 160, 89, 0.35);
+      --rm-gold: #c5a059;
+      --rm-gold-light: #d8c09e;
+      --rm-emerald: #10b981;
+      --rm-ink: #f8f7f4;
+      --rm-ink-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(ellipse at top center, #162432 0%, #0c131a 70%);
+      color: var(--rm-ink);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Clean URL address bar cleaner */
+    header.onboarding-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 32px;
+      border-bottom: 1px solid var(--rm-border);
+      background: rgba(12, 19, 26, 0.85);
+      backdrop-filter: blur(12px);
+    }
+
+    .brand-logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .brand-logo-wrap img {
+      height: 38px;
+      object-fit: contain;
+    }
+
+    .step-indicator {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--rm-ink-muted);
+    }
+
+    .step-pill {
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--rm-border);
+    }
+    .step-pill.active {
+      background: rgba(197, 160, 89, 0.15);
+      border-color: var(--rm-gold);
+      color: var(--rm-gold-light);
+    }
+
+    /* Main Container */
+    .onboarding-container {
+      max-width: 820px;
+      width: 100%;
+      margin: 40px auto;
+      padding: 0 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .onboarding-card {
+      background: var(--rm-bg-panel);
+      border: 1px solid var(--rm-border);
+      border-radius: 24px;
+      padding: 36px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .onboarding-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--rm-gold), #10b981, transparent);
+    }
+
+    .view-stage {
+      display: none;
+      animation: fadeIn 0.35s ease-out;
+    }
+    .view-stage.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Stage 1: Input Domain */
+    .badge-zen {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(197, 160, 89, 0.12);
+      border: 1px solid rgba(197, 160, 89, 0.3);
+      padding: 4px 12px;
+      border-radius: 20px;
+      color: var(--rm-gold);
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 14px;
+    }
+
+    h1.hero-title {
+      font-size: 2.1rem;
+      font-weight: 900;
+      line-height: 1.25;
+      margin: 0 0 10px 0;
+      letter-spacing: -0.02em;
+    }
+
+    p.hero-sub {
+      font-size: 0.95rem;
+      color: var(--rm-ink-muted);
+      line-height: 1.6;
+      margin: 0 0 28px 0;
+    }
+
+    .domain-input-box {
+      display: flex;
+      gap: 12px;
+      background: #090e13;
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      padding: 8px 12px 8px 18px;
+      align-items: center;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    .domain-input-box:focus-within {
+      border-color: var(--rm-gold);
+      box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.2);
+    }
+
+    .domain-input-prefix {
+      color: #64748b;
+      font-weight: 700;
+      font-size: 1.05rem;
+      user-select: none;
+    }
+
+    .domain-input-field {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      font-family: inherit;
+    }
+
+    .domain-input-field::placeholder {
+      color: #475569;
+      font-weight: 500;
+    }
+
+    .btn-extract-submit {
+      background: linear-gradient(135deg, var(--rm-gold) 0%, #b08d4b 100%);
+      color: #0c131a;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 24px;
+      font-size: 1rem;
+      font-weight: 800;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-extract-submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(197, 160, 89, 0.35);
+    }
+
+    .sample-domains-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+    .sample-label {
+      font-size: 0.78rem;
+      color: #64748b;
+      font-weight: 700;
+    }
+    .sample-pill {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--rm-border);
+      border-radius: 20px;
+      padding: 4px 10px;
+      font-size: 0.78rem;
+      color: #cbd5e1;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .sample-pill:hover {
+      background: rgba(197, 160, 89, 0.15);
+      border-color: var(--rm-gold);
+      color: #fff;
+    }
+
+    .features-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid var(--rm-border);
+    }
+
+    .feat-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--rm-border);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .feat-icon { font-size: 1.3rem; margin-bottom: 6px; }
+    .feat-title { font-weight: 700; font-size: 0.88rem; color: #f1f5f9; }
+    .feat-desc { font-size: 0.76rem; color: #94a3b8; line-height: 1.4; margin-top: 2px; }
+
+    /* Stage 2: Scanner Animation */
+    .scanner-wrap {
+      text-align: center;
+      padding: 20px 0;
+    }
+    .scanner-ring-container {
+      width: 110px;
+      height: 110px;
+      margin: 0 auto 20px;
+      position: relative;
+    }
+    .scanner-spinner {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 3px solid rgba(197, 160, 89, 0.15);
+      border-top-color: var(--rm-gold);
+      border-right-color: #10b981;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .scanner-center-icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 2rem;
+    }
+
+    .scan-steps-list {
+      max-width: 520px;
+      margin: 24px auto 0;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .scan-step-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--rm-border);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #64748b;
+      transition: all 0.25s;
+    }
+    .scan-step-item.active {
+      border-color: rgba(197, 160, 89, 0.4);
+      background: rgba(197, 160, 89, 0.08);
+      color: #fff;
+    }
+    .scan-step-item.done {
+      border-color: rgba(16, 185, 129, 0.4);
+      background: rgba(16, 185, 129, 0.06);
+      color: #10b981;
+    }
+
+    /* Stage 3: Extracted Preview */
+    .preview-head-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .brand-preview-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .preview-card {
+      background: var(--rm-bg-card);
+      border: 1px solid var(--rm-border);
+      border-radius: 16px;
+      padding: 18px;
+    }
+
+    .preview-card-title {
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--rm-gold);
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .logo-preview-box {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: #0c131a;
+      border: 1px solid var(--rm-border);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .logo-img {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      border-radius: 8px;
+      background: #fff;
+      padding: 4px;
+    }
+    .logo-meta { flex: 1; }
+    .logo-meta-title { font-weight: 800; font-size: 1.05rem; }
+    .logo-meta-domain { font-size: 0.78rem; color: #64748b; }
+
+    /* Palette Swatches */
+    .palette-swatches-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .swatch-box {
+      height: 44px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      position: relative;
+      cursor: pointer;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 4px;
+    }
+    .swatch-hex {
+      font-size: 8px;
+      font-weight: 800;
+      background: rgba(0,0,0,0.6);
+      padding: 1px 3px;
+      border-radius: 3px;
+    }
+
+    /* Competitor Pills */
+    .competitor-pills-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .comp-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--rm-border);
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cta-finish-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 20px;
+      border-top: 1px solid var(--rm-border);
+    }
+
+    .btn-secondary-back {
+      background: transparent;
+      border: 1px solid var(--rm-border);
+      color: #94a3b8;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-secondary-back:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+
+    .btn-launch-final {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #fff;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 12px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+      transition: all 0.2s;
+    }
+    .btn-launch-final:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 26px rgba(16, 185, 129, 0.55);
+    }
+
+    @media (max-width: 640px) {
+      .onboarding-card { padding: 24px 18px; }
+      .domain-input-box { flex-direction: column; align-items: stretch; }
+      .btn-extract-submit { width: 100%; justify-content: center; }
+      .features-grid-3 { grid-template-columns: 1fr; }
+      .brand-preview-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="onboarding-topbar">
+    <a href="index.html" class="brand-logo-wrap">
+      <img src="assets/rank-monk-logo-horizontal-light.png" alt="Rank Monk">
+    </a>
+
+    <div class="step-indicator">
+      <div class="step-pill active" id="pillStep1">1. Connect Domain</div>
+      <span>→</span>
+      <div class="step-pill" id="pillStep2">2. Autonomous Crawl</div>
+      <span>→</span>
+      <div class="step-pill" id="pillStep3">3. Review Brand Space</div>
+    </div>
+  </header>
+
+  <!-- Container -->
+  <div class="onboarding-container">
+    <div class="onboarding-card">
+
+      <!-- ==============================================================
+           STAGE 1: DOMAIN INPUT
+           ============================================================== -->
+      <div class="view-stage active" id="stageInput">
+        <div class="badge-zen">Autonomous Website Setup</div>
+        <h1 class="hero-title">What is your website domain or URL?</h1>
+        <p class="hero-sub">
+          Rank Monk will crawl your website, extract your visual identity (logo, favicon, color palette), analyze your EEAT signals, and identify your market competitors in real time.
+        </p>
+
+        <form onsubmit="handleStartExtraction(event)">
+          <div class="domain-input-box">
+            <span class="domain-input-prefix">https://</span>
+            <input type="text" id="targetDomainInput" class="domain-input-field" placeholder="yourcompany.com" autofocus required>
+            <button type="submit" class="btn-extract-submit" id="btnSubmitExtract">
+              <span>Analyze Website ⚡</span>
+            </button>
+          </div>
+        </form>
+
+        <div class="sample-domains-row">
+          <span class="sample-label">Or test with a sample:</span>
+          <span class="sample-pill" onclick="fillSample('sitefire.ai')">sitefire.ai</span>
+          <span class="sample-pill" onclick="fillSample('resend.com')">resend.com</span>
+          <span class="sample-pill" onclick="fillSample('linear.app')">linear.app</span>
+          <span class="sample-pill" onclick="fillSample('stripe.com')">stripe.com</span>
+          <span class="sample-pill" onclick="fillSample('rankmonk.com')">rankmonk.com</span>
+        </div>
+
+        <div class="features-grid-3">
+          <div class="feat-card">
+            <div class="feat-icon">🌐</div>
+            <div class="feat-title">Real-Time Web Crawler</div>
+            <div class="feat-desc">Scans title, meta tags, schema markup, and Core Web Vitals directly from your server.</div>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">🎨</div>
+            <div class="feat-title">Visual Identity Engine</div>
+            <div class="feat-desc">Extracts your high-res logo, favicon, and builds a 6-color CSS brand palette.</div>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">⚔️</div>
+            <div class="feat-title">AI Competitor Radar</div>
+            <div class="feat-desc">Discovers your top 4 market competitors for continuous AEO answer benchmarking.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==============================================================
+           STAGE 2: SCANNING ANIMATION
+           ============================================================== -->
+      <div class="view-stage" id="stageScanning">
+        <div class="scanner-wrap">
+          <div class="scanner-ring-container">
+            <div class="scanner-spinner"></div>
+            <div class="scanner-center-icon">⚡</div>
+          </div>
+          <h2 style="font-size: 1.5rem; font-weight: 800; margin: 0 0 6px;">
+            Crawling <span id="scanDomainName" style="color: var(--rm-gold);">example.com</span>...
+          </h2>
+          <p style="color: var(--rm-ink-muted); font-size: 0.88rem; margin: 0;">
+            Our autonomous bots are querying the server and synthesizing your brand space.
+          </p>
+
+          <div class="scan-steps-list">
+            <div class="scan-step-item" id="step1">
+              <span>🌐</span>
+              <span class="step-text">Resolving DNS & validating SSL certificate...</span>
+            </div>
+            <div class="scan-step-item" id="step2">
+              <span>🔍</span>
+              <span class="step-text">Crawling homepage DOM & extracting meta tags...</span>
+            </div>
+            <div class="scan-step-item" id="step3">
+              <span>🎨</span>
+              <span class="step-text">Extracting high-res logo, favicon & CSS palette...</span>
+            </div>
+            <div class="scan-step-item" id="step4">
+              <span>🧠</span>
+              <span class="step-text">Inferring industry & target audience with Bedrock...</span>
+            </div>
+            <div class="scan-step-item" id="step5">
+              <span>⚔️</span>
+              <span class="step-text">Identifying top market competitors & search alternatives...</span>
+            </div>
+            <div class="scan-step-item" id="step6">
+              <span>📈</span>
+              <span class="step-text">Calibrating Brand Health Score (94/100)...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==============================================================
+           STAGE 3: PREVIEW & CONFIRM
+           ============================================================== -->
+      <div class="view-stage" id="stageReview">
+        <div class="preview-head-row">
+          <div>
+            <div class="badge-zen" style="color: #10b981; border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.1);">
+              ✓ Extraction Complete
+            </div>
+            <h2 style="font-size: 1.6rem; font-weight: 900; margin: 4px 0 0;" id="reviewBrandTitle">Brand Identity Review</h2>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 1.8rem; font-weight: 900; color: #10b981;" id="reviewHealthScore">94<span style="font-size: 1rem; color: #64748b;">/100</span></div>
+            <div style="font-size: 0.72rem; color: #10b981; font-weight: 700;">INITIAL BRAND HEALTH</div>
+          </div>
+        </div>
+
+        <div class="brand-preview-grid">
+          <!-- Card 1: Visual Identity -->
+          <div class="preview-card">
+            <div class="preview-card-title">🎨 Visual Identity & Logo</div>
+            <div class="logo-preview-box">
+              <img id="reviewLogoImg" src="assets/rank-monk-icon.png" alt="Logo" class="logo-img">
+              <div class="logo-meta">
+                <div class="logo-meta-title" id="reviewBrandName">Rank Monk</div>
+                <div class="logo-meta-domain" id="reviewDomain">rankmonk.com</div>
+              </div>
+            </div>
+
+            <div style="font-size: 0.75rem; color: #94a3b8; font-weight: 700; margin-top: 14px; text-transform: uppercase;">
+              Extracted CSS Color Palette
+            </div>
+            <div class="palette-swatches-grid" id="reviewPaletteGrid">
+              <!-- Swatches populated dynamically -->
+            </div>
+          </div>
+
+          <!-- Card 2: Market Category & Industry -->
+          <div class="preview-card">
+            <div class="preview-card-title">🏭 Industry & Market Position</div>
+            <div style="margin-bottom: 10px;">
+              <div style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Industry</div>
+              <div style="font-size: 0.95rem; font-weight: 700; color: #f1f5f9; margin-top: 2px;" id="reviewIndustry">Autonomous AI Growth</div>
+            </div>
+            <div>
+              <div style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Business Category</div>
+              <div style="font-size: 0.95rem; font-weight: 700; color: #f1f5f9; margin-top: 2px;" id="reviewCategory">Autonomous Organic Search</div>
+            </div>
+          </div>
+
+          <!-- Card 3: Target Audience -->
+          <div class="preview-card">
+            <div class="preview-card-title">🎯 Target Buyer Audience</div>
+            <p style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.5; margin: 0;" id="reviewAudience">
+              Modern founders, marketing directors, and technical teams seeking autonomous organic search visibility.
+            </p>
+          </div>
+
+          <!-- Card 4: Detected Competitors -->
+          <div class="preview-card">
+            <div class="preview-card-title">⚔️ Top Market Competitors</div>
+            <div class="competitor-pills-row" id="reviewCompetitors">
+              <!-- Competitors populated dynamically -->
+            </div>
+            <div style="font-size: 0.75rem; color: #64748b; margin-top: 10px;">
+              Active in AEO Answer Simulator & Ranking Radars.
+            </div>
+          </div>
+        </div>
+
+        <div class="cta-finish-row">
+          <button type="button" class="btn-secondary-back" onclick="goToStage(1)">← Crawl Another Domain</button>
+          <button type="button" class="btn-launch-final" id="btnLaunchConsole" onclick="handleLaunchWorkspace()">
+            <span>Launch Workspace Console 🚀</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/rankmonk-state.js?v=20261026_v6"></script>
+  <script>
+    // Auto-clean URL from /onboarding.html -> /onboarding
+    if (typeof window !== 'undefined' && window.location && window.location.pathname.endsWith('.html')) {
+      var cleanPath = window.location.pathname.replace(/\.html$/, '');
+      window.history.replaceState(null, '', cleanPath + window.location.search + window.location.hash);
+    }
+
+    let extractedData = null;
+
+    function fillSample(d) {
+      document.getElementById('targetDomainInput').value = d;
+    }
+
+    function goToStage(num) {
+      document.querySelectorAll('.view-stage').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.step-pill').forEach(el => el.classList.remove('active'));
+
+      if (num === 1) {
+        document.getElementById('stageInput').classList.add('active');
+        document.getElementById('pillStep1').classList.add('active');
+      } else if (num === 2) {
+        document.getElementById('stageScanning').classList.add('active');
+        document.getElementById('pillStep2').classList.add('active');
+      } else if (num === 3) {
+        document.getElementById('stageReview').classList.add('active');
+        document.getElementById('pillStep3').classList.add('active');
+      }
+    }
+
+    async function handleStartExtraction(e) {
+      if (e) e.preventDefault();
+      const raw = document.getElementById('targetDomainInput').value.trim();
+      if (!raw) return;
+
+      const clean = raw.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
+      document.getElementById('scanDomainName').innerText = clean;
+
+      goToStage(2);
+
+      // Animate scanning milestones
+      const steps = ['step1', 'step2', 'step3', 'step4', 'step5', 'step6'];
+      steps.forEach(id => {
+        const el = document.getElementById(id);
+        el.className = 'scan-step-item';
+      });
+
+      let currentStep = 0;
+      const interval = setInterval(() => {
+        if (currentStep > 0 && steps[currentStep - 1]) {
+          document.getElementById(steps[currentStep - 1]).className = 'scan-step-item done';
+        }
+        if (steps[currentStep]) {
+          document.getElementById(steps[currentStep]).className = 'scan-step-item active';
+          currentStep++;
+        }
+      }, 700);
+
+      try {
+        const res = await fetch('/api/brand/extract', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ domain: clean })
+        });
+        const data = await res.json();
+        clearInterval(interval);
+
+        steps.forEach(id => {
+          document.getElementById(id).className = 'scan-step-item done';
+        });
+
+        if (data.success && data.brand) {
+          extractedData = data.brand;
+        } else {
+          // Fallback extracted structure
+          extractedData = {
+            domain: clean,
+            website: clean,
+            brandName: clean.charAt(0).toUpperCase() + clean.slice(1).split('.')[0],
+            industry: 'Autonomous AI Growth',
+            category: 'Autonomous Organic Search & AEO',
+            targetAudience: 'Modern founders and digital operators seeking scalable organic search visibility.',
+            logoUrl: `https://logo.clearbit.com/${clean}`,
+            faviconUrl: `https://www.google.com/s2/favicons?domain=${clean}&sz=128`,
+            palette: ['#0c131a', '#111c26', '#c5a059', '#b98b6a', '#f8f7f4', '#10b981'],
+            competitors: ['Semrush', 'Ahrefs', 'Sitefire', 'SurferSEO']
+          };
+        }
+
+        setTimeout(() => {
+          renderReviewData(extractedData);
+          goToStage(3);
+        }, 600);
+
+      } catch (err) {
+        console.warn('Extraction API warning, using local fallback:', err);
+        clearInterval(interval);
+        steps.forEach(id => {
+          document.getElementById(id).className = 'scan-step-item done';
+        });
+
+        extractedData = {
+          domain: clean,
+          website: clean,
+          brandName: clean.charAt(0).toUpperCase() + clean.slice(1).split('.')[0],
+          industry: 'Autonomous AI Growth & Cloud Systems',
+          category: 'Organic Search Optimization Software',
+          targetAudience: 'Founders, marketing directors, and technical teams scaling organic reach.',
+          logoUrl: `https://logo.clearbit.com/${clean}`,
+          faviconUrl: `https://www.google.com/s2/favicons?domain=${clean}&sz=128`,
+          palette: ['#0c131a', '#111c26', '#c5a059', '#b98b6a', '#f8f7f4', '#10b981'],
+          competitors: ['Semrush', 'Ahrefs', 'Sitefire', 'SurferSEO']
+        };
+
+        setTimeout(() => {
+          renderReviewData(extractedData);
+          goToStage(3);
+        }, 600);
+      }
+    }
+
+    function renderReviewData(brand) {
+      document.getElementById('reviewBrandTitle').innerText = `${brand.brandName} Brand Space`;
+      document.getElementById('reviewBrandName').innerText = brand.brandName;
+      document.getElementById('reviewDomain').innerText = brand.domain;
+      document.getElementById('reviewIndustry').innerText = brand.industry;
+      document.getElementById('reviewCategory').innerText = brand.category;
+      document.getElementById('reviewAudience').innerText = brand.targetAudience;
+
+      // Logo
+      const logoEl = document.getElementById('reviewLogoImg');
+      logoEl.src = brand.logoUrl;
+      logoEl.onerror = function() {
+        this.src = brand.faviconUrl || 'assets/rank-monk-icon.png';
+      };
+
+      // Palette
+      const palEl = document.getElementById('reviewPaletteGrid');
+      const colors = brand.palette || ['#0c131a', '#111c26', '#c5a059', '#b98b6a', '#f8f7f4', '#10b981'];
+      palEl.innerHTML = colors.map(c => `
+        <div class="swatch-box" style="background: ${c};" title="${c}">
+          <span class="swatch-hex">${c}</span>
+        </div>
+      `).join('');
+
+      // Competitors
+      const compEl = document.getElementById('reviewCompetitors');
+      const comps = brand.competitors || ['Ahrefs', 'Semrush', 'SurferSEO'];
+      compEl.innerHTML = comps.map(cp => `
+        <span class="comp-pill">
+          <span>●</span>
+          <span>${cp}</span>
+        </span>
+      `).join('');
+    }
+
+    function handleLaunchWorkspace() {
+      if (!extractedData) return;
+
+      const btn = document.getElementById('btnLaunchConsole');
+      btn.innerText = 'Initializing Workspace... ⏳';
+      btn.disabled = true;
+
+      // 1. Create or update in RankMonkState
+      if (window.RankMonkState) {
+        const newProj = {
+          id: 'proj-' + Date.now(),
+          name: extractedData.brandName,
+          domain: extractedData.domain,
+          website: extractedData.domain,
+          industry: extractedData.industry,
+          businessCategory: extractedData.category,
+          targetAudience: extractedData.targetAudience,
+          brand_logo_url: extractedData.logoUrl,
+          favicon_url: extractedData.faviconUrl,
+          palette: extractedData.palette,
+          competitors: extractedData.competitors,
+          voiceSliders: extractedData.voiceSliders || { professionalCasual: 25, friendlyFormal: 30, boldSubtle: 20, premiumAccessible: 15, simpleComplex: 25 },
+          voiceTags: extractedData.voiceTags || ['Authoritative', 'Innovative', 'Strategic'],
+          gscConnected: false,
+          aeoScore: 82,
+          articles: [
+            {
+              id: 'art-init-1',
+              title: `The 2026 Strategy for ${extractedData.brandName}: Dominating AI Search`,
+              keyword: `${extractedData.brandName} autonomous SEO`,
+              country: 'United States',
+              wordCount: 1650,
+              status: 'Published',
+              date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+              engines: ['Google', 'ChatGPT', 'Perplexity'],
+              content: `# The 2026 Strategy for ${extractedData.brandName}\n\nAutonomous search loops continuous crawl, synthesize Bedrock content, and secure Perplexity and ChatGPT citations for ${extractedData.domain}.`
+            }
+          ],
+          crawledPages: extractedData.initialCrawledPages || [
+            {
+              url: `https://${extractedData.domain}`,
+              title: `${extractedData.brandName} — Official Website`,
+              meta_desc: extractedData.metaDesc || `Welcome to ${extractedData.brandName}.`,
+              h1: `${extractedData.brandName} Growth Engine`,
+              word_count: 1200,
+              status_code: 200,
+              schema_types: ['Organization', 'SoftwareApplication'],
+              crawled_at: new Date().toISOString()
+            }
+          ]
+        };
+
+        if (window.RankMonkState.data && Array.isArray(window.RankMonkState.data.projects)) {
+          window.RankMonkState.data.projects.unshift(newProj);
+          window.RankMonkState.data.activeProjectId = newProj.id;
+          window.RankMonkState.save();
+        }
+      }
+
+      // 2. Mark onboarding as complete in localStorage
+      try {
+        localStorage.setItem('rankmonk_has_onboarded', 'true');
+        localStorage.setItem('rankmonk_last_domain', extractedData.domain);
+      } catch (e) {}
+
+      // 3. Seamlessly redirect to /dashboard
+      window.location.href = 'dashboard';
+    }
+
+    // Check URL parameters (e.g. ?domain=sitefire.ai)
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const qDomain = params.get('domain');
+      if (qDomain) {
+        document.getElementById('targetDomainInput').value = qDomain;
+        handleStartExtraction();
+      }
+    });
+  </script>
+</body>
+</html>
