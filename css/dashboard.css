@@ -954,14 +954,15 @@ body.dash-shell {
 
 .logo-preview-box {
   flex: 2;
-  background: #faf8f5;
-  border: 1px solid #efeae1;
+  background: #0c131a;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
   padding: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   height: 64px;
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .logo-preview-box img {
@@ -972,14 +973,15 @@ body.dash-shell {
 
 .favicon-preview-box {
   flex: 1;
-  background: #faf8f5;
-  border: 1px solid #efeae1;
+  background: #0c131a;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
   padding: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   height: 64px;
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .palette-swatches-row {
@@ -2087,5 +2089,151 @@ body.dash-shell {
   color: var(--rm-gold, #c5a059);
 }
 
+/* ==========================================================================
+   AI Website Executive Summary & Competitor Intelligence Watchlist
+   ========================================================================== */
+.ai-summary-panel-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  padding: 20px 24px;
+}
 
+.competitor-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
 
+.competitor-card-item {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+
+.competitor-card-item:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  transform: translateY(-2px);
+}
+
+.comp-head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.comp-brand-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.comp-favicon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  object-fit: contain;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 3px;
+  flex-shrink: 0;
+}
+
+.comp-name-box {
+  min-width: 0;
+  flex: 1;
+}
+
+.comp-name {
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.comp-domain-link {
+  font-size: 0.8rem;
+  color: #6366f1;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 3px;
+  transition: color 0.15s;
+}
+
+.comp-domain-link:hover {
+  color: #4338ca;
+  text-decoration: underline;
+}
+
+.comp-remove-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+
+.comp-remove-btn:hover {
+  color: #ef4444;
+  background: #fee2e2;
+}
+
+.comp-desc {
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.45;
+  margin: 0;
+  font-weight: 500;
+}
+
+.comp-footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px solid #f1f5f9;
+  font-size: 0.74rem;
+}
+
+.comp-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #10b981;
+  font-weight: 700;
+}
+
+.comp-visit-btn {
+  color: #4f46e5;
+  font-weight: 800;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: transform 0.15s;
+}
+
+.comp-visit-btn:hover {
+  text-decoration: underline;
+  transform: translateX(2px);
+}

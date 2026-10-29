@@ -1020,6 +1020,36 @@
       return newArt;
     }
 
+    addCompetitor(comp) {
+      const proj = this.getActiveProject();
+      if (!proj) return;
+      if (!Array.isArray(proj.competitors)) proj.competitors = [];
+      proj.competitors.push(comp);
+      this.save();
+      return comp;
+    }
+
+    removeCompetitor(indexOrComp) {
+      const proj = this.getActiveProject();
+      if (!proj || !Array.isArray(proj.competitors)) return;
+      if (typeof indexOrComp === 'number') {
+        proj.competitors.splice(indexOrComp, 1);
+      } else if (typeof indexOrComp === 'string') {
+        const clean = indexOrComp.toLowerCase();
+        proj.competitors = proj.competitors.filter(c => {
+          const cDom = (typeof c === 'string' ? c : (c.domain || c.name || '')).toLowerCase();
+          return cDom !== clean;
+        });
+      } else if (typeof indexOrComp === 'object' && indexOrComp !== null) {
+        const targetDom = (indexOrComp.domain || indexOrComp.name || '').toLowerCase();
+        proj.competitors = proj.competitors.filter(c => {
+          const cDom = (typeof c === 'string' ? c : (c.domain || c.name || '')).toLowerCase();
+          return cDom !== targetDom;
+        });
+      }
+      this.save();
+    }
+
     // Compute all dynamic metrics for active project
     getComputedMetrics() {
       const proj = this.getActiveProject();

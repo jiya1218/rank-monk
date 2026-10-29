@@ -380,8 +380,10 @@
       height: 48px;
       object-fit: contain;
       border-radius: 8px;
-      background: #fff;
-      padding: 4px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 6px;
+      transition: background 0.2s ease, border-color 0.2s ease;
     }
     .logo-meta { flex: 1; }
     .logo-meta-title { font-weight: 800; font-size: 1.05rem; }
@@ -646,6 +648,17 @@
             </div>
           </div>
 
+          <!-- Card: Autonomous AI Brand Summary -->
+          <div class="preview-card" style="grid-column: 1 / -1; background: rgba(99, 102, 241, 0.08); border-color: rgba(99, 102, 241, 0.3);">
+            <div class="preview-card-title" style="color: #a5b4fc; display: flex; justify-content: space-between; align-items: center;">
+              <span>✨ Autonomous AI Website Summary</span>
+              <span style="font-size: 0.7rem; color: #10b981; font-weight: 700;">Synthesized by Bedrock Nova Pro</span>
+            </div>
+            <p style="font-size: 0.9rem; color: #e2e8f0; line-height: 1.65; margin: 0; font-weight: 500;" id="reviewSummary">
+              Autonomous brand intelligence loading...
+            </p>
+          </div>
+
           <!-- Card 3: Target Audience -->
           <div class="preview-card">
             <div class="preview-card-title">🎯 Target Buyer Audience</div>
@@ -658,9 +671,9 @@
           <div class="preview-card">
             <div class="preview-card-title">⚔️ Top Market Competitors</div>
             <div class="competitor-pills-row" id="reviewCompetitors">
-              <!-- Competitors populated dynamically -->
+              <!-- Competitors populated dynamically with working domains & links -->
             </div>
-            <div style="font-size: 0.75rem; color: #64748b; margin-top: 10px;">
+            <div style="font-size: 0.72rem; color: #64748b; margin-top: 10px;">
               Active in AEO Answer Simulator & Ranking Radars.
             </div>
           </div>
@@ -807,11 +820,27 @@
       document.getElementById('reviewCategory').innerText = brand.category;
       document.getElementById('reviewAudience').innerText = brand.targetAudience;
 
-      // Logo
+      // Logo & Dynamic Contrast for White/Dark Marks
       const logoEl = document.getElementById('reviewLogoImg');
-      logoEl.src = brand.logoUrl;
+      const lUrl = brand.logoUrl || brand.faviconUrl || 'assets/rank-monk-icon.png';
+      const lLower = lUrl.toLowerCase();
+      if (lLower.includes('white') || lLower.includes('light')) {
+        logoEl.style.background = '#090e13';
+        logoEl.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+      } else if (lLower.includes('dark') || lLower.includes('black')) {
+        logoEl.style.background = '#ffffff';
+        logoEl.style.borderColor = '#cbd5e1';
+      } else {
+        logoEl.style.background = 'rgba(255, 255, 255, 0.08)';
+        logoEl.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+      }
+      logoEl.src = lUrl;
       logoEl.onerror = function() {
-        this.src = brand.faviconUrl || 'assets/rank-monk-icon.png';
+        if (this.src !== brand.faviconUrl && brand.faviconUrl) {
+          this.src = brand.faviconUrl;
+        } else {
+          this.src = 'assets/rank-monk-icon.png';
+        }
       };
 
       // Palette
@@ -823,14 +852,38 @@
         </div>
       `).join('');
 
-      // Competitors
+      // AI Website Executive Summary
+      const sumEl = document.getElementById('reviewSummary');
+      if (sumEl) {
+        sumEl.innerText = brand.summary || `${brand.brandName} is a leading provider of ${brand.category}, engineering tailored digital solutions for ${brand.targetAudience}.`;
+      }
+
+      // Competitors with Working Domains and Direct Links
       const compEl = document.getElementById('reviewCompetitors');
-      const comps = brand.competitors || ['Ahrefs', 'Semrush', 'SurferSEO'];
+      const rawComps = brand.competitors || [];
+      const comps = rawComps.map(c => {
+        if (typeof c === 'string') {
+          let d = c.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
+          if (!d.includes('.') && d.length > 0) d += '.com';
+          let n = c.replace(/\.(com|io|ai|net|co|in|org|app|dev)$/i, '');
+          n = n.charAt(0).toUpperCase() + n.slice(1);
+          return { name: n, domain: d, website: `https://${d}` };
+        }
+        let d = c.domain || (c.website ? c.website.replace(/^https?:\/\//, '').split('/')[0] : '');
+        return {
+          name: c.name || d,
+          domain: d,
+          website: c.website || (d ? `https://${d}` : '#')
+        };
+      });
+
       compEl.innerHTML = comps.map(cp => `
-        <span class="comp-pill">
-          <span>●</span>
-          <span>${cp}</span>
-        </span>
+        <a href="${cp.website}" target="_blank" rel="noopener noreferrer" class="comp-pill" style="text-decoration: none; cursor: pointer;" title="Visit ${cp.domain}">
+          <img src="https://www.google.com/s2/favicons?domain=${cp.domain}&sz=32" style="width: 14px; height: 14px; border-radius: 3px; object-fit: contain;" onerror="this.style.display='none'">
+          <span style="color: #fff; font-weight: 700;">${cp.name}</span>
+          <span style="color: var(--rm-gold); font-size: 11px; font-weight: 600;">(${cp.domain})</span>
+          <span style="color: #94a3b8; font-size: 10px;">↗</span>
+        </a>
       `).join('');
     }
 
@@ -841,57 +894,70 @@
       btn.innerText = 'Initializing Workspace... ⏳';
       btn.disabled = true;
 
-      // 1. Create or update in RankMonkState
-      if (window.RankMonkState) {
-        const newProj = {
-          id: 'proj-' + Date.now(),
-          name: extractedData.brandName,
-          domain: extractedData.domain,
-          website: extractedData.domain,
-          industry: extractedData.industry,
-          businessCategory: extractedData.category,
-          targetAudience: extractedData.targetAudience,
-          brand_logo_url: extractedData.logoUrl,
-          favicon_url: extractedData.faviconUrl,
-          palette: extractedData.palette,
-          competitors: extractedData.competitors,
-          voiceSliders: extractedData.voiceSliders || { professionalCasual: 25, friendlyFormal: 30, boldSubtle: 20, premiumAccessible: 15, simpleComplex: 25 },
-          voiceTags: extractedData.voiceTags || ['Authoritative', 'Innovative', 'Strategic'],
-          gscConnected: false,
-          aeoScore: 82,
-          articles: [
-            {
-              id: 'art-init-1',
-              title: `The 2026 Strategy for ${extractedData.brandName}: Dominating AI Search`,
-              keyword: `${extractedData.brandName} autonomous SEO`,
-              country: 'United States',
-              wordCount: 1650,
-              status: 'Published',
-              date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-              engines: ['Google', 'ChatGPT', 'Perplexity'],
-              content: `# The 2026 Strategy for ${extractedData.brandName}\n\nAutonomous search loops continuous crawl, synthesize Bedrock content, and secure Perplexity and ChatGPT citations for ${extractedData.domain}.`
-            }
-          ],
-          crawledPages: extractedData.initialCrawledPages || [
-            {
-              url: `https://${extractedData.domain}`,
-              title: `${extractedData.brandName} — Official Website`,
-              meta_desc: extractedData.metaDesc || `Welcome to ${extractedData.brandName}.`,
-              h1: `${extractedData.brandName} Growth Engine`,
-              word_count: 1200,
-              status_code: 200,
-              schema_types: ['Organization', 'SoftwareApplication'],
-              crawled_at: new Date().toISOString()
-            }
-          ]
-        };
+      const newProj = {
+        id: 'proj-' + Date.now(),
+        name: extractedData.brandName,
+        domain: extractedData.domain,
+        website: extractedData.domain,
+        industry: extractedData.industry,
+        businessCategory: extractedData.category,
+        targetAudience: extractedData.targetAudience,
+        summary: extractedData.summary || '',
+        brand_logo_url: extractedData.logoUrl,
+        favicon_url: extractedData.faviconUrl,
+        palette: extractedData.palette,
+        competitors: extractedData.competitors,
+        voiceSliders: extractedData.voiceSliders || { professionalCasual: 25, friendlyFormal: 30, boldSubtle: 20, premiumAccessible: 15, simpleComplex: 25 },
+        voiceTags: extractedData.voiceTags || ['Authoritative', 'Innovative', 'Strategic'],
+        gscConnected: false,
+        aeoScore: 82,
+        articles: [
+          {
+            id: 'art-init-1',
+            title: `The 2026 Strategy for ${extractedData.brandName}: Dominating AI Search`,
+            keyword: `${extractedData.brandName} autonomous SEO`,
+            country: 'United States',
+            wordCount: 1650,
+            status: 'Published',
+            date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+            engines: ['Google', 'ChatGPT', 'Perplexity'],
+            content: `# The 2026 Strategy for ${extractedData.brandName}\n\nAutonomous search loops continuous crawl, synthesize Bedrock content, and secure Perplexity and ChatGPT citations for ${extractedData.domain}.`
+          }
+        ],
+        crawledPages: extractedData.initialCrawledPages || [
+          {
+            url: `https://${extractedData.domain}`,
+            title: `${extractedData.brandName} — Official Website`,
+            meta_desc: extractedData.metaDesc || `Welcome to ${extractedData.brandName}.`,
+            h1: `${extractedData.brandName} Growth Engine`,
+            word_count: 1200,
+            status_code: 200,
+            schema_types: ['Organization', 'SoftwareApplication'],
+            crawled_at: new Date().toISOString()
+          }
+        ]
+      };
 
-        if (window.RankMonkState.data && Array.isArray(window.RankMonkState.data.projects)) {
-          window.RankMonkState.data.projects.unshift(newProj);
-          window.RankMonkState.data.activeProjectId = newProj.id;
+      // 1. Create or update in RankMonkState
+      if (window.RankMonkState && window.RankMonkState.data && Array.isArray(window.RankMonkState.data.projects)) {
+        window.RankMonkState.data.projects.unshift(newProj);
+        window.RankMonkState.data.activeProjectId = newProj.id;
+        if (typeof window.RankMonkState.save === 'function') {
           window.RankMonkState.save();
         }
       }
+
+      // 1b. Direct localStorage backup guarantee
+      try {
+        const STORAGE_KEY = 'rankmonk_engine_state_v6';
+        let rawState = localStorage.getItem(STORAGE_KEY);
+        let parsed = rawState ? JSON.parse(rawState) : { projects: [], activeProjectId: '' };
+        if (!parsed.projects) parsed.projects = [];
+        parsed.projects = parsed.projects.filter(p => p.domain && p.domain.toLowerCase() !== extractedData.domain.toLowerCase());
+        parsed.projects.unshift(newProj);
+        parsed.activeProjectId = newProj.id;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+      } catch (backupErr) {}
 
       // 2. Mark onboarding as complete in localStorage
       try {

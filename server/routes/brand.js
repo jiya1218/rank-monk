@@ -1,5 +1,5 @@
 import express from 'express';
-import { extractBrandFromDomain } from '../services/brandExtractor.js';
+import { extractBrandFromDomain, generateBrandSummary } from '../services/brandExtractor.js';
 import { memoryStore, supabaseAdmin } from '../config/supabase.js';
 
 const router = express.Router();
@@ -25,6 +25,7 @@ router.post('/extract', async (req, res) => {
       industry: brandData.industry,
       businessCategory: brandData.category,
       targetAudience: brandData.targetAudience,
+      summary: brandData.summary,
       brand_logo_url: brandData.logoUrl,
       favicon_url: brandData.faviconUrl,
       palette: brandData.palette,
@@ -56,6 +57,30 @@ router.post('/extract', async (req, res) => {
   } catch (err) {
     console.error('[Brand Route] Extraction error:', err);
     res.status(500).json({ error: err.message || 'Brand extraction failed' });
+  }
+});
+
+router.post('/summary', async (req, res) => {
+  const { domain, brandName, industry, category, targetAudience, homepageText } = req.body;
+  const target = domain || brandName;
+  if (!target) {
+    return res.status(400).json({ error: 'Domain or brand name is required' });
+  }
+
+  try {
+    console.log(`[Brand Route] Generating AI website summary for: ${target}`);
+    const summary = await generateBrandSummary({
+      domain,
+      brandName,
+      industry,
+      category,
+      targetAudience,
+      homepageText
+    });
+    res.json({ success: true, summary });
+  } catch (err) {
+    console.error('[Brand Route] Summary generation error:', err);
+    res.status(500).json({ error: err.message || 'Failed to generate summary' });
   }
 });
 

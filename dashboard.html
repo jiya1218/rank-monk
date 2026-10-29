@@ -473,6 +473,24 @@
            ==================================================================== -->
       <div class="dash-view-panel active-view" id="panel-dashboard">
         
+        <!-- Domain Connection Prompt Banner for New Users -->
+        <div id="firstTimeDomainPromptBanner" style="display: none; background: linear-gradient(135deg, rgba(17, 28, 38, 0.95), rgba(22, 36, 50, 0.95)); border: 1px solid rgba(197, 160, 89, 0.4); border-radius: 16px; padding: 20px 24px; margin-bottom: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 16px;">
+              <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(197, 160, 89, 0.15); border: 1px solid rgba(197, 160, 89, 0.3); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">⚡</div>
+              <div>
+                <div style="font-size: 1.05rem; font-weight: 800; color: #fff; margin-bottom: 4px;">Connect Your Website Domain</div>
+                <div style="font-size: 0.85rem; color: #94a3b8; max-width: 580px;">Enter your website URL to autonomously extract your brand identity, high-res logo, favicon, 6-color CSS palette, target buyer persona, competitors, and technical SEO crawl.</div>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <button onclick="openConnectWebsiteModal()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; border: none; padding: 10px 22px; border-radius: 10px; font-weight: 800; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);">
+                <span>+ Connect My Website ⚡</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Empty Audit State (SoloSpider Matching: When project has 0 crawled pages) -->
         <div id="dashboardEmptyAuditState" style="display: none;">
           <div class="empty-audit-banner">
@@ -801,6 +819,39 @@
 
         </div>
 
+        <!-- Autonomous AI Brand Summary Card -->
+        <div class="dash-panel-card ai-summary-panel-card" style="margin-bottom: 24px; border: 1.5px solid rgba(99, 102, 241, 0.25); background: linear-gradient(135deg, rgba(99, 102, 241, 0.04) 0%, rgba(16, 185, 129, 0.03) 100%);">
+          <div class="panel-card-head">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(99, 102, 241, 0.15); display: flex; align-items: center; justify-content: center; font-size: 16px;">
+                ✨
+              </div>
+              <div>
+                <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #0f172a;">AI Website Executive Summary</h3>
+                <p style="margin: 2px 0 0; font-size: 0.76rem; color: #64748b; font-weight: 600;">Autonomous intelligence calibrated by AWS Bedrock Nova Pro</p>
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn-sm-action" onclick="copyBrandSummary()" id="btnCopySummary" title="Copy to clipboard" style="display: flex; align-items: center; gap: 6px;">
+                <span>📋 Copy</span>
+              </button>
+              <button class="btn-sm-action" onclick="regenerateActiveBrandSummary()" id="btnRegenSummary" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; border: none; font-weight: 800; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);">
+                <span id="btnRegenIcon">⚡</span>
+                <span id="btnRegenText">Regenerate AI Summary</span>
+              </button>
+            </div>
+          </div>
+          <div style="margin-top: 14px; position: relative;">
+            <div id="aiSummaryLoading" style="display: none; padding: 24px; text-align: center;">
+              <div class="scanner-spinner" style="width: 28px; height: 28px; margin: 0 auto 10px; border-width: 2.5px;"></div>
+              <div style="font-size: 0.82rem; font-weight: 700; color: #6366f1;">Synthesizing website intelligence with Bedrock Nova Pro...</div>
+            </div>
+            <p id="bpAiSummaryText" style="font-size: 0.92rem; line-height: 1.7; color: #334155; margin: 0; font-weight: 500;">
+              Loading autonomous website intelligence...
+            </p>
+          </div>
+        </div>
+
         <!-- 3 Brand Panels Grid (Brand Profile, Visual Identity, Brand Voice) -->
         <div class="brand-panels-3">
           
@@ -808,7 +859,10 @@
           <div class="brand-info-card">
             <div class="brand-info-head">
               <h3><span>👤</span> Brand Profile</h3>
-              <button class="btn-edit-sm" onclick="editBrandProfile()">Edit</button>
+              <div style="display: flex; gap: 6px;">
+                <button class="btn-edit-sm" onclick="promptExtractBrandForActiveProject()" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">⚡ Re-extract</button>
+                <button class="btn-edit-sm" onclick="editBrandProfile()">Edit</button>
+              </div>
             </div>
             <div class="brand-profile-list">
               <div class="bp-item">
@@ -834,24 +888,27 @@
           <div class="brand-info-card">
             <div class="brand-info-head">
               <h3><span>🎨</span> Visual Identity</h3>
-              <button class="btn-edit-sm" onclick="alert('Visual assets synced from logo upload.')">Edit</button>
+              <button class="btn-edit-sm" onclick="promptExtractBrandForActiveProject()" style="background: rgba(197, 160, 89, 0.15); color: var(--rm-gold-light); border: 1px solid rgba(197, 160, 89, 0.35);">⚡ Sync from Site</button>
             </div>
             <div class="logo-favicon-preview-row">
-              <div class="logo-preview-box">
-                <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk Logo" id="bpLogoPreview">
+              <div class="logo-preview-box" id="bpLogoPreviewBox">
+                <img src="assets/rank-monk-logo-horizontal.png" alt="Brand Logo" id="bpLogoPreview">
               </div>
-              <div class="favicon-preview-box">
-                <img src="assets/rank-monk-icon.png" alt="Favicon" style="height: 38px;">
+              <div class="favicon-preview-box" id="bpFaviconPreviewBox">
+                <img src="assets/rank-monk-icon.png" alt="Favicon" id="bpFaviconPreview" style="height: 38px;">
               </div>
             </div>
-            <div class="bp-label" style="margin-bottom: 6px;">Color Palette</div>
-            <div class="palette-swatches-row">
-              <div class="palette-swatch" style="background: #1e2d3c;" title="#1e2d3c (Deep Slate Navy)"></div>
-              <div class="palette-swatch" style="background: #2d3c4b;" title="#2d3c4b"></div>
-              <div class="palette-swatch" style="background: #1e3c4b;" title="#1e3c4b"></div>
-              <div class="palette-swatch" style="background: #b98b6a;" title="#b98b6a (Monk Gold)"></div>
-              <div class="palette-swatch" style="background: #d8c09e;" title="#d8c09e (Sand)"></div>
-              <div class="palette-swatch" style="background: #10b981;" title="#10b981 (Emerald)"></div>
+            <div class="bp-label" style="margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+              <span>Color Palette</span>
+              <span style="font-size: 10px; color: var(--rm-gold);" id="bpPaletteNote">CSS Extracted</span>
+            </div>
+            <div class="palette-swatches-row" id="bpPaletteSwatches">
+              <div class="palette-swatch" style="background: #0c131a;" title="#0c131a"></div>
+              <div class="palette-swatch" style="background: #111c26;" title="#111c26"></div>
+              <div class="palette-swatch" style="background: #c5a059;" title="#c5a059"></div>
+              <div class="palette-swatch" style="background: #b98b6a;" title="#b98b6a"></div>
+              <div class="palette-swatch" style="background: #f8f7f4;" title="#f8f7f4"></div>
+              <div class="palette-swatch" style="background: #10b981;" title="#10b981"></div>
             </div>
           </div>
 
@@ -907,16 +964,16 @@
         </div>
 
         <!-- Competitor Snapshot & Modules Integration -->
-        <div class="dash-panel-card">
+        <div class="dash-panel-card" style="margin-top: 24px;">
           <div class="panel-card-head">
-            <h3>Competitor Intelligence Watchlist</h3>
-            <button class="btn-sm-action" onclick="promptAddCompetitor()">+ Add Competitor</button>
+            <div>
+              <h3 style="margin: 0; font-size: 1.05rem;">Competitor Intelligence Watchlist</h3>
+              <p style="margin: 2px 0 0; font-size: 0.78rem; color: var(--rm-ink-muted);">Monitored rival website domains, market positioning & live search alternatives</p>
+            </div>
+            <button class="btn-sm-action" onclick="openAddCompetitorModal()" style="background: rgba(99, 102, 241, 0.1); color: #6366f1; border-color: rgba(99, 102, 241, 0.3); font-weight: 800;">+ Add Competitor</button>
           </div>
-          <div style="display: flex; gap: 10px; flex-wrap: wrap;" id="competitorPills">
-            <span class="badge-status published">SurferSEO</span>
-            <span class="badge-status published">Ahrefs</span>
-            <span class="badge-status published">Jasper AI</span>
-            <span class="badge-status published">Semrush</span>
+          <div id="competitorPills" class="competitor-cards-grid">
+            <!-- Dynamically populated with working domains, favicons, and visit links -->
           </div>
         </div>
 
@@ -1875,6 +1932,103 @@
     </div>
   </div>
 
+  <!-- 10. Connect & Extract Website Domain Modal -->
+  <div class="modal-overlay" id="connectWebsiteModal">
+    <div class="modal-dialog" style="max-width: 540px;">
+      <div class="modal-head">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.4rem;">🌐</span>
+          <div>
+            <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #111c26;" id="connectModalTitle">Connect Website Domain</h3>
+            <p style="margin: 2px 0 0; font-size: 0.78rem; color: #64748b;">Autonomous brand identity, palette & competitor extraction</p>
+          </div>
+        </div>
+        <button class="btn-modal-close" onclick="closeConnectWebsiteModal()">✕</button>
+      </div>
+
+      <div style="padding: 16px 0 4px;">
+        <form onsubmit="handleConnectWebsiteExtract(event)" id="connectWebsiteForm">
+          <label style="display: block; font-size: 0.78rem; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 8px;">
+            Target Website Domain or URL
+          </label>
+          <div style="display: flex; align-items: center; background: #fff; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 4px 12px; margin-bottom: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+            <span style="font-size: 0.88rem; font-weight: 700; color: #94a3b8; margin-right: 6px;">https://</span>
+            <input type="text" id="connectDomainInput" required placeholder="yourbrand.com" style="flex: 1; border: none; outline: none; font-size: 0.95rem; font-weight: 600; color: #0f172a; padding: 10px 0;">
+          </div>
+
+          <div id="connectExtractProgress" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+              <div class="scanner-spinner" style="width: 20px; height: 20px; border-width: 2px;"></div>
+              <span id="connectProgressStatus" style="font-size: 0.85rem; font-weight: 700; color: #0f172a;">Connecting to website server...</span>
+            </div>
+            <div style="font-size: 0.76rem; color: #64748b; line-height: 1.5;" id="connectProgressSubtext">
+              Extracting title, meta tags, high-res logo, favicon, 6-color CSS palette, target audience & competitors with AWS Bedrock...
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+            <button type="button" class="btn-fix-sm" onclick="closeConnectWebsiteModal()">Cancel</button>
+            <button type="submit" class="btn-primary-top" id="btnRunExtractDomain" style="padding: 10px 22px;">
+              <span>Extract & Connect Website ⚡</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 11. Add Competitor Modal -->
+  <div class="modal-overlay" id="addCompetitorModal">
+    <div class="modal-dialog" style="max-width: 500px;">
+      <div class="modal-head">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.4rem;">⚔️</span>
+          <div>
+            <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #111c26;">Add Competitor Domain</h3>
+            <p style="margin: 2px 0 0; font-size: 0.78rem; color: #64748b;">Add rival website to track search visibility & AEO rankings</p>
+          </div>
+        </div>
+        <button class="btn-modal-close" onclick="closeAddCompetitorModal()">✕</button>
+      </div>
+
+      <div style="padding: 16px 0 4px;">
+        <form onsubmit="handleSaveCompetitor(event)">
+          <div class="auth-field" style="margin-bottom: 14px;">
+            <label style="display: block; font-size: 0.78rem; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
+              Competitor Website Domain or URL *
+            </label>
+            <div style="display: flex; align-items: center; background: #fff; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 2px 12px;">
+              <span style="font-size: 0.88rem; font-weight: 700; color: #94a3b8; margin-right: 6px;">https://</span>
+              <input type="text" id="modalCompDomainInput" required placeholder="competitor.com" style="flex: 1; border: none; outline: none; font-size: 0.95rem; font-weight: 600; color: #0f172a; padding: 10px 0;">
+            </div>
+            <span style="font-size: 0.72rem; color: #64748b; margin-top: 4px; display: block;">Enter working domain. We will auto-extract brand name and favicon.</span>
+          </div>
+
+          <div class="auth-field" style="margin-bottom: 14px;">
+            <label style="display: block; font-size: 0.78rem; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
+              Brand Name (Optional)
+            </label>
+            <input type="text" id="modalCompNameInput" placeholder="e.g. LeewayHertz" style="width: 100%; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 10px 12px; font-size: 0.95rem; font-weight: 600; color: #0f172a; outline: none; box-sizing: border-box;">
+          </div>
+
+          <div class="auth-field" style="margin-bottom: 18px;">
+            <label style="display: block; font-size: 0.78rem; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 6px;">
+              Positioning / Core Service (Optional)
+            </label>
+            <input type="text" id="modalCompPosInput" placeholder="e.g. Enterprise AI Consulting & Custom Development" style="width: 100%; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 10px 12px; font-size: 0.95rem; font-weight: 600; color: #0f172a; outline: none; box-sizing: border-box;">
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 10px;">
+            <button type="button" class="btn-fix-sm" onclick="closeAddCompetitorModal()">Cancel</button>
+            <button type="submit" class="btn-primary-top" style="padding: 10px 22px;">
+              <span>Add to Watchlist 🚀</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- ========================================================================
        NATIVE MOBILE APP BOTTOM DOCK & BACKDROP
        ======================================================================== -->
@@ -2328,6 +2482,374 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
 
       closeEditBrandProfileModal();
       renderAll();
+    }
+
+    // Competitor Intelligence Watchlist & Working Domains Handlers
+    function normalizeCompetitorItem(c) {
+      if (!c) return null;
+      if (typeof c === 'string') {
+        let raw = c.trim();
+        let domain = raw.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
+        if (!domain.includes('.') && domain.length > 0) domain += '.com';
+        let name = raw.replace(/\.(com|io|ai|net|co|in|org|app|dev)$/i, '');
+        name = name.charAt(0).toUpperCase() + name.slice(1);
+        return {
+          name,
+          domain,
+          website: `https://${domain}`,
+          positioning: 'Direct Market Alternative'
+        };
+      } else if (typeof c === 'object') {
+        let domain = (c.domain || c.website || c.name || '').toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
+        if (!domain.includes('.') && domain.length > 0) domain += '.com';
+        let name = c.name || (domain ? domain.split('.')[0] : 'Competitor');
+        name = name.charAt(0).toUpperCase() + name.slice(1);
+        return {
+          name,
+          domain,
+          website: c.website || (domain ? `https://${domain}` : '#'),
+          positioning: c.positioning || 'Direct Market Alternative'
+        };
+      }
+      return null;
+    }
+
+    function renderCompetitorWatchlist(proj) {
+      const container = document.getElementById('competitorPills');
+      if (!container) return;
+
+      const raw = proj ? (proj.competitors || []) : [];
+      const list = raw.map(normalizeCompetitorItem).filter(Boolean);
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1 / -1; padding: 24px; text-align: center; background: #faf9f6; border: 1.5px dashed #cbd5e1; border-radius: 14px;">
+            <div style="font-size: 1.4rem; margin-bottom: 6px;">⚔️</div>
+            <div style="font-size: 0.9rem; font-weight: 800; color: #1e293b;">No competitors monitored yet</div>
+            <div style="font-size: 0.78rem; color: #64748b; margin-top: 4px;">Click <strong>+ Add Competitor</strong> above to track competitor domains and AEO alternatives.</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = list.map((c, idx) => `
+        <div class="competitor-card-item">
+          <div class="comp-head-row">
+            <div class="comp-brand-info">
+              <img src="https://www.google.com/s2/favicons?domain=${c.domain}&sz=64" alt="${c.name}" class="comp-favicon" onerror="this.src='assets/rank-monk-icon.png'">
+              <div class="comp-name-box">
+                <div class="comp-name">${c.name}</div>
+                <a href="${c.website}" target="_blank" rel="noopener noreferrer" class="comp-domain-link" title="Visit ${c.domain}">
+                  <span>${c.domain}</span>
+                  <span>↗</span>
+                </a>
+              </div>
+            </div>
+            <button type="button" class="comp-remove-btn" onclick="removeCompetitorAtIndex(${idx})" title="Remove ${c.name} from watchlist">✕</button>
+          </div>
+          <p class="comp-desc">${c.positioning || 'Monitored across AEO answer benchmarks and ranking radars.'}</p>
+          <div class="comp-footer-row">
+            <span class="comp-status-badge">● Active Tracking</span>
+            <a href="${c.website}" target="_blank" rel="noopener noreferrer" class="comp-visit-btn">
+              <span>Visit Site</span>
+              <span>→</span>
+            </a>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function removeCompetitorAtIndex(idx) {
+      const proj = RankMonkState.getActiveProject();
+      if (!proj || !Array.isArray(proj.competitors)) return;
+      proj.competitors.splice(idx, 1);
+      RankMonkState.save();
+      renderAll();
+    }
+
+    function openAddCompetitorModal() {
+      const modal = document.getElementById('addCompetitorModal');
+      if (modal) {
+        document.getElementById('modalCompDomainInput').value = '';
+        document.getElementById('modalCompNameInput').value = '';
+        document.getElementById('modalCompPosInput').value = '';
+        modal.classList.add('open');
+      }
+    }
+
+    function closeAddCompetitorModal() {
+      const modal = document.getElementById('addCompetitorModal');
+      if (modal) modal.classList.remove('open');
+    }
+
+    function handleSaveCompetitor(e) {
+      if (e) e.preventDefault();
+      const rawDomain = document.getElementById('modalCompDomainInput').value.trim();
+      if (!rawDomain) return;
+
+      const cleanDom = rawDomain.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
+      const customName = document.getElementById('modalCompNameInput').value.trim();
+      const pos = document.getElementById('modalCompPosInput').value.trim() || 'Direct Market Alternative';
+
+      let name = customName;
+      if (!name) {
+        name = cleanDom.replace(/\.(com|io|ai|net|co|in|org|app|dev)$/i, '');
+        name = name.charAt(0).toUpperCase() + name.slice(1);
+      }
+
+      const newComp = {
+        name,
+        domain: cleanDom,
+        website: `https://${cleanDom}`,
+        positioning: pos
+      };
+
+      const proj = RankMonkState.getActiveProject();
+      if (proj) {
+        if (!Array.isArray(proj.competitors)) proj.competitors = [];
+        // Avoid duplicate domains
+        proj.competitors = proj.competitors.filter(c => {
+          const d = (typeof c === 'string' ? c : (c.domain || '')).toLowerCase();
+          return d !== cleanDom;
+        });
+        proj.competitors.push(newComp);
+        RankMonkState.save();
+      }
+
+      closeAddCompetitorModal();
+      renderAll();
+    }
+
+    async function regenerateActiveBrandSummary() {
+      const proj = RankMonkState.getActiveProject();
+      if (!proj) return;
+
+      const btn = document.getElementById('btnRegenSummary');
+      const icon = document.getElementById('btnRegenIcon');
+      const text = document.getElementById('btnRegenText');
+      const loading = document.getElementById('aiSummaryLoading');
+      const summaryP = document.getElementById('bpAiSummaryText');
+
+      if (btn) btn.disabled = true;
+      if (icon) icon.innerText = '⏳';
+      if (text) text.innerText = 'Synthesizing with Bedrock...';
+      if (loading) loading.style.display = 'block';
+      if (summaryP) summaryP.style.display = 'none';
+
+      try {
+        const res = await fetch('/api/brand/summary', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            domain: proj.domain,
+            brandName: proj.name,
+            industry: proj.industry,
+            category: proj.businessCategory,
+            targetAudience: proj.targetAudience
+          })
+        });
+        const data = await res.json();
+        if (data.success && data.summary) {
+          proj.summary = data.summary;
+          RankMonkState.save();
+        }
+      } catch (err) {
+        console.warn('Failed to regenerate summary:', err);
+      } finally {
+        if (loading) loading.style.display = 'none';
+        if (summaryP) {
+          summaryP.style.display = 'block';
+          summaryP.innerText = proj.summary;
+        }
+        if (btn) btn.disabled = false;
+        if (icon) icon.innerText = '⚡';
+        if (text) text.innerText = 'Regenerate AI Summary';
+      }
+    }
+
+    function copyBrandSummary() {
+      const text = document.getElementById('bpAiSummaryText')?.innerText;
+      if (!text) return;
+      navigator.clipboard.writeText(text);
+      const btn = document.getElementById('btnCopySummary');
+      if (btn) {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<span>✓ Copied!</span>';
+        setTimeout(() => { btn.innerHTML = orig; }, 1800);
+      }
+    }
+
+    // Connect & Extract Website Handlers
+    function openConnectWebsiteModal(prefill) {
+      const modal = document.getElementById('connectWebsiteModal');
+      const input = document.getElementById('connectDomainInput');
+      const prog = document.getElementById('connectExtractProgress');
+      const btn = document.getElementById('btnRunExtractDomain');
+      if (modal) modal.classList.add('open');
+      if (prog) prog.style.display = 'none';
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<span>Extract & Connect Website ⚡</span>';
+      }
+      if (input) {
+        input.value = prefill || '';
+        input.focus();
+      }
+    }
+
+    function closeConnectWebsiteModal() {
+      const modal = document.getElementById('connectWebsiteModal');
+      if (modal) modal.classList.remove('open');
+    }
+
+    function promptExtractBrandForActiveProject() {
+      const proj = RankMonkState.getActiveProject();
+      const domain = proj ? proj.domain : '';
+      openConnectWebsiteModal(domain);
+    }
+
+    async function handleConnectWebsiteExtract(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('connectDomainInput');
+      const raw = (input ? input.value : '').trim();
+      if (!raw) return;
+
+      const clean = raw.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
+      const prog = document.getElementById('connectExtractProgress');
+      const statusText = document.getElementById('connectProgressStatus');
+      const subText = document.getElementById('connectProgressSubtext');
+      const btn = document.getElementById('btnRunExtractDomain');
+
+      if (prog) prog.style.display = 'block';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>Crawling & Extracting... ⏳</span>';
+      }
+
+      if (statusText) statusText.innerText = `Crawling https://${clean}...`;
+      if (subText) subText.innerText = 'Resolving SSL, reading DOM, extracting high-res logo and CSS palette...';
+
+      const stepTimer1 = setTimeout(() => {
+        if (statusText) statusText.innerText = 'Extracting Visual Identity & CSS Palette...';
+        if (subText) subText.innerText = 'Parsing theme colors, logo, and favicon from server assets...';
+      }, 900);
+
+      const stepTimer2 = setTimeout(() => {
+        if (statusText) statusText.innerText = 'Synthesizing with AWS Bedrock Nova Pro...';
+        if (subText) subText.innerText = 'Determining industry niche, buyer persona, and top market competitors...';
+      }, 2000);
+
+      try {
+        const res = await fetch('/api/brand/extract', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ domain: clean })
+        });
+        const data = await res.json();
+        clearTimeout(stepTimer1);
+        clearTimeout(stepTimer2);
+
+        let brand = null;
+        if (data.success && data.brand) {
+          brand = data.brand;
+        } else {
+          // Heuristic fallback
+          brand = {
+            domain: clean,
+            website: clean,
+            brandName: clean.charAt(0).toUpperCase() + clean.slice(1).split('.')[0],
+            industry: 'Autonomous AI Growth',
+            category: 'Autonomous Organic Search & AEO',
+            targetAudience: 'Modern founders and digital operators seeking scalable organic search visibility.',
+            logoUrl: `https://logo.clearbit.com/${clean}`,
+            faviconUrl: `https://www.google.com/s2/favicons?domain=${clean}&sz=128`,
+            palette: ['#0c131a', '#111c26', '#c5a059', '#b98b6a', '#f8f7f4', '#10b981'],
+            competitors: ['Semrush', 'Ahrefs', 'Sitefire', 'SurferSEO']
+          };
+        }
+
+        // Update existing project or create new one
+        const existing = RankMonkState.data.projects.find(p => p.domain.toLowerCase() === clean);
+        if (existing) {
+          existing.name = brand.brandName || existing.name;
+          existing.industry = brand.industry || existing.industry;
+          existing.businessCategory = brand.category || existing.businessCategory;
+          existing.targetAudience = brand.targetAudience || existing.targetAudience;
+          if (brand.summary) existing.summary = brand.summary;
+          existing.brand_logo_url = brand.logoUrl || existing.brand_logo_url;
+          existing.favicon_url = brand.faviconUrl || existing.favicon_url;
+          if (brand.palette && brand.palette.length) existing.palette = brand.palette;
+          if (brand.competitors && brand.competitors.length) existing.competitors = brand.competitors;
+          if (brand.initialCrawledPages && brand.initialCrawledPages.length) existing.crawledPages = brand.initialCrawledPages;
+          RankMonkState.data.activeProjectId = existing.id;
+        } else {
+          const newP = {
+            id: 'proj-' + Date.now(),
+            name: brand.brandName || clean.charAt(0).toUpperCase() + clean.slice(1).split('.')[0],
+            domain: clean,
+            website: clean,
+            industry: brand.industry || 'AI Automation & Software Systems Engineering',
+            businessCategory: brand.category || 'Enterprise AI Solutions & Autonomous Operations',
+            targetAudience: brand.targetAudience || 'Modern enterprises, founders, and business leaders.',
+            summary: brand.summary || '',
+            brand_logo_url: brand.logoUrl,
+            favicon_url: brand.faviconUrl,
+            palette: brand.palette || ['#0c131a', '#111c26', '#c5a059', '#b98b6a', '#f8f7f4', '#10b981'],
+            competitors: brand.competitors || [],
+            gscConnected: false,
+            aeoScore: 84,
+            mediaAssets: [],
+            articles: [
+              {
+                id: 'art-' + Date.now(),
+                title: 'The 2026 Strategy for ' + (brand.brandName || clean) + ': Dominating AI Search',
+                keyword: (brand.brandName || clean) + ' autonomous SEO',
+                country: 'United States',
+                wordCount: 1650,
+                status: 'Published',
+                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                engines: ['Google', 'ChatGPT', 'Perplexity'],
+                content: '# The 2026 Strategy for ' + (brand.brandName || clean) + '\n\nAutonomous search loops continuous crawl, synthesize Bedrock content, and secure Perplexity and ChatGPT citations.'
+              }
+            ],
+            crawledPages: brand.initialCrawledPages || [
+              {
+                url: 'https://' + clean,
+                title: brand.title || (clean + ' — Official Website'),
+                meta_desc: brand.metaDesc || ('Official platform and modern digital solutions for ' + clean),
+                h1: brand.title ? brand.title.split('|')[0].trim() : clean,
+                word_count: 1200,
+                status_code: 200,
+                schema_types: ['Organization', 'SoftwareApplication'],
+                crawled_at: new Date().toISOString()
+              }
+            ],
+            voiceSliders: brand.voiceSliders || { professionalCasual: 25, friendlyFormal: 30, boldSubtle: 20, premiumAccessible: 15, simpleComplex: 25 },
+            voiceTags: brand.voiceTags || ['Authoritative', 'Innovative', 'Strategic']
+          };
+          RankMonkState.data.projects.unshift(newP);
+          RankMonkState.data.activeProjectId = newP.id;
+        }
+
+        RankMonkState.save();
+        try {
+          localStorage.setItem('rankmonk_has_onboarded', 'true');
+          localStorage.setItem('rankmonk_last_domain', clean);
+        } catch(e){}
+
+        const banner = document.getElementById('firstTimeDomainPromptBanner');
+        if (banner) banner.style.display = 'none';
+
+        closeConnectWebsiteModal();
+        renderAll();
+
+      } catch (err) {
+        clearTimeout(stepTimer1);
+        clearTimeout(stepTimer2);
+        console.error('Extraction error:', err);
+        closeConnectWebsiteModal();
+        renderAll();
+      }
     }
 
     // Track Keyword Handler
@@ -2905,9 +3427,54 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
         const editBtn = document.querySelector('.brand-info-card .btn-edit-sm');
         if (editBtn) editBtn.onclick = openEditBrandProfileModal;
 
-        // Visual Identity Panel
+        // Visual Identity Panel & Dynamic Contrast for White Logos
         const logoImg = document.getElementById('bpLogoPreview');
-        if (logoImg && proj.brand_logo_url) logoImg.src = proj.brand_logo_url;
+        const logoBox = document.getElementById('bpLogoPreviewBox');
+        if (logoImg) {
+          const lUrl = proj.brand_logo_url || `https://logo.clearbit.com/${proj.domain}`;
+          const lLower = lUrl.toLowerCase();
+          if (logoBox) {
+            if (lLower.includes('white') || lLower.includes('light')) {
+              logoBox.style.background = '#0c131a';
+              logoBox.style.borderColor = 'rgba(255, 255, 255, 0.18)';
+            } else if (lLower.includes('dark') || lLower.includes('black')) {
+              logoBox.style.background = '#ffffff';
+              logoBox.style.borderColor = '#e2e8f0';
+            } else {
+              logoBox.style.background = '#0c131a';
+              logoBox.style.borderColor = 'rgba(255, 255, 255, 0.12)';
+            }
+          }
+          logoImg.src = lUrl;
+          logoImg.onerror = function() {
+            this.src = proj.favicon_url || 'assets/rank-monk-logo-horizontal.png';
+          };
+        }
+
+        const favImg = document.getElementById('bpFaviconPreview');
+        const favBox = document.getElementById('bpFaviconPreviewBox');
+        if (favImg) {
+          if (favBox) {
+            favBox.style.background = '#0c131a';
+            favBox.style.borderColor = 'rgba(255, 255, 255, 0.12)';
+          }
+          favImg.src = proj.favicon_url || `https://www.google.com/s2/favicons?domain=${proj.domain}&sz=128`;
+          favImg.onerror = function() {
+            this.src = 'assets/rank-monk-icon.png';
+          };
+        }
+
+        const paletteSwatches = document.getElementById('bpPaletteSwatches');
+        if (paletteSwatches) {
+          const colors = Array.isArray(proj.palette) && proj.palette.length > 0
+            ? proj.palette
+            : ['#0c131a', '#111c26', '#c5a059', '#b98b6a', '#f8f7f4', '#10b981'];
+          paletteSwatches.innerHTML = colors.map(c => `
+            <div class="palette-swatch" style="background: ${c}; position: relative; display: flex; flex-direction: column; justify-content: flex-end; padding: 4px; border-radius: 6px; min-width: 44px; height: 38px; border: 1px solid rgba(255,255,255,0.1);" title="${c}">
+              <span style="font-size: 8px; font-weight: 800; color: #fff; text-shadow: 0 1px 2px #000; letter-spacing: -0.2px;">${c}</span>
+            </div>
+          `).join('');
+        }
 
         // Brand Voice Sliders
         if (proj.voiceSliders) {
@@ -2918,15 +3485,14 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
           document.getElementById('rngSimp').value = proj.voiceSliders.simpleComplex ?? 25;
         }
 
-        // Competitors
-        const cpWrap = document.getElementById('competitorPills');
-        if (cpWrap && proj.competitors) {
-          cpWrap.innerHTML = proj.competitors.map(c => `
-            <span class="badge-status published" style="cursor: pointer;" title="Click to remove" onclick="RankMonkState.removeCompetitor('${c}'); renderAll();">
-              ${c} ✕
-            </span>
-          `).join('');
+        // AI Website Executive Summary
+        const summaryTextEl = document.getElementById('bpAiSummaryText');
+        if (summaryTextEl) {
+          summaryTextEl.innerText = proj.summary || `${proj.name} is an advanced provider of ${proj.industry || 'technology solutions'}, specializing in ${proj.businessCategory || 'custom autonomous operations'}. Purpose-built for ${proj.targetAudience || 'modern enterprises and growth teams'}, the company delivers tailored solutions with dependable computational reliability.`;
         }
+
+        // Competitor Intelligence Watchlist with real working domains & links
+        renderCompetitorWatchlist(proj);
 
         // Full SEO Table (Technical Crawler Tab)
         const fullSeo = document.getElementById('seoFullIssuesBody');
@@ -3059,7 +3625,7 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
         `).join('');
 
         const addNewHtml = `
-          <div onclick="window.location.href='onboarding';" style="margin-top: 6px; padding: 7px 8px; font-size: 11px; font-weight: 800; color: #10b981; border-top: 1px solid #243547; cursor: pointer; display: flex; align-items: center; gap: 6px; border-radius: 6px;">
+          <div onclick="toggleWorkspaceDropdown(); openConnectWebsiteModal();" style="margin-top: 6px; padding: 7px 8px; font-size: 11px; font-weight: 800; color: #10b981; border-top: 1px solid #243547; cursor: pointer; display: flex; align-items: center; gap: 6px; border-radius: 6px;">
             <span>⚡</span>
             <span>+ Connect New Website</span>
           </div>
@@ -3110,6 +3676,20 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
         }
       } catch (e) {}
     }
+
+    // Check if domain connection prompt banner should show
+    try {
+      const hasOnboarded = localStorage.getItem('rankmonk_has_onboarded') === 'true';
+      const isDefaultOnly = RankMonkState.data.projects.length === 1 && RankMonkState.data.projects[0].domain === 'rankmonk.com';
+      const banner = document.getElementById('firstTimeDomainPromptBanner');
+      if (banner) {
+        if (!hasOnboarded || isDefaultOnly) {
+          banner.style.display = 'block';
+        } else {
+          banner.style.display = 'none';
+        }
+      }
+    } catch (e) {}
 
     // Auto-render
     if (window.RankMonkState && typeof window.RankMonkState.subscribe === 'function') {
