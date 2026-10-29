@@ -681,6 +681,20 @@ Respond ONLY with raw valid JSON. Do not include markdown code block formatting.
         summary = `${brandName} is an autonomous AI-driven organic search and Answer Engine Optimization (AEO) platform built for high-growth operators. By autonomously analyzing search engine algorithms, generative AI models, and real-time citation graphs, it optimizes brand visibility across Google, Perplexity, and ChatGPT. ${brandName} replaces manual consulting workflows with continuous algorithmic dominance.`;
       }
       voiceTags = ['Authoritative', 'Autonomous', 'Data-Driven', 'Strategic'];
+    } else if (textBlob.includes('beauty') || textBlob.includes('cosmetic') || textBlob.includes('skincare') || textBlob.includes('makeup') || textBlob.includes('fragrance') || textBlob.includes('hair') || textBlob.includes('ulta') || textBlob.includes('sephora')) {
+      industry = 'Retail & Beauty';
+      category = 'Cosmetics, Skincare, Fragrance & Hair Care';
+      targetAudience = 'Beauty enthusiasts, skincare consumers, and everyday shoppers seeking curated cosmetics and personal care products.';
+      competitors = normalizeCompetitors([
+        { name: 'Sephora', domain: 'sephora.com', positioning: 'Global luxury and prestige beauty retailer' },
+        { name: "Macy's", domain: 'macys.com', positioning: 'Department store with comprehensive beauty and fragrance counters' },
+        { name: 'Target', domain: 'target.com', positioning: 'Affordable and mass-market cosmetics, haircare, and personal care' },
+        { name: 'Nordstrom', domain: 'nordstrom.com', positioning: 'High-end beauty, luxury fragrances, and department store retail' }
+      ]);
+      if (!summary) {
+        summary = `${brandName} is a premier destination for beauty, skincare, and fragrance products, connecting shoppers with top cosmetics and wellness collections. With an extensive digital catalog and curated brand experience, it serves beauty enthusiasts across diverse demographics.`;
+      }
+      voiceTags = ['Vibrant', 'Empowering', 'Accessible', 'Inspiring'];
     } else if (textBlob.includes('shop') || textBlob.includes('store') || textBlob.includes('apparel') || textBlob.includes('cart') || textBlob.includes('food') || textBlob.includes('delivery')) {
       industry = 'E-Commerce & Digital Services';
       category = 'Direct-To-Consumer Commerce & On-Demand Services';
