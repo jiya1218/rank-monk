@@ -765,8 +765,8 @@
         if (data.success && data.brand) {
           extractedData = data.brand;
         } else {
-          // Smart domain-aware fallback
-          extractedData = createSmartDomainFallback(clean);
+          // Clean dynamic fallback with zero pre-feeded fake data
+          extractedData = createCleanDomainProfile(clean);
         }
 
         setTimeout(() => {
@@ -775,13 +775,14 @@
         }, 600);
 
       } catch (err) {
-        console.warn('Extraction API warning, using smart fallback:', err);
+        console.warn('Extraction API warning:', err);
         clearInterval(interval);
         steps.forEach(id => {
           document.getElementById(id).className = 'scan-step-item done';
         });
 
-        extractedData = createSmartDomainFallback(clean);
+        // Clean dynamic fallback with zero pre-feeded fake data
+        extractedData = createCleanDomainProfile(clean);
 
         setTimeout(() => {
           renderReviewData(extractedData);
@@ -790,58 +791,21 @@
       }
     }
 
-    function createSmartDomainFallback(clean) {
+    function createCleanDomainProfile(clean) {
       const brandName = clean.charAt(0).toUpperCase() + clean.slice(1).split('.')[0];
-      const dLower = clean.toLowerCase();
-      
-      if (dLower.includes('beauty') || dLower.includes('cosmetic') || dLower.includes('skin') || dLower.includes('hair') || dLower.includes('ulta') || dLower.includes('sephora')) {
-        return {
-          domain: clean,
-          website: clean,
-          brandName: brandName,
-          industry: 'Retail & Beauty',
-          category: 'Cosmetics, Skincare, Fragrance & Hair Care',
-          targetAudience: 'Beauty enthusiasts, skincare consumers, and everyday shoppers seeking curated cosmetics.',
-          summary: `${brandName} is a premier destination for beauty, skincare, and fragrance collections, offering an extensive selection of cosmetics and personal care products for modern shoppers.`,
-          logoUrl: `https://logo.clearbit.com/${clean}`,
-          faviconUrl: `https://www.google.com/s2/favicons?domain=${clean}&sz=128`,
-          palette: ['#f37830', '#cc0052', '#e90b5a', '#1e293b', '#f8fafc', '#10b981'],
-          competitors: [
-            { name: 'Sephora', domain: 'sephora.com', website: 'https://sephora.com', positioning: 'Global luxury and prestige beauty retailer' },
-            { name: "Macy's", domain: 'macys.com', website: 'https://macys.com', positioning: 'Department store beauty and fragrance collections' },
-            { name: 'Target', domain: 'target.com', website: 'https://target.com', positioning: 'Affordable cosmetics and everyday personal care' },
-            { name: 'Nordstrom', domain: 'nordstrom.com', website: 'https://nordstrom.com', positioning: 'High-end beauty and designer fragrances' }
-          ]
-        };
-      } else if (dLower.includes('tech') || dLower.includes('ai') || dLower.includes('cloud') || dLower.includes('soft') || dLower.includes('app') || dLower.includes('scale')) {
-        return {
-          domain: clean,
-          website: clean,
-          brandName: brandName,
-          industry: 'Technology & Cloud Software',
-          category: 'Digital Systems & Cloud Platforms',
-          targetAudience: 'Business operators, technology leaders, and modern software teams.',
-          summary: `${brandName} is a technology company delivering software platforms and digital workflows engineered for scalable modern operations.`,
-          logoUrl: `https://logo.clearbit.com/${clean}`,
-          faviconUrl: `https://www.google.com/s2/favicons?domain=${clean}&sz=128`,
-          palette: ['#0f172a', '#1e293b', '#6366f1', '#8b5cf6', '#f8fafc', '#10b981'],
-          competitors: []
-        };
-      } else {
-        return {
-          domain: clean,
-          website: clean,
-          brandName: brandName,
-          industry: 'Digital Commerce & Brand Experience',
-          category: 'Online Products & Consumer Services',
-          targetAudience: 'Modern consumers and commercial clients seeking high-quality products and digital services.',
-          summary: `${brandName} is an established digital brand and commercial platform providing tailored products and experiences for customers worldwide.`,
-          logoUrl: `https://logo.clearbit.com/${clean}`,
-          faviconUrl: `https://www.google.com/s2/favicons?domain=${clean}&sz=128`,
-          palette: ['#0f172a', '#1e293b', '#3b82f6', '#10b981', '#f8fafc', '#f59e0b'],
-          competitors: []
-        };
-      }
+      return {
+        domain: clean,
+        website: clean,
+        brandName: brandName,
+        industry: 'General Enterprise & Brand',
+        category: 'Digital Products & Services',
+        targetAudience: `Audience and clientele of ${brandName}`,
+        summary: `${brandName} operates online at ${clean}. Explore their catalog, solutions, and services directly on the domain.`,
+        logoUrl: `https://logo.clearbit.com/${clean}`,
+        faviconUrl: `https://www.google.com/s2/favicons?domain=${clean}&sz=128`,
+        palette: ['#0f172a', '#1e293b', '#3b82f6', '#10b981', '#f8fafc', '#f59e0b'],
+        competitors: [] // Zero fake pre-feeded competitors
+      };
     }
 
     function renderReviewData(brand) {
@@ -887,7 +851,7 @@
       // AI Website Executive Summary
       const sumEl = document.getElementById('reviewSummary');
       if (sumEl) {
-        sumEl.innerText = brand.summary || `${brand.brandName} is a leading provider of ${brand.category}, engineering tailored digital solutions for ${brand.targetAudience}.`;
+        sumEl.innerText = brand.summary || `${brand.brandName} is an active brand in ${brand.industry}, delivering ${brand.category} for ${brand.targetAudience}.`;
       }
 
       // Competitors with Working Domains and Direct Links
@@ -907,16 +871,24 @@
           domain: d,
           website: c.website || (d ? `https://${d}` : '#')
         };
-      });
+      }).filter(c => c.name && c.domain);
 
-      compEl.innerHTML = comps.map(cp => `
-        <a href="${cp.website}" target="_blank" rel="noopener noreferrer" class="comp-pill" style="text-decoration: none; cursor: pointer;" title="Visit ${cp.domain}">
-          <img src="https://www.google.com/s2/favicons?domain=${cp.domain}&sz=32" style="width: 14px; height: 14px; border-radius: 3px; object-fit: contain;" onerror="this.style.display='none'">
-          <span style="color: #fff; font-weight: 700;">${cp.name}</span>
-          <span style="color: var(--rm-gold); font-size: 11px; font-weight: 600;">(${cp.domain})</span>
-          <span style="color: #94a3b8; font-size: 10px;">↗</span>
-        </a>
-      `).join('');
+      if (comps.length === 0) {
+        compEl.innerHTML = `
+          <div style="color: #94a3b8; font-size: 0.85rem; padding: 6px 0; font-style: italic;">
+            Direct competitors will be identified and tracked continuously in your growth console.
+          </div>
+        `;
+      } else {
+        compEl.innerHTML = comps.map(cp => `
+          <a href="${cp.website}" target="_blank" rel="noopener noreferrer" class="comp-pill" style="text-decoration: none; cursor: pointer;" title="Visit ${cp.domain}">
+            <img src="https://www.google.com/s2/favicons?domain=${cp.domain}&sz=32" style="width: 14px; height: 14px; border-radius: 3px; object-fit: contain;" onerror="this.style.display='none'">
+            <span style="color: #fff; font-weight: 700;">${cp.name}</span>
+            <span style="color: var(--rm-gold); font-size: 11px; font-weight: 600;">(${cp.domain})</span>
+            <span style="color: #94a3b8; font-size: 10px;">↗</span>
+          </a>
+        `).join('');
+      }
     }
 
     function handleLaunchWorkspace() {

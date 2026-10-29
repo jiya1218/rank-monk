@@ -649,102 +649,69 @@ Respond ONLY with raw valid JSON. Do not include markdown code block formatting.
     console.warn('[BrandExtractor] Bedrock synthesis note, using deterministic fallback:', err.message);
   }
 
-  // 8. Deterministic Fallbacks if Bedrock was offline or incomplete
+  // 8. If primary Bedrock call was incomplete, invoke secondary neural synthesis with crawled content
   if (!bedrockSuccess || competitors.length === 0) {
-    const textBlob = `${domain} ${title} ${metaDesc} ${homepageText}`.toLowerCase();
-    
-    if (textBlob.includes('scale') || textBlob.includes('automation') || textBlob.includes('erp') || textBlob.includes('agent')) {
-      industry = 'AI Automation & Software Systems Engineering';
-      category = 'Enterprise AI Solutions & Autonomous Operations';
-      targetAudience = 'Modern enterprises, founders, and business leaders seeking custom AI agents, automated workflows, and ERP integration.';
-      competitors = normalizeCompetitors([
-        { name: 'LeewayHertz', domain: 'leewayhertz.com', positioning: 'Custom AI Development & Autonomous Agentic Systems' },
-        { name: 'Markovate', domain: 'markovate.com', positioning: 'Enterprise AI Strategy & Automation Engineering' },
-        { name: 'InData Labs', domain: 'indatalabs.com', positioning: 'Big Data, Computer Vision & Custom AI Software' },
-        { name: 'Accubits', domain: 'accubits.com', positioning: 'Enterprise AI Solutions & Tech Transformation' }
-      ]);
-      if (!summary) {
-        summary = `${brandName} engineers enterprise-grade AI automation, intelligent agents, and custom software architectures for modern businesses. Designed to eliminate operational overhead and fragmented manual workflows, their systems integrate deeply into core ERP and operational pipelines. With high computational speed and reliable autonomous design, ${brandName} equips organizations to scale intelligence seamlessly.`;
+    try {
+      const fallbackPrompt = `Analyze this real website content for "${brandName}" (${domain}):
+Title: ${title}
+Meta Description: ${metaDesc}
+Crawled Content:
+"""
+${homepageText.slice(0, 3500)}
+"""
+
+Determine the exact brand details based strictly on this content:
+Return strictly a JSON object:
+{
+  "brandName": "${brandName}",
+  "industry": "True exact industry of this business",
+  "category": "Specific niche category",
+  "targetAudience": "Who they actually serve",
+  "summary": "3-sentence executive summary of what this company does",
+  "competitors": [
+    { "name": "Real Competitor 1", "domain": "competitor1.com", "positioning": "Brief positioning" },
+    { "name": "Real Competitor 2", "domain": "competitor2.com", "positioning": "Brief positioning" },
+    { "name": "Real Competitor 3", "domain": "competitor3.com", "positioning": "Brief positioning" },
+    { "name": "Real Competitor 4", "domain": "competitor4.com", "positioning": "Brief positioning" }
+  ]
+}`;
+      const res2 = await generateText({ prompt: fallbackPrompt, maxTokens: 800, temperature: 0.25 });
+      if (res2 && res2.text) {
+        let cleanText = res2.text.replace(/```json/gi, '').replace(/```/g, '').trim();
+        const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          if (parsed.brandName) brandName = parsed.brandName;
+          if (parsed.industry) industry = parsed.industry;
+          if (parsed.category) category = parsed.category;
+          if (parsed.targetAudience) targetAudience = parsed.targetAudience;
+          if (parsed.summary) summary = parsed.summary;
+          if (Array.isArray(parsed.competitors) && parsed.competitors.length > 0) {
+            competitors = normalizeCompetitors(parsed.competitors);
+          }
+          bedrockSuccess = true;
+        }
       }
-      voiceTags = ['Innovative', 'Efficient', 'Reliable', 'Transformative'];
-    } else if (textBlob.includes('seo') || textBlob.includes('search') || textBlob.includes('rank') || textBlob.includes('aeo')) {
-      industry = 'Autonomous AI Search & Agentic Growth';
-      category = 'AEO, GEO & Autonomous Organic Search Engine';
-      targetAudience = 'Founders, CMOs, and growth marketers needing automated search visibility without agency retainers.';
-      competitors = normalizeCompetitors([
-        { name: 'Ahrefs', domain: 'ahrefs.com', positioning: 'All-in-one SEO toolset and backlink index' },
-        { name: 'Semrush', domain: 'semrush.com', positioning: 'Online visibility and competitive intelligence platform' },
-        { name: 'SurferSEO', domain: 'surferseo.com', positioning: 'On-page SEO and content optimization workflow' },
-        { name: 'BrightEdge', domain: 'brightedge.com', positioning: 'Enterprise SEO platform and organic search measurement' }
-      ]);
-      if (!summary) {
-        summary = `${brandName} is an autonomous AI-driven organic search and Answer Engine Optimization (AEO) platform built for high-growth operators. By autonomously analyzing search engine algorithms, generative AI models, and real-time citation graphs, it optimizes brand visibility across Google, Perplexity, and ChatGPT. ${brandName} replaces manual consulting workflows with continuous algorithmic dominance.`;
-      }
-      voiceTags = ['Authoritative', 'Autonomous', 'Data-Driven', 'Strategic'];
-    } else if (textBlob.includes('beauty') || textBlob.includes('cosmetic') || textBlob.includes('skincare') || textBlob.includes('makeup') || textBlob.includes('fragrance') || textBlob.includes('hair') || textBlob.includes('ulta') || textBlob.includes('sephora')) {
-      industry = 'Retail & Beauty';
-      category = 'Cosmetics, Skincare, Fragrance & Hair Care';
-      targetAudience = 'Beauty enthusiasts, skincare consumers, and everyday shoppers seeking curated cosmetics and personal care products.';
-      competitors = normalizeCompetitors([
-        { name: 'Sephora', domain: 'sephora.com', positioning: 'Global luxury and prestige beauty retailer' },
-        { name: "Macy's", domain: 'macys.com', positioning: 'Department store with comprehensive beauty and fragrance counters' },
-        { name: 'Target', domain: 'target.com', positioning: 'Affordable and mass-market cosmetics, haircare, and personal care' },
-        { name: 'Nordstrom', domain: 'nordstrom.com', positioning: 'High-end beauty, luxury fragrances, and department store retail' }
-      ]);
-      if (!summary) {
-        summary = `${brandName} is a premier destination for beauty, skincare, and fragrance products, connecting shoppers with top cosmetics and wellness collections. With an extensive digital catalog and curated brand experience, it serves beauty enthusiasts across diverse demographics.`;
-      }
-      voiceTags = ['Vibrant', 'Empowering', 'Accessible', 'Inspiring'];
-    } else if (textBlob.includes('shop') || textBlob.includes('store') || textBlob.includes('apparel') || textBlob.includes('cart') || textBlob.includes('food') || textBlob.includes('delivery')) {
-      industry = 'E-Commerce & Digital Services';
-      category = 'Direct-To-Consumer Commerce & On-Demand Services';
-      targetAudience = 'Modern digital consumers and brand enthusiasts looking for seamless on-demand experiences.';
-      competitors = normalizeCompetitors([
-        { name: 'Shopify', domain: 'shopify.com', positioning: 'Global e-commerce platform and merchant infrastructure' },
-        { name: 'Uber Eats', domain: 'ubereats.com', positioning: 'On-demand food delivery and local logistics marketplace' },
-        { name: 'DoorDash', domain: 'doordash.com', positioning: 'Local commerce and on-demand delivery logistics' },
-        { name: 'Instacart', domain: 'instacart.com', positioning: 'Grocery delivery and retail fulfillment network' }
-      ]);
-      if (!summary) {
-        summary = `${brandName} delivers a modern digital commerce and delivery experience engineered for consumer convenience and operational scale. Built with intuitive digital interfaces and rapid fulfillment pipelines, it bridges merchant supply with immediate consumer demand.`;
-      }
-      voiceTags = ['Customer-Centric', 'Vibrant', 'Fast', 'Accessible'];
-    } else if (textBlob.includes('pay') || textBlob.includes('bank') || textBlob.includes('finance') || textBlob.includes('credit')) {
-      industry = 'Financial Technology & Digital Banking';
-      category = 'Payment Orchestration & FinTech Infrastructure';
-      targetAudience = 'Chief Financial Officers, finance operations managers, and business builders.';
-      competitors = normalizeCompetitors([
-        { name: 'Stripe', domain: 'stripe.com', positioning: 'Financial infrastructure for the internet' },
-        { name: 'Razorpay', domain: 'razorpay.com', positioning: 'Payments and banking platform for businesses' },
-        { name: 'Adyen', domain: 'adyen.com', positioning: 'End-to-end payments and financial management' },
-        { name: 'Brex', domain: 'brex.com', positioning: 'Corporate cards and spend management software' }
-      ]);
-      if (!summary) {
-        summary = `${brandName} delivers modern financial technology and payment infrastructure designed to streamline digital transactions and treasury operations. By combining institutional security with developer-friendly APIs, it provides enterprise reliability for global commerce.`;
-      }
-      voiceTags = ['Secure', 'Institutional', 'Compliant', 'Precise'];
-    } else if (textBlob.includes('dev') || textBlob.includes('api') || textBlob.includes('cloud') || textBlob.includes('code')) {
-      industry = 'Developer Tools & Cloud Infrastructure';
-      category = 'High-Performance Developer APIs & DevOps Platforms';
-      targetAudience = 'Software engineers, DevOps architects, and technical engineering leaders.';
-      competitors = normalizeCompetitors([
-        { name: 'GitHub', domain: 'github.com', positioning: 'Complete developer platform to build, scale, and deliver software' },
-        { name: 'Vercel', domain: 'vercel.com', positioning: 'Frontend cloud platform for developer experience and edge delivery' },
-        { name: 'Supabase', domain: 'supabase.com', positioning: 'The open source Firebase alternative with Postgres and Auth' },
-        { name: 'Cloudflare', domain: 'cloudflare.com', positioning: 'Global connectivity cloud and edge security network' }
-      ]);
-      if (!summary) {
-        summary = `${brandName} provides developer-first cloud infrastructure and high-performance software tools built for modern engineering teams. Engineered with speed, reliability, and security at its core, it accelerates development cycles and enterprise deployment pipelines.`;
-      }
-      voiceTags = ['Technical', 'Concise', 'Developer-First', 'High-Trust'];
+    } catch (e2) {
+      console.warn('[BrandExtractor] Secondary LLM call note:', e2.message);
+    }
+  }
+
+  // 9. Authentic fallback derived ONLY from the real crawled page (NO pre-feeded or fake data)
+  if (!summary) {
+    if (metaDesc && metaDesc.length > 25) {
+      summary = metaDesc;
+    } else if (title && title.length > 10) {
+      summary = `${brandName} — ${title}. Explore their products, offerings, and services directly on ${domain}.`;
     } else {
-      competitors = normalizeCompetitors([
-        { name: 'Industry Peer 1', domain: 'peerone.com', positioning: 'Market Alternative' },
-        { name: 'Industry Peer 2', domain: 'peertwo.com', positioning: 'Market Alternative' }
-      ]);
-      if (!summary) {
-        summary = `${brandName} is a dedicated provider of ${industry}, delivering tailored ${category} for ${targetAudience}. With focused expertise and modern systems, the company provides dependable, high-quality outcomes.`;
-      }
+      summary = `${brandName} is accessible online at ${domain}. Discover their products, solutions, and offerings.`;
+    }
+  }
+
+  if (industry === 'Technology & Software' && title) {
+    const titleParts = title.split(/[|—·-]/).map(s => s.trim()).filter(Boolean);
+    if (titleParts.length > 1) {
+      category = titleParts[1];
     }
   }
 
