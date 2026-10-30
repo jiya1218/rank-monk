@@ -26,6 +26,10 @@ export const env = {
   BEDROCK_BEARER_TOKEN: process.env.AWS_BEARER_TOKEN_BEDROCK || process.env.VITE_BEDROCK_API_KEY || DEFAULT_BEDROCK_TOKEN,
   BEDROCK_REGION: process.env.AWS_REGION || 'us-east-1',
   BEDROCK_DEFAULT_MODEL: 'amazon.nova-pro-v1:0',
+
+  // Google Gemini & Imagen API
+  GEMINI_API_KEY: process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || '',
+  GEMINI_IMAGE_MODEL: process.env.GEMINI_IMAGE_MODEL || 'imagen-3.0-generate-002',
   
   // Razorpay INR Payments
   RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID || process.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_rankmonk_zen',

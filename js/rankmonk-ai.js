@@ -145,45 +145,23 @@ Write out the full article directly without conversational preamble.`;
       keyword: kw,
       tone: t,
       country: c,
-      model: 'Amazon Nova Pro (AWS Bedrock)',
+      model: 'Zen AI Engine (Nova Pro)',
       generatedAt: new Date().toISOString()
     };
   }
 
-  // 2. AI Media Studio Image Generator
-  async function generateImage({ prompt, style, aspectRatio, width, height }) {
-    let w = width || 1024;
-    let h = height || 1024;
-
-    if (aspectRatio === '16:9') {
-      w = 1280;
-      h = 720;
-    } else if (aspectRatio === '9:16') {
-      w = 720;
-      h = 1280;
-    } else if (aspectRatio === '4:3') {
-      w = 1024;
-      h = 768;
+  // 2. AI Media Studio Image Generator (Google Imagen 3 via Gemini API)
+  async function generateImage({ prompt, style, aspectRatio = '1:1' }) {
+    const res = await fetch('/api/media/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, style, aspectRatio })
+    });
+    const data = await res.json();
+    if (!data.success) {
+      throw new Error(data.error || 'Image generation failed');
     }
-
-    const styledPrompt = `${prompt}, ${style || 'zen minimalist aesthetic'}, professional studio lighting, 8k resolution, ultra-clean design`;
-
-    try {
-      const res = await fetch('/api/bedrock/generate-image', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: styledPrompt, width: w, height: h })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        return data.imageUrl;
-      }
-    } catch (e) {
-      console.warn('[RankMonkAI] Local image endpoint fallback:', e.message);
-    }
-
-    const seed = Math.floor(Math.random() * 999999);
-    return `https://image.pollinations.ai/prompt/${encodeURIComponent(styledPrompt)}?width=${w}&height=${h}&seed=${seed}&nologo=true&enhance=true`;
+    return data.item ? data.item.imageUrl : data.imageUrl;
   }
 
   // 3. AEO LLM Radar Scanner

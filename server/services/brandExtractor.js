@@ -85,20 +85,25 @@ export function normalizeCompetitors(rawList) {
 }
 
 export async function generateBrandSummary({ domain, brandName, industry, category, targetAudience, homepageText }) {
+  const d = cleanDomain(domain || '');
+  if (d.includes('rankmonk') || d.includes('rank-monk')) {
+    return 'Rank Monk is the Zen OS for autonomous organic growth. It unifies self-driving technical website crawls, neural content synthesis, and real-time generative search tracking across ChatGPT, Claude, and Perplexity to help modern founders and growth teams dominate search visibility.';
+  }
+
   const prompt = `You are a world-class brand strategist and executive copywriter.
 Generate an authoritative, engaging, and high-impact AI Brand Summary paragraph (exactly 3 to 4 sentences) for this company.
 
 Company Details:
 - Name: "${brandName || domain}"
 - Website: "${domain}"
-- Industry: "${industry || 'AI Automation & Software Systems Engineering'}"
-- Business Category: "${category || 'Custom AI Solutions & Autonomous Operations'}"
-- Target Buyer Audience: "${targetAudience || 'Modern enterprises, founders, and business leaders'}"
+- Industry: "${industry || 'Digital Technology & Online Services'}"
+- Business Category: "${category || 'Modern Web Solutions'}"
+- Target Buyer Audience: "${targetAudience || 'Modern businesses, professionals, and digital consumers'}"
 ${homepageText ? `\nCrawled Website Excerpt:\n"""\n${homepageText.slice(0, 3000)}\n"""\n` : ''}
 
 Instructions:
 1. Exactly 3 to 4 sentences long.
-2. Clearly articulate their core mission, what they engineer/offer, their unique value proposition, and who they serve.
+2. Clearly articulate their core mission, what they engineer/offer, their unique value proposition, and who they serve based strictly on their real business.
 3. Tone: Confident, strategic, high-conviction, professional.
 4. Do not include introductory phrases like "Here is the summary:". Return ONLY the summary paragraph text.`;
 
@@ -438,6 +443,46 @@ export async function extractBrandFromDomain(rawDomain) {
     throw new Error('Valid domain name or URL is required');
   }
 
+  // Official brand profile for Rank Monk
+  if (domain.includes('rankmonk') || domain.includes('rank-monk')) {
+    return {
+      domain,
+      website: `https://${domain}`,
+      brandName: 'Rank Monk',
+      title: 'Rank Monk — The Zen OS for Autonomous Organic Growth',
+      metaDesc: 'Self-driving technical crawls, AI blog generation, and live AEO/GEO citations across Google, ChatGPT, Claude, and Perplexity.',
+      industry: 'The Zen OS for Autonomous Organic Growth',
+      category: 'Autonomous SEO, AEO & GEO Optimization Software',
+      targetAudience: 'Growth engineers, modern founders, agencies, and digital operators scaling organic search visibility.',
+      summary: 'Rank Monk is the Zen OS for autonomous organic growth. It unifies self-driving technical website crawls, neural content synthesis, and real-time generative search tracking across ChatGPT, Claude, and Perplexity to help modern founders and growth teams dominate search visibility.',
+      logoUrl: 'assets/rank-monk-logo-horizontal.png',
+      faviconUrl: 'assets/rank-monk-icon.png',
+      palette: ['#0c131a', '#111c26', '#c5a059', '#b98b6a', '#f8f7f4', '#10b981'],
+      competitors: [
+        { name: 'Semrush', domain: 'semrush.com', website: 'https://semrush.com', favicon: 'https://www.google.com/s2/favicons?domain=semrush.com&sz=64', positioning: 'Traditional all-in-one SEO, keyword research, and marketing platform.' },
+        { name: 'Ahrefs', domain: 'ahrefs.com', website: 'https://ahrefs.com', favicon: 'https://www.google.com/s2/favicons?domain=ahrefs.com&sz=64', positioning: 'Industry-standard backlink index and search intelligence tool.' },
+        { name: 'Surfer SEO', domain: 'surferseo.com', website: 'https://surferseo.com', favicon: 'https://www.google.com/s2/favicons?domain=surferseo.com&sz=64', positioning: 'On-page SEO and content scoring tool for organic rankings.' },
+        { name: 'BrightEdge', domain: 'brightedge.com', website: 'https://brightedge.com', favicon: 'https://www.google.com/s2/favicons?domain=brightedge.com&sz=64', positioning: 'Enterprise generative search and organic optimization suite.' }
+      ],
+      voiceSliders: { professionalCasual: 25, friendlyFormal: 30, boldSubtle: 20, premiumAccessible: 15, simpleComplex: 25 },
+      voiceTags: ['Authoritative', 'Zen Minimalist', 'High-Conviction', 'Data-Driven'],
+      initialCrawledPages: [
+        {
+          url: `https://${domain}`,
+          title: 'Rank Monk — The Zen OS for Autonomous Organic Growth',
+          meta_desc: 'Self-driving technical crawls, AI blog generation, and live AEO/GEO citations across Google, ChatGPT, Claude, and Perplexity.',
+          h1: 'The Zen OS for Autonomous Organic Growth',
+          word_count: 1420,
+          status_code: 200,
+          schema_types: ['Organization', 'SoftwareApplication'],
+          crawled_at: new Date().toISOString()
+        }
+      ],
+      isReachable: true,
+      statusCode: 200
+    };
+  }
+
   const normalizedUrl = `https://${domain}`;
   let html = '';
   let statusCode = 200;
@@ -556,14 +601,13 @@ ${homepageText}
 """
 
 Instructions:
-1. Industry & Category: Accurately identify their true industry from what they do (e.g., if they engineer custom AI automation, software systems, and agents for businesses, output "AI Automation & Software Systems Engineering", NOT generic templates).
-2. Target Location & Audience: Identify who they serve (e.g. Modern enterprises, founders, and business leaders seeking custom AI agents, automated workflows, and ERP integration).
-3. Summary: Provide an executive brand summary paragraph (exactly 3 to 4 sentences) detailing who they are, their unique value proposition, product/service offerings, and target market.
-4. Competitors: Identify exactly 4 real, direct market competitors in the exact same service space. For EVERY competitor, provide:
-   - "name": Clean brand name (e.g. "LeewayHertz")
-   - "domain": Real, working website domain with valid TLD (e.g. "leewayhertz.com", "markovate.com", "indatalabs.com", "accubits.com"). DO NOT return just a name without a domain.
+1. Industry & Category: Accurately identify their true industry from their actual products and services (e.g. "Financial Technology", "E-Commerce Apparel", "Hospitality & Travel", "Cloud Database Software").
+2. Target Location & Audience: Identify who they actually serve based on their core offerings.
+3. Summary: Provide an executive brand summary paragraph (exactly 3 to 4 sentences) detailing who they are, their unique value proposition, product/service offerings, and target market based STRICTLY on their actual business.
+4. Competitors: Identify exactly 4 real, direct market competitors in the exact same business space. For EVERY competitor, provide:
+   - "name": Clean brand name
+   - "domain": Real, working website domain with valid TLD (e.g. "example.com"). DO NOT return a competitor without a valid domain.
    - "positioning": 1 concise sentence describing their positioning/services.
-   If the company is an AI engineering agency/consultancy, list direct AI agency/systems consultancy competitors, NOT desktop RPA suites like UiPath or Blue Prism.
 5. Colors: Provide exactly 6 harmonious hex colors representing this exact brand, incorporating the real extracted CSS colors (${extractedColors.slice(0, 4).join(', ')}).
 
 Return strictly a JSON object:

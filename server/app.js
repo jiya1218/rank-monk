@@ -8,14 +8,13 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Root health/info endpoints
-app.get(['/api', '/'], (req, res) => {
+// Root API health/info endpoint (strictly on /api, never hijack root / frontend)
+app.get('/api', (req, res) => {
   res.json({ success: true, service: 'Rank Monk Autonomous Backend API Live', version: '2.2.0', status: 'operational' });
 });
 
-// Mount all API endpoints under /api and root / for local dev and Vercel serverless compatibility
+// Mount all API endpoints under /api
 app.use('/api', apiRouter);
-app.use('/', apiRouter);
 
 // Global Error Handler
 app.use((err, req, res, next) => {

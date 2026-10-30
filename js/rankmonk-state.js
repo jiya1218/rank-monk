@@ -1009,7 +1009,7 @@
         tone: tone || 'Professional',
         wordCount: parseInt(wordCount, 10) || 1400,
         content: content || '',
-        model: 'Amazon Nova Pro (AWS Bedrock)',
+        model: 'Zen AI Engine (Nova Pro)',
         status: 'Published',
         date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
         engines: ['Google', 'ChatGPT', 'Perplexity']

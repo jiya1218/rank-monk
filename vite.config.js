@@ -18,8 +18,13 @@ function productionBackendPlugin() {
         next();
       });
 
-      // Mount Express full-stack API server directly on Vite middleware
-      server.middlewares.use(app);
+      // Mount Express full-stack API server directly on Vite middleware for /api requests
+      server.middlewares.use((req, res, next) => {
+        if (req.url.startsWith('/api')) {
+          return app(req, res, next);
+        }
+        next();
+      });
       console.log('⚡ [Vite Server] Rank Monk Production Backend API mounted on /api');
     }
   };

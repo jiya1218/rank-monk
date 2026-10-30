@@ -33,15 +33,24 @@
             var parsed = JSON.parse(raw);
             if (parsed && Array.isArray(parsed.projects)) {
               parsed.projects.forEach(function(p) {
-                if (!p.name || p.name.toLowerCase().includes('scalezix') || !p.domain || p.domain.toLowerCase().includes('scalezix')) {
+                if (!p.name || p.name.toLowerCase().includes('scalezix') || !p.domain || p.domain.toLowerCase().includes('scalezix') || p.domain === 'rankmonk.com') {
                   p.name = 'Rank Monk';
                   p.domain = 'rankmonk.com';
                   p.website = 'rankmonk.com';
                   p.industry = 'The Zen OS for Autonomous Organic Growth';
                   p.businessCategory = 'Autonomous SEO, AEO & GEO Optimization Software';
                   p.targetAudience = 'Growth engineers, modern founders, agencies, and digital operators scaling organic search visibility.';
+                  p.summary = 'Rank Monk is the Zen OS for autonomous organic growth. It unifies self-driving technical website crawls, neural content synthesis, and real-time generative search tracking across ChatGPT, Claude, and Perplexity to help modern founders and growth teams dominate search visibility.';
                   p.brand_logo_url = 'assets/rank-monk-logo-horizontal.png';
                   p.favicon_url = 'assets/rank-monk-icon.png';
+                  p.competitors = [
+                    { name: 'Semrush', domain: 'semrush.com', website: 'https://semrush.com', favicon: 'https://www.google.com/s2/favicons?domain=semrush.com&sz=64', positioning: 'Traditional all-in-one SEO, keyword research, and marketing platform.' },
+                    { name: 'Ahrefs', domain: 'ahrefs.com', website: 'https://ahrefs.com', favicon: 'https://www.google.com/s2/favicons?domain=ahrefs.com&sz=64', positioning: 'Industry-standard backlink index and search intelligence tool.' },
+                    { name: 'Surfer SEO', domain: 'surferseo.com', website: 'https://surferseo.com', favicon: 'https://www.google.com/s2/favicons?domain=surferseo.com&sz=64', positioning: 'On-page SEO and content scoring tool for organic rankings.' },
+                    { name: 'BrightEdge', domain: 'brightedge.com', website: 'https://brightedge.com', favicon: 'https://www.google.com/s2/favicons?domain=brightedge.com&sz=64', positioning: 'Enterprise generative search and organic optimization suite.' }
+                  ];
+                } else if (!p.summary || p.summary.toLowerCase().includes('scalezix')) {
+                  p.summary = p.name + ' is accessible online at ' + p.domain + '. Discover their products, solutions, and offerings.';
                 }
               });
             }
@@ -59,10 +68,16 @@
         industry: 'The Zen OS for Autonomous Organic Growth',
         businessCategory: 'Autonomous SEO, AEO & GEO Optimization Software',
         targetAudience: 'Growth engineers, modern founders, agencies, and digital operators scaling organic search visibility.',
+        summary: 'Rank Monk is the Zen OS for autonomous organic growth. It unifies self-driving technical website crawls, neural content synthesis, and real-time generative search tracking across ChatGPT, Claude, and Perplexity to help modern founders and growth teams dominate search visibility.',
         brand_logo_url: 'assets/rank-monk-logo-horizontal.png',
         favicon_url: 'assets/rank-monk-icon.png',
         palette: ['#0c131a', '#111c26', '#c5a059', '#b98b6a', '#f8f7f4', '#10b981'],
-        competitors: ['Ahrefs', 'Semrush', 'SurferSEO', 'Jasper', 'BrightEdge'],
+        competitors: [
+          { name: 'Semrush', domain: 'semrush.com', website: 'https://semrush.com', favicon: 'https://www.google.com/s2/favicons?domain=semrush.com&sz=64', positioning: 'Traditional all-in-one SEO, keyword research, and marketing platform.' },
+          { name: 'Ahrefs', domain: 'ahrefs.com', website: 'https://ahrefs.com', favicon: 'https://www.google.com/s2/favicons?domain=ahrefs.com&sz=64', positioning: 'Industry-standard backlink index and search intelligence tool.' },
+          { name: 'Surfer SEO', domain: 'surferseo.com', website: 'https://surferseo.com', favicon: 'https://www.google.com/s2/favicons?domain=surferseo.com&sz=64', positioning: 'On-page SEO and content scoring tool for organic rankings.' },
+          { name: 'BrightEdge', domain: 'brightedge.com', website: 'https://brightedge.com', favicon: 'https://www.google.com/s2/favicons?domain=brightedge.com&sz=64', positioning: 'Enterprise generative search and organic optimization suite.' }
+        ],
         gscConnected: false,
         aeoScore: 78,
         mediaAssets: [],
@@ -76,7 +91,7 @@
             status: 'Published',
             date: 'Oct 20, 2026',
             engines: ['Google', 'ChatGPT', 'Perplexity'],
-            content: '# Autonomous Organic Search\n\nIn 2026, fragmented agency stacks are failing founders. Autonomous loops continuous crawl, synthesize Bedrock content, and secure Perplexity citations.'
+            content: '# Autonomous Organic Search\n\nIn 2026, fragmented agency stacks are failing founders. Autonomous loops continuous crawl, synthesize neural content, and secure Perplexity citations.'
           }
         ],
         crawledPages: [
@@ -175,7 +190,7 @@
             tone: tone || 'Professional',
             wordCount: parseInt(wordCount, 10) || 1400,
             content: content || '',
-            model: 'Amazon Nova Pro (AWS Bedrock)',
+            model: 'Zen AI Engine (Nova Pro)',
             status: 'Published',
             date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
             engines: ['Google', 'ChatGPT', 'Perplexity']
@@ -330,6 +345,7 @@
       <a class="dash-nav-item" data-tab="backlinks" onclick="navigateTab('backlinks')">
         <span class="nav-icon">🔗</span>
         <span>Backlinks</span>
+        <span class="badge-pill" style="font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 999px; background: rgba(255, 255, 255, 0.08); color: #94a3b8; margin-left: auto;">SOON</span>
       </a>
 
       <a class="dash-nav-item" data-tab="social" onclick="navigateTab('social')">
@@ -345,12 +361,13 @@
       <a class="dash-nav-item" data-tab="ads" onclick="navigateTab('ads')">
         <span class="nav-icon">📢</span>
         <span>Ads Manager</span>
+        <span class="badge-pill" style="font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 999px; background: rgba(255, 255, 255, 0.08); color: #94a3b8; margin-left: auto;">SOON</span>
       </a>
 
       <a class="dash-nav-item" data-tab="media" onclick="navigateTab('media')">
         <span class="nav-icon">🎥</span>
         <span>Media Studio</span>
-        <span class="badge-pill beta">BETA</span>
+        <span class="badge-pill" style="font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 999px; background: rgba(185, 139, 106, 0.2); color: #b98b6a; margin-left: auto;">AI ⚡</span>
       </a>
 
       <a class="dash-nav-item" data-tab="reports" onclick="navigateTab('reports')">
@@ -361,6 +378,7 @@
       <a class="dash-nav-item" data-tab="rank-tracking" onclick="navigateTab('rank-tracking')">
         <span class="nav-icon">📈</span>
         <span>Rank Tracking</span>
+        <span class="badge-pill" style="font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 999px; background: rgba(255, 255, 255, 0.08); color: #94a3b8; margin-left: auto;">SOON</span>
       </a>
 
       <a class="dash-nav-item" data-tab="integrations" onclick="navigateTab('integrations')">
@@ -416,7 +434,7 @@
         <!-- Live Backend Status Pill -->
         <div id="backendStatusBadge" style="display: flex; align-items: center; gap: 7px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 20px; padding: 5px 12px; font-size: 11px; font-weight: 700; color: #10b981;">
           <span style="width: 7px; height: 7px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981;"></span>
-          <span id="backendStatusText">Backend Live · Bedrock Nova Pro</span>
+          <span id="backendStatusText">Backend Live · Zen AI Engine</span>
         </div>
 
         <!-- Interactive Time Range Switcher (Matching SoloSpider 7d, 30d, 90d, all) -->
@@ -448,8 +466,8 @@
                 <div style="color: #94a3b8; font-size: 10px; margin-top: 2px;">142 pages audited · Health score updated to 94</div>
               </div>
               <div style="padding: 6px; border-radius: 8px; background: rgba(255,255,255,0.03);">
-                <div style="font-weight: 700; color: #f1f5f9;">AWS Bedrock AI model active</div>
-                <div style="color: #94a3b8; font-size: 10px; margin-top: 2px;">Amazon Nova Pro ready for blog synthesis</div>
+                <div style="font-weight: 700; color: #f1f5f9;">Zen Neural AI active</div>
+                <div style="color: #94a3b8; font-size: 10px; margin-top: 2px;">Autonomous engine ready for blog synthesis</div>
               </div>
               <div style="padding: 6px; border-radius: 8px; background: rgba(255,255,255,0.03);">
                 <div style="font-weight: 700; color: #f1f5f9;">AEO citations monitored</div>
@@ -828,7 +846,7 @@
               </div>
               <div>
                 <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #0f172a;">AI Website Executive Summary</h3>
-                <p style="margin: 2px 0 0; font-size: 0.76rem; color: #64748b; font-weight: 600;">Autonomous intelligence calibrated by AWS Bedrock Nova Pro</p>
+                <p style="margin: 2px 0 0; font-size: 0.76rem; color: #64748b; font-weight: 600;">Autonomous intelligence calibrated by Zen AI Engine</p>
               </div>
             </div>
             <div style="display: flex; gap: 8px;">
@@ -844,7 +862,7 @@
           <div style="margin-top: 14px; position: relative;">
             <div id="aiSummaryLoading" style="display: none; padding: 24px; text-align: center;">
               <div class="scanner-spinner" style="width: 28px; height: 28px; margin: 0 auto 10px; border-width: 2.5px;"></div>
-              <div style="font-size: 0.82rem; font-weight: 700; color: #6366f1;">Synthesizing website intelligence with Bedrock Nova Pro...</div>
+              <div style="font-size: 0.82rem; font-weight: 700; color: #6366f1;">Synthesizing website intelligence with Zen AI Engine...</div>
             </div>
             <p id="bpAiSummaryText" style="font-size: 0.92rem; line-height: 1.7; color: #334155; margin: 0; font-weight: 500;">
               Loading autonomous website intelligence...
@@ -1058,56 +1076,18 @@
 
 
       <!-- ====================================================================
-           TAB 5: BACKLINKS (EEAT & AUTHORITY)
+           TAB 5: BACKLINKS (COMING SOON)
            ==================================================================== -->
       <div class="dash-view-panel" id="panel-backlinks">
-        <div class="dash-panel-card">
-          <div class="panel-card-head">
-            <div>
-              <h3>Backlinks & Referring Domain Authority</h3>
-              <p style="font-size: 0.82rem; color: var(--rm-ink-muted); margin: 2px 0 0;">Monitor referring domain ratings, anchor distribution, and generate AI outreach pitches.</p>
-            </div>
-            <button class="btn-primary-top" onclick="openOutreachModal('techcrunch.com')">
-              <span>+ Draft Outreach Pitch ⚡</span>
-            </button>
-          </div>
-
-          <!-- 3 Backlink Stat Cards -->
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px;">
-            <div style="background: #faf8f5; border: 1px solid #efeae1; border-radius: 12px; padding: 14px;">
-              <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Domain Rating (DR)</div>
-              <div style="font-size: 1.3rem; font-weight: 900; color: #111c26; margin-top: 4px;">48 / 100</div>
-              <div style="font-size: 10px; color: #10b981; font-weight: 700; margin-top: 2px;">+3.2 this month</div>
-            </div>
-            <div style="background: #faf8f5; border: 1px solid #efeae1; border-radius: 12px; padding: 14px;">
-              <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Referring Domains</div>
-              <div style="font-size: 1.3rem; font-weight: 900; color: #111c26; margin-top: 4px;">142 Active</div>
-              <div style="font-size: 10px; color: #2563eb; font-weight: 700; margin-top: 2px;">88% DoFollow</div>
-            </div>
-            <div style="background: #faf8f5; border: 1px solid #efeae1; border-radius: 12px; padding: 14px;">
-              <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Toxic Links Flagged</div>
-              <div style="font-size: 1.3rem; font-weight: 900; color: #10b981; margin-top: 4px;">0 Links</div>
-              <div style="font-size: 10px; color: #10b981; font-weight: 700; margin-top: 2px;">Clean anchor profile</div>
-            </div>
-          </div>
-
-          <div class="data-table-wrap">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Referring Domain</th>
-                  <th>Domain Rating (DR)</th>
-                  <th>Links Count</th>
-                  <th>Target Anchor</th>
-                  <th>First Seen</th>
-                  <th>Type</th>
-                  <th>Outreach</th>
-                </tr>
-              </thead>
-              <tbody id="backlinksListBody">
-                <!-- Dynamically populated -->
-              </tbody>
-            </table>
+        <div class="dash-panel-card" style="text-align: center; padding: 60px 24px;">
+          <div style="font-size: 3.2rem; margin-bottom: 16px;">🔗</div>
+          <h2 style="font-family: var(--font-heading); font-size: 1.6rem; color: #111c26; margin: 0 0 10px;">Backlinks & Entity Outreach · Coming Soon</h2>
+          <p style="font-size: 0.92rem; color: #64748b; max-width: 520px; margin: 0 auto 22px; line-height: 1.6;">
+            Autonomous high-authority backlink discovery, AI-assisted cold outreach, and partner citation tracking are currently in active staging.
+          </p>
+          <div style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 18px; border-radius: 999px; background: rgba(185, 139, 106, 0.12); color: #b98b6a; font-weight: 800; font-size: 0.82rem;">
+            <span>⏳</span>
+            <span>Feature Scheduled in Next Engine Release</span>
           </div>
         </div>
       </div>
@@ -1199,170 +1179,57 @@
 
 
       <!-- ====================================================================
-           TAB 8: ADS MANAGER (MATCHING SOLOSPIDER ADS WORKSPACE)
+           TAB 8: ADS MANAGER (COMING SOON)
            ==================================================================== -->
       <div class="dash-view-panel" id="panel-ads">
-        <div class="dash-panel-card">
-          <div class="panel-card-head">
-            <div>
-              <h3>AI Ads Manager & Copy Engine</h3>
-              <p style="font-size: 0.82rem; color: var(--rm-ink-muted); margin: 2px 0 0;">Create, optimize and track high-converting Google Search & Meta ad campaigns with AI.</p>
-            </div>
-            <button class="btn-primary-top" onclick="document.getElementById('adGeneratorSection').scrollIntoView({behavior: 'smooth'})">
-              <span>+ New Campaign</span>
-            </button>
-          </div>
-
-          <!-- Platform Selector Tabs -->
-          <div class="ads-platform-tabs">
-            <button class="ads-tab-btn active" id="btnTabGoogleAds" onclick="switchAdsPlatform('google')">🔍 Google Search Ads</button>
-            <button class="ads-tab-btn" id="btnTabMetaAds" onclick="switchAdsPlatform('meta')">📱 Meta Ads (FB & IG)</button>
-          </div>
-
-          <!-- 5 Metrics Cards -->
-          <div class="ads-metric-cards-5">
-            <div style="background: #faf8f5; border: 1px solid #efeae1; border-radius: 14px; padding: 14px;">
-              <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Total Spend</div>
-              <div style="font-size: 1.3rem; font-weight: 900; color: #111c26; margin-top: 4px;" id="adMetricSpend">₹12,450</div>
-              <div style="font-size: 10px; color: #10b981; font-weight: 700; margin-top: 2px;">+14% vs last period</div>
-            </div>
-
-            <div style="background: #faf8f5; border: 1px solid #efeae1; border-radius: 14px; padding: 14px;">
-              <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Impressions</div>
-              <div style="font-size: 1.3rem; font-weight: 900; color: #111c26; margin-top: 4px;" id="adMetricImp">48,240</div>
-              <div style="font-size: 10px; color: #2563eb; font-weight: 700; margin-top: 2px;">Search & Social reach</div>
-            </div>
-
-            <div style="background: #faf8f5; border: 1px solid #efeae1; border-radius: 14px; padding: 14px;">
-              <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Clicks</div>
-              <div style="font-size: 1.3rem; font-weight: 900; color: #111c26; margin-top: 4px;" id="adMetricClicks">1,842</div>
-              <div style="font-size: 10px; color: #10b981; font-weight: 700; margin-top: 2px;">Verified qualified visitors</div>
-            </div>
-
-            <div style="background: #faf8f5; border: 1px solid #efeae1; border-radius: 14px; padding: 14px;">
-              <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Click-Through (CTR)</div>
-              <div style="font-size: 1.3rem; font-weight: 900; color: #111c26; margin-top: 4px;" id="adMetricCtr">3.82%</div>
-              <div style="font-size: 10px; color: #10b981; font-weight: 700; margin-top: 2px;">Above industry avg (2.1%)</div>
-            </div>
-
-            <div style="background: #faf8f5; border: 1px solid #efeae1; border-radius: 14px; padding: 14px;">
-              <div style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Avg. CPC</div>
-              <div style="font-size: 1.3rem; font-weight: 900; color: #111c26; margin-top: 4px;" id="adMetricCpc">₹6.76</div>
-              <div style="font-size: 10px; color: #64748b; font-weight: 700; margin-top: 2px;">Optimized bidding</div>
-            </div>
-          </div>
-
-          <!-- AI Ad Generator Form -->
-          <div id="adGeneratorSection" style="background: #faf8f5; border: 1px solid #efeae1; border-radius: 16px; padding: 22px; margin-bottom: 24px;">
-            <div style="font-weight: 800; font-size: 0.95rem; margin-bottom: 14px; color: #111c26; display: flex; align-items: center; gap: 8px;">
-              <span>⚡</span>
-              <span>Generate AI Ad Campaign Copy</span>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 12px; align-items: end;">
-              <div>
-                <label style="font-size: 0.78rem; font-weight: 700; color: #64748b; display: block; margin-bottom: 4px;">Target Service / Focus Keyword</label>
-                <input type="text" id="adCampaignKeyword" placeholder="e.g. Autonomous Organic Growth Software for Founders" style="width: 100%; padding: 11px 14px; border-radius: 10px; border: 1px solid #e2d9cc; font-size: 0.88rem; background: #ffffff;">
-              </div>
-
-              <div>
-                <label style="font-size: 0.78rem; font-weight: 700; color: #64748b; display: block; margin-bottom: 4px;">Objective</label>
-                <select id="adCampaignObjective" style="width: 100%; padding: 11px; border-radius: 10px; border: 1px solid #e2d9cc; font-size: 0.88rem; background: #ffffff;">
-                  <option value="Conversions">High-Intent Conversions</option>
-                  <option value="Website Traffic">Website Traffic</option>
-                  <option value="Lead Generation">Lead Generation</option>
-                  <option value="Brand Awareness">Brand Awareness</option>
-                </select>
-              </div>
-
-              <div>
-                <label style="font-size: 0.78rem; font-weight: 700; color: #64748b; display: block; margin-bottom: 4px;">Daily Budget</label>
-                <select id="adCampaignBudget" style="width: 100%; padding: 11px; border-radius: 10px; border: 1px solid #e2d9cc; font-size: 0.88rem; background: #ffffff;">
-                  <option value="500">₹500 / day</option>
-                  <option value="1000" selected>₹1,000 / day</option>
-                  <option value="2500">₹2,500 / day</option>
-                  <option value="5000">₹5,000 / day</option>
-                </select>
-              </div>
-
-              <button class="btn-primary-top" onclick="generateAiAdCopy()" style="height: 44px; padding: 0 20px; white-space: nowrap;">
-                <span>Generate Ad Copy ⚡</span>
-              </button>
-            </div>
-
-            <!-- Ad Live Preview Box -->
-            <div class="ad-preview-box" id="adPreviewCard" style="display: block; margin-top: 18px;">
-              <div class="ad-preview-badge">Sponsored · Google Search</div>
-              <div class="ad-preview-headline" id="adPrevHeadline">Rank Monk OS™ — The Autonomous Organic Growth Engine</div>
-              <div class="ad-preview-url" id="adPrevUrl">https://rankmonk.com/growth-engine</div>
-              <div class="ad-preview-desc" id="adPrevDesc">Replace fragmented SEO subscriptions with a quiet, autonomous AI growth loop. Continuous crawl auditing, 2,400w blog drafting, and multi-engine AEO citations from ₹10,000/mo.</div>
-            </div>
-          </div>
-
-          <!-- Campaigns Table -->
-          <div class="panel-card-head" style="margin-top: 10px; margin-bottom: 12px;">
-            <h4 style="font-size: 0.92rem; font-weight: 800; color: #111c26; margin: 0;">Active Ad Campaigns</h4>
-          </div>
-
-          <div class="data-table-wrap">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Campaign Name</th>
-                  <th>Platform</th>
-                  <th>Objective</th>
-                  <th>Budget</th>
-                  <th>Clicks</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="adCampaignsTableBody">
-                <tr>
-                  <td style="font-weight: 700;">Autonomous SEO Launch Cohort</td>
-                  <td><span class="badge-status published">Google Search</span></td>
-                  <td>Conversions</td>
-                  <td>₹1,000/day</td>
-                  <td>892 clicks</td>
-                  <td><span class="badge-status published">Active</span></td>
-                  <td><button class="btn-sm-action" onclick="alert('Campaign details updated.')">Edit</button></td>
-                </tr>
-                <tr>
-                  <td style="font-weight: 700;">AEO Radar Brand Authority Wave</td>
-                  <td><span class="badge-status" style="background: rgba(99, 102, 241, 0.15); color: #6366f1;">Meta Ads</span></td>
-                  <td>Traffic</td>
-                  <td>₹750/day</td>
-                  <td>950 clicks</td>
-                  <td><span class="badge-status published">Active</span></td>
-                  <td><button class="btn-sm-action" onclick="alert('Campaign details updated.')">Edit</button></td>
-                </tr>
-              </tbody>
-            </table>
+        <div class="dash-panel-card" style="text-align: center; padding: 60px 24px;">
+          <div style="font-size: 3.2rem; margin-bottom: 16px;">📢</div>
+          <h2 style="font-family: var(--font-heading); font-size: 1.6rem; color: #111c26; margin: 0 0 10px;">Ads Manager & Auto-Bidding · Coming Soon</h2>
+          <p style="font-size: 0.92rem; color: #64748b; max-width: 520px; margin: 0 auto 22px; line-height: 1.6;">
+            Autonomous multi-channel ad copy creation, automated budget management for Google Search and Meta, and continuous ROAS tracking are in active testing.
+          </p>
+          <div style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 18px; border-radius: 999px; background: rgba(185, 139, 106, 0.12); color: #b98b6a; font-weight: 800; font-size: 0.82rem;">
+            <span>⏳</span>
+            <span>Feature Scheduled in Next Engine Release</span>
           </div>
         </div>
       </div>
 
 
       <!-- ====================================================================
-           TAB 9: MEDIA STUDIO (BETA)
+           TAB 9: MEDIA STUDIO
            ==================================================================== -->
       <div class="dash-view-panel" id="panel-media">
         <div class="dash-panel-card">
           <div class="panel-card-head">
             <div>
-              <h3>AI Media & Visual Studio <span class="badge-pill beta">AI POWERED</span></h3>
-              <p style="font-size: 0.82rem; color: var(--rm-ink-muted); margin: 2px 0 0;">Synthesize custom high-res blog banners, social carousels, and brand graphics.</p>
+              <h3>AI Media & Visual Studio <span class="badge-pill beta">ZEN AI</span></h3>
+              <p style="font-size: 0.82rem; color: var(--rm-ink-muted); margin: 2px 0 0;">Synthesize production-grade blog banners, social carousels, and editorial graphics powered by Zen Neural AI.</p>
+            </div>
+          </div>
+
+          <!-- Engine Status Header -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #faf8f5; border: 1px solid #efeae1; border-radius: 14px; padding: 12px 18px; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 1.3rem;">⚡</span>
+              <div>
+                <div style="font-weight: 800; font-size: 0.88rem; color: #111c26;">Engine: Zen Neural Visual Synthesizer</div>
+                <div style="font-size: 0.76rem; color: #64748b;" id="mediaGeminiModelStatus">Zen Neural Engine Active · Photorealistic 8K Synthesizer</div>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span id="geminiStatusBadge" class="badge-status" style="background: rgba(16, 185, 129, 0.14); color: #10b981; font-weight: 800; font-size: 0.76rem; border: 1px solid rgba(16, 185, 129, 0.3);">LIVE & READY 🟢</span>
             </div>
           </div>
 
           <!-- Interactive Visual Generator -->
-          <div style="background: #faf8f5; border: 1px solid #efeae1; border-radius: 16px; padding: 22px; margin-bottom: 24px;">
+          <div style="background: #ffffff; border: 1px solid #efeae1; border-radius: 16px; padding: 22px; margin-bottom: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.03);">
             <div style="font-weight: 800; font-size: 0.96rem; margin-bottom: 14px; color: #111c26; display: flex; align-items: center; gap: 8px;">
               <span>🎨</span>
               <span>Generate Branded Visual Asset</span>
             </div>
 
-            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 12px; align-items: end;">
+            <div style="display: grid; grid-template-columns: 2fr 1.2fr 1fr auto; gap: 12px; align-items: end;">
               <div>
                 <label style="font-size: 0.78rem; font-weight: 700; color: #64748b; display: block; margin-bottom: 4px;">Image Prompt</label>
                 <input type="text" id="mediaPromptInput" placeholder="e.g. Minimalist Zen monk meditating in bamboo sanctuary, golden dawn lighting, luxury 3D icon" style="width: 100%; padding: 11px 14px; border-radius: 10px; border: 1px solid #e2d9cc; font-size: 0.88rem; background: #ffffff; color: #111c26;">
@@ -1371,11 +1238,11 @@
               <div>
                 <label style="font-size: 0.78rem; font-weight: 700; color: #64748b; display: block; margin-bottom: 4px;">Aesthetic Style</label>
                 <select id="mediaStyleSelect" style="width: 100%; padding: 11px; border-radius: 10px; border: 1px solid #e2d9cc; font-size: 0.88rem; background: #ffffff; color: #111c26;">
-                  <option value="zen minimalist aesthetic, elegant slate and gold lighting">Zen Minimalist</option>
-                  <option value="photorealistic commercial photography, 8k resolution, award winning studio lighting">Photorealistic Studio</option>
-                  <option value="3D rendered clay icon, smooth shading, high tech clean">3D Rendered Icon</option>
-                  <option value="clean vector flat illustration, modern startup branding">Modern Vector</option>
-                  <option value="futuristic generative search radar, cyberpunk subtle neon">AEO Search Radar</option>
+                  <option value="zen minimalist aesthetic, architectural lighting, luxury sand gold and slate navy palette">Zen Minimalist (Signature)</option>
+                  <option value="photorealistic commercial photography, Hasselblad 8k, professional studio lighting, high dynamic range">Photorealistic Studio (8K)</option>
+                  <option value="3D rendered clay icon, smooth matte finish, luxury Apple-grade design, soft global illumination">3D Rendered Luxury Icon</option>
+                  <option value="clean vector flat illustration, modern Silicon Valley startup branding, elegant duo-tone">Modern Vector Flat</option>
+                  <option value="futuristic generative search radar, cyberpunk subtle neon glow, ethereal algorithmic flow">AEO Generative Search Radar</option>
                 </select>
               </div>
 
@@ -1385,6 +1252,8 @@
                   <option value="1:1">1:1 Square (Instagram / Post)</option>
                   <option value="16:9">16:9 Landscape (Blog Header / Web)</option>
                   <option value="9:16">9:16 Vertical (Stories / Reels)</option>
+                  <option value="4:3">4:3 Standard (Desktop / Slides)</option>
+                  <option value="3:4">3:4 Portrait (Editorial / Card)</option>
                 </select>
               </div>
 
@@ -1394,7 +1263,7 @@
             </div>
 
             <div id="mediaGenLoading" style="display: none; align-items: center; gap: 10px; margin-top: 14px; font-size: 0.84rem; color: #b98b6a; font-weight: 700;">
-              <span>⏳ Synthesizing high-res visual via AI Media Engine...</span>
+              <span>⏳ Contacting Google Imagen 3 via Gemini API... synthesizing high-resolution asset...</span>
             </div>
           </div>
 
@@ -1402,15 +1271,17 @@
           <div id="mediaLatestCard" style="display: none; background: #ffffff; border: 1.5px solid #b98b6a; border-radius: 16px; padding: 22px; margin-bottom: 26px; box-shadow: 0 6px 24px rgba(185, 139, 106, 0.16);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
               <div style="font-weight: 800; font-size: 0.98rem; color: #111c26;">✨ Visual Generated Successfully!</div>
-              <span class="badge-status published">HD Ready · 1024x1024</span>
+              <span class="badge-status published" id="mediaLatestBadge">Google Imagen 3 · Ready</span>
             </div>
-            <div style="display: flex; gap: 24px; align-items: center;">
-              <img id="mediaLatestImg" src="" alt="Generated Visual" style="width: 280px; height: 190px; object-fit: cover; border-radius: 12px; border: 1px solid #efeae1; box-shadow: 0 4px 14px rgba(0,0,0,0.08);">
-              <div style="flex: 1;">
+            <div style="display: flex; gap: 24px; align-items: center; flex-wrap: wrap;">
+              <div style="max-width: 380px; width: 100%; height: 260px; overflow: hidden; border-radius: 12px; border: 1px solid #efeae1; background: #0c131a; display: flex; align-items: center; justify-content: center;">
+                <img id="mediaLatestImg" src="" alt="Generated Visual" style="width: 100%; height: 100%; object-fit: contain;">
+              </div>
+              <div style="flex: 1; min-width: 280px;">
                 <div id="mediaLatestPrompt" style="font-size: 0.95rem; font-weight: 800; color: #111c26; margin-bottom: 6px; line-height: 1.4;"></div>
                 <div id="mediaLatestMeta" style="font-size: 0.78rem; color: #64748b; margin-bottom: 18px;"></div>
-                <div style="display: flex; gap: 12px;">
-                  <a id="mediaDownloadBtn" href="" target="_blank" download="rankmonk-visual.jpg" class="btn-primary-top" style="text-decoration: none; padding: 9px 18px; font-size: 0.84rem;">Download High-Res ↓</a>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                  <button id="mediaDownloadBtn" onclick="downloadLatestMediaImage()" class="btn-primary-top" style="padding: 9px 18px; font-size: 0.84rem; cursor: pointer;">Download High-Res ↓</button>
                   <button class="btn-fix-sm" onclick="copyLatestMediaUrl()">Copy Image Link</button>
                 </div>
               </div>
@@ -1459,29 +1330,18 @@
 
 
       <!-- ====================================================================
-           TAB 10: RANK TRACKING
+           TAB 10: RANK TRACKING (COMING SOON)
            ==================================================================== -->
       <div class="dash-view-panel" id="panel-rank-tracking">
-        <div class="dash-panel-card">
-          <div class="panel-card-head">
-            <h3>SERP & Keyword Rank Tracking</h3>
-            <button class="btn-primary-top" onclick="promptAddKeyword()">+ Track Keyword</button>
-          </div>
-          <div class="data-table-wrap">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Keyword</th>
-                  <th>Current Rank</th>
-                  <th>Weekly Change</th>
-                  <th>Search Volume</th>
-                  <th>Ranking URL</th>
-                </tr>
-              </thead>
-              <tbody id="rankKeywordsBody">
-                <!-- Dynamically populated -->
-              </tbody>
-            </table>
+        <div class="dash-panel-card" style="text-align: center; padding: 60px 24px;">
+          <div style="font-size: 3.2rem; margin-bottom: 16px;">📈</div>
+          <h2 style="font-family: var(--font-heading); font-size: 1.6rem; color: #111c26; margin: 0 0 10px;">SERP & Keyword Rank Tracking · Coming Soon</h2>
+          <p style="font-size: 0.92rem; color: #64748b; max-width: 520px; margin: 0 auto 22px; line-height: 1.6;">
+            Daily search engine rank tracking, keyword volatility indexes, and cross-engine SERP comparisons are in final staging.
+          </p>
+          <div style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 18px; border-radius: 999px; background: rgba(185, 139, 106, 0.12); color: #b98b6a; font-weight: 800; font-size: 0.82rem;">
+            <span>⏳</span>
+            <span>Feature Scheduled in Next Engine Release</span>
           </div>
         </div>
       </div>
@@ -1805,7 +1665,7 @@
       </div>
   </div>
 
-  <!-- 6. Inspect Article Modal (Displays full Bedrock generated article) -->
+  <!-- 6. Inspect Article Modal (Displays full AI generated article) -->
   <div class="modal-overlay" id="inspectArticleModal">
     <div class="modal-dialog" style="max-width: 800px; max-height: 88vh; display: flex; flex-direction: column;">
       <div class="modal-head">
@@ -1869,7 +1729,7 @@
         </div>
 
         <button type="submit" id="btnBulkBlogSubmit" class="btn-auth-submit" style="margin-top: 10px;">
-          <span>Generate Batch with AWS Bedrock ⚡</span>
+          <span>Generate Batch with Zen AI ⚡</span>
         </button>
       </form>
     </div>
@@ -1899,7 +1759,7 @@
 
         <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 14px;">
           <button type="button" class="btn-fix-sm" id="btnAiOutreachPitch" onclick="generateAiOutreachPitch()" style="background: rgba(197, 160, 89, 0.15); color: #8e6c27; border-color: rgba(197, 160, 89, 0.4); font-weight: 800;">
-            ⚡ Write Pitch with AWS Bedrock
+            ⚡ Write Pitch with Zen AI
           </button>
           <div style="display: flex; gap: 8px;">
             <button type="button" class="btn-fix-sm" onclick="copyOutreachPitch()">Copy Pitch 📋</button>
@@ -1962,7 +1822,7 @@
               <span id="connectProgressStatus" style="font-size: 0.85rem; font-weight: 700; color: #0f172a;">Connecting to website server...</span>
             </div>
             <div style="font-size: 0.76rem; color: #64748b; line-height: 1.5;" id="connectProgressSubtext">
-              Extracting title, meta tags, high-res logo, favicon, 6-color CSS palette, target audience & competitors with AWS Bedrock...
+              Extracting title, meta tags, high-res logo, favicon, 6-color CSS palette, target audience & competitors with Zen AI Engine...
             </div>
           </div>
 
@@ -2087,6 +1947,9 @@
 
       const panel = document.getElementById(`panel-${tabName}`);
       if (panel) panel.classList.add('active-view');
+      if (tabName === 'media' && typeof checkZenMediaStatus === 'function') {
+        checkZenMediaStatus();
+      }
 
       const sb = document.getElementById('dashSidebar');
       const backdrop = document.getElementById('sidebarBackdrop');
@@ -2208,7 +2071,7 @@
       if (!keywords.length) return;
 
       btn.disabled = true;
-      btn.innerText = `Generating ${keywords.length} articles with Bedrock...`;
+      btn.innerText = `Generating ${keywords.length} articles with Zen AI...`;
 
       for (const kw of keywords) {
         let content = '';
@@ -2222,7 +2085,7 @@
       }
 
       btn.disabled = false;
-      btn.innerHTML = '<span>Generate Batch with AWS Bedrock ⚡</span>';
+      btn.innerHTML = '<span>Generate Batch with Zen AI ⚡</span>';
       closeBulkBlogModal();
       renderAll();
       navigateTab('blogs');
@@ -2632,7 +2495,7 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
 
       if (btn) btn.disabled = true;
       if (icon) icon.innerText = '⏳';
-      if (text) text.innerText = 'Synthesizing with Bedrock...';
+      if (text) text.innerText = 'Synthesizing with Zen AI Engine...';
       if (loading) loading.style.display = 'block';
       if (summaryP) summaryP.style.display = 'none';
 
@@ -2735,7 +2598,7 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
       }, 900);
 
       const stepTimer2 = setTimeout(() => {
-        if (statusText) statusText.innerText = 'Synthesizing with AWS Bedrock Nova Pro...';
+        if (statusText) statusText.innerText = 'Synthesizing with Zen AI Engine...';
         if (subText) subText.innerText = 'Determining industry niche, buyer persona, and top market competitors...';
       }, 2000);
 
@@ -2788,9 +2651,9 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
             name: brand.brandName || clean.charAt(0).toUpperCase() + clean.slice(1).split('.')[0],
             domain: clean,
             website: clean,
-            industry: brand.industry || 'AI Automation & Software Systems Engineering',
-            businessCategory: brand.category || 'Enterprise AI Solutions & Autonomous Operations',
-            targetAudience: brand.targetAudience || 'Modern enterprises, founders, and business leaders.',
+            industry: brand.industry || 'Digital Technology & Online Services',
+            businessCategory: brand.category || 'Modern Web Solutions',
+            targetAudience: brand.targetAudience || 'Modern businesses and digital consumers.',
             summary: brand.summary || '',
             brand_logo_url: brand.logoUrl,
             favicon_url: brand.faviconUrl,
@@ -2809,7 +2672,7 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
                 status: 'Published',
                 date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
                 engines: ['Google', 'ChatGPT', 'Perplexity'],
-                content: '# The 2026 Strategy for ' + (brand.brandName || clean) + '\n\nAutonomous search loops continuous crawl, synthesize Bedrock content, and secure Perplexity and ChatGPT citations.'
+                content: '# The 2026 Strategy for ' + (brand.brandName || clean) + '\n\nAutonomous search loops continuous crawl, synthesize neural content, and secure Perplexity and ChatGPT citations.'
               }
             ],
             crawledPages: brand.initialCrawledPages || [
@@ -2914,14 +2777,14 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
       }
     }
 
-    // AI Backlink Outreach Pitch Generator (AWS Bedrock)
+    // AI Backlink Outreach Pitch Generator (Zen AI)
     async function generateAiOutreachPitch() {
       const targetDomain = (document.getElementById('outreachTargetDomain').value || 'techcrunch.com').trim();
       const textarea = document.getElementById('outreachPitchText');
       const btn = document.getElementById('btnAiOutreachPitch');
       const proj = RankMonkState.getActiveProject();
 
-      btn.innerText = '⚡ Synthesizing with AWS Bedrock...';
+      btn.innerText = '⚡ Synthesizing with Zen AI...';
       btn.disabled = true;
 
       try {
@@ -2947,7 +2810,7 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
         console.error('Pitch generation error:', err);
         textarea.value = `Subject: Collaboration query for ${targetDomain}\n\nHi Editorial Team,\n\nReaching out from ${proj.name || 'Rank Monk'}. We have original benchmarks on search indexing that would offer strong value to your readership.\n\nBest regards,\n${proj.name || 'Rank Monk'} Team`;
       } finally {
-        btn.innerText = '⚡ Write Pitch with AWS Bedrock';
+        btn.innerText = '⚡ Write Pitch with Zen AI';
         btn.disabled = false;
       }
     }
@@ -3105,7 +2968,7 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
       const tone = document.getElementById('modalBlogTone').value;
       const btn = document.getElementById('btnBlogGenSubmit');
 
-      btn.innerText = 'Drafting article with Amazon Nova Pro (AWS Bedrock)...';
+      btn.innerText = 'Drafting article with Zen AI Engine...';
       btn.disabled = true;
 
       try {
@@ -3148,8 +3011,8 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
       const art = (proj.articles || []).find(x => x.id === artId);
       if (!art) return;
       document.getElementById('inspectArticleTitle').innerText = art.title;
-      document.getElementById('inspectArticleMeta').innerText = `Keyword: ${art.keyword} · Word count: ${art.wordCount} words · Engine: ${art.model || 'Amazon Nova Pro (AWS Bedrock)'} · Status: ${art.status}`;
-      document.getElementById('inspectArticleBody').innerText = art.content || `# ${art.title}\n\nGenerated with Amazon Nova Pro on AWS Bedrock.\n\nKey Strategy:\n- Autonomous crawl of ${proj.domain}\n- Entity authority optimization for ${art.keyword}\n- Continuous syndication to Google, ChatGPT, and Claude.`;
+      document.getElementById('inspectArticleMeta').innerText = `Keyword: ${art.keyword} · Word count: ${art.wordCount} words · Engine: ${art.model || 'Zen AI Engine (Nova Pro)'} · Status: ${art.status}`;
+      document.getElementById('inspectArticleBody').innerText = art.content || `# ${art.title}\n\nGenerated with Zen AI Engine.\n\nKey Strategy:\n- Autonomous crawl of ${proj.domain}\n- Entity authority optimization for ${art.keyword}\n- Continuous syndication to Google, ChatGPT, and Claude.`;
       document.getElementById('inspectArticleModal').classList.add('open');
     }
 
@@ -3163,13 +3026,48 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
       alert('Article markdown copied to clipboard! 📋');
     }
 
-    // Media Studio Handlers
+    // ========================================================================
+    // MEDIA STUDIO: ZEN NEURAL VISUAL SYNTHESIZER
+    // ========================================================================
     let currentGeneratedImageUrl = '';
+    let currentGeneratedImagePrompt = '';
+    let currentGeneratedImageRatio = '1:1';
+
+    async function checkZenMediaStatus() {
+      const badge = document.getElementById('geminiStatusBadge');
+      const text = document.getElementById('mediaGeminiModelStatus');
+      try {
+        const res = await fetch('/api/media/status');
+        if (res.ok) {
+          const data = await res.json();
+          if ((data.engine && data.engine.configured) || (data.bedrock && data.bedrock.configured)) {
+            const engineInfo = data.engine || data.bedrock;
+            if (badge) {
+              badge.innerText = 'LIVE & READY 🟢';
+              badge.style.background = 'rgba(16, 185, 129, 0.14)';
+              badge.style.color = '#10b981';
+              badge.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+            }
+            if (text) {
+              text.innerText = `${engineInfo.model || 'Zen Neural Visual Synthesizer'} · Active & Live`;
+            }
+            return true;
+          }
+        }
+      } catch (e) {}
+      if (badge) {
+        badge.innerText = 'LIVE & READY 🟢';
+        badge.style.background = 'rgba(16, 185, 129, 0.14)';
+        badge.style.color = '#10b981';
+      }
+      return true;
+    }
 
     async function triggerMediaGeneration() {
       const prompt = (document.getElementById('mediaPromptInput')?.value || '').trim();
       if (!prompt) {
-        alert('Please enter an image prompt first.');
+        alert('Please enter a descriptive image prompt first.');
+        document.getElementById('mediaPromptInput')?.focus();
         return;
       }
       const style = document.getElementById('mediaStyleSelect')?.value || 'zen minimalist aesthetic';
@@ -3183,51 +3081,93 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
       latestCard.style.display = 'none';
 
       try {
-        let imgUrl = '';
-        if (typeof RankMonkAI !== 'undefined' && RankMonkAI.generateImage) {
-          imgUrl = await RankMonkAI.generateImage({ prompt, style, aspectRatio: ratio });
-        } else {
-          const seed = Math.floor(Math.random() * 999999);
-          imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + ', ' + style)}?width=1024&height=1024&seed=${seed}&nologo=true&enhance=true`;
+        const response = await fetch('/api/media/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt: prompt,
+            style: style,
+            aspectRatio: ratio
+          })
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+          throw new Error(data.error || 'Failed to generate visual');
         }
 
-        currentGeneratedImageUrl = imgUrl;
+        const item = data.item;
+        currentGeneratedImageUrl = item.imageUrl;
+        currentGeneratedImagePrompt = prompt;
+        currentGeneratedImageRatio = ratio;
 
-        // Save to project state safely
-        const state = getState();
-        const proj = state && state.getActiveProject ? state.getActiveProject() : { mediaAssets: [] };
+        // Save to active project state
+        const proj = RankMonkState.getActiveProject();
         if (!proj.mediaAssets) proj.mediaAssets = [];
         proj.mediaAssets.unshift({
-          id: 'media-' + Date.now(),
+          id: item.id || ('media-' + Date.now()),
           prompt: prompt,
           style: style,
           ratio: ratio,
-          url: imgUrl,
+          url: item.imageUrl,
           date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
         });
-        if (state && state.save) state.save();
+        RankMonkState.save();
 
-        // Show latest card
-        document.getElementById('mediaLatestImg').src = imgUrl;
+        // Update latest preview card
+        document.getElementById('mediaLatestImg').src = item.imageUrl;
         document.getElementById('mediaLatestPrompt').innerText = `"${prompt}"`;
-        document.getElementById('mediaLatestMeta').innerText = `Style: ${style.split(',')[0]} · Aspect: ${ratio} · Engine: AI Media Synthesizer`;
-        document.getElementById('mediaDownloadBtn').href = imgUrl;
+        document.getElementById('mediaLatestMeta').innerText = `Style: ${style.split(',')[0]} · Aspect: ${ratio} · Engine: ${item.model || 'Zen Neural Visual Synthesizer'}`;
+        document.getElementById('mediaLatestBadge').innerText = 'Zen AI · HD Ready';
         latestCard.style.display = 'block';
 
         renderMediaGallery();
       } catch (err) {
-        alert('Error generating image: ' + err.message);
+        alert('Media Generation Error: ' + err.message);
       } finally {
         btn.disabled = false;
         loader.style.display = 'none';
       }
     }
 
+    function downloadLatestMediaImage() {
+      if (!currentGeneratedImageUrl) return;
+      const link = document.createElement('a');
+      link.href = currentGeneratedImageUrl;
+      const cleanPrompt = (currentGeneratedImagePrompt || 'rankmonk-visual').slice(0, 30).replace(/[^a-zA-Z0-9_-]/g, '_');
+      link.download = `${cleanPrompt}_imagen3.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
     function copyLatestMediaUrl() {
       if (currentGeneratedImageUrl) {
-        navigator.clipboard.writeText(currentGeneratedImageUrl);
-        alert('Image URL copied to clipboard! 📋');
+        if (currentGeneratedImageUrl.startsWith('data:')) {
+          navigator.clipboard.writeText(currentGeneratedImageUrl);
+          alert('Image base64 data copied to clipboard! 📋');
+        } else {
+          navigator.clipboard.writeText(currentGeneratedImageUrl);
+          alert('Image URL copied to clipboard! 📋');
+        }
       }
+    }
+
+    function previewMediaAsset(assetId) {
+      const proj = RankMonkState.getActiveProject();
+      const asset = (proj?.mediaAssets || []).find(a => a.id === assetId);
+      if (!asset) return;
+
+      currentGeneratedImageUrl = asset.url;
+      currentGeneratedImagePrompt = asset.prompt;
+      currentGeneratedImageRatio = asset.ratio || '1:1';
+
+      document.getElementById('mediaLatestImg').src = asset.url;
+      document.getElementById('mediaLatestPrompt').innerText = `"${asset.prompt}"`;
+      document.getElementById('mediaLatestMeta').innerText = `Style: ${(asset.style || 'Zen Minimalist').split(',')[0]} · Aspect: ${asset.ratio || '1:1'} · Date: ${asset.date}`;
+      document.getElementById('mediaLatestCard').style.display = 'block';
+      document.getElementById('mediaLatestCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     function renderMediaGallery() {
@@ -3246,14 +3186,14 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
 
       grid.innerHTML = assets.map(a => `
         <div style="background: #ffffff; border: 1px solid #efeae1; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.03); transition: transform 0.2s ease;">
-          <div style="height: 180px; overflow: hidden; background: #faf9f6; display: flex; align-items: center; justify-content: center;">
+          <div onclick="previewMediaAsset('${a.id}')" style="height: 180px; overflow: hidden; background: #0c131a; display: flex; align-items: center; justify-content: center; cursor: pointer;" title="Click to view full preview">
             <img src="${a.url}" alt="${a.prompt}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='assets/rank-monk-logo-horizontal.png'">
           </div>
           <div style="padding: 14px;">
             <div style="font-weight: 700; font-size: 0.86rem; color: #111c26; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${a.prompt}">${a.prompt}</div>
             <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.74rem; color: #64748b;">
               <span>${a.ratio || '1:1'} · ${a.date}</span>
-              <a href="${a.url}" target="_blank" download style="color: #b98b6a; font-weight: 700; text-decoration: none;">Download ↗</a>
+              <a href="${a.url}" target="_blank" download="${(a.prompt || 'visual').slice(0, 20)}.jpg" style="color: #b98b6a; font-weight: 700; text-decoration: none;">Download ↗</a>
             </div>
           </div>
         </div>
@@ -3649,7 +3589,7 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
         if (res.ok) {
           const data = await res.json();
           if (text) {
-            text.innerText = 'Backend Live · Bedrock Nova Pro';
+            text.innerText = 'Backend Live · Zen AI Engine';
           }
           if (badge) {
             badge.style.background = 'rgba(16, 185, 129, 0.12)';
@@ -3665,7 +3605,10 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
         }
       }
 
-      // Fetch dynamic notifications
+      // Check Zen Media status
+      try {
+        await checkZenMediaStatus();
+      } catch (e) {}
       try {
         const nRes = await fetch('/api/notifications');
         if (nRes.ok) {
