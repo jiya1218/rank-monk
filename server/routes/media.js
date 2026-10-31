@@ -1,5 +1,6 @@
 import express from 'express';
 import { generateBedrockImage } from '../services/bedrock.js';
+import { generateImageWithGemini, getGeminiStatus } from '../services/gemini.js';
 import { env } from '../config/env.js';
 import { supabaseAdmin } from '../config/supabase.js';
 
@@ -11,25 +12,47 @@ let mediaLibrary = [
     prompt: 'Minimalist Zen Monk silhouette meditating before a glowing search graph, luxury sand gold and slate navy palette',
     imageUrl: 'assets/rank-monk-logo-horizontal.png',
     aspectRatio: '16:9',
-    model: 'Zen Neural Engine (Autonomous SDXL)',
+    model: 'Google Imagen 3 (imagen-3.0-generate-002)',
     created_at: new Date(Date.now() - 86400000).toISOString()
   }
 ];
 
 /**
  * GET /api/media/status
- * Check if the Zen Neural Media Synthesizer is operational
+ * Check active engine (Google Gemini Imagen 3 vs AWS Bedrock)
  */
 router.get('/status', (req, res) => {
-  const payload = {
-    configured: true,
-    model: 'Zen Neural Visual Synthesizer (Autonomous SDXL & FLUX)',
-    region: 'us-east-1'
+  const gemini = getGeminiStatus();
+  if (gemini.configured) {
+    const payload = {
+      configured: true,
+      activeEngine: 'gemini',
+      model: gemini.imageModel,
+      modelDisplay: 'Google Imagen 3 (imagen-3.0-generate-002)',
+      provider: 'Google Gemini',
+      region: 'Google Cloud Global'
+    };
+    return res.json({
+      success: true,
+      engine: payload,
+      gemini: payload
+    });
+  }
+
+  const bedrockPayload = {
+    configured: Boolean(env.BEDROCK_BEARER_TOKEN),
+    activeEngine: 'bedrock',
+    model: 'stability.stable-image-core-v1:1',
+    modelDisplay: 'Stability Stable Image Core v1.1',
+    region: 'us-west-2',
+    provider: 'AWS Bedrock',
+    secondaryModel: 'stability.sd3-5-large-v1:0'
   };
+
   res.json({
     success: true,
-    engine: payload,
-    bedrock: payload
+    engine: bedrockPayload,
+    bedrock: bedrockPayload
   });
 });
 
@@ -54,27 +77,46 @@ router.get('/library', async (req, res) => {
 
 /**
  * POST /api/media/generate
- * Generate visual asset directly using the configured AWS Bedrock key
+ * Generate visual asset: Prioritizes Google Gemini Imagen 3, falls back to AWS Bedrock
  */
 router.post('/generate', async (req, res) => {
   try {
     const {
       prompt,
       style = 'zen minimalist aesthetic, architectural lighting, luxury sand gold and slate navy palette',
-      aspectRatio = '1:1'
+      aspectRatio = '1:1',
+      apiKey
     } = req.body;
 
     if (!prompt || !prompt.trim()) {
       return res.status(400).json({ success: false, error: 'Prompt is required.' });
     }
 
-    console.log(`[Media Route] Generating visual via Zen Neural Engine: "${prompt.slice(0, 50)}..."`);
+    const geminiKey = (apiKey || env.GEMINI_API_KEY || '').trim();
+    let result = null;
 
-    const result = await generateBedrockImage({
-      prompt,
-      style,
-      aspectRatio
-    });
+    if (geminiKey && geminiKey.length > 10) {
+      console.log(`[Media Route] Generating visual via Google Gemini Imagen 3: "${prompt.slice(0, 50)}..."`);
+      try {
+        result = await generateImageWithGemini({
+          prompt,
+          style,
+          aspectRatio,
+          apiKey: geminiKey
+        });
+      } catch (geminiErr) {
+        console.warn('[Media Route] Gemini Imagen error, trying AWS Bedrock fallback:', geminiErr.message);
+      }
+    }
+
+    if (!result) {
+      console.log(`[Media Route] Generating visual via AWS Bedrock: "${prompt.slice(0, 50)}..."`);
+      result = await generateBedrockImage({
+        prompt,
+        style,
+        aspectRatio
+      });
+    }
 
     const item = {
       id: `med_${Date.now()}`,
@@ -83,8 +125,8 @@ router.post('/generate', async (req, res) => {
       style: result.style,
       imageUrl: result.imageUrl,
       aspectRatio: result.aspectRatio,
-      model: result.model || 'Zen Neural Engine (Autonomous SDXL)',
-      provider: result.provider || 'zen-neural',
+      model: result.model || 'Google Imagen 3 (imagen-3.0-generate-002)',
+      provider: result.provider || 'gemini',
       created_at: result.created_at
     };
 
