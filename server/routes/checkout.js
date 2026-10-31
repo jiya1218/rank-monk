@@ -41,6 +41,13 @@ router.get('/subscription', (req, res) => {
   });
 });
 
+router.get('/config', (req, res) => {
+  res.json({
+    success: true,
+    key_id: env.RAZORPAY_KEY_ID || 'rzp_live_TuVbNSiePj0Pz7'
+  });
+});
+
 router.post('/razorpay-order', handleCreateOrder);
 router.post('/create-order', handleCreateOrder);
 

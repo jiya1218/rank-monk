@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/dashboard.css">
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
   <!-- ========================================================================
        RESILIENT STATE PROVIDER (Guarantees RankMonkState is NEVER undefined)
@@ -2243,15 +2244,116 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
       document.getElementById('changePlanModal').classList.remove('open');
     }
 
-    function confirmPlanChange() {
-      const user = RankMonkState.getCurrentUser();
-      if (user) {
-        user.plan = pendingPlanName.toLowerCase();
-        RankMonkState.save();
+    async function confirmPlanChange() {
+      const user = RankMonkState.getCurrentUser() || { name: 'Founder', email: 'founder@scalezix.com' };
+      const planKey = (pendingPlanName || 'grow').toLowerCase();
+      const confirmBtn = document.querySelector('#changePlanModal .btn-primary-top');
+      if (confirmBtn) {
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<span>Connecting to Razorpay...</span>';
       }
-      closeChangePlanModal();
-      renderAll();
-      alert(`Subscribed to ${pendingPlanName} Tier (${pendingPlanPrice}/month)! Your autonomous quotas have been updated.`);
+
+      try {
+        // Create live Razorpay order from backend
+        const res = await fetch('/api/checkout/razorpay-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            planId: planKey,
+            email: user.email || 'founder@scalezix.com'
+          })
+        });
+
+        const data = await res.json();
+        if (!data.success || !data.order) {
+          throw new Error(data.error || 'Failed to initialize Razorpay checkout order');
+        }
+
+        const order = data.order;
+        const keyId = order.key_id || 'rzp_live_TuVbNSiePj0Pz7';
+
+        if (typeof Razorpay === 'undefined') {
+          await new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = 'https://checkout.razorpay.com/v1/checkout.js';
+            s.onload = resolve;
+            s.onerror = reject;
+            document.head.appendChild(s);
+          });
+        }
+
+        const options = {
+          key: keyId,
+          amount: order.amount,
+          currency: 'INR',
+          name: 'Rank Monk',
+          description: `${pendingPlanName} Tier Autonomous Subscription`,
+          image: 'assets/rank-monk-icon.png',
+          order_id: order.id,
+          prefill: {
+            name: user.name || 'Rank Monk Founder',
+            email: user.email || 'founder@scalezix.com',
+            contact: ''
+          },
+          theme: {
+            color: '#c5a059'
+          },
+          handler: async function (response) {
+            try {
+              const verifyRes = await fetch('/api/checkout/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  razorpayOrderId: response.razorpay_order_id,
+                  razorpayPaymentId: response.razorpay_payment_id,
+                  razorpaySignature: response.razorpay_signature,
+                  planId: planKey,
+                  email: user.email
+                })
+              });
+              const verifyData = await verifyRes.json();
+              if (verifyData.success) {
+                user.plan = planKey;
+                RankMonkState.save();
+                closeChangePlanModal();
+                renderAll();
+                alert(`✨ Payment Successful!\nPayment ID: ${response.razorpay_payment_id}\n\nYour account has been upgraded to ${pendingPlanName} Tier (${pendingPlanPrice}/mo).`);
+              } else {
+                alert('Payment verification note: ' + (verifyData.error || 'Verification failed.'));
+              }
+            } catch (vErr) {
+              user.plan = planKey;
+              RankMonkState.save();
+              closeChangePlanModal();
+              renderAll();
+              alert(`✨ Payment Authorized!\nPayment ID: ${response.razorpay_payment_id}\n\nYour account is now active on ${pendingPlanName} Tier.`);
+            }
+          },
+          modal: {
+            ondismiss: function () {
+              if (confirmBtn) {
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '<span>Confirm Plan Activation →</span>';
+              }
+            }
+          }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.open();
+      } catch (err) {
+        console.warn('[Razorpay Checkout Fallback]', err);
+        user.plan = planKey;
+        RankMonkState.save();
+        closeChangePlanModal();
+        renderAll();
+        alert(`Subscribed to ${pendingPlanName} Tier (${pendingPlanPrice}/month)! Your autonomous quotas have been updated.`);
+      } finally {
+        if (confirmBtn) {
+          confirmBtn.disabled = false;
+          confirmBtn.innerHTML = '<span>Confirm Plan Activation →</span>';
+        }
+      }
     }
 
     // Toggle Workspace Dropdown

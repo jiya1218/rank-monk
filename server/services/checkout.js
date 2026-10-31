@@ -28,8 +28,43 @@ export async function createCheckoutOrder({ planId = 'grow', userEmail = 'zen@ra
     isDiscountApplied = true;
   }
 
-  const orderId = `order_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+  let orderId = `order_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
   const receipt = `rcpt_${normalizedPlan}_${Date.now()}`;
+
+  // Call official Razorpay Live Orders API
+  if (env.RAZORPAY_KEY_ID && env.RAZORPAY_KEY_SECRET) {
+    try {
+      const authHeader = 'Basic ' + Buffer.from(`${env.RAZORPAY_KEY_ID}:${env.RAZORPAY_KEY_SECRET}`).toString('base64');
+      const res = await fetch('https://api.razorpay.com/v1/orders', {
+        method: 'POST',
+        headers: {
+          'Authorization': authHeader,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          amount: finalAmountPaise,
+          currency: 'INR',
+          receipt: receipt,
+          notes: {
+            plan_id: normalizedPlan,
+            plan_name: planInfo.name,
+            user_email: userEmail
+          }
+        })
+      });
+
+      if (res.ok) {
+        const liveOrder = await res.json();
+        orderId = liveOrder.id;
+        console.log(`[Razorpay] Created Live Order ${orderId} for ${planInfo.name} (₹${finalAmountINR})`);
+      } else {
+        const errText = await res.text();
+        console.warn(`[Razorpay] Order API returned ${res.status}:`, errText);
+      }
+    } catch (apiErr) {
+      console.warn('[Razorpay] Network request error creating order:', apiErr.message);
+    }
+  }
 
   const orderData = {
     id: orderId,
@@ -56,8 +91,8 @@ export async function verifyPaymentSignature({ razorpayOrderId, razorpayPaymentI
   const normalizedPlan = planId.toLowerCase().trim();
   const planInfo = env.PRICING_PLANS[normalizedPlan] || env.PRICING_PLANS.grow;
 
-  // Signature verification logic
-  let isValid = true;
+  // Real Razorpay signature verification logic
+  let isValid = false;
   if (env.RAZORPAY_KEY_SECRET && razorpayOrderId && razorpayPaymentId && razorpaySignature) {
     try {
       const generatedSignature = crypto
@@ -65,9 +100,12 @@ export async function verifyPaymentSignature({ razorpayOrderId, razorpayPaymentI
         .update(`${razorpayOrderId}|${razorpayPaymentId}`)
         .digest('hex');
       isValid = generatedSignature === razorpaySignature;
-    } catch {
-      isValid = true; // In test mode, allow verification
+    } catch (e) {
+      console.warn('[Razorpay] Verification HMAC error:', e);
+      isValid = false;
     }
+  } else if (!env.RAZORPAY_KEY_SECRET) {
+    isValid = true; // Fallback only when secret is unconfigured
   }
 
   if (isValid) {
