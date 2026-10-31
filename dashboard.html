@@ -285,6 +285,10 @@
   <!-- Core Scripts in Head -->
   <script src="js/rankmonk-ai.js?v=20261023_rev5"></script>
   <script src="js/rankmonk-state.js?v=20261023_rev5"></script>
+
+  <!-- Calendly Widget Assets -->
+  <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+  <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
 </head>
 <body class="dash-shell">
 
@@ -1386,17 +1390,74 @@
 
 
       <!-- ====================================================================
-           TAB 12: SUPPORT CENTER
+           TAB 12: SUPPORT CENTER & DIRECT SANCTUARY
            ==================================================================== -->
       <div class="dash-view-panel" id="panel-support">
-        <div class="dash-panel-card">
+        <div class="dash-panel-card" style="margin-bottom: 24px;">
           <div class="panel-card-head">
-            <h3>Founder Support & Knowledge Sanctuary</h3>
+            <div>
+              <h3>Founder & Engineering Sanctuary</h3>
+              <p style="font-size: 0.88rem; color: var(--rm-ink-muted); margin: 4px 0 0;">Direct access to our core architects, engineering team, and scheduling desk.</p>
+            </div>
+            <span class="badge-status published">Response SLA &lt; 2 hrs</span>
           </div>
-          <p style="font-size: 0.88rem; color: var(--rm-ink-muted);">Direct priority Slack & WhatsApp channels included with your Grow Plan.</p>
-          <div style="display: flex; gap: 12px; margin-top: 14px;">
-            <button class="btn btn-secondary" onclick="alert('Opening knowledge docs...');">Browse Documentation 📖</button>
-            <button class="btn btn-primary" onclick="alert('Connecting to founder Slack channel...');">Talk to Rank Monk Engineer 💬</button>
+
+          <!-- Direct Channels Grid -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 18px;">
+            <!-- Email Support -->
+            <div style="padding: 20px; background: #faf8f5; border: 1px solid #efeae1; border-radius: 14px;">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                <span style="font-size: 1.4rem;">✉️</span>
+                <div style="font-weight: 800; font-size: 0.95rem; color: #111c26;">Direct Email Desk</div>
+              </div>
+              <p style="font-size: 0.82rem; color: #64748b; margin: 0 0 12px; line-height: 1.5;">Direct escalation to founders for custom requirements or prompt tuning.</p>
+              <a href="mailto:contact@scalezix.com" class="btn-primary-top" style="text-decoration: none; display: inline-flex; justify-content: center; width: 100%; padding: 8px 12px; font-size: 0.82rem;">
+                contact@scalezix.com ✉️
+              </a>
+              <div style="text-align: center; margin-top: 6px;">
+                <a href="mailto:um18218@gmail.com" style="color: #64748b; font-size: 0.76rem; text-decoration: none;">um18218@gmail.com</a>
+              </div>
+            </div>
+
+            <!-- Phone & WhatsApp -->
+            <div style="padding: 20px; background: #faf8f5; border: 1px solid #efeae1; border-radius: 14px;">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                <span style="font-size: 1.4rem;">📞</span>
+                <div style="font-weight: 800; font-size: 0.95rem; color: #111c26;">Direct Call & WhatsApp</div>
+              </div>
+              <p style="font-size: 0.82rem; color: #64748b; margin: 0 0 12px; line-height: 1.5;">Direct line for urgent crawls, serverless webhooks, and billing queries.</p>
+              <div style="display: flex; gap: 8px;">
+                <a href="tel:+918200010241" class="btn-secondary" style="flex: 1; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 8px 10px; font-size: 0.8rem; font-weight: 700; border-radius: 8px; border: 1px solid #cbd5e1; color: #334155; background: #fff;">
+                  📞 Call
+                </a>
+                <a href="https://wa.me/918200010241?text=Hi%20Rank%20Monk%20Team%2C%20I%20have%20an%20inquiry%20from%20my%20dashboard." target="_blank" rel="noopener noreferrer" style="flex: 1.2; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 8px 10px; font-size: 0.8rem; font-weight: 700; border-radius: 8px; background: #25D366; color: #fff;">
+                  💬 WhatsApp
+                </a>
+              </div>
+            </div>
+
+            <!-- Live Session Booking -->
+            <div style="padding: 20px; background: #ffffff; border: 1.5px solid var(--rm-gold, #c5a059); border-radius: 14px; box-shadow: 0 4px 16px rgba(197, 160, 89, 0.12);">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                <span style="font-size: 1.4rem;">📅</span>
+                <div style="font-weight: 800; font-size: 0.95rem; color: #111c26;">1-on-1 Growth Session</div>
+              </div>
+              <p style="font-size: 0.82rem; color: #64748b; margin: 0 0 12px; line-height: 1.5;">Book a live 30-minute walkthrough with our lead growth architects.</p>
+              <button onclick="openDashboardCalendly()" class="btn-primary-top" style="width: 100%; justify-content: center; padding: 8px 12px; font-size: 0.82rem;">
+                Book Strategy Session 📅
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Embedded Interactive Calendar inside Dashboard -->
+        <div class="dash-panel-card" style="padding: 18px;">
+          <div class="panel-card-head" style="margin-bottom: 14px;">
+            <h3>Live Booking Calendar</h3>
+            <span style="font-size: 0.82rem; color: #64748b;">Direct Slot Reservation</span>
+          </div>
+          <div style="border-radius: 12px; overflow: hidden; background: #fff; border: 1px solid #efeae1;">
+            <div class="calendly-inline-widget" data-url="https://calendly.com/utkarshmakwana31/30min?hide_landing_page_details=1&hide_gdpr_banner=1" style="min-width:320px;height:650px;width:100%;"></div>
           </div>
         </div>
       </div>
@@ -2546,6 +2607,15 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
         const orig = btn.innerHTML;
         btn.innerHTML = '<span>✓ Copied!</span>';
         setTimeout(() => { btn.innerHTML = orig; }, 1800);
+      }
+    }
+
+    // Calendly Integration Handler
+    function openDashboardCalendly() {
+      if (window.Calendly && typeof window.Calendly.initPopupWidget === 'function') {
+        Calendly.initPopupWidget({ url: 'https://calendly.com/utkarshmakwana31/30min' });
+      } else {
+        window.open('https://calendly.com/utkarshmakwana31/30min', '_blank');
       }
     }
 

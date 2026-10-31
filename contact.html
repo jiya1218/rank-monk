@@ -31,6 +31,10 @@
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/animations.css">
   <link rel="stylesheet" href="css/responsive.css">
+
+  <!-- Calendly Widget Assets -->
+  <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+  <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
 </head>
 <body class="page-fade-in">
 
@@ -110,40 +114,79 @@
             <h2 style="font-family: var(--font-heading); font-size: 2rem; margin-bottom: 24px;">Direct Channels</h2>
             
             <div style="display: flex; flex-direction: column; gap: 20px;">
+              <!-- Direct Email Card -->
               <div style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 24px;">
                 <div style="display: flex; gap: 14px; align-items: center; margin-bottom: 10px;">
-                  <span style="font-size: 1.6rem;">💬</span>
+                  <span style="font-size: 1.6rem;">✉️</span>
                   <div>
                     <h3 style="font-size: 1.15rem; margin: 0; font-family: var(--font-heading);">Founder & Support Desk</h3>
-                    <div style="font-size: 0.85rem; color: var(--muted);">Direct Slack & email escalation</div>
+                    <div style="font-size: 0.85rem; color: var(--muted);">Direct email escalation (SLA &lt; 2 hrs)</div>
                   </div>
                 </div>
                 <p style="font-size: 0.92rem; color: var(--ink); margin: 0 0 12px; line-height: 1.5;">
-                  Active subscribers on Grow & Scale plans get direct access to our engineering Slack. For general queries, write to:
+                  For customer onboarding, API integrations, and enterprise requirements, email our engineering team:
                 </p>
-                <a href="mailto:support@rankmonk.com" style="color: var(--tan); font-weight: 700; text-decoration: none; font-size: 0.95rem;">support@rankmonk.com →</a>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                  <a href="mailto:contact@scalezix.com" style="color: var(--tan); font-weight: 700; text-decoration: none; font-size: 1.05rem; display: inline-flex; align-items: center; gap: 6px;">
+                    contact@scalezix.com →
+                  </a>
+                  <a href="mailto:um18218@gmail.com" style="color: var(--muted); font-size: 0.88rem; text-decoration: none;">
+                    um18218@gmail.com
+                  </a>
+                </div>
               </div>
 
+              <!-- Direct Call & WhatsApp Card -->
               <div style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 24px;">
                 <div style="display: flex; gap: 14px; align-items: center; margin-bottom: 10px;">
-                  <span style="font-size: 1.6rem;">🤝</span>
+                  <span style="font-size: 1.6rem;">📞</span>
                   <div>
-                    <h3 style="font-size: 1.15rem; margin: 0; font-family: var(--font-heading);">Custom Integrations & High Volume</h3>
-                    <div style="font-size: 0.85rem; color: var(--muted);">Power creators & custom requirements</div>
+                    <h3 style="font-size: 1.15rem; margin: 0; font-family: var(--font-heading);">Direct Phone & WhatsApp</h3>
+                    <div style="font-size: 0.85rem; color: var(--muted);">Direct voice & messaging line</div>
                   </div>
                 </div>
-                <p style="font-size: 0.92rem; color: var(--ink); margin: 0 0 12px; line-height: 1.5;">
-                  Have questions about high-volume crawls, custom API webhooks, or dedicated onboarding? Talk to our team:
+                <p style="font-size: 0.92rem; color: var(--ink); margin: 0 0 14px; line-height: 1.5;">
+                  Call directly or message us on WhatsApp for real-time consultation:
                 </p>
-                <a href="mailto:support@rankmonk.com" style="color: var(--tan); font-weight: 700; text-decoration: none; font-size: 0.95rem;">support@rankmonk.com →</a>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                  <a href="tel:+918200010241" class="btn btn-secondary" style="padding: 9px 16px; font-size: 0.9rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                    <span>📞</span> +91 8200010241
+                  </a>
+                  <a href="https://wa.me/918200010241?text=Hi%20Rank%20Monk%20Team%2C%20I%20have%20an%20inquiry%20about%20the%20platform." target="_blank" rel="noopener noreferrer" class="btn" style="padding: 9px 16px; font-size: 0.9rem; font-weight: 700; text-decoration: none; background: #25D366; color: #fff; border: 1px solid #20ba5a; display: inline-flex; align-items: center; gap: 6px; border-radius: 999px;">
+                    <span>💬</span> WhatsApp Us
+                  </a>
+                </div>
               </div>
 
+              <!-- 1-on-1 Booking Card -->
+              <div style="background: var(--card); border: 1.5px solid var(--tan, #c5a059); border-radius: 18px; padding: 24px; position: relative; box-shadow: 0 4px 20px rgba(197, 160, 89, 0.12);">
+                <div style="display: flex; gap: 14px; align-items: center; margin-bottom: 10px;">
+                  <span style="font-size: 1.6rem;">📅</span>
+                  <div>
+                    <h3 style="font-size: 1.15rem; margin: 0; font-family: var(--font-heading);">Book a 1-on-1 Growth Session</h3>
+                    <div style="font-size: 0.85rem; color: var(--muted);">30-min live walkthrough & strategy audit</div>
+                  </div>
+                </div>
+                <p style="font-size: 0.92rem; color: var(--ink); margin: 0 0 14px; line-height: 1.5;">
+                  Select a live time slot directly on our interactive schedule for a personalized growth architecture review.
+                </p>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                  <button type="button" onclick="openCalendly()" class="btn btn-primary" style="padding: 10px 18px; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 8px;">
+                    <span>Book Strategy Call 📅</span>
+                  </button>
+                  <a href="#calendlySection" class="btn btn-secondary" style="padding: 10px 16px; font-size: 0.88rem; text-decoration: none;">
+                    View Calendar ↓
+                  </a>
+                </div>
+              </div>
+
+              <!-- Response SLA -->
               <div style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 24px;">
                 <div style="display: flex; gap: 14px; align-items: center; margin-bottom: 10px;">
                   <span style="font-size: 1.6rem;">⏱️</span>
                   <div>
-                    <h3 style="font-size: 1.15rem; margin: 0; font-family: var(--font-heading);">Response SLA</h3>
-                    <div style="font-size: 0.85rem; color: var(--muted);">Fast and human</div>
+                    <h3 style="font-size: 1.15rem; margin: 0; font-family: var(--font-heading);">Response Guarantee</h3>
+                    <div style="font-size: 0.85rem; color: var(--muted);">Calm, fast, and human</div>
                   </div>
                 </div>
                 <p style="font-size: 0.92rem; color: var(--muted); margin: 0; line-height: 1.5;">
@@ -200,6 +243,22 @@
             </form>
           </div>
 
+        </div>
+      </div>
+    </section>
+
+    <!-- INTERACTIVE SCHEDULING EMBED SECTION -->
+    <section class="section" id="calendlySection" style="padding-top: 40px; border-top: 1px solid var(--line); background: var(--bg-alt, #faf8f5);">
+      <div class="container">
+        <div style="text-align: center; max-width: 680px; margin: 0 auto 36px;">
+          <span class="eyebrow">Real-Time Scheduling</span>
+          <h2 style="font-family: var(--font-heading); font-size: 2.2rem; margin: 10px 0;">Schedule a <span class="accent">1-on-1 Growth Demo</span></h2>
+          <p class="lead" style="font-size: 1rem; color: var(--muted);">Book a live 30-minute consultation with our growth architects. We'll audit your current organic visibility live.</p>
+        </div>
+
+        <!-- Inline Booking Container -->
+        <div style="background: var(--card); border: 1px solid var(--line); border-radius: 24px; padding: 16px; box-shadow: var(--shadow-card); max-width: 1000px; margin: 0 auto; min-height: 700px;">
+          <div class="calendly-inline-widget" data-url="https://calendly.com/utkarshmakwana31/30min?hide_landing_page_details=1&hide_gdpr_banner=1" style="min-width:320px;height:700px;width:100%;"></div>
         </div>
       </div>
     </section>
@@ -304,6 +363,19 @@
 
   <script src="js/app.js"></script>
   <script>
+    function openCalendly() {
+      if (window.Calendly && typeof window.Calendly.initPopupWidget === 'function') {
+        Calendly.initPopupWidget({ url: 'https://calendly.com/utkarshmakwana31/30min' });
+      } else {
+        const target = document.getElementById('calendlySection');
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+        } else {
+          window.open('https://calendly.com/utkarshmakwana31/30min', '_blank');
+        }
+      }
+    }
+
     function handleContactSubmit(e) {
       e.preventDefault();
       const btn = document.getElementById('btnContactSubmit');
