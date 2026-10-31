@@ -193,7 +193,7 @@
             tone: tone || 'Professional',
             wordCount: parseInt(wordCount, 10) || 1400,
             content: content || '',
-            model: 'Zen AI Engine (Nova Pro)',
+            model: 'Zen Autonomous Intelligence Engine',
             status: 'Published',
             date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
             engines: ['Google', 'ChatGPT', 'Perplexity']
@@ -306,8 +306,8 @@
       <div class="workspace-label">WORKSPACE</div>
       <button class="workspace-card-btn" id="workspaceBtn" onclick="toggleWorkspaceDropdown()">
         <div class="workspace-favicon" id="wsFaviconText">
-          <img id="wsFaviconImg" src="" alt="Favicon" style="width: 22px; height: 22px; object-fit: contain; border-radius: 4px; display: none;" onerror="this.style.display='none'; document.getElementById('wsFaviconFallback').style.display='block';">
-          <span id="wsFaviconFallback">R</span>
+          <img id="wsFaviconImg" src="assets/rank-monk-icon.png" alt="Favicon" style="width: 22px; height: 22px; object-fit: contain; border-radius: 4px; display: block;" onerror="this.src='assets/rank-monk-icon.png';">
+          <span id="wsFaviconFallback" style="display: none;">R</span>
         </div>
         <div class="workspace-meta">
           <div class="workspace-domain" id="wsDomainLabel">https://rankmonk.com</div>
@@ -3018,7 +3018,7 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
       const art = (proj.articles || []).find(x => x.id === artId);
       if (!art) return;
       document.getElementById('inspectArticleTitle').innerText = art.title;
-      document.getElementById('inspectArticleMeta').innerText = `Keyword: ${art.keyword} · Word count: ${art.wordCount} words · Engine: ${art.model || 'Zen AI Engine (Nova Pro)'} · Status: ${art.status}`;
+      document.getElementById('inspectArticleMeta').innerText = `Keyword: ${art.keyword} · Word count: ${art.wordCount} words · Engine: ${art.model || 'Zen Autonomous Intelligence Engine'} · Status: ${art.status}`;
       document.getElementById('inspectArticleBody').innerText = art.content || `# ${art.title}\n\nGenerated with Zen AI Engine.\n\nKey Strategy:\n- Autonomous crawl of ${proj.domain}\n- Entity authority optimization for ${art.keyword}\n- Continuous syndication to Google, ChatGPT, and Claude.`;
       document.getElementById('inspectArticleModal').classList.add('open');
     }
@@ -3246,19 +3246,35 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
         document.getElementById('wsDomainLabel').innerText = `https://${proj.domain}`;
         
         // Dynamic Workspace Logo / Favicon
-        const initialLetter = (proj.name || proj.domain || 'R').charAt(0).toUpperCase();
+        const cleanDom = (proj.domain || '').replace(/^https?:\/\//i, '').replace(/\/.*$/, '').toLowerCase();
+        const initialLetter = (proj.name || cleanDom || 'R').charAt(0).toUpperCase();
         const favImgEl = document.getElementById('wsFaviconImg');
         const favFallbackEl = document.getElementById('wsFaviconFallback');
-        const siteFavicon = proj.favicon_url || (proj.domain ? `https://www.google.com/s2/favicons?domain=${proj.domain}&sz=64` : '');
+        let siteFavicon = proj.favicon_url;
+        if (!siteFavicon) {
+          if (cleanDom.includes('rankmonk')) {
+            siteFavicon = 'assets/rank-monk-icon.png';
+          } else if (cleanDom) {
+            siteFavicon = `https://www.google.com/s2/favicons?domain=${cleanDom}&sz=64`;
+          }
+        }
         if (favImgEl && favFallbackEl) {
           favFallbackEl.innerText = initialLetter;
           if (siteFavicon) {
             favImgEl.src = siteFavicon;
             favImgEl.style.display = 'block';
             favFallbackEl.style.display = 'none';
+            favImgEl.onerror = function() {
+              if (cleanDom && !this.src.includes('duckduckgo')) {
+                this.src = `https://icons.duckduckgo.com/ip3/${cleanDom}.ico`;
+              } else {
+                this.src = 'assets/rank-monk-icon.png';
+              }
+            };
           } else {
-            favImgEl.style.display = 'none';
-            favFallbackEl.style.display = 'block';
+            favImgEl.src = 'assets/rank-monk-icon.png';
+            favImgEl.style.display = 'block';
+            favFallbackEl.style.display = 'none';
           }
         }
 
@@ -3617,7 +3633,7 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
         const itemsHtml = RankMonkState.data.projects.map(p => `
           <div onclick="RankMonkState.setActiveProject('${p.id}'); toggleWorkspaceDropdown(); renderAll();" style="padding: 7px 8px; font-size: 11px; font-weight: 700; color: ${p.id === RankMonkState.data.activeProjectId ? 'var(--rm-gold)' : '#fff'}; cursor: pointer; border-radius: 6px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
             <div style="display: flex; align-items: center; gap: 8px; min-width: 0; overflow: hidden;">
-              <img src="${p.favicon_url || 'https://www.google.com/s2/favicons?domain=' + p.domain + '&sz=32'}" style="width: 14px; height: 14px; object-fit: contain; border-radius: 2px;" onerror="this.style.display='none'">
+              <img src="${p.favicon_url || (p.domain && p.domain.includes('rankmonk') ? 'assets/rank-monk-icon.png' : 'https://www.google.com/s2/favicons?domain=' + p.domain + '&sz=32')}" style="width: 14px; height: 14px; object-fit: contain; border-radius: 2px;" onerror="this.src='assets/rank-monk-icon.png'">
               <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.domain}</span>
             </div>
             ${p.id === RankMonkState.data.activeProjectId ? '<span style="color: var(--rm-gold);">✔</span>' : ''}

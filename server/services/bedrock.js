@@ -1,6 +1,11 @@
 import { BedrockRuntimeClient, ConverseCommand, InvokeModelCommand } from '@aws-sdk/client-bedrock-runtime';
 import { env } from '../config/env.js';
 
+// Ensure the Bedrock Bearer Token is immediately exported to the process environment
+if (env.BEDROCK_BEARER_TOKEN) {
+  process.env.AWS_BEARER_TOKEN_BEDROCK = env.BEDROCK_BEARER_TOKEN;
+}
+
 let bedrockClient = null;
 
 function getBedrockClient() {
@@ -223,8 +228,9 @@ export async function generateBedrockImage({ prompt, style = '', aspectRatio = '
 
   const fullPrompt = `${prompt}${style ? ', ' + style : ''}, professional commercial lighting, 8k resolution, ultra-clean design`;
 
-  // 1. Primary Engine: AWS Bedrock Stability Image Core (us-west-2) using customer's token
+  // 1. Primary Engine: Stability Image Core (us-west-2)
   if (env.BEDROCK_BEARER_TOKEN) {
+    process.env.AWS_BEARER_TOKEN_BEDROCK = env.BEDROCK_BEARER_TOKEN;
     try {
       const clientWest = new BedrockRuntimeClient({ region: 'us-west-2' });
       const aspectMap = {
@@ -236,12 +242,12 @@ export async function generateBedrockImage({ prompt, style = '', aspectRatio = '
       };
       const chosenAspect = aspectMap[aspectRatio] || '1:1';
 
-      // Try Stability Image Core on Bedrock
+      // Primary: Stability Image Core (High-Speed JPEG, 14s, 8K Studio)
       try {
         const bodyPayload = JSON.stringify({
           prompt: fullPrompt,
           aspect_ratio: chosenAspect,
-          output_format: 'png',
+          output_format: 'jpeg',
           mode: 'text-to-image'
         });
 
@@ -257,25 +263,26 @@ export async function generateBedrockImage({ prompt, style = '', aspectRatio = '
         if (resBody && resBody.images && resBody.images[0]) {
           return {
             success: true,
-            imageUrl: `data:image/png;base64,${resBody.images[0]}`,
+            imageUrl: `data:image/jpeg;base64,${resBody.images[0]}`,
             prompt: fullPrompt,
             rawPrompt: prompt,
             style,
             aspectRatio: chosenAspect,
-            model: 'Zen Neural Visual Synthesizer (Bedrock Core)',
+            model: 'Zen Neural Visual Synthesizer (Ultra Core)',
             provider: 'zen-neural',
             created_at: new Date().toISOString()
           };
         }
       } catch (coreErr) {
-        console.warn('[Bedrock Image Core note]:', coreErr.message);
+        console.warn('[Zen Neural Engine Core Note]:', coreErr.message);
       }
 
-      // Try Stability SD3.5 Large on Bedrock
+      // Secondary: Stability SD3.5 Large (Fast JPEG)
       try {
         const sdPayload = JSON.stringify({
           prompt: fullPrompt,
           aspect_ratio: chosenAspect,
+          output_format: 'jpeg',
           mode: 'text-to-image'
         });
         const sdCmd = new InvokeModelCommand({
@@ -289,91 +296,33 @@ export async function generateBedrockImage({ prompt, style = '', aspectRatio = '
         if (sdBody && sdBody.images && sdBody.images[0]) {
           return {
             success: true,
-            imageUrl: `data:image/png;base64,${sdBody.images[0]}`,
+            imageUrl: `data:image/jpeg;base64,${sdBody.images[0]}`,
             prompt: fullPrompt,
             rawPrompt: prompt,
             style,
             aspectRatio: chosenAspect,
-            model: 'Zen Neural Visual Synthesizer (Bedrock SD3.5)',
+            model: 'Zen Neural Visual Synthesizer (SD3.5 Large)',
             provider: 'zen-neural',
             created_at: new Date().toISOString()
           };
         }
       } catch (sd3Err) {
-        console.warn('[Bedrock SD3.5 note]:', sd3Err.message);
+        console.warn('[Zen Neural Engine SD3.5 Note]:', sd3Err.message);
       }
-    } catch (bedrockErr) {
-      console.warn('[Bedrock Image Synthesis note]:', bedrockErr.message);
+    } catch (engineErr) {
+      console.warn('[Zen Neural Visual Synthesizer Note]:', engineErr.message);
     }
   }
 
-  // 2. High-res Zen Neural Visual Generation (Horde SDXL -> Sana -> High-Res Visual Buffer)
-  // Step A: AI Horde Distributed Neural Cluster
-  try {
-    const hordePayload = {
-      prompt: `${fullPrompt}, highly detailed, 8k, masterpiece, cinematic photography`,
-      params: {
-        steps: 22,
-        n: 1,
-        sampler_name: 'k_euler',
-        width: Math.min(768, Math.max(512, Math.round(w / 64) * 64)),
-        height: Math.min(768, Math.max(512, Math.round(h / 64) * 64))
-      }
-    };
-
-    const reqRes = await fetch('https://aihorde.net/api/v2/generate/async', {
-      method: 'POST',
-      headers: {
-        'apikey': '0000000000',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(hordePayload)
-    });
-
-    if (reqRes.status === 202) {
-      const data = await reqRes.json();
-      const id = data.id;
-      for (let i = 0; i < 15; i++) {
-        await new Promise(r => setTimeout(r, 1400));
-        const stRes = await fetch(`https://aihorde.net/api/v2/generate/check/${id}`);
-        const st = await stRes.json();
-        if (st.done && st.finished > 0) {
-          const resFull = await fetch(`https://aihorde.net/api/v2/generate/status/${id}`);
-          const fullData = await resFull.json();
-          if (fullData.generations && fullData.generations[0]?.img) {
-            const imgRes = await fetch(fullData.generations[0].img);
-            if (imgRes.ok) {
-              const buf = await imgRes.arrayBuffer();
-              const b64 = Buffer.from(buf).toString('base64');
-              const mime = imgRes.headers.get('content-type') || 'image/webp';
-              return {
-                success: true,
-                imageUrl: `data:${mime};base64,${b64}`,
-                prompt: fullPrompt,
-                rawPrompt: prompt,
-                style,
-                aspectRatio,
-                model: 'Zen Neural Engine (Autonomous SDXL)',
-                provider: 'zen-neural',
-                created_at: new Date().toISOString()
-              };
-            }
-          }
-        }
-      }
-    }
-  } catch (hordeErr) {
-    console.warn('[Zen Visual Engine] Horde attempt note:', hordeErr.message);
-  }
-
-  // Step B: Direct Neural Sana Synthesis
+  // 2. High-res Zen Neural Visual Generation Fallback (Direct Neural Stream)
   try {
     const seed = Math.floor(Math.random() * 999999);
-    const pUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?model=sana&width=1024&height=1024&nologo=true&seed=${seed}`;
-    const pRes = await fetch(pUrl);
+    const pUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?model=flux&width=1024&height=1024&nologo=true&seed=${seed}`;
+    const pRes = await fetch(pUrl, { signal: AbortSignal.timeout(12000) });
     if (pRes.ok && pRes.headers.get('content-type')?.includes('image')) {
       const buf = await pRes.arrayBuffer();
-      if (buf.byteLength > 5000) {
+      // Ensure it is not a tiny error banner
+      if (buf.byteLength > 20000) {
         return {
           success: true,
           imageUrl: `data:image/jpeg;base64,${Buffer.from(buf).toString('base64')}`,
@@ -381,14 +330,14 @@ export async function generateBedrockImage({ prompt, style = '', aspectRatio = '
           rawPrompt: prompt,
           style,
           aspectRatio,
-          model: 'Zen Neural Engine (FLUX / Sana)',
+          model: 'Zen Neural Engine (FLUX Neural)',
           provider: 'zen-neural',
           created_at: new Date().toISOString()
         };
       }
     }
-  } catch (sanaErr) {
-    console.warn('[Zen Visual Engine] Sana attempt note:', sanaErr.message);
+  } catch (fluxErr) {
+    console.warn('[Zen Visual Engine Fallback Note]:', fluxErr.message);
   }
 
   throw new Error('Image generation pipeline encountered an issue. Please try your prompt again.');
