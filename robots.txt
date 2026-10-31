@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Disallow authenticated application console routes
+Disallow: /dashboard
+Disallow: /dashboard.html
+Disallow: /onboarding
+Disallow: /onboarding.html
+Disallow: /api/
+
+# XML Sitemaps
+Sitemap: https://www.rankmonk.in/sitemap.xml
+Sitemap: https://rankmonk.in/sitemap.xml
+

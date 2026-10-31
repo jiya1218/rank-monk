@@ -6,6 +6,15 @@
   <title>Developer API Documentation — Rank Monk Autonomous Search Platform</title>
   <meta name="description" content="Official REST API reference for Rank Monk. Integrate autonomous crawling, Zen AI blog generation, and AEO citations into your CI/CD and CMS.">
   <link rel="icon" type="image/png" href="assets/rank-monk-icon.png">
+
+  <!-- Anti-Flash Theme Script -->
+  <script>
+    (function() {
+      var t = localStorage.getItem("rankmonk-theme") || 
+              (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", t);
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -34,8 +43,9 @@
   <!-- Navigation Header -->
   <header class="site-header">
     <div class="header-inner container">
-      <a href="index.html" class="brand-logo-link">
-        <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="logo-img" style="height: 38px;">
+      <a href="index.html" class="brand-logo-link brand" aria-label="Rank Monk home">
+        <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="brand-logo-img logo-light" style="height: 38px;">
+        <img src="assets/rank-monk-logo-horizontal-light.png" alt="Rank Monk" class="brand-logo-img logo-dark" style="height: 38px;">
       </a>
       <nav class="nav-links">
         <a href="features.html">Features</a>
@@ -45,8 +55,38 @@
         <a href="about.html">About</a>
       </nav>
       <div class="nav-actions">
-        <a href="login.html" class="btn btn-ghost">Log In</a>
-        <a href="dashboard" class="btn btn-primary">Open Console →</a>
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle theme">☾</button>
+        <a href="https://calendly.com/utkarshmakwana31/demo-for-rankmonk" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm nav-book-demo-btn">Book Demo 📅</a>
+        <a href="login.html" class="btn btn-ghost btn-sm">Log In</a>
+        <a href="dashboard" class="btn btn-primary btn-sm">Open Console →</a>
+
+        <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle Navigation">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Drawer -->
+    <div class="mobile-nav-sheet" id="mobileNavSheet">
+      <div class="mobile-sheet-head">
+        <a href="index.html" class="brand">
+          <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="brand-logo-img logo-light" style="height: 44px;">
+          <img src="assets/rank-monk-logo-horizontal-light.png" alt="Rank Monk" class="brand-logo-img logo-dark" style="height: 44px;">
+        </a>
+        <button class="mobile-sheet-close" id="mobileSheetClose">✕</button>
+      </div>
+      <div class="mobile-sheet-links">
+        <a href="index.html" class="nav-link mobile-link"><span>🏠 Home</span></a>
+        <a href="features.html" class="nav-link mobile-link"><span>⚡ Features</span></a>
+        <a href="engines.html" class="nav-link mobile-link"><span>⚙️ AI Engines</span></a>
+        <a href="comparison.html" class="nav-link mobile-link"><span>⚖️ Stack Collapse</span></a>
+        <a href="pricing.html" class="nav-link mobile-link"><span>🏷️ Pricing</span></a>
+        <a href="faq.html" class="nav-link mobile-link"><span>📖 FAQ</span></a>
+        <a href="https://calendly.com/utkarshmakwana31/demo-for-rankmonk" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-block" style="margin-top: 10px;">Book Demo 📅</a>
       </div>
     </div>
   </header>
@@ -269,5 +309,6 @@ Content-Type: application/json</div>
       <span class="dock-lbl">Console</span>
     </a>
   </nav>
+  <script src="js/app.js"></script>
 </body>
 </html>

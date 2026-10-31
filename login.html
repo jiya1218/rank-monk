@@ -12,7 +12,7 @@
     (function() {
       try {
         var saved = localStorage.getItem('rankmonk-theme');
-        var theme = saved || 'light';
+        var theme = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         document.documentElement.setAttribute('data-theme', theme);
       } catch (e) {}
     })();
@@ -103,8 +103,9 @@
       <img src="assets/rank-monk-logo-horizontal-light.png" alt="Rank Monk" class="brand-logo-img logo-dark">
     </a>
 
-    <div style="display: flex; align-items: center; gap: 14px;">
+    <div style="display: flex; align-items: center; gap: 12px;">
       <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="Toggle theme">◑</button>
+      <a href="https://calendly.com/utkarshmakwana31/demo-for-rankmonk" target="_blank" rel="noopener noreferrer" class="btn nav-book-demo-btn" style="font-size: 0.85rem; padding: 8px 16px;">Book Demo 📅</a>
       <a href="index.html" class="btn btn-secondary" style="font-size: 0.85rem; padding: 8px 16px;">← Back to Site</a>
     </div>
   </header>

@@ -151,4 +151,15 @@
   --nude-stone: #5a4232;
   --nude-linen: #1f150e;
   --nude-bone: #170f0a;
+
+  /* Rank Monk Global Dark Tokens */
+  --rm-bg-sand: #140d08;
+  --rm-card-bg: #1f150e;
+  --rm-card-border: #3b2a20;
+  --rm-ink-primary: #f4eadf;
+  --rm-ink-secondary: #d8c09e;
+  --rm-ink-muted: #b8a291;
+  --rm-gold: #c9a27e;
+  --rm-sand-card: #241912;
+  --rm-sand-border: #3b2a20;
 }

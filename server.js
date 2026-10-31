@@ -14,6 +14,21 @@ const publicPath = path.join(__dirname);
 app.use(express.static(distPath));
 app.use(express.static(publicPath));
 
+// Explicit SEO routes for search engines
+app.get('/sitemap.xml', (req, res) => {
+  const filePath = path.join(distPath, 'sitemap.xml');
+  res.type('application/xml').sendFile(filePath, (err) => {
+    if (err) res.sendFile(path.join(__dirname, 'sitemap.xml'));
+  });
+});
+
+app.get('/robots.txt', (req, res) => {
+  const filePath = path.join(distPath, 'robots.txt');
+  res.type('text/plain').sendFile(filePath, (err) => {
+    if (err) res.sendFile(path.join(__dirname, 'robots.txt'));
+  });
+});
+
 // Fallback routing for HTML pages (Express v5 compatible)
 app.use((req, res, next) => {
   if (req.path.startsWith('/api')) {
