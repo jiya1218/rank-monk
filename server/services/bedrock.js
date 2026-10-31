@@ -223,93 +223,87 @@ export async function generateBedrockImage({ prompt, style = '', aspectRatio = '
 
   const fullPrompt = `${prompt}${style ? ', ' + style : ''}, professional commercial lighting, 8k resolution, ultra-clean design`;
 
-  // 1. Try AWS Bedrock Titan Image Generator
+  // 1. Primary Engine: AWS Bedrock Stability Image Core (us-west-2) using customer's token
   if (env.BEDROCK_BEARER_TOKEN) {
     try {
-      const client = getBedrockClient();
-      const modelsToTry = [
-        'amazon.titan-image-generator-v2:0',
-        'amazon.titan-image-generator-v1'
-      ];
+      const clientWest = new BedrockRuntimeClient({ region: 'us-west-2' });
+      const aspectMap = {
+        '1:1': '1:1',
+        '16:9': '16:9',
+        '9:16': '9:16',
+        '4:3': '4:3',
+        '3:4': '3:4'
+      };
+      const chosenAspect = aspectMap[aspectRatio] || '1:1';
 
-      for (const modelId of modelsToTry) {
-        try {
-          const bodyPayload = JSON.stringify({
-            taskType: 'TEXT_IMAGE',
-            textToImageParams: {
-              text: fullPrompt
-            },
-            imageGenerationConfig: {
-              numberOfImages: 1,
-              quality: 'standard',
-              height: h,
-              width: w,
-              cfgScale: 8.0
-            }
-          });
-
-          const cmd = new InvokeModelCommand({
-            modelId,
-            contentType: 'application/json',
-            accept: 'application/json',
-            body: Buffer.from(bodyPayload)
-          });
-
-          const res = await client.send(cmd);
-          const resBody = JSON.parse(new TextDecoder().decode(res.body));
-          if (resBody && resBody.images && resBody.images[0]) {
-            return {
-              success: true,
-              imageUrl: `data:image/png;base64,${resBody.images[0]}`,
-              prompt: fullPrompt,
-              rawPrompt: prompt,
-              style,
-              aspectRatio,
-              model: modelId,
-              provider: 'aws-bedrock',
-              created_at: new Date().toISOString()
-            };
-          }
-        } catch (mErr) {
-          console.warn(`[Bedrock Image] ${modelId} attempt note:`, mErr.message);
-        }
-      }
-
-      // Try Stability SDXL on Bedrock
+      // Try Stability Image Core on Bedrock
       try {
-        const sdxlBody = JSON.stringify({
-          text_prompts: [{ text: fullPrompt, weight: 1 }],
-          cfg_scale: 8,
-          steps: 30,
-          width: w,
-          height: h
+        const bodyPayload = JSON.stringify({
+          prompt: fullPrompt,
+          aspect_ratio: chosenAspect,
+          output_format: 'png',
+          mode: 'text-to-image'
         });
-        const sdxlCmd = new InvokeModelCommand({
-          modelId: 'stability.stable-diffusion-xl-v1',
+
+        const cmd = new InvokeModelCommand({
+          modelId: 'stability.stable-image-core-v1:1',
           contentType: 'application/json',
           accept: 'application/json',
-          body: Buffer.from(sdxlBody)
+          body: Buffer.from(bodyPayload)
         });
-        const sdxlRes = await client.send(sdxlCmd);
-        const sdxlJson = JSON.parse(new TextDecoder().decode(sdxlRes.body));
-        if (sdxlJson.artifacts && sdxlJson.artifacts[0] && sdxlJson.artifacts[0].base64) {
+
+        const res = await clientWest.send(cmd);
+        const resBody = JSON.parse(new TextDecoder().decode(res.body));
+        if (resBody && resBody.images && resBody.images[0]) {
           return {
             success: true,
-            imageUrl: `data:image/png;base64,${sdxlJson.artifacts[0].base64}`,
+            imageUrl: `data:image/png;base64,${resBody.images[0]}`,
             prompt: fullPrompt,
             rawPrompt: prompt,
             style,
-            aspectRatio,
-            model: 'stability.stable-diffusion-xl-v1',
-            provider: 'aws-bedrock',
+            aspectRatio: chosenAspect,
+            model: 'Zen Neural Visual Synthesizer (Bedrock Core)',
+            provider: 'zen-neural',
             created_at: new Date().toISOString()
           };
         }
-      } catch (sdxlErr) {
-        console.warn('[Bedrock Image] Stability attempt note:', sdxlErr.message);
+      } catch (coreErr) {
+        console.warn('[Bedrock Image Core note]:', coreErr.message);
+      }
+
+      // Try Stability SD3.5 Large on Bedrock
+      try {
+        const sdPayload = JSON.stringify({
+          prompt: fullPrompt,
+          aspect_ratio: chosenAspect,
+          mode: 'text-to-image'
+        });
+        const sdCmd = new InvokeModelCommand({
+          modelId: 'stability.sd3-5-large-v1:0',
+          contentType: 'application/json',
+          accept: 'application/json',
+          body: Buffer.from(sdPayload)
+        });
+        const sdRes = await clientWest.send(sdCmd);
+        const sdBody = JSON.parse(new TextDecoder().decode(sdRes.body));
+        if (sdBody && sdBody.images && sdBody.images[0]) {
+          return {
+            success: true,
+            imageUrl: `data:image/png;base64,${sdBody.images[0]}`,
+            prompt: fullPrompt,
+            rawPrompt: prompt,
+            style,
+            aspectRatio: chosenAspect,
+            model: 'Zen Neural Visual Synthesizer (Bedrock SD3.5)',
+            provider: 'zen-neural',
+            created_at: new Date().toISOString()
+          };
+        }
+      } catch (sd3Err) {
+        console.warn('[Bedrock SD3.5 note]:', sd3Err.message);
       }
     } catch (bedrockErr) {
-      console.warn('[Bedrock Image] Client note:', bedrockErr.message);
+      console.warn('[Bedrock Image Synthesis note]:', bedrockErr.message);
     }
   }
 
@@ -397,24 +391,5 @@ export async function generateBedrockImage({ prompt, style = '', aspectRatio = '
     console.warn('[Zen Visual Engine] Sana attempt note:', sanaErr.message);
   }
 
-  // Step C: High-Res Curated Visual Asset Buffer
-  try {
-    const picsumRes = await fetch('https://picsum.photos/1024/1024');
-    if (picsumRes.ok) {
-      const buf = await picsumRes.arrayBuffer();
-      return {
-        success: true,
-        imageUrl: `data:image/jpeg;base64,${Buffer.from(buf).toString('base64')}`,
-        prompt: fullPrompt,
-        rawPrompt: prompt,
-        style,
-        aspectRatio,
-        model: 'Zen Neural Visual Studio',
-        provider: 'zen-neural',
-        created_at: new Date().toISOString()
-      };
-    }
-  } catch (pErr) {}
-
-  throw new Error('All image synthesis pipelines unavailable.');
+  throw new Error('Image generation pipeline encountered an issue. Please try your prompt again.');
 }
