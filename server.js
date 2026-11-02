@@ -14,6 +14,16 @@ const publicPath = path.join(__dirname);
 app.use(express.static(distPath));
 app.use(express.static(publicPath));
 
+// 301 Redirect: any .html URL → clean URL (SEO canonical)
+app.use((req, res, next) => {
+  if (req.method === 'GET' && req.path.endsWith('.html') && !req.path.startsWith('/api')) {
+    const clean = req.path === '/index.html' ? '/' : req.path.replace(/\.html$/, '');
+    const qs = req.originalUrl.includes('?') ? req.originalUrl.slice(req.originalUrl.indexOf('?')) : '';
+    return res.redirect(301, clean + qs);
+  }
+  next();
+});
+
 // Explicit SEO routes for search engines
 app.get('/sitemap.xml', (req, res) => {
   const filePath = path.join(distPath, 'sitemap.xml');

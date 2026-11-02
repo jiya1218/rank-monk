@@ -6,10 +6,11 @@ export const config = {
 };
 
 export default function handler(req, res) {
-  // Restore original request path if Vercel rewrite or proxy collapsed it to /api
-  const orig = req.headers['x-matched-path'] || req.headers['x-forwarded-uri'];
-  if (orig && orig.startsWith('/api') && (req.url === '/api' || req.url === '/api/')) {
+  const orig = req.headers['x-matched-path'] || req.headers['x-forwarded-uri'] || req.headers['x-original-url'];
+  if (orig && orig.startsWith('/api')) {
     req.url = orig;
+  } else if (!req.url.startsWith('/api')) {
+    req.url = '/api' + (req.url.startsWith('/') ? req.url : '/' + req.url);
   }
   return app(req, res);
 }
