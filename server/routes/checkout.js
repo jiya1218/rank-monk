@@ -10,34 +10,9 @@ router.get('/subscription', (req, res) => {
     success: true,
     subscription: memoryStore.subscription,
     plans: [
-      {
-        id: 'seed',
-        name: 'Seed',
-        priceINR: 10000,
-        formatted: '₹10,000 / mo',
-        credits: 50,
-        articlesPerMonth: 15,
-        targetDomains: 1
-      },
-      {
-        id: 'grow',
-        name: 'Grow',
-        priceINR: 20000,
-        formatted: '₹20,000 / mo',
-        credits: 200,
-        articlesPerMonth: 45,
-        targetDomains: 3,
-        popular: true
-      },
-      {
-        id: 'scale',
-        name: 'Scale',
-        priceINR: 40000,
-        formatted: '₹40,000 / mo',
-        credits: 600,
-        articlesPerMonth: 120,
-        targetDomains: 'Unlimited'
-      }
+      { id: 'seed', name: 'Seed', priceINR: 10000, formatted: '₹10,000 / mo', credits: 50 },
+      { id: 'grow', name: 'Grow', priceINR: 20000, formatted: '₹20,000 / mo', credits: 200, popular: true },
+      { id: 'scale', name: 'Scale', priceINR: 40000, formatted: '₹40,000 / mo', credits: 600 }
     ]
   });
 });
@@ -54,11 +29,11 @@ router.post('/create-order', handleCreateOrder);
 
 async function handleCreateOrder(req, res) {
   try {
-    const { planId = req.body.plan || 'grow', email, couponCode } = req.body;
-    const order = await createCheckoutOrder({ planId, userEmail: email, couponCode });
+    const { planId = req.body.plan || 'grow', cycle = 'monthly', email, couponCode } = req.body;
+    const order = await createCheckoutOrder({ planId, cycle, userEmail: email, couponCode });
     res.json({ success: true, order });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ success: false, error: err.message });
   }
 }
 
@@ -74,7 +49,7 @@ router.post('/verify', async (req, res) => {
     });
     res.json({ success: true, ...verification });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ success: false, error: err.message });
   }
 });
 

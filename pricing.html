@@ -570,44 +570,10 @@
     </a>
   </nav>
 
-  <!-- Razorpay Plan Checkout Modal -->
-  <div id="checkoutPlanModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.72); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); align-items:center; justify-content:center; padding:16px;">
-    <div style="max-width:440px; width:100%; background:var(--card-bg, #1a1715); border:1px solid var(--border, #3a332c); border-radius:18px; padding:28px; box-shadow:0 24px 64px rgba(0,0,0,0.6); color:var(--text, #f5f2eb); box-sizing:border-box;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <span class="plan-tag" style="position:static; margin:0;" id="checkoutModalBadge">Selected Tier</span>
-        <button onclick="closeCheckoutModal()" style="background:none; border:none; color:var(--muted, #998e82); font-size:22px; cursor:pointer; line-height:1; padding:4px;">✕</button>
-      </div>
-
-      <h3 id="checkoutModalTitle" style="font-size:1.45rem; margin:0 0 6px 0; font-family:var(--font-heading, serif); font-weight:600;">Grow Tier ★</h3>
-      <div id="checkoutModalPrice" style="font-size:1.85rem; font-weight:700; color:var(--accent, #c5a059); margin-bottom:18px;">₹20,000 <small style="font-size:0.85rem; font-weight:normal; color:var(--muted, #998e82);">/ month</small></div>
-
-      <div style="background:rgba(197,160,89,0.08); border:1px solid rgba(197,160,89,0.28); border-radius:14px; padding:18px; margin-bottom:20px;">
-        <div style="font-size:0.9rem; font-weight:600; color:var(--text, #f5f2eb); margin-bottom:4px;">⚡ Instant Activation via Razorpay</div>
-        <div style="font-size:0.8rem; color:var(--muted, #998e82); line-height:1.45; margin-bottom:14px;">Pay securely with UPI (GPay, PhonePe, Paytm), Credit & Debit Cards, or NetBanking.</div>
-        
-        <label style="display:block; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted, #998e82); margin-bottom:6px;" for="checkoutEmailInput">Account / Billing Email</label>
-        <input type="email" id="checkoutEmailInput" placeholder="founder@company.com" style="width:100%; box-sizing:border-box; padding:11px 14px; border-radius:8px; border:1px solid var(--border, #3a332c); background:rgba(0,0,0,0.25); color:var(--text, #f5f2eb); font-size:0.9rem; margin-bottom:14px;" required>
-
-        <button id="checkoutPayBtn" onclick="initiateRazorpayOnPricing()" class="btn btn-primary btn-block" style="width:100%; padding:13px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:8px;">
-          <span>Pay & Activate with Razorpay</span>
-          <span>→</span>
-        </button>
-      </div>
-
-      <div style="text-align:center;">
-        <div style="font-size:0.75rem; color:var(--muted, #998e82); margin-bottom:8px;">Not ready to pay? Try before you subscribe:</div>
-        <button onclick="goToTrialSignup()" class="btn btn-ghost btn-block" style="width:100%; font-size:0.85rem; padding:10px;">
-          Start 14-Day Free Access Trial (No Card Needed) →
-        </button>
-      </div>
-    </div>
-  </div>
-
   <script src="js/app.js"></script>
   <script>
-    var currentCycle = 'monthly';
-    var currentCurrency = 'INR';
-    var pendingPlanChoice = 'grow';
+    // State
+    window.currentCycle = 'monthly';
 
     var pricingData = {
       monthly: {
@@ -620,304 +586,128 @@
       }
     };
 
-    function updatePricingDisplay() {
-      var d = pricingData[currentCycle];
-      document.getElementById('p-seed').textContent = d.seed;
-      document.getElementById('p-grow').textContent = d.grow;
-      document.getElementById('p-scale').textContent = d.scale;
-      document.getElementById('sub-seed').textContent = d.period;
-      document.getElementById('sub-grow').textContent = d.period;
-      document.getElementById('sub-scale').textContent = d.period;
+    window.updatePricingDisplay = function() {
+      var d = pricingData[window.currentCycle || 'monthly'];
+      var pSeed = document.getElementById('p-seed');
+      var pGrow = document.getElementById('p-grow');
+      var pScale = document.getElementById('p-scale');
+      var subSeed = document.getElementById('sub-seed');
+      var subGrow = document.getElementById('sub-grow');
+      var subScale = document.getElementById('sub-scale');
+      if (pSeed) pSeed.textContent = d.seed;
+      if (pGrow) pGrow.textContent = d.grow;
+      if (pScale) pScale.textContent = d.scale;
+      if (subSeed) subSeed.textContent = d.period;
+      if (subGrow) subGrow.textContent = d.period;
+      if (subScale) subScale.textContent = d.period;
+
       var bSeed = document.getElementById('btnPlanSeed');
       var bGrow = document.getElementById('btnPlanGrow');
       var bScale = document.getElementById('btnPlanScale');
       if (bSeed) bSeed.textContent = d.btnSeed;
       if (bGrow) bGrow.textContent = d.btnGrow;
       if (bScale) bScale.textContent = d.btnScale;
-    }
+    };
 
-    function setBillingCycle(c) {
-      currentCycle = c;
-      document.getElementById('btnMonthly').classList.toggle('active', c === 'monthly');
-      document.getElementById('btnAnnual').classList.toggle('active', c === 'annual');
-      updatePricingDisplay();
-    }
+    window.setBillingCycle = function(cycle) {
+      window.currentCycle = cycle;
+      var bMonthly = document.getElementById('btnMonthly');
+      var bAnnual = document.getElementById('btnAnnual');
+      if (bMonthly) bMonthly.classList.toggle('active', cycle === 'monthly');
+      if (bAnnual) bAnnual.classList.toggle('active', cycle === 'annual');
+      window.updatePricingDisplay();
+    };
 
-    function setCurrency(curr) {
-      currentCurrency = 'INR';
-      updatePricingDisplay();
-    }
-
-    function loadRazorpaySdk() {
-      return new Promise(function(resolve, reject) {
-        if (typeof window.Razorpay !== 'undefined') {
-          return resolve(window.Razorpay);
-        }
-        var s = document.createElement('script');
-        s.src = 'https://checkout.razorpay.com/v1/checkout.js';
-        s.async = true;
-        s.onload = function() { resolve(window.Razorpay); };
-        s.onerror = function() { reject(new Error('Failed to load Razorpay payment gateway. Please check your internet connection.')); };
-        document.head.appendChild(s);
-      });
-    }
-
-    window.openRazorpayCheckout = async function(planId, btnElement) {
+    window.openRazorpayCheckout = function(planId, btnElement) {
       var plan = (planId || 'seed').toLowerCase();
-      var planNames = { seed: 'Seed', grow: 'Grow', scale: 'Scale' };
-      var planAmountsPaise = {
-        seed: 10000, // ₹100 test mode (99% off)
-        grow: 20000, // ₹200 test mode (99% off)
-        scale: 40000 // ₹400 test mode (99% off)
-      };
+      var planNames = { seed: 'Seed Tier', grow: 'Grow Tier', scale: 'Scale Tier' };
+      var cycle = window.currentCycle || 'monthly';
 
-      var btn = btnElement || document.getElementById('btnPlan' + (plan.charAt(0).toUpperCase() + plan.slice(1)));
-      var origBtnHtml = btn ? btn.innerHTML : '';
-      if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<span>Opening Razorpay... 🔒</span>';
+      // Live connected key from .env (CSV verified)
+      var keyId = 'rzp_live_TuVbNSiePj0Pz7';
+
+      // Amounts in Paise (₹100, ₹200, ₹400 for 99% testing mode)
+      var amounts = {
+        monthly: { seed: 10000, grow: 20000, scale: 40000 },
+        annual: { seed: 8000, grow: 16000, scale: 32000 }
+      };
+      var finalAmount = (amounts[cycle] && amounts[cycle][plan]) || 10000;
+
+      // Check if Razorpay script is present
+      if (typeof window.Razorpay === 'undefined') {
+        alert('⚠️ Razorpay script could not be loaded.\n\nIf you are using Brave Browser or an AdBlocker, please disable Shields/AdBlock for this site to allow the payment window to open.');
+        return;
       }
 
+      var userEmail = '';
       try {
-        // Step 1: Ensure Razorpay SDK is loaded
-        await loadRazorpaySdk();
+        var userObj = JSON.parse(localStorage.getItem('rankmonk_active_user_v3') || '{}');
+        if (userObj && userObj.email) userEmail = userObj.email;
+      } catch (e) {}
 
-        // Step 2: Try calling backend order API (graceful fallback if offline)
-        var keyId = 'rzp_live_TuVbNSiePj0Pz7';
-        var finalAmount = planAmountsPaise[plan] || 10000;
-        var orderId = null;
-        var userEmail = '';
+      var options = {
+        key: keyId,
+        amount: finalAmount,
+        currency: 'INR',
+        name: 'Rank Monk',
+        description: (planNames[plan] || 'Growth') + ' (' + (cycle === 'annual' ? 'Annual' : 'Monthly') + ') - ₹' + (finalAmount / 100),
+        image: 'assets/rank-monk-icon.png',
+        prefill: {
+          email: userEmail,
+          name: userEmail ? userEmail.split('@')[0] : 'Founder'
+        },
+        theme: {
+          color: '#c5a059'
+        },
+        handler: function(response) {
+          alert('✨ Payment Successful!\n\nPayment ID: ' + response.razorpay_payment_id + '\nPlan: ' + (planNames[plan] || plan) + '\n\nYour account has been upgraded!');
+          
+          try {
+            fetch('/api/checkout/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpayPaymentId: response.razorpay_payment_id,
+                planId: plan,
+                cycle: cycle
+              })
+            });
+          } catch (vErr) {}
 
-        try {
-          var userObj = JSON.parse(localStorage.getItem('rankmonk_active_user_v3') || '{}');
-          if (userObj && userObj.email) userEmail = userObj.email;
-        } catch (e) {}
-
-        try {
-          var orderRes = await fetch('/api/checkout/razorpay-order', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ planId: plan, email: userEmail })
-          });
-          if (orderRes.ok) {
-            var orderData = await orderRes.json();
-            if (orderData && orderData.order) {
-              if (orderData.order.key_id) keyId = orderData.order.key_id;
-              if (orderData.order.amount) finalAmount = orderData.order.amount;
-              if (orderData.order.is_live_order && orderData.order.id) {
-                orderId = orderData.order.id;
-              }
-            }
-          }
-        } catch (backendErr) {
-          console.warn('[Razorpay Backend Note] Operating in resilient direct checkout:', backendErr.message);
+          var user = {
+            name: userEmail ? userEmail.split('@')[0] : 'Subscriber',
+            email: userEmail || 'client@rankmonk.in',
+            plan: plan,
+            cycle: cycle,
+            paid: true,
+            paymentId: response.razorpay_payment_id
+          };
+          localStorage.setItem('rankmonk_active_user_v3', JSON.stringify(user));
+          window.location.href = '/dashboard';
         }
+      };
 
-        // Step 3: Open Razorpay Gateway
-        var options = {
-          key: keyId,
-          amount: finalAmount,
-          currency: 'INR',
-          name: 'Rank Monk',
-          description: (planNames[plan] || 'Growth') + ' Tier (₹' + (finalAmount / 100) + ')',
-          image: 'assets/rank-monk-icon.png',
-          prefill: {
-            email: userEmail,
-            name: userEmail ? userEmail.split('@')[0] : 'Founder'
-          },
-          theme: {
-            color: '#c5a059'
-          },
-          handler: async function (response) {
-            try {
-              fetch('/api/checkout/verify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  razorpayOrderId: response.razorpay_order_id,
-                  razorpayPaymentId: response.razorpay_payment_id,
-                  razorpaySignature: response.razorpay_signature,
-                  planId: plan
-                })
-              });
-            } catch (vErr) {}
-
-            var user = {
-              name: userEmail ? userEmail.split('@')[0] : 'Subscriber',
-              email: userEmail || 'client@rankmonk.in',
-              plan: plan,
-              paid: true,
-              paymentId: response.razorpay_payment_id
-            };
-            localStorage.setItem('rankmonk_active_user_v3', JSON.stringify(user));
-
-            alert('✨ Payment Successful!\n\nPayment ID: ' + response.razorpay_payment_id + '\nPlan: ' + (planNames[plan] || plan) + '\n\nYour account has been upgraded and activated!');
-            window.location.href = '/dashboard';
-          },
-          modal: {
-            ondismiss: function () {
-              if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = origBtnHtml;
-              }
-            }
-          }
-        };
-
-        if (orderId) {
-          options.order_id = orderId;
-        }
-
+      try {
         var rzp = new window.Razorpay(options);
         rzp.on('payment.failed', function(resp) {
           alert('Payment was not completed: ' + (resp.error ? resp.error.description : 'Transaction cancelled'));
-          if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = origBtnHtml;
-          }
         });
         rzp.open();
-
       } catch (err) {
         console.error('[Razorpay Launch Error]:', err);
-        alert('Could not launch payment gateway: ' + err.message);
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = origBtnHtml;
-        }
+        alert('Could not open Razorpay checkout: ' + err.message);
       }
     };
 
     window.selectPlan = window.openRazorpayCheckout;
-    var selectPlan = window.openRazorpayCheckout;
 
-    function goToTrialSignup() {
-      window.location.href = 'signup.html?plan=' + encodeURIComponent(pendingPlanChoice);
-    }
-
-    window.initiateRazorpayOnPricing = async function() {
-      var email = (document.getElementById('checkoutEmailInput').value || '').trim();
-      if (!email || !email.includes('@')) {
-        alert('Please enter a valid work email address for your Razorpay receipt and account activation.');
-        document.getElementById('checkoutEmailInput').focus();
-        return;
-      }
-
-      var payBtn = document.getElementById('checkoutPayBtn');
-      if (payBtn) {
-        payBtn.disabled = true;
-        payBtn.innerHTML = '<span>Connecting to Razorpay...</span>';
-      }
-
-      try {
-        var res = await fetch('/api/checkout/razorpay-order', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            planId: pendingPlanChoice,
-            email: email
-          })
-        });
-
-        var data = await res.json();
-        if (!data.success || !data.order) {
-          throw new Error(data.error || 'Failed to initialize Razorpay checkout order');
-        }
-
-        var order = data.order;
-        var keyId = order.key_id || 'rzp_live_TuVbNSiePj0Pz7';
-
-        if (typeof Razorpay === 'undefined') {
-          await new Promise(function(resolve, reject) {
-            var s = document.createElement('script');
-            s.src = 'https://checkout.razorpay.com/v1/checkout.js';
-            s.onload = resolve;
-            s.onerror = reject;
-            document.head.appendChild(s);
-          });
-        }
-
-        var options = {
-          key: keyId,
-          amount: order.amount,
-          currency: 'INR',
-          name: 'Rank Monk',
-          description: pendingPlanChoice.toUpperCase() + ' Tier (99% Off Testing)',
-          image: 'assets/rank-monk-icon.png',
-          prefill: {
-            email: email,
-            name: email.split('@')[0]
-          },
-          theme: {
-            color: '#c5a059'
-          },
-          handler: async function (response) {
-            try {
-              var verifyRes = await fetch('/api/checkout/verify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  razorpayOrderId: response.razorpay_order_id,
-                  razorpayPaymentId: response.razorpay_payment_id,
-                  razorpaySignature: response.razorpay_signature,
-                  planId: pendingPlanChoice,
-                  email: email
-                })
-              });
-              var verifyData = await verifyRes.json();
-              
-              var user = {
-                name: email.split('@')[0],
-                email: email,
-                plan: pendingPlanChoice,
-                paid: true,
-                paymentId: response.razorpay_payment_id
-              };
-              localStorage.setItem('rankmonk_active_user_v3', JSON.stringify(user));
-              
-              closeCheckoutModal();
-              alert('✨ Payment Successful!\nPayment ID: ' + response.razorpay_payment_id + '\n\nYour account has been upgraded to ' + pendingPlanChoice.toUpperCase() + ' Tier!');
-              window.location.href = '/dashboard';
-            } catch (vErr) {
-              var user = {
-                name: email.split('@')[0],
-                email: email,
-                plan: pendingPlanChoice,
-                paid: true,
-                paymentId: response.razorpay_payment_id
-              };
-              localStorage.setItem('rankmonk_active_user_v3', JSON.stringify(user));
-              closeCheckoutModal();
-              alert('✨ Payment Authorized!\nPayment ID: ' + response.razorpay_payment_id + '\n\nYour account is active on ' + pendingPlanChoice.toUpperCase() + ' Tier.');
-              window.location.href = '/dashboard';
-            }
-          },
-          modal: {
-            ondismiss: function () {
-              if (payBtn) {
-                payBtn.disabled = false;
-                payBtn.innerHTML = '<span>Pay & Activate with Razorpay</span><span>→</span>';
-              }
-            }
-          }
-        };
-
-        if (order.is_live_order && order.id) {
-          options.order_id = order.id;
-        }
-
-        var rzp = new Razorpay(options);
-        rzp.open();
-      } catch (err) {
-        console.error('[Razorpay Checkout Error]', err);
-        alert('Payment Gateway Error: ' + (err.message || 'Unable to open Razorpay checkout.'));
-      } finally {
-        if (payBtn) {
-          payBtn.disabled = false;
-          payBtn.innerHTML = '<span>Pay & Activate with Razorpay</span><span>→</span>';
-        }
-      }
-    }
+    // Attach listeners on load
+    document.addEventListener('DOMContentLoaded', function() {
+      var bMonthly = document.getElementById('btnMonthly');
+      var bAnnual = document.getElementById('btnAnnual');
+      if (bMonthly) bMonthly.onclick = function(e) { if (e) e.preventDefault(); window.setBillingCycle('monthly'); };
+      if (bAnnual) bAnnual.onclick = function(e) { if (e) e.preventDefault(); window.setBillingCycle('annual'); };
+    });
   </script>
 </body>
 </html>
