@@ -38,6 +38,11 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [editingModal, setEditingModal] = useState<'profile' | 'visual' | 'voice' | null>(null);
+  const [logoFailed, setLogoFailed] = useState(false);
+
+  React.useEffect(() => {
+    setLogoFailed(false);
+  }, [project?.logoUrl]);
 
   // Sliders state (0 to 100)
   const [voiceSliders, setVoiceSliders] = useState(project?.voiceSliders || {
@@ -71,22 +76,22 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
   };
 
   const domain = project?.domain || 'company.com';
-  const cleanDomain = domain.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '');
+  const cleanDomain = domain.replace(/^(https?:\/\/)+/gi, '').replace(/^www\./i, '').replace(/\/$/, '');
   const websiteUrl = `https://${cleanDomain}`;
 
   const competitorsList = (project?.competitors && project.competitors.length > 0)
     ? project.competitors
     : [
-        { name: 'cairnindia.com', positioning: "Major player in oil & gas exploration, focusing on energy resources", strengths: "Extensive energy reserves and established market presence", share: 30 },
-        { name: 'essar.com', positioning: "Diversified global conglomerate with interests in energy, metals & mining", strengths: "Broad industrial portfolio and significant global reach", share: 25 },
-        { name: 'relianceind.com', positioning: "India's largest private sector enterprise across diverse businesses", strengths: "Market dominance across multiple sectors & massive financial resources", share: 45 }
+        { name: 'Market Benchmark A', positioning: "Major peer and established player in this vertical", strengths: "High search presence and established market footprint", share: 38 },
+        { name: 'Emerging Challenger B', positioning: "High-growth digital competitor with active market velocity", strengths: "Rapid acquisition speed and organic content reach", share: 34 },
+        { name: 'Global Platform C', positioning: "Enterprise standard with deep distribution channels", strengths: "High brand recognition and broad product catalog", share: 28 }
       ];
 
   const palette = (project?.palette && project.palette.length >= 6)
     ? project.palette
-    : ['#007CBA', '#006BA1', '#005A87', '#0693E3', '#F3612E', '#69727D'];
+    : ['#FC8019', '#282C3F', '#FFA048', '#686B78', '#F2F2F2', '#60B246'];
 
-  const voiceTags = project?.voiceTags || ['Authoritative', 'Technical', 'Reliable', 'Solution Oriented'];
+  const voiceTags = project?.voiceTags || ['Authoritative', 'Reliable', 'Customer-Centric', 'Solution Oriented'];
 
   const brandSummaryText = project?.summary ||
     `${project?.name || 'This brand'} is an industry-leading company specializing in high-performance solutions, engineering excellence, and customer-centric delivery. With a focus on technical precision and quality assurance, they provide tailored solutions to diverse commercial and enterprise clients globally.`;
@@ -324,13 +329,27 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <span className="text-[11px] font-bold text-[#6f5a4c] uppercase tracking-wider block mb-1.5">Logo</span>
-                  <div className="h-16 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl flex items-center justify-center p-2">
-                    <img
-                      src={project?.logoUrl || '/assets/rank-monk-logo-horizontal.png'}
-                      alt={project?.name || 'Logo'}
-                      className="max-h-12 max-w-full object-contain"
-                      onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
-                    />
+                  <div className="h-16 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl flex items-center justify-center p-2 overflow-hidden">
+                    {!logoFailed && project?.logoUrl ? (
+                      <img
+                        src={project.logoUrl}
+                        alt={project?.name || 'Logo'}
+                        className="max-h-12 max-w-full object-contain"
+                        onError={() => setLogoFailed(true)}
+                      />
+                    ) : (
+                      <div className="flex items-center gap-2 px-1">
+                        <img
+                          src={project?.faviconUrl || `https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128`}
+                          alt="Brand Icon"
+                          className="w-7 h-7 object-contain rounded-md"
+                          onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                        />
+                        <span className="font-bold text-xs text-[#2b1b12] truncate max-w-[80px]">
+                          {project?.name || cleanDomain}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 

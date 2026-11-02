@@ -1,17 +1,5 @@
 [
   {
-    "id": "usr_founder_01",
-    "email": "founder@rankmonk.in",
-    "name": "Rank Monk Architect",
-    "phone": "+91 98765 43210",
-    "password": "Password123!",
-    "role": "owner",
-    "plan": "scale",
-    "paid": true,
-    "domain": "rankmonk.in",
-    "created_at": "2026-11-02T10:30:22.048Z"
-  },
-  {
     "id": "usr_1793647460656",
     "email": "jiyapatel181224@gmail.com",
     "name": "Patel jiya devangbhai",
@@ -20,7 +8,7 @@
     "role": "member",
     "plan": "scale",
     "paid": true,
-    "domain": "",
+    "domain": "https://swiggy.com",
     "created_at": "2026-11-02T19:24:20.656Z",
     "paymentId": "pay_TvRDKP4RqnGVc8",
     "couponUsed": "RANKMONK001"

@@ -44,6 +44,9 @@ function LoginForm() {
       const user = data.user;
       localStorage.setItem('rankmonk_user', JSON.stringify(user));
       localStorage.setItem('rankmonk_active_user_v3', JSON.stringify(user));
+      if (!user.domain) {
+        localStorage.removeItem('rankmonk_active_project');
+      }
 
       // Redirect user to homepage
       router.push('/');

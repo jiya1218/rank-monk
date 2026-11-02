@@ -15,23 +15,7 @@ export async function POST(req: Request) {
 
     const normEmail = email.toLowerCase().trim();
 
-    // 1. Founder / Owner bypass if needed for platform testing
-    if (normEmail === 'founder@rankmonk.in' && password === 'Password123!') {
-      const user = {
-        id: 'usr_founder_01',
-        email: 'founder@rankmonk.in',
-        name: 'Rank Monk Architect',
-        phone: '+91 98765 43210',
-        role: 'owner',
-        plan: 'scale',
-        paid: true,
-        domain: 'rankmonk.in',
-        createdAt: '2026-11-02T10:30:22.048Z'
-      };
-      return NextResponse.json({ success: true, user });
-    }
-
-    // 2. Real Registered Users from Database (users.json)
+    // Real Registered Users from Database (users.json)
     const usersFile = path.join(process.cwd(), 'server', 'data', 'users.json');
     if (fs.existsSync(usersFile)) {
       try {

@@ -265,6 +265,46 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../../app/api/social/callback/meta/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/social/callback/meta">> = Specific
+  const handler = {} as typeof import("../../../app/api/social/callback/meta/route.js")
+  type __Check = __IsExpected<typeof handler>
+  
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../../app/api/social/connect/meta/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/social/connect/meta">> = Specific
+  const handler = {} as typeof import("../../../app/api/social/connect/meta/route.js")
+  type __Check = __IsExpected<typeof handler>
+  
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../../app/api/social/publish/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/social/publish">> = Specific
+  const handler = {} as typeof import("../../../app/api/social/publish/route.js")
+  type __Check = __IsExpected<typeof handler>
+  
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../../app/api/user/update-domain/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/user/update-domain">> = Specific
+  const handler = {} as typeof import("../../../app/api/user/update-domain/route.js")
+  type __Check = __IsExpected<typeof handler>
+  
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 
 
 
