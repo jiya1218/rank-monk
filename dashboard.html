@@ -17,11 +17,28 @@
        ======================================================================== -->
   <script>
     (function() {
-      // Auto-clean URL in address bar from /dashboard.html -> /dashboard
-      if (typeof window !== 'undefined' && window.location && window.location.pathname.endsWith('.html')) {
+      // Auto-clean URL in address bar & capture payment verification
+      try {
         var cleanPath = window.location.pathname.replace(/\.html$/, '');
-        window.history.replaceState(null, '', cleanPath + window.location.search + window.location.hash);
-      }
+        var params = new URLSearchParams(window.location.search);
+        var paymentId = params.get('razorpay_payment_id');
+        var plan = params.get('plan');
+        if (paymentId || plan) {
+          var userObj = {};
+          try {
+            userObj = JSON.parse(localStorage.getItem('rankmonk_active_user_v3') || '{}');
+          } catch(e) {}
+          if (plan) userObj.plan = plan;
+          if (paymentId) userObj.paymentId = paymentId;
+          userObj.paid = true;
+          localStorage.setItem('rankmonk_active_user_v3', JSON.stringify(userObj));
+          localStorage.setItem('rankmonk_just_completed_payment', 'true');
+        }
+        // Wipe tracking params cleanly: /dashboard
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState(null, '', cleanPath || '/dashboard');
+        }
+      } catch(e) {}
 
       var STORAGE_KEY = 'rankmonk_engine_state_v6';
       function getStoredData() {
@@ -2013,8 +2030,27 @@
       return window.RankMonkState || (typeof RankMonkState !== 'undefined' ? RankMonkState : null);
     }
 
+    function isUserDomainConnected() {
+      try {
+        const hasOnboarded = localStorage.getItem('rankmonk_has_onboarded') === 'true';
+        const userConnected = localStorage.getItem('rankmonk_user_domain_connected') === 'true';
+        const p = window.RankMonkState && window.RankMonkState.getActiveProject ? window.RankMonkState.getActiveProject() : null;
+        if (!p) return false;
+        if (p.domain === 'rankmonk.com' && !hasOnboarded && !userConnected) return false;
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
     // Tab Navigation
     function navigateTab(tabName) {
+      if (tabName !== 'dashboard' && tabName !== 'settings' && tabName !== 'support' && !isUserDomainConnected()) {
+        openConnectWebsiteModal();
+        alert('🔒 Connect Your Website Domain First\n\nPlease connect your website domain to unlock the ' + tabName.toUpperCase() + ' engine and view authentic live data.');
+        return;
+      }
+
       document.querySelectorAll('.dash-nav-item').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.dash-view-panel').forEach(el => el.classList.remove('active-view'));
       document.querySelectorAll('.mobile-tab-btn').forEach(el => el.classList.remove('active'));
@@ -2886,6 +2922,7 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
 
         RankMonkState.save();
         try {
+          localStorage.setItem('rankmonk_user_domain_connected', 'true');
           localStorage.setItem('rankmonk_has_onboarded', 'true');
           localStorage.setItem('rankmonk_last_domain', clean);
         } catch(e){}
@@ -3453,7 +3490,11 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
           proj.targetAudience = 'Growth engineers, modern founders, agencies, and digital operators scaling organic search visibility.';
           RankMonkState.save();
         }
-        document.getElementById('wsDomainLabel').innerText = `https://${proj.domain}`;
+        if (!isUserDomainConnected()) {
+          document.getElementById('wsDomainLabel').innerText = '+ Connect Your Website';
+        } else {
+          document.getElementById('wsDomainLabel').innerText = `https://${proj.domain}`;
+        }
         
         // Dynamic Workspace Logo / Favicon
         const cleanDom = (proj.domain || '').replace(/^https?:\/\//i, '').replace(/\/.*$/, '').toLowerCase();
@@ -3488,7 +3529,14 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
           }
         }
 
-        document.getElementById('wsTierLabel').innerText = `Grow Plan`;
+        var activePlan = 'Grow Plan';
+        try {
+          var u = JSON.parse(localStorage.getItem('rankmonk_active_user_v3') || '{}');
+          if (u && u.plan) {
+            activePlan = u.plan.charAt(0).toUpperCase() + u.plan.slice(1) + ' Plan';
+          }
+        } catch(e) {}
+        document.getElementById('wsTierLabel').innerText = activePlan;
         document.getElementById('emptyAuditSiteDomain').innerText = `https://${proj.domain}`;
 
         // Number formatter helper
@@ -3906,17 +3954,23 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
       } catch (e) {}
     }
 
-    // Check if domain connection prompt banner should show
+    // Auto-prompt domain connection modal if domain is not yet connected
     try {
-      const hasOnboarded = localStorage.getItem('rankmonk_has_onboarded') === 'true';
-      const isDefaultOnly = RankMonkState.data.projects.length === 1 && RankMonkState.data.projects[0].domain === 'rankmonk.com';
-      const banner = document.getElementById('firstTimeDomainPromptBanner');
-      if (banner) {
-        if (!hasOnboarded || isDefaultOnly) {
-          banner.style.display = 'block';
-        } else {
-          banner.style.display = 'none';
-        }
+      if (!isUserDomainConnected()) {
+        const banner = document.getElementById('firstTimeDomainPromptBanner');
+        if (banner) banner.style.display = 'block';
+
+        setTimeout(() => {
+          openConnectWebsiteModal();
+          const title = document.getElementById('connectModalTitle');
+          if (title) {
+            if (localStorage.getItem('rankmonk_just_completed_payment') === 'true') {
+              title.innerText = 'Payment Successful! Connect Your Website Domain';
+            } else {
+              title.innerText = 'Connect Your Website Domain to Get Started';
+            }
+          }
+        }, 600);
       }
     } catch (e) {}
 
