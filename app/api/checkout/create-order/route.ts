@@ -60,7 +60,7 @@ export async function POST(req: Request) {
               plan_name: planInfo.name,
               billing_cycle: cycle,
               user_email: email || 'client@rankmonk.in',
-              coupon_applied: isSpecialDiscount ? 'RANKMONK001 (₹10 Test)' : 'none'
+              coupon_applied: normalizedCoupon || 'none'
             }
           }),
           signal: controller.signal
@@ -92,9 +92,9 @@ export async function POST(req: Request) {
         plan: tier,
         cycle,
         email,
-        couponApplied: isSpecialDiscount,
-        couponCode: isSpecialDiscount ? 'RANKMONK001' : '',
-        discountPercentage: isSpecialDiscount ? '99.99%' : '0%',
+        couponApplied: !!normalizedCoupon,
+        couponCode: normalizedCoupon,
+        discountPercentage: '0%',
         isLiveOrder
       }
     });
