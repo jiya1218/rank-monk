@@ -31,9 +31,9 @@ export const env = {
   GEMINI_API_KEY: process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || '',
   GEMINI_IMAGE_MODEL: process.env.GEMINI_IMAGE_MODEL || 'imagen-3.0-generate-002',
   
-  // Razorpay INR Payments
-  RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID || process.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_rankmonk_zen',
-  RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET || 'rzp_sec_rankmonk_zen_secret',
+  // Razorpay INR Payments (Live Active Production Credentials)
+  RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID || process.env.VITE_RAZORPAY_KEY_ID || 'rzp_live_TuVbNSiePj0Pz7',
+  RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET || 'V6JoLMEMEOaR2qvWODv2blGB',
   
   // Pricing Constants (Strict INR)
   PRICING_PLANS: {

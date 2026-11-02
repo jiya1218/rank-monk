@@ -7,6 +7,9 @@
     }
   },
   "rewrites": [
+    { "source": "/api/checkout/:match*", "destination": "/api/checkout.js" },
+    { "source": "/api/checkout", "destination": "/api/checkout.js" },
+    { "source": "/api/:match*", "destination": "/api/index.js" },
     { "source": "/onboarding", "destination": "/onboarding.html" },
     { "source": "/dashboard", "destination": "/dashboard.html" },
     { "source": "/login", "destination": "/login.html" },

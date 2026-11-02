@@ -618,84 +618,114 @@
       window.updatePricingDisplay();
     };
 
-    window.openRazorpayCheckout = function(planId, btnElement) {
+    window.openRazorpayCheckout = async function(planId, btnElement) {
       var plan = (planId || 'seed').toLowerCase();
       var planNames = { seed: 'Seed Tier', grow: 'Grow Tier', scale: 'Scale Tier' };
       var cycle = window.currentCycle || 'monthly';
+      var originalText = btnElement ? btnElement.innerHTML : '';
 
-      // Live connected key from .env (CSV verified)
-      var keyId = 'rzp_live_TuVbNSiePj0Pz7';
-
-      // Amounts in Paise (₹100, ₹200, ₹400 for 99% testing mode)
-      var amounts = {
-        monthly: { seed: 10000, grow: 20000, scale: 40000 },
-        annual: { seed: 8000, grow: 16000, scale: 32000 }
-      };
-      var finalAmount = (amounts[cycle] && amounts[cycle][plan]) || 10000;
-
-      // Check if Razorpay script is present
-      if (typeof window.Razorpay === 'undefined') {
-        alert('⚠️ Razorpay script could not be loaded.\n\nIf you are using Brave Browser or an AdBlocker, please disable Shields/AdBlock for this site to allow the payment window to open.');
-        return;
+      if (btnElement) {
+        btnElement.disabled = true;
+        btnElement.innerHTML = 'Connecting to Razorpay... 🔒';
       }
 
-      var userEmail = '';
+      var userEmail = 'client@rankmonk.in';
       try {
         var userObj = JSON.parse(localStorage.getItem('rankmonk_active_user_v3') || '{}');
         if (userObj && userObj.email) userEmail = userObj.email;
       } catch (e) {}
 
-      var options = {
-        key: keyId,
-        amount: finalAmount,
-        currency: 'INR',
-        name: 'Rank Monk',
-        description: (planNames[plan] || 'Growth') + ' (' + (cycle === 'annual' ? 'Annual' : 'Monthly') + ') - ₹' + (finalAmount / 100),
-        image: 'assets/rank-monk-icon.png',
-        prefill: {
-          email: userEmail,
-          name: userEmail ? userEmail.split('@')[0] : 'Founder'
-        },
-        theme: {
-          color: '#c5a059'
-        },
-        handler: function(response) {
-          alert('✨ Payment Successful!\n\nPayment ID: ' + response.razorpay_payment_id + '\nPlan: ' + (planNames[plan] || plan) + '\n\nYour account has been upgraded!');
-          
-          try {
-            fetch('/api/checkout/verify', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                razorpayPaymentId: response.razorpay_payment_id,
-                planId: plan,
-                cycle: cycle
-              })
-            });
-          } catch (vErr) {}
-
-          var user = {
-            name: userEmail ? userEmail.split('@')[0] : 'Subscriber',
-            email: userEmail || 'client@rankmonk.in',
-            plan: plan,
-            cycle: cycle,
-            paid: true,
-            paymentId: response.razorpay_payment_id
-          };
-          localStorage.setItem('rankmonk_active_user_v3', JSON.stringify(user));
-          window.location.href = '/dashboard';
-        }
-      };
+      var checkoutData = null;
 
       try {
-        var rzp = new window.Razorpay(options);
-        rzp.on('payment.failed', function(resp) {
-          alert('Payment was not completed: ' + (resp.error ? resp.error.description : 'Transaction cancelled'));
+        // Step 1: Call direct backend serverless checkout endpoint
+        var response = await fetch('/api/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            planId: plan,
+            cycle: cycle,
+            customerEmail: userEmail
+          })
         });
-        rzp.open();
+
+        if (!response.ok) {
+          throw new Error('Server returned HTTP ' + response.status);
+        }
+
+        checkoutData = await response.json();
+        if (!checkoutData || !checkoutData.success) {
+          throw new Error((checkoutData && checkoutData.error) || 'Failed to create Razorpay session');
+        }
+
+        // Step 2: If Razorpay SDK is present and Order ID returned, launch official modal
+        if (typeof window.Razorpay !== 'undefined' && checkoutData.orderId) {
+          var options = {
+            key: checkoutData.keyId,
+            amount: checkoutData.amount,
+            currency: checkoutData.currency || 'INR',
+            name: 'Rank Monk',
+            description: (planNames[plan] || 'Growth') + ' (' + (cycle === 'annual' ? 'Annual' : 'Monthly') + ') - ₹' + checkoutData.amountINR,
+            order_id: checkoutData.orderId,
+            image: 'assets/rank-monk-icon.png',
+            prefill: {
+              email: userEmail,
+              name: userEmail ? userEmail.split('@')[0] : 'Founder'
+            },
+            theme: {
+              color: '#c5a059'
+            },
+            handler: function(resp) {
+              alert('✨ Payment Successful!\n\nPayment ID: ' + resp.razorpay_payment_id + '\nPlan: ' + (planNames[plan] || plan) + '\n\nYour account has been upgraded!');
+              
+              var user = {
+                name: userEmail ? userEmail.split('@')[0] : 'Subscriber',
+                email: userEmail,
+                plan: plan,
+                cycle: cycle,
+                paid: true,
+                paymentId: resp.razorpay_payment_id
+              };
+              localStorage.setItem('rankmonk_active_user_v3', JSON.stringify(user));
+              window.location.href = '/dashboard';
+            },
+            modal: {
+              ondismiss: function() {
+                if (btnElement) {
+                  btnElement.disabled = false;
+                  btnElement.innerHTML = originalText;
+                }
+              }
+            }
+          };
+
+          var rzp = new window.Razorpay(options);
+          rzp.on('payment.failed', function(resp) {
+            alert('Payment was not completed: ' + (resp.error ? resp.error.description : 'Transaction cancelled'));
+            if (btnElement) {
+              btnElement.disabled = false;
+              btnElement.innerHTML = originalText;
+            }
+          });
+          rzp.open();
+        } else if (checkoutData.paymentUrl) {
+          // Step 3: Seamless instant fallback to Razorpay hosted checkout page (bypasses all adblockers / script blocks)
+          window.location.href = checkoutData.paymentUrl;
+        } else {
+          throw new Error('No valid checkout URL or Order ID was returned');
+        }
       } catch (err) {
         console.error('[Razorpay Launch Error]:', err);
-        alert('Could not open Razorpay checkout: ' + err.message);
+        if (checkoutData && checkoutData.paymentUrl) {
+          window.location.href = checkoutData.paymentUrl;
+        } else {
+          alert('⚠️ Payment Gateway Notice:\n\n' + err.message + '\n\nIf you have an AdBlocker or Brave Shields active, please disable it or allow popups for rankmonk.in.');
+        }
+      } finally {
+        if (btnElement) {
+          btnElement.disabled = false;
+          btnElement.innerHTML = originalText;
+        }
       }
     };
 

@@ -26,12 +26,33 @@ router.get('/config', (req, res) => {
 
 router.post('/razorpay-order', handleCreateOrder);
 router.post('/create-order', handleCreateOrder);
+router.post('/', handleCreateOrder);
+router.get('/', (req, res) => {
+  res.json({
+    success: true,
+    service: 'Rank Monk Razorpay Checkout Engine',
+    keyId: env.RAZORPAY_KEY_ID || 'rzp_live_TuVbNSiePj0Pz7',
+    currency: 'INR'
+  });
+});
 
 async function handleCreateOrder(req, res) {
   try {
-    const { planId = req.body.plan || 'grow', cycle = 'monthly', email, couponCode } = req.body;
+    const { planId = req.body.plan || 'grow', cycle = 'monthly', email = req.body.customerEmail || 'client@rankmonk.in', couponCode } = req.body;
     const order = await createCheckoutOrder({ planId, cycle, userEmail: email, couponCode });
-    res.json({ success: true, order });
+    res.json({
+      success: true,
+      keyId: env.RAZORPAY_KEY_ID || 'rzp_live_TuVbNSiePj0Pz7',
+      orderId: order.id || order.orderId,
+      amount: order.amount || order.amountPaise,
+      amountINR: Math.round((order.amount || 10000) / 100),
+      currency: 'INR',
+      planId: order.plan_id || order.planId,
+      planName: order.plan_name || order.planName,
+      cycle: order.billing_cycle || cycle,
+      paymentUrl: order.paymentUrl || null,
+      order: order
+    });
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });
   }
