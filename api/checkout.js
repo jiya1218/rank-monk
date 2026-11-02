@@ -108,7 +108,15 @@ export default async function handler(req, res) {
           notify: { sms: false, email: false },
           reminder_enable: false,
           callback_url: 'https://www.rankmonk.in/dashboard?status=success&plan=' + normPlan,
-          callback_method: 'get'
+          callback_method: 'get',
+          options: {
+            checkout: {
+              name: 'Rank Monk',
+              theme: {
+                color: '#c5a059'
+              }
+            }
+          }
         })
       });
       if (linkRes.ok) {
