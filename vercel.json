@@ -1,38 +1,4 @@
 {
-  "cleanUrls": true,
-  "trailingSlash": false,
-  "functions": {
-    "api/*.js": {
-      "maxDuration": 60
-    }
-  },
-  "rewrites": [
-    { "source": "/api/checkout/:match*", "destination": "/api/checkout.js" },
-    { "source": "/api/checkout", "destination": "/api/checkout.js" },
-    { "source": "/api/:match*", "destination": "/api/index.js" },
-    { "source": "/onboarding", "destination": "/onboarding.html" },
-    { "source": "/dashboard", "destination": "/dashboard.html" },
-    { "source": "/login", "destination": "/login.html" },
-    { "source": "/signup", "destination": "/signup.html" },
-    { "source": "/pricing", "destination": "/pricing.html" },
-    { "source": "/features", "destination": "/features.html" },
-    { "source": "/about", "destination": "/about.html" },
-    { "source": "/contact", "destination": "/contact.html" },
-    { "source": "/engines", "destination": "/engines.html" },
-    { "source": "/comparison", "destination": "/comparison.html" },
-    { "source": "/faq", "destination": "/faq.html" },
-    { "source": "/blog", "destination": "/blog.html" },
-    { "source": "/case-studies", "destination": "/case-studies.html" },
-    { "source": "/glossary", "destination": "/glossary.html" },
-    { "source": "/terms", "destination": "/terms.html" },
-    { "source": "/privacy", "destination": "/privacy.html" },
-    { "source": "/roadmap", "destination": "/roadmap.html" },
-    { "source": "/changelog", "destination": "/changelog.html" },
-    { "source": "/affiliate", "destination": "/affiliate.html" },
-    { "source": "/careers", "destination": "/careers.html" },
-    { "source": "/help-center", "destination": "/help-center.html" },
-    { "source": "/api-docs", "destination": "/api-docs.html" },
-    { "source": "/eeat-analysis", "destination": "/eeat-analysis.html" },
-    { "source": "/use-cases", "destination": "/use-cases.html" }
-  ]
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs"
 }

@@ -1,1 +1,0 @@
-globalThis.__RSC_MANIFEST=(globalThis.__RSC_MANIFEST||{});globalThis.__RSC_MANIFEST["/api/auth/signup/route"]={"moduleLoading":{"prefix":"/_next/"},"ssrModuleMapping":{},"edgeSSRModuleMapping":{},"clientModules":{},"entryCSSFiles":{"C:\\one drive folder\\Desktop\\scalezix\\rank monk\\app\\api\\auth\\signup\\route":[]},"rscModuleMapping":{},"edgeRscModuleMapping":{}};
