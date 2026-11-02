@@ -38,8 +38,15 @@ router.get('/', (req, res) => {
 
 async function handleCreateOrder(req, res) {
   try {
-    const { planId = req.body.plan || 'grow', cycle = 'monthly', email = req.body.customerEmail || 'client@rankmonk.in', couponCode } = req.body;
-    const order = await createCheckoutOrder({ planId, cycle, userEmail: email, couponCode });
+    const {
+      planId = req.body.plan || 'grow',
+      cycle = 'monthly',
+      email = req.body.customerEmail || 'client@rankmonk.in',
+      customerName = req.body.customerName || '',
+      customerPhone = req.body.customerPhone || '',
+      couponCode
+    } = req.body;
+    const order = await createCheckoutOrder({ planId, cycle, userEmail: email, customerName, customerPhone, couponCode });
     res.json({
       success: true,
       keyId: env.RAZORPAY_KEY_ID || 'rzp_live_TuVbNSiePj0Pz7',

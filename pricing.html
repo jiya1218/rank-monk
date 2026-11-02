@@ -253,6 +253,17 @@
     <section class="section" id="plans">
       <div class="container">
         
+        <!-- Mandatory Payment Required Notification Banner -->
+        <div id="requirePaymentBanner" style="display: none; max-width: 760px; margin: 0 auto 28px; background: rgba(197, 160, 89, 0.12); border: 1.5px solid #c5a059; border-radius: 16px; padding: 18px 24px; text-align: center; color: var(--fg); box-shadow: 0 4px 20px rgba(197, 160, 89, 0.15);">
+          <div style="font-weight: 800; font-size: 1.05rem; color: #c5a059; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <span>🔒</span>
+            <span id="requirePaymentBannerTitle">Subscription Payment Required</span>
+          </div>
+          <div style="font-size: 0.9rem; opacity: 0.92; line-height: 1.5;" id="requirePaymentBannerMsg">
+            Complete your subscription payment below to activate and access your Rank Monk OS console.
+          </div>
+        </div>
+
         <!-- Interactive Billing Controls -->
         <div class="billing-toggle-bar">
           <div class="toggle-group" id="cycleGroup">
@@ -656,7 +667,9 @@
           body: JSON.stringify({
             planId: plan,
             cycle: cycle,
-            customerEmail: userEmail
+            customerEmail: userEmail,
+            customerName: userObj.name || userEmail.split('@')[0],
+            customerPhone: userObj.phone || ''
           })
         });
 
@@ -691,24 +704,31 @@
             image: 'assets/rank-monk-icon.png',
             prefill: {
               email: userEmail,
-              name: userEmail ? userEmail.split('@')[0] : 'Founder'
+              name: userObj.name || userEmail.split('@')[0],
+              contact: userObj.phone || ''
             },
             theme: {
               color: '#c5a059'
             },
             handler: function(resp) {
-              alert('✨ Payment Successful!\n\nPayment ID: ' + resp.razorpay_payment_id + '\nPlan: ' + (planNames[plan] || plan) + '\n\nYour account has been upgraded!');
+              alert('✨ Payment Successful!\n\nPayment ID: ' + resp.razorpay_payment_id + '\nPlan: ' + (planNames[plan] || plan) + '\n\nYour account has been activated!');
               
-              var user = {
-                name: userEmail ? userEmail.split('@')[0] : 'Subscriber',
-                email: userEmail,
-                plan: plan,
-                cycle: cycle,
-                paid: true,
-                paymentId: resp.razorpay_payment_id
-              };
-              localStorage.setItem('rankmonk_active_user_v3', JSON.stringify(user));
-              window.location.href = '/dashboard';
+              userObj.paid = true;
+              userObj.plan = plan;
+              userObj.cycle = cycle;
+              userObj.paymentId = resp.razorpay_payment_id;
+              localStorage.setItem('rankmonk_active_user_v3', JSON.stringify(userObj));
+              localStorage.setItem('rankmonk_just_completed_payment', 'true');
+
+              try {
+                var pList = JSON.parse(localStorage.getItem('rankmonk_paid_users_list') || '[]');
+                if (!pList.includes(userEmail.toLowerCase())) {
+                  pList.push(userEmail.toLowerCase());
+                  localStorage.setItem('rankmonk_paid_users_list', JSON.stringify(pList));
+                }
+              } catch(e) {}
+
+              window.location.href = '/dashboard?status=success&plan=' + plan + '&razorpay_payment_id=' + resp.razorpay_payment_id;
             },
             modal: {
               ondismiss: function() {
@@ -761,21 +781,33 @@
         var params = new URLSearchParams(window.location.search);
         var pendingPlan = localStorage.getItem('rankmonk_pending_checkout_plan') || params.get('plan');
         var pendingCycle = localStorage.getItem('rankmonk_pending_checkout_cycle') || params.get('cycle');
+        var isRequirePayment = params.get('requirePayment') === '1' || params.get('newSignup') === '1';
+        var autoCheckout = params.get('autoCheckout') === '1';
         var rawUser = localStorage.getItem('rankmonk_active_user_v3');
         var userObj = rawUser ? JSON.parse(rawUser) : null;
 
-        if (userObj && userObj.email && pendingPlan) {
-          localStorage.removeItem('rankmonk_pending_checkout_plan');
-          localStorage.removeItem('rankmonk_pending_checkout_cycle');
-          if (pendingCycle) window.setBillingCycle(pendingCycle);
-          if (window.history && window.history.replaceState) {
-            window.history.replaceState(null, '', '/pricing');
+        var pList = [];
+        try { pList = JSON.parse(localStorage.getItem('rankmonk_paid_users_list') || '[]'); } catch(e) {}
+        var isPaid = userObj && (userObj.paid === true || userObj.email === 'founder@rankmonk.in' || pList.includes(userObj.email.toLowerCase()));
+
+        if (isRequirePayment || (userObj && !isPaid)) {
+          var banner = document.getElementById('requirePaymentBanner');
+          var msg = document.getElementById('requirePaymentBannerMsg');
+          if (banner) banner.style.display = 'block';
+          if (msg && userObj) {
+            msg.innerHTML = 'Account created for <strong>' + (userObj.name || userObj.email) + '</strong>. Please complete your subscription payment below to activate and unlock your Rank Monk OS console.';
           }
+        }
+
+        if (userObj && userObj.email && pendingPlan && (autoCheckout || isRequirePayment)) {
+          if (pendingCycle) window.setBillingCycle(pendingCycle);
           setTimeout(function() {
             var btnId = pendingPlan === 'seed' ? 'btnPlanSeed' : (pendingPlan === 'scale' ? 'btnPlanScale' : 'btnPlanGrow');
             var btn = document.getElementById(btnId);
-            window.openRazorpayCheckout(pendingPlan, btn);
-          }, 400);
+            if (btn && typeof window.openRazorpayCheckout === 'function') {
+              window.openRazorpayCheckout(pendingPlan, btn);
+            }
+          }, 600);
         }
       } catch(e) {}
     });

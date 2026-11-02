@@ -47,7 +47,13 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { planId = 'grow', cycle = 'monthly', customerEmail = 'client@rankmonk.in' } = req.body || {};
+    const {
+      planId = 'grow',
+      cycle = 'monthly',
+      customerEmail = 'client@rankmonk.in',
+      customerName = '',
+      customerPhone = ''
+    } = req.body || {};
     const normPlan = (planId || 'grow').toLowerCase().trim();
     const planInfo = PLAN_CONFIGS[normPlan] || PLAN_CONFIGS.grow;
 
@@ -102,8 +108,9 @@ export default async function handler(req, res) {
           accept_partial: false,
           description: `${planInfo.name} (${isAnnual ? 'Annual' : 'Monthly'}) - Rank Monk`,
           customer: {
-            name: customerEmail.split('@')[0] || 'Customer',
-            email: customerEmail
+            name: customerName || customerEmail.split('@')[0] || 'Customer',
+            email: customerEmail,
+            contact: customerPhone || ''
           },
           notify: { sms: false, email: false },
           reminder_enable: false,

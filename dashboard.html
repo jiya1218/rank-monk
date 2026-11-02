@@ -17,28 +17,76 @@
        ======================================================================== -->
   <script>
     (function() {
-      // Auto-clean URL in address bar & capture payment verification
+      // 1. Mandatory Authentication Check
+      var rawUser = localStorage.getItem('rankmonk_active_user_v3');
+      if (!rawUser) {
+        window.location.replace('/login');
+        return;
+      }
+      var userObj = null;
+      try { userObj = JSON.parse(rawUser); } catch(e) {}
+      if (!userObj || !userObj.email) {
+        window.location.replace('/login');
+        return;
+      }
+
+      // 2. Capture Razorpay Payment Success Callback
       try {
         var cleanPath = window.location.pathname.replace(/\.html$/, '');
         var params = new URLSearchParams(window.location.search);
         var paymentId = params.get('razorpay_payment_id');
-        var plan = params.get('plan');
-        if (paymentId || plan) {
-          var userObj = {};
-          try {
-            userObj = JSON.parse(localStorage.getItem('rankmonk_active_user_v3') || '{}');
-          } catch(e) {}
-          if (plan) userObj.plan = plan;
-          if (paymentId) userObj.paymentId = paymentId;
+        var paymentLinkId = params.get('razorpay_payment_link_id');
+        var paymentStatus = params.get('status');
+        var planParam = params.get('plan');
+
+        if (paymentId || paymentLinkId || paymentStatus === 'success') {
           userObj.paid = true;
+          if (paymentId) userObj.paymentId = paymentId;
+          if (paymentLinkId) userObj.paymentLinkId = paymentLinkId;
+          if (planParam) userObj.plan = planParam;
           localStorage.setItem('rankmonk_active_user_v3', JSON.stringify(userObj));
           localStorage.setItem('rankmonk_just_completed_payment', 'true');
-        }
-        // Wipe tracking params cleanly: /dashboard
-        if (window.history && window.history.replaceState) {
-          window.history.replaceState(null, '', cleanPath || '/dashboard');
+
+          try {
+            var paidList = JSON.parse(localStorage.getItem('rankmonk_paid_users_list') || '[]');
+            if (!paidList.includes(userObj.email.toLowerCase())) {
+              paidList.push(userObj.email.toLowerCase());
+              localStorage.setItem('rankmonk_paid_users_list', JSON.stringify(paidList));
+            }
+            var db = JSON.parse(localStorage.getItem('rankmonk_users_db') || '[]');
+            var match = db.find(function(u) { return u.email.toLowerCase() === userObj.email.toLowerCase(); });
+            if (match) {
+              match.paid = true;
+              if (planParam) match.plan = planParam;
+              localStorage.setItem('rankmonk_users_db', JSON.stringify(db));
+            }
+          } catch(dbErr) {}
+
+          // Clean URL to /dashboard
+          if (window.history && window.history.replaceState) {
+            window.history.replaceState(null, '', cleanPath || '/dashboard');
+          }
         }
       } catch(e) {}
+
+      // 3. Strict Subscription Payment Gate (Hard Paywall)
+      var isFounder = userObj.email.toLowerCase() === 'founder@rankmonk.in' || userObj.role === 'owner';
+      var isPaidInRegistry = false;
+      try {
+        var pList = JSON.parse(localStorage.getItem('rankmonk_paid_users_list') || '[]');
+        isPaidInRegistry = pList.includes(userObj.email.toLowerCase());
+      } catch(e) {}
+
+      var isSubscribed = isFounder || userObj.paid === true || isPaidInRegistry;
+
+      if (!isSubscribed) {
+        // Unpaid user trying to enter dashboard -> Lock out and redirect to payment
+        var targetPlan = userObj.plan || 'grow';
+        localStorage.setItem('rankmonk_pending_checkout_plan', targetPlan);
+        window.location.replace('/pricing?plan=' + encodeURIComponent(targetPlan) + '&requirePayment=1&autoCheckout=1');
+        return;
+      }
+    })();
 
       var STORAGE_KEY = 'rankmonk_engine_state_v6';
       function getStoredData() {

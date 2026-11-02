@@ -15,16 +15,19 @@
         var theme = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         document.documentElement.setAttribute('data-theme', theme);
 
-        // If user already has an active session, send straight to dashboard
+        // If user already has an active session, verify payment status
         var rawUser = localStorage.getItem('rankmonk_active_user_v3');
         if (rawUser) {
           var parsed = JSON.parse(rawUser);
           if (parsed && parsed.email) {
-            var urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('redirect') === 'pricing' || localStorage.getItem('rankmonk_pending_checkout_plan')) {
-              window.location.replace('/pricing?autoCheckout=1');
-            } else {
+            var isFounder = parsed.email.toLowerCase() === 'founder@rankmonk.in' || parsed.role === 'owner';
+            var paidList = [];
+            try { paidList = JSON.parse(localStorage.getItem('rankmonk_paid_users_list') || '[]'); } catch(e) {}
+            var isPaid = isFounder || parsed.paid === true || paidList.includes(parsed.email.toLowerCase());
+            if (isPaid) {
               window.location.replace('/dashboard');
+            } else {
+              window.location.replace('/pricing?plan=' + encodeURIComponent(parsed.plan || 'grow') + '&requirePayment=1&autoCheckout=1');
             }
           }
         }
@@ -145,10 +148,17 @@
           throw new Error('Verification failed. Please check your credentials.');
         }
 
-        var pendingPlan = localStorage.getItem('rankmonk_pending_checkout_plan');
-        var redirectParam = new URLSearchParams(window.location.search).get('redirect');
-        if (pendingPlan || redirectParam === 'pricing') {
-          window.location.href = '/pricing?autoCheckout=1';
+        // Strict Subscription Verification: Check if user has completed payment
+        var isFounder = user.email.toLowerCase() === 'founder@rankmonk.in' || user.role === 'owner';
+        var paidList = [];
+        try { paidList = JSON.parse(localStorage.getItem('rankmonk_paid_users_list') || '[]'); } catch(e) {}
+        var isPaid = isFounder || user.paid === true || paidList.includes(user.email.toLowerCase());
+
+        if (!isPaid) {
+          // Unpaid account: Must complete payment before accessing dashboard
+          var targetPlan = user.plan || 'grow';
+          localStorage.setItem('rankmonk_pending_checkout_plan', targetPlan);
+          window.location.href = '/pricing?plan=' + encodeURIComponent(targetPlan) + '&requirePayment=1&autoCheckout=1';
           return;
         }
 
