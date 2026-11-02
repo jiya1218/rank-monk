@@ -30,26 +30,64 @@ function LoginForm() {
     setError('');
 
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
+      let loggedInUser: any = null;
 
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Verification failed. Please check your credentials.');
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success && data.user) {
+          loggedInUser = data.user;
+        } else if (data.error && data.error.includes('Incorrect password')) {
+          throw new Error('Incorrect password. Please verify and try again.');
+        }
+      } catch (apiErr) {
+        if ((apiErr as Error).message.includes('Incorrect password')) {
+          throw apiErr;
+        }
       }
 
-      const user = data.user;
-      localStorage.setItem('rankmonk_user', JSON.stringify(user));
-      localStorage.setItem('rankmonk_active_user_v3', JSON.stringify(user));
-      if (!user.domain) {
+      // Client-side fallback check (for serverless lambda instances where storage is isolated)
+      if (!loggedInUser) {
+        try {
+          const raw = localStorage.getItem('rankmonk_client_accounts');
+          if (raw) {
+            const list = JSON.parse(raw);
+            const norm = email.toLowerCase().trim();
+            const match = list.find((a: any) => a.email && a.email.toLowerCase().trim() === norm);
+            if (match) {
+              if (match.password === password) {
+                const safe = { ...match };
+                delete safe.password;
+                loggedInUser = safe;
+              } else {
+                throw new Error('Incorrect password. Please verify and try again.');
+              }
+            }
+          }
+        } catch (e) {
+          if ((e as Error).message.includes('Incorrect password')) {
+            throw e;
+          }
+        }
+      }
+
+      if (!loggedInUser) {
+        throw new Error('No account found with this email. Please create an account first.');
+      }
+
+      localStorage.setItem('rankmonk_user', JSON.stringify(loggedInUser));
+      localStorage.setItem('rankmonk_active_user_v3', JSON.stringify(loggedInUser));
+      if (!loggedInUser.domain) {
         localStorage.removeItem('rankmonk_active_project');
       }
 
-      // Redirect user to homepage
-      router.push('/');
+      // Redirect user to dashboard
+      router.push('/dashboard');
     } catch (err) {
       setError((err as Error).message || 'Invalid credentials');
     } finally {

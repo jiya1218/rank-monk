@@ -35,8 +35,27 @@ export default function SignupPage() {
         throw new Error(data.error || 'Signup failed.');
       }
 
-      // Redirect user to login page with success notice
-      router.push('/login?registered=true');
+      const user = data.user;
+      localStorage.setItem('rankmonk_user', JSON.stringify(user));
+      localStorage.setItem('rankmonk_active_user_v3', JSON.stringify(user));
+
+      // Persist to client credentials cache for seamless multi-session login on serverless
+      try {
+        const raw = localStorage.getItem('rankmonk_client_accounts');
+        const list = raw ? JSON.parse(raw) : [];
+        const norm = email.toLowerCase().trim();
+        const idx = list.findIndex((a: any) => a.email && a.email.toLowerCase().trim() === norm);
+        const record = { ...user, password };
+        if (idx !== -1) {
+          list[idx] = record;
+        } else {
+          list.push(record);
+        }
+        localStorage.setItem('rankmonk_client_accounts', JSON.stringify(list));
+      } catch (e) {}
+
+      // Auto-login straight to onboarding/dashboard!
+      router.push('/dashboard');
     } catch (err) {
       setError((err as Error).message || 'Signup failed');
     } finally {
