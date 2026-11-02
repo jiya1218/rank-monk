@@ -46,13 +46,13 @@ export function PricingSection({ initialPlan, requirePaymentNotice }: PricingSec
       return;
     }
 
-    if (code === 'RANKMONK001') {
-      setAppliedCoupon('RANKMONK001');
+    if (code === 'RANKMONK001' || code === 'RANKMONK100' || code === 'FREE100') {
+      setAppliedCoupon(code);
       setIsDiscountActive(true);
       setCouponError('');
-      setCouponInput('RANKMONK001');
+      setCouponInput(code);
     } else {
-      setCouponError('Invalid coupon code. Try RANKMONK001 for ₹10 testing.');
+      setCouponError('Invalid coupon code. Try RANKMONK100 or RANKMONK001 for 100% OFF.');
     }
   };
 
@@ -85,6 +85,33 @@ export function PricingSection({ initialPlan, requirePaymentNotice }: PricingSec
       }
 
       const orderData = json.data;
+
+      // Handle 100% Free Activation (Bypass Razorpay for ₹0 orders)
+      if (json.isFree || orderData.amount === 0) {
+        try {
+          await fetch('/api/checkout/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: user ? user.email : email,
+              plan: tier,
+              paymentId: `free_coupon_${Date.now()}`,
+              couponCode: appliedCoupon
+            })
+          });
+        } catch (e) {}
+
+        if (user) {
+          user.paid = true;
+          user.plan = tier;
+          localStorage.setItem('rankmonk_user', JSON.stringify(user));
+          localStorage.setItem('rankmonk_active_user_v3', JSON.stringify(user));
+        }
+
+        alert(`🎉 100% Discount Applied!\n\nYour account has been upgraded to ${PLAN_CONFIG[tier].name} Plan for ₹0.`);
+        router.push('/dashboard');
+        return;
+      }
 
       // Handle Razorpay Checkout
       if (typeof window !== 'undefined' && (window as any).Razorpay) {
@@ -187,10 +214,10 @@ export function PricingSection({ initialPlan, requirePaymentNotice }: PricingSec
                 <span style={{ fontSize: '1.4rem' }}>🏷️</span>
                 <div>
                   <div style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--success)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    Coupon RANKMONK001 Applied!
+                    Coupon {appliedCoupon} Applied!
                   </div>
                   <div style={{ fontSize: '0.86rem', color: 'var(--ink)', fontWeight: 600 }}>
-                    99.99% Discount Active — Pay only <strong style={{ color: 'var(--success)' }}>₹10</strong> for any tier!
+                    100% Discount Active — Instant <strong style={{ color: 'var(--success)' }}>₹0 Free Activation</strong> for any tier!
                   </div>
                 </div>
               </div>
@@ -207,7 +234,7 @@ export function PricingSection({ initialPlan, requirePaymentNotice }: PricingSec
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <input
                   type="text"
-                  placeholder="Promo Code (e.g. RANKMONK001)"
+                  placeholder="Promo Code (e.g. RANKMONK100 or RANKMONK001)"
                   value={couponInput}
                   onChange={(e) => setCouponInput(e.target.value)}
                   style={{ flex: 1, padding: '10px 14px', background: 'var(--bg-alt)', border: '1px solid var(--line)', borderRadius: '10px', fontSize: '0.85rem', color: 'var(--ink)', textTransform: 'uppercase', fontWeight: 700, outline: 'none' }}
@@ -230,13 +257,13 @@ export function PricingSection({ initialPlan, requirePaymentNotice }: PricingSec
 
               {/* 1-Click Test Promo Button */}
               <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem' }}>
-                <span style={{ color: 'var(--muted)' }}>Testing payment with ₹10?</span>
+                <span style={{ color: 'var(--muted)' }}>Testing full platform?</span>
                 <button
                   type="button"
-                  onClick={() => handleApplyCoupon('RANKMONK001')}
-                  style={{ background: 'none', border: 'none', color: 'var(--mocha)', fontWeight: 800, cursor: 'pointer', textDecoration: 'underline' }}
+                  onClick={() => handleApplyCoupon('RANKMONK100')}
+                  style={{ background: 'none', border: 'none', color: 'var(--success)', fontWeight: 800, cursor: 'pointer', textDecoration: 'underline' }}
                 >
-                  ⚡ Click to Apply RANKMONK001 (₹10 Test)
+                  ⚡ Click to Apply 100% OFF (RANKMONK100)
                 </button>
               </div>
             </div>
@@ -254,8 +281,8 @@ export function PricingSection({ initialPlan, requirePaymentNotice }: PricingSec
                   <span style={{ fontSize: '1rem', color: 'var(--muted)', textDecoration: 'line-through', marginRight: '8px' }}>
                     {cycle === 'annual' ? '₹8,000' : '₹10,000'}
                   </span>
-                  <strong style={{ color: 'var(--success)', fontSize: '2.4rem' }}>₹10</strong>
-                  <small style={{ color: 'var(--success)', fontWeight: 700 }}> (99.99% OFF)</small>
+                  <strong style={{ color: 'var(--success)', fontSize: '2.4rem' }}>₹0</strong>
+                  <small style={{ color: 'var(--success)', fontWeight: 700 }}> (100% OFF FREE)</small>
                 </div>
               ) : (
                 <div>
@@ -286,7 +313,7 @@ export function PricingSection({ initialPlan, requirePaymentNotice }: PricingSec
               {loadingTier === 'seed'
                 ? 'Preparing checkout...'
                 : isDiscountActive
-                ? 'Pay ₹10 to Unlock Seed Tier →'
+                ? 'Unlock Seed Tier Free (₹0) →'
                 : 'Choose Seed (₹10,000)'}
             </button>
           </div>
@@ -301,8 +328,8 @@ export function PricingSection({ initialPlan, requirePaymentNotice }: PricingSec
                   <span style={{ fontSize: '1rem', color: '#d7c4b2', textDecoration: 'line-through', marginRight: '8px' }}>
                     {cycle === 'annual' ? '₹16,000' : '₹20,000'}
                   </span>
-                  <strong style={{ color: '#84e1bc', fontSize: '2.4rem' }}>₹10</strong>
-                  <small style={{ color: '#84e1bc', fontWeight: 700 }}> (99.99% OFF)</small>
+                  <strong style={{ color: '#84e1bc', fontSize: '2.4rem' }}>₹0</strong>
+                  <small style={{ color: '#84e1bc', fontWeight: 700 }}> (100% OFF FREE)</small>
                 </div>
               ) : (
                 <div>
@@ -333,7 +360,7 @@ export function PricingSection({ initialPlan, requirePaymentNotice }: PricingSec
               {loadingTier === 'grow'
                 ? 'Preparing checkout...'
                 : isDiscountActive
-                ? 'Pay ₹10 to Unlock Grow Tier →'
+                ? 'Unlock Grow Tier Free (₹0) →'
                 : 'Choose Grow (₹20,000) →'}
             </button>
           </div>
@@ -347,8 +374,8 @@ export function PricingSection({ initialPlan, requirePaymentNotice }: PricingSec
                   <span style={{ fontSize: '1rem', color: 'var(--muted)', textDecoration: 'line-through', marginRight: '8px' }}>
                     {cycle === 'annual' ? '₹32,000' : '₹40,000'}
                   </span>
-                  <strong style={{ color: 'var(--success)', fontSize: '2.4rem' }}>₹10</strong>
-                  <small style={{ color: 'var(--success)', fontWeight: 700 }}> (99.99% OFF)</small>
+                  <strong style={{ color: 'var(--success)', fontSize: '2.4rem' }}>₹0</strong>
+                  <small style={{ color: 'var(--success)', fontWeight: 700 }}> (100% OFF FREE)</small>
                 </div>
               ) : (
                 <div>
@@ -379,7 +406,7 @@ export function PricingSection({ initialPlan, requirePaymentNotice }: PricingSec
               {loadingTier === 'scale'
                 ? 'Preparing checkout...'
                 : isDiscountActive
-                ? 'Pay ₹10 to Unlock Scale Tier →'
+                ? 'Unlock Scale Tier Free (₹0) →'
                 : 'Choose Scale (₹40,000)'}
             </button>
           </div>

@@ -52,13 +52,13 @@ export function PricingModal({ isOpen, onClose, onSuccess }: PricingModalProps) 
       return;
     }
 
-    if (code === 'RANKMONK001') {
-      setAppliedCoupon('RANKMONK001');
+    if (code === 'RANKMONK001' || code === 'RANKMONK100' || code === 'FREE100') {
+      setAppliedCoupon(code);
       setIsDiscountActive(true);
       setCouponError('');
-      setCouponInput('RANKMONK001');
+      setCouponInput(code);
     } else {
-      setCouponError('Invalid coupon code. Try RANKMONK001 for ₹10 testing.');
+      setCouponError('Invalid coupon code. Try RANKMONK001 or RANKMONK100 for 100% OFF.');
     }
   };
 
@@ -91,6 +91,38 @@ export function PricingModal({ isOpen, onClose, onSuccess }: PricingModalProps) 
       }
 
       const orderData = json.data;
+
+      // Handle 100% Free Activation (Bypass Razorpay for ₹0 orders)
+      if (json.isFree || orderData.amount === 0) {
+        try {
+          await fetch('/api/checkout/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: user ? user.email : email,
+              plan: tier,
+              paymentId: `free_coupon_${Date.now()}`,
+              couponCode: appliedCoupon
+            })
+          });
+        } catch (e) {}
+
+        if (user) {
+          user.paid = true;
+          user.plan = tier;
+          localStorage.setItem('rankmonk_user', JSON.stringify(user));
+          localStorage.setItem('rankmonk_active_user_v3', JSON.stringify(user));
+        }
+
+        alert(`🎉 100% Discount Applied!\n\nYour account has been upgraded to ${PLAN_CONFIG[tier].name} Plan for ₹0.`);
+        onClose();
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          router.push('/dashboard');
+        }
+        return;
+      }
 
       // Handle Razorpay Checkout
       if (typeof window !== 'undefined' && (window as any).Razorpay) {
@@ -303,10 +335,10 @@ export function PricingModal({ isOpen, onClose, onSuccess }: PricingModalProps) 
                 <span style={{ fontSize: '1.2rem' }}>🏷️</span>
                 <div>
                   <span style={{ fontWeight: 800, color: '#03543f', textTransform: 'uppercase', display: 'block', fontSize: '10.5px' }}>
-                    Coupon RANKMONK001 Active!
+                    Coupon {appliedCoupon} Active!
                   </span>
                   <span style={{ color: '#2b1b12', fontSize: '11px' }}>
-                    99.99% Discount — Pay only <strong style={{ color: '#03543f' }}>₹10</strong> for testing!
+                    100% Discount — Instant <strong style={{ color: '#03543f' }}>₹0 Free Activation</strong> for testing!
                   </span>
                 </div>
               </div>
@@ -323,7 +355,7 @@ export function PricingModal({ isOpen, onClose, onSuccess }: PricingModalProps) 
               <div style={{ display: 'flex', gap: '8px' }}>
                 <input
                   type="text"
-                  placeholder="Coupon Code (e.g. RANKMONK001)"
+                  placeholder="Coupon Code (e.g. RANKMONK100 or RANKMONK001)"
                   value={couponInput}
                   onChange={(e) => setCouponInput(e.target.value)}
                   style={{ flex: 1, padding: '8px 12px', backgroundColor: '#fffcf7', border: '1px solid #e4d6c6', borderRadius: '10px', textTransform: 'uppercase', fontWeight: 700, fontSize: '0.78rem', color: '#2b1b12', outline: 'none' }}
@@ -342,13 +374,13 @@ export function PricingModal({ isOpen, onClose, onSuccess }: PricingModalProps) 
               )}
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: '#6f5a4c', paddingTop: '6px', borderTop: '1px solid #e4d6c6' }}>
-                <span>Testing gateway with ₹10?</span>
+                <span>Testing full platform?</span>
                 <button
                   type="button"
-                  onClick={() => handleApplyCoupon('RANKMONK001')}
-                  style={{ fontWeight: 800, color: '#7a5242', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
+                  onClick={() => handleApplyCoupon('RANKMONK100')}
+                  style={{ fontWeight: 800, color: '#03543f', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
                 >
-                  ⚡ Apply RANKMONK001 (₹10 Test)
+                  ⚡ Apply 100% OFF (RANKMONK100)
                 </button>
               </div>
             </div>
@@ -378,8 +410,8 @@ export function PricingModal({ isOpen, onClose, onSuccess }: PricingModalProps) 
                     <span style={{ textDecoration: 'line-through', fontSize: '11px', color: '#6f5a4c', marginRight: '6px' }}>
                       {cycle === 'annual' ? '₹8,000' : '₹10,000'}
                     </span>
-                    <strong style={{ color: '#03543f', fontSize: '1.65rem' }}>₹10</strong>
-                    <small style={{ color: '#03543f', fontSize: '10px', fontWeight: 700 }}> (99.99% OFF)</small>
+                    <strong style={{ color: '#03543f', fontSize: '1.65rem' }}>₹0</strong>
+                    <small style={{ color: '#03543f', fontSize: '10px', fontWeight: 700 }}> (100% OFF FREE)</small>
                   </span>
                 ) : (
                   <span>
@@ -447,7 +479,7 @@ export function PricingModal({ isOpen, onClose, onSuccess }: PricingModalProps) 
               {loadingTier === 'seed'
                 ? 'Processing...'
                 : isDiscountActive
-                ? 'Pay ₹10 to Unlock Seed Tier →'
+                ? 'Unlock Seed Tier Free (₹0) →'
                 : 'Choose Seed (₹10,000)'}
             </button>
           </div>
@@ -493,8 +525,8 @@ export function PricingModal({ isOpen, onClose, onSuccess }: PricingModalProps) 
                     <span style={{ textDecoration: 'line-through', fontSize: '11px', color: '#d7c4b2', marginRight: '6px' }}>
                       {cycle === 'annual' ? '₹16,000' : '₹20,000'}
                     </span>
-                    <strong style={{ color: '#84e1bc', fontSize: '1.65rem' }}>₹10</strong>
-                    <small style={{ color: '#84e1bc', fontSize: '10px', fontWeight: 700 }}> (99.99% OFF)</small>
+                    <strong style={{ color: '#84e1bc', fontSize: '1.65rem' }}>₹0</strong>
+                    <small style={{ color: '#84e1bc', fontSize: '10px', fontWeight: 700 }}> (100% OFF FREE)</small>
                   </span>
                 ) : (
                   <span>
@@ -563,7 +595,7 @@ export function PricingModal({ isOpen, onClose, onSuccess }: PricingModalProps) 
               {loadingTier === 'grow'
                 ? 'Processing...'
                 : isDiscountActive
-                ? 'Pay ₹10 to Unlock Grow Tier →'
+                ? 'Unlock Grow Tier Free (₹0) →'
                 : 'Choose Grow (₹20,000) →'}
             </button>
           </div>
@@ -589,8 +621,8 @@ export function PricingModal({ isOpen, onClose, onSuccess }: PricingModalProps) 
                     <span style={{ textDecoration: 'line-through', fontSize: '11px', color: '#6f5a4c', marginRight: '6px' }}>
                       {cycle === 'annual' ? '₹32,000' : '₹40,000'}
                     </span>
-                    <strong style={{ color: '#03543f', fontSize: '1.65rem' }}>₹10</strong>
-                    <small style={{ color: '#03543f', fontSize: '10px', fontWeight: 700 }}> (99.99% OFF)</small>
+                    <strong style={{ color: '#03543f', fontSize: '1.65rem' }}>₹0</strong>
+                    <small style={{ color: '#03543f', fontSize: '10px', fontWeight: 700 }}> (100% OFF FREE)</small>
                   </span>
                 ) : (
                   <span>
@@ -658,7 +690,7 @@ export function PricingModal({ isOpen, onClose, onSuccess }: PricingModalProps) 
               {loadingTier === 'scale'
                 ? 'Processing...'
                 : isDiscountActive
-                ? 'Pay ₹10 to Unlock Scale Tier →'
+                ? 'Unlock Scale Tier Free (₹0) →'
                 : 'Choose Scale (₹40,000)'}
             </button>
           </div>

@@ -9,12 +9,28 @@ export async function POST(req: Request) {
     const planInfo = PLAN_CONFIG[tier];
     let baseAmountINR = cycle === 'annual' ? planInfo.priceAnnual : planInfo.priceMonthly;
 
-    // Check for 99.99% Test Discount Coupon: RANKMONK001 -> Pay ₹10
+    // Check for 100% Free Test Discount Coupon (RANKMONK100, RANKMONK001, FREE100)
     const normalizedCoupon = (couponCode || '').trim().toUpperCase();
-    const isSpecialDiscount = normalizedCoupon === 'RANKMONK001';
+    const isFreeDiscount = normalizedCoupon === 'RANKMONK100' || normalizedCoupon === 'RANKMONK001' || normalizedCoupon === 'FREE100';
 
-    let finalAmountINR = isSpecialDiscount ? 10 : baseAmountINR;
-    let finalAmountPaise = finalAmountINR * 100; // ₹10 = 1,000 paise
+    if (isFreeDiscount) {
+      return NextResponse.json({
+        success: true,
+        isFree: true,
+        data: {
+          orderId: `free_${tier}_${Date.now()}`,
+          amount: 0,
+          amountINR: 0,
+          currency: 'INR',
+          keyId: 'free_coupon',
+          isLiveOrder: false,
+          plan: tier
+        }
+      });
+    }
+
+    let finalAmountINR = baseAmountINR;
+    let finalAmountPaise = finalAmountINR * 100;
 
     const keyId = process.env.RAZORPAY_KEY_ID || process.env.VITE_RAZORPAY_KEY_ID || 'rzp_live_TuVbNSiePj0Pz7';
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
