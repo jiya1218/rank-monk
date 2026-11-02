@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { getUserByEmail, addUser } from '@/lib/userStorage';
 
 export async function POST(req: Request) {
   try {
@@ -21,19 +20,8 @@ export async function POST(req: Request) {
     }
 
     const normEmail = email.toLowerCase().trim();
-    const dataDir = path.join(process.cwd(), 'server', 'data');
-    const usersFile = path.join(dataDir, 'users.json');
 
-    if (!fs.existsSync(dataDir)) {
-      try { fs.mkdirSync(dataDir, { recursive: true }); } catch (e) {}
-    }
-
-    let users: any[] = [];
-    if (fs.existsSync(usersFile)) {
-      try { users = JSON.parse(fs.readFileSync(usersFile, 'utf8')); } catch (e) {}
-    }
-
-    if (users.some((u: any) => u.email.toLowerCase() === normEmail)) {
+    if (getUserByEmail(normEmail)) {
       return NextResponse.json(
         { success: false, error: 'An account with this email already exists. Please log in.' },
         { status: 409 }
@@ -53,8 +41,7 @@ export async function POST(req: Request) {
       created_at: new Date().toISOString()
     };
 
-    users.push(newUser);
-    fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf8');
+    addUser(newUser);
 
     const safeUser = {
       id: newUser.id,

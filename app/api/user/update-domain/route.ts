@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { updateUser } from '@/lib/userStorage';
 
 export async function POST(req: Request) {
   try {
@@ -9,15 +8,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: 'Email and domain required' }, { status: 400 });
     }
 
-    const usersFile = path.join(process.cwd(), 'server', 'data', 'users.json');
-    if (fs.existsSync(usersFile)) {
-      const users = JSON.parse(fs.readFileSync(usersFile, 'utf8'));
-      const idx = users.findIndex((u: any) => u.email.toLowerCase() === email.toLowerCase().trim());
-      if (idx !== -1) {
-        users[idx].domain = domain;
-        fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf8');
-      }
-    }
+    updateUser(email, { domain });
 
     return NextResponse.json({ success: true });
   } catch (err) {

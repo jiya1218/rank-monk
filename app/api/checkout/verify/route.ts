@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { updateUser } from '@/lib/userStorage';
 
 export async function POST(req: Request) {
   try {
@@ -11,21 +10,12 @@ export async function POST(req: Request) {
     }
 
     const normEmail = email.toLowerCase().trim();
-    const usersFile = path.join(process.cwd(), 'server', 'data', 'users.json');
-
-    if (fs.existsSync(usersFile)) {
-      try {
-        const users = JSON.parse(fs.readFileSync(usersFile, 'utf8'));
-        const user = users.find((u: any) => u.email.toLowerCase() === normEmail);
-        if (user) {
-          user.paid = true;
-          user.plan = plan;
-          user.paymentId = paymentId;
-          user.couponUsed = couponCode;
-          fs.writeFileSync(usersFile, JSON.stringify(users, null, 2), 'utf8');
-        }
-      } catch (e) {}
-    }
+    updateUser(normEmail, {
+      paid: true,
+      plan,
+      paymentId,
+      couponUsed: couponCode
+    });
 
     return NextResponse.json({
       success: true,

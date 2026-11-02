@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { getUserByEmail } from '@/lib/userStorage';
 
 export async function POST(req: Request) {
   try {
@@ -14,37 +13,30 @@ export async function POST(req: Request) {
     }
 
     const normEmail = email.toLowerCase().trim();
+    const matched = getUserByEmail(normEmail);
 
-    // Real Registered Users from Database (users.json)
-    const usersFile = path.join(process.cwd(), 'server', 'data', 'users.json');
-    if (fs.existsSync(usersFile)) {
-      try {
-        const users = JSON.parse(fs.readFileSync(usersFile, 'utf8'));
-        const matched = users.find((u: any) => u.email.toLowerCase() === normEmail);
-        if (matched) {
-          if (matched.password === password) {
-            return NextResponse.json({
-              success: true,
-              user: {
-                id: matched.id,
-                email: matched.email,
-                name: matched.name,
-                phone: matched.phone,
-                role: matched.role || 'member',
-                plan: matched.plan || 'grow',
-                paid: matched.paid === true,
-                domain: matched.domain || '',
-                createdAt: matched.created_at || new Date().toISOString()
-              }
-            });
-          } else {
-            return NextResponse.json(
-              { success: false, error: 'Incorrect password. Please verify and try again.' },
-              { status: 401 }
-            );
+    if (matched) {
+      if (matched.password === password) {
+        return NextResponse.json({
+          success: true,
+          user: {
+            id: matched.id,
+            email: matched.email,
+            name: matched.name,
+            phone: matched.phone,
+            role: matched.role || 'member',
+            plan: matched.plan || 'grow',
+            paid: matched.paid === true,
+            domain: matched.domain || '',
+            createdAt: matched.created_at || new Date().toISOString()
           }
-        }
-      } catch (e) {}
+        });
+      } else {
+        return NextResponse.json(
+          { success: false, error: 'Incorrect password. Please verify and try again.' },
+          { status: 401 }
+        );
+      }
     }
 
     return NextResponse.json(
