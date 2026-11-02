@@ -658,7 +658,17 @@
           throw new Error((checkoutData && checkoutData.error) || 'Failed to create Razorpay session');
         }
 
-        // Step 2: If Razorpay SDK is present and Order ID returned, launch official modal
+        // Direct navigation to official Razorpay Hosted Checkout
+        // 100% adblocker-proof, popup-blocker-proof, works on every mobile & desktop browser!
+        if (checkoutData.paymentUrl) {
+          if (btnElement) {
+            btnElement.innerHTML = 'Opening Razorpay... 🔒';
+          }
+          window.location.href = checkoutData.paymentUrl;
+          return;
+        }
+
+        // Fallback: If no paymentUrl, try opening Razorpay modal
         if (typeof window.Razorpay !== 'undefined' && checkoutData.orderId) {
           var options = {
             key: checkoutData.keyId,
@@ -708,9 +718,6 @@
             }
           });
           rzp.open();
-        } else if (checkoutData.paymentUrl) {
-          // Step 3: Seamless instant fallback to Razorpay hosted checkout page (bypasses all adblockers / script blocks)
-          window.location.href = checkoutData.paymentUrl;
         } else {
           throw new Error('No valid checkout URL or Order ID was returned');
         }
