@@ -88,137 +88,109 @@
       }
     })();
 
-      var STORAGE_KEY = 'rankmonk_engine_state_v6';
+      // Scoped User Session & Workspace State
+      var activeUser = null;
+      try {
+        var rawUser = localStorage.getItem('rankmonk_active_user_v3');
+        if (rawUser) activeUser = JSON.parse(rawUser);
+      } catch(e) {}
+
+      var userEmail = (activeUser && activeUser.email) ? activeUser.email.toLowerCase().trim() : 'guest';
+      var isFounder = userEmail === 'founder@rankmonk.in' || (activeUser && activeUser.role === 'owner');
+      var STORAGE_KEY = 'rm_state_' + userEmail.replace(/[^a-z0-9]/g, '_');
+
       function getStoredData() {
         try {
-          ['rankmonk_engine_state_v1', 'rankmonk_engine_state_v2', 'rankmonk_engine_state_v3', 'rankmonk_engine_state_v4', 'rankmonk_engine_state_v5', 'solospider_engine_state'].forEach(function(k){
-            try { localStorage.removeItem(k); } catch(e){}
-          });
           var raw = localStorage.getItem(STORAGE_KEY);
-          if (raw) {
-            var parsed = JSON.parse(raw);
-            if (parsed && Array.isArray(parsed.projects)) {
-              parsed.projects.forEach(function(p) {
-                if (!p.name || p.name.toLowerCase().includes('scalezix') || !p.domain || p.domain.toLowerCase().includes('scalezix') || p.domain === 'rankmonk.com') {
-                  p.name = 'Rank Monk';
-                  p.domain = 'rankmonk.com';
-                  p.website = 'rankmonk.com';
-                  p.industry = 'The Zen OS for Autonomous Organic Growth';
-                  p.businessCategory = 'Autonomous SEO, AEO & GEO Optimization Software';
-                  p.targetAudience = 'Growth engineers, modern founders, agencies, and digital operators scaling organic search visibility.';
-                  p.summary = 'Rank Monk is the Zen OS for autonomous organic growth. It unifies self-driving technical website crawls, neural content synthesis, and real-time generative search tracking across ChatGPT, Claude, and Perplexity to help modern founders and growth teams dominate search visibility.';
-                  p.brand_logo_url = 'assets/rank-monk-logo-horizontal.png';
-                  p.favicon_url = 'assets/rank-monk-icon.png';
-                  p.competitors = [
-                    { name: 'Semrush', domain: 'semrush.com', website: 'https://semrush.com', favicon: 'https://www.google.com/s2/favicons?domain=semrush.com&sz=64', positioning: 'Traditional all-in-one SEO, keyword research, and marketing platform.' },
-                    { name: 'Ahrefs', domain: 'ahrefs.com', website: 'https://ahrefs.com', favicon: 'https://www.google.com/s2/favicons?domain=ahrefs.com&sz=64', positioning: 'Industry-standard backlink index and search intelligence tool.' },
-                    { name: 'Surfer SEO', domain: 'surferseo.com', website: 'https://surferseo.com', favicon: 'https://www.google.com/s2/favicons?domain=surferseo.com&sz=64', positioning: 'On-page SEO and content scoring tool for organic rankings.' },
-                    { name: 'BrightEdge', domain: 'brightedge.com', website: 'https://brightedge.com', favicon: 'https://www.google.com/s2/favicons?domain=brightedge.com&sz=64', positioning: 'Enterprise generative search and organic optimization suite.' }
-                  ];
-                } else if (!p.summary || p.summary.toLowerCase().includes('scalezix')) {
-                  p.summary = p.name + ' is accessible online at ' + p.domain + '. Discover their products, solutions, and offerings.';
-                }
-                if (Array.isArray(p.mediaAssets)) {
-                  p.mediaAssets = p.mediaAssets.filter(function(a) { return a && a.url && !a.url.includes('picsum.photos'); });
-                }
-              });
-            }
-            return parsed;
-          }
+          if (raw) return JSON.parse(raw);
         } catch (e) {}
         return null;
       }
 
-      var defaultProj = {
-        id: 'proj-rankmonk',
-        name: 'Rank Monk',
-        domain: 'rankmonk.com',
-        website: 'rankmonk.com',
-        industry: 'The Zen OS for Autonomous Organic Growth',
-        businessCategory: 'Autonomous SEO, AEO & GEO Optimization Software',
-        targetAudience: 'Growth engineers, modern founders, agencies, and digital operators scaling organic search visibility.',
-        summary: 'Rank Monk is the Zen OS for autonomous organic growth. It unifies self-driving technical website crawls, neural content synthesis, and real-time generative search tracking across ChatGPT, Claude, and Perplexity to help modern founders and growth teams dominate search visibility.',
-        brand_logo_url: 'assets/rank-monk-logo-horizontal.png',
-        favicon_url: 'assets/rank-monk-icon.png',
-        palette: ['#0c131a', '#111c26', '#c5a059', '#b98b6a', '#f8f7f4', '#10b981'],
-        competitors: [
-          { name: 'Semrush', domain: 'semrush.com', website: 'https://semrush.com', favicon: 'https://www.google.com/s2/favicons?domain=semrush.com&sz=64', positioning: 'Traditional all-in-one SEO, keyword research, and marketing platform.' },
-          { name: 'Ahrefs', domain: 'ahrefs.com', website: 'https://ahrefs.com', favicon: 'https://www.google.com/s2/favicons?domain=ahrefs.com&sz=64', positioning: 'Industry-standard backlink index and search intelligence tool.' },
-          { name: 'Surfer SEO', domain: 'surferseo.com', website: 'https://surferseo.com', favicon: 'https://www.google.com/s2/favicons?domain=surferseo.com&sz=64', positioning: 'On-page SEO and content scoring tool for organic rankings.' },
-          { name: 'BrightEdge', domain: 'brightedge.com', website: 'https://brightedge.com', favicon: 'https://www.google.com/s2/favicons?domain=brightedge.com&sz=64', positioning: 'Enterprise generative search and organic optimization suite.' }
-        ],
-        gscConnected: false,
-        aeoScore: 78,
-        mediaAssets: [],
-        articles: [
-          {
-            id: 'art-1',
-            title: 'Autonomous Organic Search: Why Fragmented Stacks Are Dying in 2026',
-            keyword: 'Autonomous SEO platform',
-            country: 'United States',
-            wordCount: 1450,
-            status: 'Published',
-            date: 'Oct 20, 2026',
-            engines: ['Google', 'ChatGPT', 'Perplexity'],
-            content: '# Autonomous Organic Search\n\nIn 2026, fragmented agency stacks are failing founders. Autonomous loops continuous crawl, synthesize neural content, and secure Perplexity citations.'
-          }
-        ],
-        crawledPages: [
-          {
-            url: 'https://rankmonk.com',
-            title: 'Rank Monk — The Zen OS for Autonomous Organic Growth',
-            meta_desc: 'Scale your organic search traffic, AEO citations, and rankings autonomously with Rank Monk.',
-            h1: 'The Zen OS for Autonomous Organic Growth',
-            word_count: 1850,
-            status_code: 200,
-            schema_types: ['Organization', 'SoftwareApplication'],
-            crawled_at: new Date().toISOString()
-          },
-          {
-            url: 'https://rankmonk.com/pricing',
-            title: 'Pricing & Plans — Rank Monk',
-            meta_desc: 'Rank Monk plans starting at ₹10,000/month. No agency retainers.',
-            h1: 'Simple, transparent growth plans.',
-            word_count: 940,
-            status_code: 200,
-            schema_types: ['Product'],
-            crawled_at: new Date().toISOString()
-          },
-          {
-            url: 'https://rankmonk.com/features',
-            title: 'Autonomous Features — Rank Monk',
-            meta_desc: 'Autonomous blog drafting, technical crawler audits, and AEO citations.',
-            h1: 'Everything you need to dominate organic search and AI answers.',
-            word_count: 1420,
-            status_code: 200,
-            schema_types: ['SoftwareApplication'],
-            crawled_at: new Date().toISOString()
-          },
-          {
-            url: 'https://rankmonk.com/eeat-analysis',
-            title: 'Free EEAT Diagnostic — Rank Monk',
-            meta_desc: 'Audit your website Experience, Expertise, Authoritativeness, and Trustworthiness.',
-            h1: 'Audit your website EEAT signals in seconds.',
-            word_count: 820,
-            status_code: 200,
-            schema_types: ['WebApplication'],
-            crawled_at: new Date().toISOString()
-          }
-        ],
-        voiceSliders: { professionalCasual: 20, friendlyFormal: 25, boldSubtle: 20, premiumAccessible: 15, simpleComplex: 25 },
-        voiceTags: ['Zen', 'Authoritative', 'Strategic', 'Data-Driven', 'Clear']
-      };
+      function buildUserProject(domainInput, userName) {
+        var cleanDom = (domainInput || '').trim().toLowerCase().replace(/^https?:\/\//i, '').replace(/^www\./i, '').split('/')[0];
+        if (!cleanDom) return null;
+        var bName = cleanDom.charAt(0).toUpperCase() + cleanDom.slice(1).split('.')[0];
+        return {
+          id: 'proj-' + cleanDom.replace(/[^a-z0-9]/g, '_'),
+          name: bName,
+          domain: cleanDom,
+          website: cleanDom,
+          industry: 'Autonomous AI Growth',
+          businessCategory: 'Online Platform & Digital Brand',
+          targetAudience: 'Active customers and targeted audience for ' + cleanDom,
+          summary: bName + ' autonomous organic growth and generative search visibility workspace.',
+          brand_logo_url: 'https://logo.clearbit.com/' + cleanDom,
+          favicon_url: 'https://www.google.com/s2/favicons?domain=' + cleanDom + '&sz=128',
+          palette: ['#0c131a', '#111c26', '#c5a059', '#b98b6a', '#f8f7f4', '#10b981'],
+          competitors: ['Semrush', 'Ahrefs', 'SurferSEO'],
+          gscConnected: false,
+          aeoScore: 84,
+          mediaAssets: [],
+          articles: [
+            {
+              id: 'art-' + Date.now(),
+              title: 'The 2026 Growth Strategy for ' + bName,
+              keyword: bName + ' organic search',
+              country: 'United States',
+              wordCount: 1450,
+              status: 'Published',
+              date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+              engines: ['Google', 'ChatGPT', 'Perplexity'],
+              content: '# The 2026 Growth Strategy for ' + bName + '\n\nAutonomous search loops continuous crawl, synthesize neural content, and secure generative search citations.'
+            }
+          ],
+          crawledPages: [
+            {
+              url: 'https://' + cleanDom,
+              title: bName + ' — Official Website',
+              meta_desc: 'Welcome to the official ' + bName + ' platform.',
+              h1: bName,
+              word_count: 850,
+              status_code: 200,
+              schema_types: ['Organization'],
+              crawled_at: new Date().toISOString()
+            }
+          ],
+          voiceSliders: { professionalCasual: 20, friendlyFormal: 25, boldSubtle: 20, premiumAccessible: 15, simpleComplex: 25 },
+          voiceTags: ['Authoritative', 'Innovative', 'Strategic']
+        };
+      }
 
-      var data = getStoredData() || {
-        projects: [defaultProj],
-        activeProjectId: 'proj-rankmonk',
-        currentUser: { name: 'Rank Monk Architect', email: 'zen@rankmonk.com', plan: 'grow' }
-      };
-      if (!data.projects || !data.projects.length) data.projects = [defaultProj];
+      // Initialize User Data
+      var userDomain = (activeUser && activeUser.domain) ? activeUser.domain.trim() : '';
+      var storedData = getStoredData();
+      var data = null;
+
+      if (storedData && Array.isArray(storedData.projects) && storedData.projects.length > 0) {
+        data = storedData;
+      } else if (userDomain) {
+        var userProj = buildUserProject(userDomain, activeUser ? activeUser.name : '');
+        data = {
+          projects: [userProj],
+          activeProjectId: userProj.id,
+          currentUser: activeUser
+        };
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+      } else if (isFounder) {
+        var founderProj = buildUserProject('rankmonk.in', 'Rank Monk Architect');
+        data = {
+          projects: [founderProj],
+          activeProjectId: founderProj.id,
+          currentUser: activeUser
+        };
+      } else {
+        // Unconnected User: no fake domains
+        data = {
+          projects: [],
+          activeProjectId: null,
+          currentUser: activeUser
+        };
+      }
 
       var listeners = [];
 
-      window.RankMonkState = window.RankMonkState || {
+      window.RankMonkState = {
         data: data,
         listeners: listeners,
         subscribe: function(fn) {
@@ -235,19 +207,50 @@
         },
         getActiveProject: function() {
           if (!this.data || !this.data.projects) this.data = data;
+          if (!this.data.projects || this.data.projects.length === 0) {
+            return {
+              id: 'none',
+              name: 'Connect Your Website',
+              domain: '',
+              website: '',
+              crawledPages: [],
+              articles: [],
+              mediaAssets: [],
+              competitors: []
+            };
+          }
           var actId = this.data.activeProjectId;
           var p = this.data.projects.find(function(x){ return x.id === actId; });
-          var proj = p || this.data.projects[0] || defaultProj;
-          if (!proj.mediaAssets) proj.mediaAssets = [];
-          if (!proj.articles) proj.articles = [];
-          return proj;
+          return p || this.data.projects[0];
         },
         setActiveProject: function(id) {
           this.data.activeProjectId = id;
           this.save();
         },
         getCurrentUser: function() {
-          return this.data.currentUser || { name: 'Jiya Patel', email: 'jiya.d.patel@gmail.com', plan: 'grow' };
+          if (activeUser && activeUser.email) return activeUser;
+          return { name: 'Subscriber', email: userEmail, plan: 'grow' };
+        },
+        addProject: function(domainInput) {
+          var p = buildUserProject(domainInput, activeUser ? activeUser.name : '');
+          if (!p) return;
+          if (!this.data.projects) this.data.projects = [];
+          var existingIdx = this.data.projects.findIndex(function(x){ return x.domain.toLowerCase() === p.domain.toLowerCase(); });
+          if (existingIdx >= 0) {
+            this.data.projects[existingIdx] = p;
+          } else {
+            this.data.projects.unshift(p);
+          }
+          this.data.activeProjectId = p.id;
+          this.save();
+          try {
+            localStorage.setItem('rankmonk_user_domain_connected', 'true');
+            if (activeUser) {
+              activeUser.domain = p.domain;
+              localStorage.setItem('rankmonk_active_user_v3', JSON.stringify(activeUser));
+            }
+          } catch(e) {}
+          return p;
         },
         createArticle: function(title, keyword, tone, country, wordCount, content) {
           var proj = this.getActiveProject();
@@ -2065,11 +2068,18 @@
 
     function isUserDomainConnected() {
       try {
-        const hasOnboarded = localStorage.getItem('rankmonk_has_onboarded') === 'true';
-        const userConnected = localStorage.getItem('rankmonk_user_domain_connected') === 'true';
+        const rawUser = localStorage.getItem('rankmonk_active_user_v3');
+        const user = rawUser ? JSON.parse(rawUser) : null;
         const p = window.RankMonkState && window.RankMonkState.getActiveProject ? window.RankMonkState.getActiveProject() : null;
-        if (!p) return false;
-        if (p.domain === 'rankmonk.com' && !hasOnboarded && !userConnected) return false;
+        if (!p || !p.domain || !p.domain.trim()) return false;
+        
+        // Founder account
+        if (user && (user.email.toLowerCase() === 'founder@rankmonk.in' || user.role === 'owner')) return true;
+
+        // If a subscriber has fallback rankmonk.com/rankmonk.in, it is NOT their connected domain
+        if (p.domain === 'rankmonk.com' || p.domain === 'rankmonk.in') {
+          return false;
+        }
         return true;
       } catch (e) {
         return false;
@@ -3513,15 +3523,6 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
       }
 
       if (proj) {
-        if (!proj.domain || proj.domain.toLowerCase().includes('scalezix') || !proj.name || proj.name.toLowerCase().includes('scalezix')) {
-          proj.name = 'Rank Monk';
-          proj.domain = 'rankmonk.com';
-          proj.website = 'rankmonk.com';
-          proj.industry = 'The Zen OS for Autonomous Organic Growth';
-          proj.businessCategory = 'Autonomous SEO, AEO & GEO Optimization Software';
-          proj.targetAudience = 'Growth engineers, modern founders, agencies, and digital operators scaling organic search visibility.';
-          RankMonkState.save();
-        }
         if (!isUserDomainConnected()) {
           document.getElementById('wsDomainLabel').innerText = '+ Connect Your Website';
         } else {

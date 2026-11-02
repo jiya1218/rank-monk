@@ -710,8 +710,33 @@
 
     getActiveProject() {
       if (!this.data) this.load();
+      
+      // Check if current session user has an active domain
+      let activeUser = null;
+      try {
+        const raw = localStorage.getItem('rankmonk_active_user_v3');
+        if (raw) activeUser = JSON.parse(raw);
+      } catch(e) {}
+
+      if (activeUser && activeUser.domain && (!this.data || !this.data.projects || this.data.projects.length === 0)) {
+        const clean = cleanDomain(activeUser.domain);
+        if (clean) {
+          const userProj = this.addProject(clean);
+          return userProj;
+        }
+      }
+
       if (!this.data || !Array.isArray(this.data.projects) || this.data.projects.length === 0) {
-        this.data = this.getDefaultData();
+        return {
+          id: 'none',
+          name: 'Connect Your Website',
+          domain: '',
+          website: '',
+          crawledPages: [],
+          articles: [],
+          mediaAssets: [],
+          competitors: []
+        };
       }
       const p = this.data.projects.find(x => x.id === this.data.activeProjectId);
       const proj = p || this.data.projects[0];
@@ -726,7 +751,14 @@
     }
 
     getCurrentUser() {
-      return this.data.currentUser || { name: 'Jiya.d.patel', email: 'jiya.d.patel@gmail.com', plan: 'grow' };
+      try {
+        const raw = localStorage.getItem('rankmonk_active_user_v3');
+        if (raw) {
+          const u = JSON.parse(raw);
+          if (u && u.email) return u;
+        }
+      } catch(e) {}
+      return (this.data && this.data.currentUser) || { name: 'Subscriber', email: 'subscriber@rankmonk.in', plan: 'grow' };
     }
 
     // Strict Persistent Registry Helpers
