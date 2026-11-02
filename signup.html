@@ -3,49 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Start Trial · Rank Monk OS</title>
+  <title>Create Account · Rank Monk OS</title>
   <meta name="description" content="Set up your Rank Monk OS autonomous organic growth account. Replace 5 fragmented tools with one disciplined loop.">
   <link rel="icon" type="image/png" href="assets/favicon-32x32.png">
+
+  <!-- Immediate Theme & Session Check (Runs before anything else) -->
   <script>
     (function() {
       try {
         var saved = localStorage.getItem('rankmonk-theme');
         var theme = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         document.documentElement.setAttribute('data-theme', theme);
+
+        // If user already has an active session, send straight to dashboard
+        var rawUser = localStorage.getItem('rankmonk_active_user_v3');
+        if (rawUser) {
+          var parsed = JSON.parse(rawUser);
+          if (parsed && parsed.email) {
+            var urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('redirect') === 'pricing' || localStorage.getItem('rankmonk_pending_checkout_plan')) {
+              window.location.replace('/pricing?autoCheckout=1');
+            } else {
+              window.location.replace('/dashboard');
+            }
+          }
+        }
       } catch (e) {}
     })();
-
-    // Resilient Fallback State Store (Guarantees RankMonkState is NEVER undefined)
-    window.RankMonkState = window.RankMonkState || {
-      signup: async function(params) {
-        var user = {
-          name: params.name || 'Jane Doe',
-          email: params.email || 'founder@company.com',
-          plan: params.plan || 'grow',
-          domain: params.domain || 'example.com'
-        };
-        try {
-          localStorage.setItem('rankmonk_active_user_v3', JSON.stringify(user));
-          var raw = localStorage.getItem('rankmonk_engine_state_v3');
-          if (raw) {
-            var parsed = JSON.parse(raw);
-            parsed.currentUser = user;
-            if (params.domain && parsed.projects) {
-              parsed.projects.unshift({
-                id: 'proj-' + Date.now(),
-                name: params.name || params.domain,
-                domain: params.domain,
-                plan: params.plan || 'grow'
-              });
-              parsed.activeProjectId = parsed.projects[0].id;
-            }
-            localStorage.setItem('rankmonk_engine_state_v3', JSON.stringify(parsed));
-          }
-        } catch (e) {}
-        return user;
-      }
-    };
   </script>
+
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/components.css">
@@ -62,7 +48,6 @@
     </a>
 
     <div style="display: flex; align-items: center; gap: 12px;">
-      <a href="https://calendly.com/utkarshmakwana31/demo-for-rankmonk" target="_blank" rel="noopener noreferrer" class="nav-book-demo-btn">Book Demo</a>
       <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="Toggle theme">◐</button>
       <a href="/login" class="btn btn-secondary" style="font-size: 0.85rem; padding: 8px 16px;">Log In →</a>
     </div>
@@ -71,32 +56,37 @@
   <!-- Centered Onboarding Card -->
   <main class="auth-container">
     <div class="auth-card" style="max-width: 540px;">
-      <div class="auth-eyebrow">Zero Fluff · 14-Day Full Access Trial</div>
-      <h1>Start Your <span style="font-style: italic; font-family: var(--font-heading); color: var(--tan);">Growth Engine</span></h1>
-      <p class="auth-sub">Replace Surfer, Ahrefs, Buffer, Jasper, and freelancers with one autonomous loop.</p>
+      <div class="auth-eyebrow">Direct Platform Access · Full Suite</div>
+      <h1>Create Your <span style="font-style: italic; font-family: var(--font-heading); color: var(--tan);">Rank Monk Account</span></h1>
+      <p class="auth-sub">Sign up to provision your autonomous organic growth loop and connect your website.</p>
 
       <form id="signupForm" class="auth-form" onsubmit="handleSignupSubmit(event)">
         
         <div class="auth-row-split">
           <div class="auth-field">
             <label for="signupName">Full Name</label>
-            <input type="text" id="signupName" required placeholder="Jane Doe" autocomplete="name">
+            <input type="text" id="signupName" required placeholder="Gopal Sharma" autocomplete="name">
           </div>
           <div class="auth-field">
-            <label for="signupDomain">Primary Website Domain</label>
-            <input type="text" id="signupDomain" required placeholder="example.com">
+            <label for="signupPhone">Contact Phone Number</label>
+            <input type="tel" id="signupPhone" required placeholder="+91 98765 43210" autocomplete="tel">
           </div>
         </div>
 
         <div class="auth-row-split">
           <div class="auth-field">
             <label for="signupEmail">Work Email</label>
-            <input type="email" id="signupEmail" required placeholder="founder@example.com" autocomplete="email">
+            <input type="email" id="signupEmail" required placeholder="founder@company.com" autocomplete="email">
           </div>
           <div class="auth-field">
             <label for="signupPassword">Password</label>
             <input type="password" id="signupPassword" required minlength="6" placeholder="At least 6 characters" autocomplete="new-password">
           </div>
+        </div>
+
+        <div class="auth-field">
+          <label for="signupDomain">Primary Website Domain <span style="font-weight: normal; color: var(--muted);">(Optional - can connect on dashboard)</span></label>
+          <input type="text" id="signupDomain" placeholder="example.com or https://yourbrand.com">
         </div>
 
         <!-- Plan Choice Selection -->
@@ -127,20 +117,21 @@
         </div>
 
         <button type="submit" id="signupSubmitBtn" class="btn-auth-submit">
-          <span>Provision Rank Monk Engine</span>
+          <span>Create Account & Continue</span>
           <span>→</span>
         </button>
 
-        <div id="signupErrorMsg" style="display:none; color: #d9534f; font-size: 0.85rem; text-align: center; margin-top: 6px;"></div>
+        <div id="signupErrorMsg" style="display:none; color: #d9534f; font-size: 0.86rem; text-align: center; margin-top: 10px; background: rgba(217, 83, 79, 0.08); border: 1px solid rgba(217, 83, 79, 0.2); border-radius: 8px; padding: 8px 12px;"></div>
       </form>
 
       <p class="auth-footer-text">
-        Already registered? <a href="/login">Log in here →</a>
+        Already registered? <a href="/login">Log in to your console →</a>
       </p>
     </div>
   </main>
 
-  <script src="js/rankmonk-state.js?v=20261023_rev5"></script>
+  <!-- State & Logic -->
+  <script src="js/rankmonk-state.js?v=20261023_rev6"></script>
   <script>
     // Theme Switcher
     const themeBtn = document.getElementById('themeToggleBtn');
@@ -174,42 +165,61 @@
     // Form Submit
     async function handleSignupSubmit(e) {
       e.preventDefault();
-      const name = (document.getElementById('signupName')?.value || '').trim() || 'Jane Doe';
-      const domain = (document.getElementById('signupDomain')?.value || '').trim() || 'example.com';
-      const email = (document.getElementById('signupEmail')?.value || '').trim() || 'founder@company.com';
-      const pass = (document.getElementById('signupPassword')?.value || '').trim() || 'password123';
+      const name = (document.getElementById('signupName')?.value || '').trim();
+      const phone = (document.getElementById('signupPhone')?.value || '').trim();
+      const email = (document.getElementById('signupEmail')?.value || '').trim();
+      const pass = (document.getElementById('signupPassword')?.value || '').trim();
+      const domain = (document.getElementById('signupDomain')?.value || '').trim();
       const selectedPlan = document.querySelector('input[name="selectedPlan"]:checked')?.value || 'grow';
       const errBox = document.getElementById('signupErrorMsg');
       const btn = document.getElementById('signupSubmitBtn');
 
-      if (errBox) errBox.style.display = 'none';
+      if (errBox) {
+        errBox.style.display = 'none';
+        errBox.innerText = '';
+      }
+
+      if (!name) {
+        if (errBox) { errBox.innerText = 'Please enter your full name.'; errBox.style.display = 'block'; }
+        return;
+      }
+      if (!phone) {
+        if (errBox) { errBox.innerText = 'Please enter your contact phone number.'; errBox.style.display = 'block'; }
+        return;
+      }
+      if (!email || !email.includes('@')) {
+        if (errBox) { errBox.innerText = 'Please enter a valid work email address.'; errBox.style.display = 'block'; }
+        return;
+      }
+      if (!pass || pass.length < 6) {
+        if (errBox) { errBox.innerText = 'Password must be at least 6 characters.'; errBox.style.display = 'block'; }
+        return;
+      }
+
       if (btn) {
-        btn.innerHTML = '<span>Provisioning autonomous workspace...</span>';
+        btn.innerHTML = '<span>Creating your account...</span>';
         btn.style.opacity = '0.75';
+        btn.disabled = true;
       }
 
       try {
-        const user = {
+        if (!window.RankMonkState || typeof window.RankMonkState.signup !== 'function') {
+          throw new Error('Engine initializing. Please wait a moment and try again.');
+        }
+
+        const newUser = await window.RankMonkState.signup({
           name: name,
+          phone: phone,
           email: email,
+          password: pass,
           domain: domain,
           plan: selectedPlan
-        };
-        localStorage.setItem('rankmonk_active_user_v3', JSON.stringify(user));
+        });
 
-        if (window.RankMonkState && typeof window.RankMonkState.signup === 'function') {
-          try {
-            await window.RankMonkState.signup({
-              name: name,
-              email: email,
-              password: pass,
-              domain: domain,
-              plan: selectedPlan
-            });
-          } catch (syncErr) {
-            console.warn('[RankMonk] Remote signup skipped, local workspace activated:', syncErr);
-          }
+        if (!newUser || !newUser.email) {
+          throw new Error('Registration could not be completed. Please try again.');
         }
+
         var pendingPlan = localStorage.getItem('rankmonk_pending_checkout_plan');
         var redirectParam = new URLSearchParams(window.location.search).get('redirect');
         if (pendingPlan || redirectParam === 'pricing') {
@@ -217,23 +227,16 @@
           return;
         }
 
-        if (domain && domain.trim()) {
-          window.location.href = 'onboarding?domain=' + encodeURIComponent(domain.trim());
-        } else {
-          window.location.href = 'onboarding';
-        }
+        window.location.href = '/dashboard';
       } catch (err) {
-        var pendingPlan = localStorage.getItem('rankmonk_pending_checkout_plan');
-        var redirectParam = new URLSearchParams(window.location.search).get('redirect');
-        if (pendingPlan || redirectParam === 'pricing') {
-          window.location.href = '/pricing?autoCheckout=1';
-          return;
+        if (btn) {
+          btn.innerHTML = '<span>Create Account & Continue</span><span>→</span>';
+          btn.style.opacity = '1';
+          btn.disabled = false;
         }
-
-        if (domain && domain.trim()) {
-          window.location.href = 'onboarding?domain=' + encodeURIComponent(domain.trim());
-        } else {
-          window.location.href = 'onboarding';
+        if (errBox) {
+          errBox.innerText = err.message || 'An error occurred while creating your account. Please try again.';
+          errBox.style.display = 'block';
         }
       }
     }

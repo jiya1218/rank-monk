@@ -462,7 +462,7 @@
         <!-- Live Backend Status Pill -->
         <div id="backendStatusBadge" style="display: flex; align-items: center; gap: 7px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 20px; padding: 5px 12px; font-size: 11px; font-weight: 700; color: #10b981;">
           <span style="width: 7px; height: 7px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981;"></span>
-          <span id="backendStatusText">Backend Live · Zen AI Engine</span>
+          <span id="backendStatusText">Rank Monk Engine Live</span>
         </div>
 
         <!-- Interactive Time Range Switcher (Matching SoloSpider 7d, 30d, 90d, all) -->
@@ -504,10 +504,6 @@
             </div>
           </div>
         </div>
-
-        <a href="https://calendly.com/utkarshmakwana31/demo-for-rankmonk" target="_blank" rel="noopener noreferrer" class="nav-book-demo-btn" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; padding: 7px 15px; border-radius: 999px; font-size: 13px;">
-          <span>Book Demo</span>
-        </a>
 
         <button class="btn-primary-top" onclick="openNewBlogModal()">
           <span>+ Create Blog</span>
@@ -878,7 +874,7 @@
               </div>
               <div>
                 <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #0f172a;">AI Website Executive Summary</h3>
-                <p style="margin: 2px 0 0; font-size: 0.76rem; color: #64748b; font-weight: 600;">Autonomous intelligence calibrated by Zen AI Engine</p>
+                <p style="margin: 2px 0 0; font-size: 0.76rem; color: #64748b; font-weight: 600;">Autonomous intelligence calibrated by Rank Monk Engine</p>
               </div>
             </div>
             <div style="display: flex; gap: 8px;">
@@ -894,7 +890,7 @@
           <div style="margin-top: 14px; position: relative;">
             <div id="aiSummaryLoading" style="display: none; padding: 24px; text-align: center;">
               <div class="scanner-spinner" style="width: 28px; height: 28px; margin: 0 auto 10px; border-width: 2.5px;"></div>
-              <div style="font-size: 0.82rem; font-weight: 700; color: #6366f1;">Synthesizing website intelligence with Zen AI Engine...</div>
+              <div style="font-size: 0.82rem; font-weight: 700; color: #6366f1;">Synthesizing website intelligence...</div>
             </div>
             <p id="bpAiSummaryText" style="font-size: 0.92rem; line-height: 1.7; color: #334155; margin: 0; font-weight: 500;">
               Loading autonomous website intelligence...
@@ -1235,8 +1231,8 @@
         <div class="dash-panel-card">
           <div class="panel-card-head">
             <div>
-              <h3>AI Media & Visual Studio <span class="badge-pill beta">ZEN AI</span></h3>
-              <p style="font-size: 0.82rem; color: var(--rm-ink-muted); margin: 2px 0 0;">Synthesize production-grade blog banners, social carousels, and editorial graphics powered by Zen Neural AI.</p>
+              <h3>AI Media & Visual Studio <span class="badge-pill beta">STUDIO 8K</span></h3>
+              <p style="font-size: 0.82rem; color: var(--rm-ink-muted); margin: 2px 0 0;">Synthesize production-grade blog banners, social carousels, and editorial graphics powered by Studio 8K Neural Engine.</p>
             </div>
           </div>
 
@@ -1815,7 +1811,7 @@
         </div>
 
         <button type="submit" id="btnBulkBlogSubmit" class="btn-auth-submit" style="margin-top: 10px;">
-          <span>Generate Batch with Zen AI ⚡</span>
+          <span>Generate Batch Articles ⚡</span>
         </button>
       </form>
     </div>
@@ -1845,7 +1841,7 @@
 
         <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 14px;">
           <button type="button" class="btn-fix-sm" id="btnAiOutreachPitch" onclick="generateAiOutreachPitch()" style="background: rgba(197, 160, 89, 0.15); color: #8e6c27; border-color: rgba(197, 160, 89, 0.4); font-weight: 800;">
-            ⚡ Write Pitch with Zen AI
+            ⚡ Write Pitch
           </button>
           <div style="display: flex; gap: 8px;">
             <button type="button" class="btn-fix-sm" onclick="copyOutreachPitch()">Copy Pitch 📋</button>
@@ -1908,7 +1904,7 @@
               <span id="connectProgressStatus" style="font-size: 0.85rem; font-weight: 700; color: #0f172a;">Connecting to website server...</span>
             </div>
             <div style="font-size: 0.76rem; color: #64748b; line-height: 1.5;" id="connectProgressSubtext">
-              Extracting title, meta tags, high-res logo, favicon, 6-color CSS palette, target audience & competitors with Zen AI Engine...
+              Extracting title, meta tags, high-res logo, favicon, 6-color CSS palette, target audience & competitors...
             </div>
           </div>
 
@@ -2176,7 +2172,7 @@
       if (!keywords.length) return;
 
       btn.disabled = true;
-      btn.innerText = `Generating ${keywords.length} articles with Zen AI...`;
+      btn.innerText = `Generating ${keywords.length} articles...`;
 
       for (const kw of keywords) {
         let content = '';
@@ -2190,7 +2186,7 @@
       }
 
       btn.disabled = false;
-      btn.innerHTML = '<span>Generate Batch with Zen AI ⚡</span>';
+      btn.innerHTML = '<span>Generate Batch Articles ⚡</span>';
       closeBulkBlogModal();
       renderAll();
       navigateTab('blogs');
@@ -2701,7 +2697,7 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
 
       if (btn) btn.disabled = true;
       if (icon) icon.innerText = '⏳';
-      if (text) text.innerText = 'Synthesizing with Zen AI Engine...';
+      if (text) text.innerText = 'Synthesizing website intelligence...';
       if (loading) loading.style.display = 'block';
       if (summaryP) summaryP.style.display = 'none';
 
@@ -2813,7 +2809,7 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
       }, 900);
 
       const stepTimer2 = setTimeout(() => {
-        if (statusText) statusText.innerText = 'Synthesizing with Zen AI Engine...';
+        if (statusText) statusText.innerText = 'Synthesizing brand intelligence...';
         if (subText) subText.innerText = 'Determining industry niche, buyer persona, and top market competitors...';
       }, 2000);
 
@@ -2993,14 +2989,14 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
       }
     }
 
-    // AI Backlink Outreach Pitch Generator (Zen AI)
+    // AI Backlink Outreach Pitch Generator
     async function generateAiOutreachPitch() {
       const targetDomain = (document.getElementById('outreachTargetDomain').value || 'techcrunch.com').trim();
       const textarea = document.getElementById('outreachPitchText');
       const btn = document.getElementById('btnAiOutreachPitch');
       const proj = RankMonkState.getActiveProject();
 
-      btn.innerText = '⚡ Synthesizing with Zen AI...';
+      btn.innerText = '⚡ Synthesizing pitch...';
       btn.disabled = true;
 
       try {
@@ -3026,7 +3022,7 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
         console.error('Pitch generation error:', err);
         textarea.value = `Subject: Collaboration query for ${targetDomain}\n\nHi Editorial Team,\n\nReaching out from ${proj.name || 'Rank Monk'}. We have original benchmarks on search indexing that would offer strong value to your readership.\n\nBest regards,\n${proj.name || 'Rank Monk'} Team`;
       } finally {
-        btn.innerText = '⚡ Write Pitch with Zen AI';
+        btn.innerText = '⚡ Write Pitch';
         btn.disabled = false;
       }
     }
@@ -3184,7 +3180,7 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
       const tone = document.getElementById('modalBlogTone').value;
       const btn = document.getElementById('btnBlogGenSubmit');
 
-      btn.innerText = 'Drafting article with Zen AI Engine...';
+      btn.innerText = 'Drafting article with Rank Monk Engine...';
       btn.disabled = true;
 
       try {
@@ -3227,8 +3223,8 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
       const art = (proj.articles || []).find(x => x.id === artId);
       if (!art) return;
       document.getElementById('inspectArticleTitle').innerText = art.title;
-      document.getElementById('inspectArticleMeta').innerText = `Keyword: ${art.keyword} · Word count: ${art.wordCount} words · Engine: ${art.model || 'Zen Autonomous Intelligence Engine'} · Status: ${art.status}`;
-      document.getElementById('inspectArticleBody').innerText = art.content || `# ${art.title}\n\nGenerated with Zen AI Engine.\n\nKey Strategy:\n- Autonomous crawl of ${proj.domain}\n- Entity authority optimization for ${art.keyword}\n- Continuous syndication to Google, ChatGPT, and Claude.`;
+      document.getElementById('inspectArticleMeta').innerText = `Keyword: ${art.keyword} · Word count: ${art.wordCount} words · Engine: ${art.model || 'Rank Monk Autonomous Engine'} · Status: ${art.status}`;
+      document.getElementById('inspectArticleBody').innerText = art.content || `# ${art.title}\n\nGenerated with Rank Monk Autonomous Engine.\n\nKey Strategy:\n- Autonomous crawl of ${proj.domain}\n- Entity authority optimization for ${art.keyword}\n- Continuous syndication to Google, ChatGPT, and Claude.`;
       document.getElementById('inspectArticleModal').classList.add('open');
     }
 
@@ -3255,34 +3251,20 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
       try {
         const res = await fetch('/api/media/status');
         if (res.ok) {
-          const data = await res.json();
-          const engineInfo = data.engine || data.bedrock || {};
-          if (engineInfo.provider === 'Google Gemini') {
-            if (badge) {
-              badge.innerText = 'GOOGLE GEMINI LIVE 🟢';
-              badge.style.background = 'rgba(66, 133, 244, 0.14)';
-              badge.style.color = '#4285f4';
-              badge.style.borderColor = 'rgba(66, 133, 244, 0.3)';
-            }
-            if (text) {
-              text.innerText = `Active Model: ${engineInfo.modelDisplay || 'Google Imagen 3'} · Live & Ready`;
-            }
-          } else {
-            if (badge) {
-              badge.innerText = 'STUDIO ENGINE LIVE 🟢';
-              badge.style.background = 'rgba(16, 185, 129, 0.14)';
-              badge.style.color = '#10b981';
-              badge.style.borderColor = 'rgba(16, 185, 129, 0.3)';
-            }
-            if (text) {
-              text.innerText = `Autonomous Visual Synthesis · Ultra High-Resolution · Active & Ready`;
-            }
+          if (badge) {
+            badge.innerText = 'STUDIO 8K LIVE 🟢';
+            badge.style.background = 'rgba(16, 185, 129, 0.14)';
+            badge.style.color = '#10b981';
+            badge.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+          }
+          if (text) {
+            text.innerText = 'Autonomous Neural Visual Studio · Ultra High-Resolution · Active & Ready';
           }
           return true;
         }
       } catch (e) {}
       if (badge) {
-        badge.innerText = 'STUDIO ENGINE LIVE 🟢';
+        badge.innerText = 'STUDIO 8K LIVE 🟢';
         badge.style.background = 'rgba(16, 185, 129, 0.14)';
         badge.style.color = '#10b981';
       }
@@ -3925,7 +3907,7 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
         if (res.ok) {
           const data = await res.json();
           if (text) {
-            text.innerText = 'Backend Live · Zen AI Engine';
+            text.innerText = 'Rank Monk Engine Live';
           }
           if (badge) {
             badge.style.background = 'rgba(16, 185, 129, 0.12)';
@@ -3937,7 +3919,7 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
         }
       } catch (err) {
         if (text) {
-          text.innerText = 'Local Zen Engine Active';
+          text.innerText = 'Rank Monk Engine Operational';
         }
       }
 
@@ -3969,7 +3951,7 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
             if (localStorage.getItem('rankmonk_just_completed_payment') === 'true') {
               title.innerText = 'Payment Successful! Connect Your Website Domain';
             } else {
-              title.innerText = 'Connect Your Website Domain to Get Started';
+              title.innerText = 'Connect Your Website Domain to Unlock Platform';
             }
           }
         }, 600);

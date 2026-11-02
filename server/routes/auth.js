@@ -3,13 +3,22 @@ import { supabaseClient } from '../config/supabase.js';
 
 const router = express.Router();
 
-let currentUser = {
-  id: 'usr_zen_master_01',
-  email: 'zen@rankmonk.com',
+// Production Registered User Store
+const registeredUsers = new Map();
+
+// Seed initial founder account
+registeredUsers.set('founder@rankmonk.in', {
+  id: 'usr_founder_01',
+  email: 'founder@rankmonk.in',
   name: 'Rank Monk Architect',
+  phone: '+91 98765 43210',
+  password: 'Password123!',
   role: 'owner',
-  plan: 'grow'
-};
+  plan: 'grow',
+  created_at: new Date().toISOString()
+});
+
+let currentUser = registeredUsers.get('founder@rankmonk.in');
 
 router.get('/user', (req, res) => {
   res.json({
@@ -19,19 +28,23 @@ router.get('/user', (req, res) => {
 });
 
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
-  if (!email) {
-    return res.status(400).json({ error: 'Email is required' });
+  const { email, password } = req.body || {};
+  if (!email || !password) {
+    return res.status(400).json({ success: false, error: 'Email and password are required' });
   }
 
-  if (supabaseClient && password) {
+  const normEmail = email.toLowerCase().trim();
+
+  // 1. Check Supabase Auth if available
+  if (supabaseClient) {
     try {
-      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email: normEmail, password });
       if (!error && data.user) {
         currentUser = {
           id: data.user.id,
           email: data.user.email,
-          name: data.user.user_metadata?.full_name || email.split('@')[0],
+          name: data.user.user_metadata?.full_name || normEmail.split('@')[0],
+          phone: data.user.user_metadata?.phone || '',
           role: 'owner',
           plan: 'grow'
         };
@@ -40,51 +53,97 @@ router.post('/login', async (req, res) => {
     } catch {}
   }
 
-  // Fallback demo/session login
+  // 2. Check strict registered user registry
+  const existing = registeredUsers.get(normEmail);
+  if (!existing) {
+    return res.status(404).json({
+      success: false,
+      error: 'No account found with this email address. Please sign up first.'
+    });
+  }
+
+  if (existing.password !== password) {
+    return res.status(401).json({
+      success: false,
+      error: 'Incorrect password. Please verify and try again.'
+    });
+  }
+
   currentUser = {
-    id: `usr_${Date.now()}`,
-    email,
-    name: email.split('@')[0],
-    role: 'owner',
-    plan: 'grow'
+    id: existing.id,
+    email: existing.email,
+    name: existing.name,
+    phone: existing.phone,
+    domain: existing.domain,
+    role: existing.role || 'owner',
+    plan: existing.plan || 'grow'
   };
 
-  res.json({ success: true, user: currentUser });
+  return res.json({ success: true, user: currentUser });
 });
 
 router.post('/signup', async (req, res) => {
-  const { email, password, name } = req.body;
-  if (!email) {
-    return res.status(400).json({ error: 'Email is required' });
+  const { email, password, name, phone, domain, plan = 'grow' } = req.body || {};
+  if (!email || !email.includes('@')) {
+    return res.status(400).json({ success: false, error: 'Valid email address is required' });
+  }
+  if (!password || password.length < 6) {
+    return res.status(400).json({ success: false, error: 'Password must be at least 6 characters long' });
+  }
+  if (!name || !name.trim()) {
+    return res.status(400).json({ success: false, error: 'Full name is required' });
+  }
+  if (!phone || !phone.trim()) {
+    return res.status(400).json({ success: false, error: 'Contact phone number is required' });
   }
 
-  if (supabaseClient && password) {
+  const normEmail = email.toLowerCase().trim();
+
+  // Check if user already exists
+  if (registeredUsers.has(normEmail)) {
+    return res.status(409).json({
+      success: false,
+      error: 'An account with this email already exists. Please log in.'
+    });
+  }
+
+  if (supabaseClient) {
     try {
       const { data, error } = await supabaseClient.auth.signUp({
-        email,
+        email: normEmail,
         password,
-        options: { data: { full_name: name || email.split('@')[0] } }
+        options: {
+          data: {
+            full_name: name.trim(),
+            phone: phone.trim(),
+            domain: domain ? domain.trim() : ''
+          }
+        }
       });
-      if (!error && data.user) {
-        currentUser = {
-          id: data.user.id,
-          email: data.user.email,
-          name: name || email.split('@')[0],
-          role: 'owner',
-          plan: 'seed'
-        };
-        return res.json({ success: true, user: currentUser, session: data.session });
+      if (error && error.message.toLowerCase().includes('already registered')) {
+        return res.status(409).json({
+          success: false,
+          error: 'An account with this email already exists. Please log in.'
+        });
       }
     } catch {}
   }
 
-  currentUser = {
+  const newUser = {
     id: `usr_${Date.now()}`,
-    email,
-    name: name || email.split('@')[0],
+    email: normEmail,
+    name: name.trim(),
+    phone: phone.trim(),
+    password: password,
+    domain: domain ? domain.trim() : '',
     role: 'owner',
-    plan: 'seed'
+    plan: plan || 'grow',
+    created_at: new Date().toISOString()
   };
+
+  registeredUsers.set(normEmail, newUser);
+  currentUser = { ...newUser };
+  delete currentUser.password;
 
   res.json({ success: true, user: currentUser });
 });

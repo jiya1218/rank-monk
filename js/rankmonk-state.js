@@ -729,95 +729,179 @@
       return this.data.currentUser || { name: 'Jiya.d.patel', email: 'jiya.d.patel@gmail.com', plan: 'grow' };
     }
 
+    // Strict Persistent Registry Helpers
+    _getUsersDb() {
+      try {
+        const raw = localStorage.getItem('rankmonk_users_db');
+        if (raw) return JSON.parse(raw);
+      } catch (e) {}
+      const defaultDb = [
+        {
+          id: 'usr_founder_01',
+          name: 'Rank Monk Architect',
+          email: 'founder@rankmonk.in',
+          phone: '+91 98765 43210',
+          password: 'Password123!',
+          plan: 'grow',
+          domain: 'rankmonk.in',
+          created_at: new Date().toISOString()
+        }
+      ];
+      try {
+        localStorage.setItem('rankmonk_users_db', JSON.stringify(defaultDb));
+      } catch (e) {}
+      return defaultDb;
+    },
+
+    _saveUsersDb(db) {
+      try {
+        localStorage.setItem('rankmonk_users_db', JSON.stringify(db));
+      } catch (e) {}
+    },
+
     async login(email, password) {
       if (!email || !password) throw new Error('Email and password are required');
+      const normEmail = email.toLowerCase().trim();
+
+      // 1. Attempt API server authentication first
+      let apiUser = null;
       try {
-        const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+        const res = await fetch('/api/auth/login', {
           method: 'POST',
-          headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ email, password })
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: normEmail, password: password })
         });
-        if (res.ok) {
-          const authData = await res.json();
-          this.data.currentUser = {
-            id: authData.user?.id,
-            email: authData.user?.email,
-            name: authData.user?.user_metadata?.name || email.split('@')[0],
-            plan: 'grow',
-            token: authData.access_token
-          };
-          this.save();
-          return this.data.currentUser;
+        const data = await res.json().catch(() => null);
+        if (res.status === 404) {
+          throw new Error('No account found with this email. Please sign up first.');
+        } else if (res.status === 401) {
+          throw new Error('Incorrect password. Please verify and try again.');
+        } else if (res.ok && data && data.success && data.user) {
+          apiUser = data.user;
         }
-      } catch (e) {
-        console.warn('[RankMonk] Supabase login error:', e);
+      } catch (apiErr) {
+        if (apiErr.message.includes('No account found') || apiErr.message.includes('Incorrect password')) {
+          throw apiErr;
+        }
+        console.warn('[RankMonk] Server auth skipped/offline:', apiErr.message);
       }
-      this.data.currentUser = {
-        name: email.split('@')[0],
-        email: email,
-        plan: 'grow'
+
+      // 2. Check local persistent accounts registry
+      const db = this._getUsersDb();
+      const localAccount = db.find(u => u.email.toLowerCase() === normEmail);
+
+      // If neither server nor local DB has this user, strictly reject
+      if (!apiUser && !localAccount) {
+        throw new Error('No account found with this email. Please sign up first.');
+      }
+
+      // If user exists locally, verify password strictly
+      if (!apiUser && localAccount) {
+        if (localAccount.password !== password) {
+          throw new Error('Incorrect password. Please verify and try again.');
+        }
+      }
+
+      const activeUser = apiUser || {
+        id: localAccount.id,
+        name: localAccount.name,
+        email: localAccount.email,
+        phone: localAccount.phone,
+        plan: localAccount.plan || 'grow',
+        domain: localAccount.domain || ''
       };
+
+      this.data.currentUser = activeUser;
+      if (activeUser.domain) {
+        this.addProject(activeUser.domain);
+      }
       this.save();
-      return this.data.currentUser;
-    }
+      try {
+        localStorage.setItem('rankmonk_active_user_v3', JSON.stringify(activeUser));
+        localStorage.setItem('rankmonk_active_user_v6', JSON.stringify(activeUser));
+      } catch (e) {}
+      return activeUser;
+    },
 
     demoLogin() {
-      this.data.currentUser = {
-        name: 'Jane Doe',
-        email: 'jane.doe@acme.com',
-        plan: 'grow'
-      };
-      this.save();
-      return this.data.currentUser;
-    }
+      throw new Error('Demo login has been disabled. Please create an account or sign in with your credentials.');
+    },
 
-    async signup({ name, domain, email, password, plan }) {
-      if (!email || !password) throw new Error('Email and password are required');
+    async signup({ name, domain, email, phone, password, plan }) {
+      if (!email || !email.includes('@')) throw new Error('A valid work email is required.');
+      if (!password || password.length < 6) throw new Error('Password must be at least 6 characters.');
+      if (!name || !name.trim()) throw new Error('Full name is required.');
+      if (!phone || !phone.trim()) throw new Error('Contact phone number is required.');
+
+      const normEmail = email.toLowerCase().trim();
+      const db = this._getUsersDb();
+
+      // Check if user already exists
+      const existing = db.find(u => u.email.toLowerCase() === normEmail);
+      if (existing) {
+        throw new Error('An account with this email already exists. Please log in.');
+      }
+
+      // Try registering on backend API
       try {
-        const res = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+        const res = await fetch('/api/auth/signup', {
           method: 'POST',
-          headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            email,
-            password,
-            data: { name, domain, plan }
+            name: name.trim(),
+            email: normEmail,
+            phone: phone.trim(),
+            password: password,
+            domain: domain ? cleanDomain(domain) : '',
+            plan: plan || 'grow'
           })
         });
-        if (res.ok) {
-          const data = await res.json();
-          this.data.currentUser = {
-            id: data.user?.id,
-            email: data.user?.email || email,
-            name: name || email.split('@')[0],
-            plan: plan || 'grow',
-            token: data.access_token
-          };
-          if (domain) {
-            this.addProject(domain);
-          }
-          this.save();
-          return this.data.currentUser;
+        const data = await res.json().catch(() => null);
+        if (res.status === 409) {
+          throw new Error('An account with this email already exists. Please log in.');
+        } else if (!res.ok && data && data.error) {
+          throw new Error(data.error);
         }
-      } catch (e) {
-        console.warn('[RankMonk] Supabase signup error:', e);
+      } catch (apiErr) {
+        if (apiErr.message.includes('already exists')) throw apiErr;
+        console.warn('[RankMonk] Server signup skipped/offline:', apiErr.message);
       }
-      this.data.currentUser = {
-        name: name || email.split('@')[0],
-        email: email,
-        plan: plan || 'grow'
+
+      const cleanDom = domain ? cleanDomain(domain) : '';
+      const newUser = {
+        id: 'usr_' + Date.now(),
+        name: name.trim(),
+        email: normEmail,
+        phone: phone.trim(),
+        password: password,
+        domain: cleanDom,
+        plan: plan || 'grow',
+        created_at: new Date().toISOString()
       };
-      if (domain) {
-        this.addProject(domain);
+
+      db.push(newUser);
+      this._saveUsersDb(db);
+
+      const sessionUser = {
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        phone: newUser.phone,
+        plan: newUser.plan,
+        domain: newUser.domain
+      };
+
+      this.data.currentUser = sessionUser;
+      if (cleanDom) {
+        this.addProject(cleanDom);
       }
       this.save();
-      return this.data.currentUser;
-    }
+      try {
+        localStorage.setItem('rankmonk_active_user_v3', JSON.stringify(sessionUser));
+        localStorage.setItem('rankmonk_active_user_v6', JSON.stringify(sessionUser));
+      } catch (e) {}
+      return sessionUser;
+    },
 
     async logout() {
       try {
@@ -950,6 +1034,11 @@
       this.data.projects.push(newProj);
       this.data.activeProjectId = newProj.id;
       this.save();
+      try {
+        localStorage.setItem('rankmonk_user_domain_connected', 'true');
+        localStorage.setItem('rankmonk_has_onboarded', 'true');
+        localStorage.setItem('rankmonk_last_domain', clean);
+      } catch (e) {}
       return newProj;
     }
 

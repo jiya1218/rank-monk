@@ -12,7 +12,7 @@ let mediaLibrary = [
     prompt: 'Minimalist Zen Monk silhouette meditating before a glowing search graph, luxury sand gold and slate navy palette',
     imageUrl: 'assets/rank-monk-logo-horizontal.png',
     aspectRatio: '16:9',
-    model: 'Google Imagen 3 (imagen-3.0-generate-002)',
+    model: 'Rank Monk Studio 8K Neural Engine',
     created_at: new Date(Date.now() - 86400000).toISOString()
   }
 ];

@@ -11,7 +11,84 @@ document.addEventListener('DOMContentLoaded', () => {
   initHeroSpotlight();
   initHeroParallax();
   initConsoleAutoplay();
+  updateNavAuthState();
 });
+
+/* --------------------------------------------------------------------------
+   GLOBAL AUTH STATE & NAVIGATION SYNC
+   -------------------------------------------------------------------------- */
+function updateNavAuthState() {
+  try {
+    const rawUser = localStorage.getItem('rankmonk_active_user_v3');
+    if (!rawUser) return;
+    const user = JSON.parse(rawUser);
+    if (!user || !user.email) return;
+
+    // User is logged in: Clean up all demo, sign up, and guest prompts across the page.
+    
+    // 1. Hide all "Book Demo" links
+    document.querySelectorAll('.nav-book-demo-btn, a[href*="calendly.com"]').forEach(el => {
+      el.style.display = 'none';
+    });
+
+    // 2. Hide all "Log in" links
+    document.querySelectorAll('.nav-login-link, a[href="/login"], a[href="login"]').forEach(el => {
+      el.style.display = 'none';
+    });
+
+    // 3. Transform header "Start climbing" / "Sign up" button into a "Dashboard →" button
+    document.querySelectorAll('.nav-actions a.btn, .nav-actions a[href="/signup"], .nav-actions a[href="signup"]').forEach(btn => {
+      btn.href = '/dashboard';
+      btn.innerText = 'Dashboard →';
+      btn.classList.add('nav-dashboard-active-btn');
+    });
+
+    // 4. Transform any "Get Started" or "Start Free Trial" or "Sign up" buttons across the site
+    document.querySelectorAll('a[href="/signup"], a[href="signup"]').forEach(btn => {
+      btn.href = '/dashboard';
+      btn.innerText = 'Go to Console →';
+    });
+
+    // 4. In mobile navigation sheet footer
+    const mobileFooters = document.querySelectorAll('.mobile-sheet-footer');
+    mobileFooters.forEach(footer => {
+      footer.innerHTML = `
+        <a href="/dashboard" class="btn btn-primary btn-block" style="margin-bottom: 8px;">Go to Dashboard →</a>
+        <a href="#" onclick="handleGlobalLogout(event)" class="btn btn-secondary btn-block" style="font-size: 0.82rem; opacity: 0.85;">Log Out (${user.name || user.email})</a>
+      `;
+    });
+
+    // 5. In nav actions, add user indicator with logout
+    const navActions = document.querySelector('.nav-actions');
+    if (navActions && !document.getElementById('navUserPill')) {
+      const userPill = document.createElement('a');
+      userPill.id = 'navUserPill';
+      userPill.href = '#';
+      userPill.onclick = handleGlobalLogout;
+      userPill.title = 'Logged in as ' + user.email + ' (Click to Log Out)';
+      userPill.style.cssText = 'font-size: 0.78rem; color: var(--muted); text-decoration: none; margin-right: 6px; display: inline-flex; align-items: center; gap: 4px;';
+      userPill.innerHTML = `<span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block;"></span> <span style="max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${user.name || user.email.split('@')[0]}</span> <span style="font-size: 0.7rem; opacity: 0.6;">(Logout)</span>`;
+      navActions.insertBefore(userPill, navActions.firstChild);
+    }
+  } catch (e) {
+    console.warn('[RankMonk] Auth state sync error:', e);
+  }
+}
+
+function handleGlobalLogout(e) {
+  if (e) e.preventDefault();
+  if (confirm('Are you sure you want to log out of Rank Monk OS?')) {
+    localStorage.removeItem('rankmonk_active_user_v3');
+    localStorage.removeItem('rankmonk_active_user_v6');
+    try {
+      fetch('/api/auth/logout', { method: 'POST' });
+    } catch(err) {}
+    window.location.href = '/';
+  }
+}
+
+window.handleGlobalLogout = handleGlobalLogout;
+window.updateNavAuthState = updateNavAuthState;
 
 /* --------------------------------------------------------------------------
    0. KINETIC CONSTELLATION HERO CANVAS ANIMATION

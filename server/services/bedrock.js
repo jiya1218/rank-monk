@@ -391,7 +391,7 @@ export async function generateBedrockImage({ prompt, style = '', aspectRatio = '
     style,
     aspectRatio,
     model: 'Rank Monk Studio 8K Neural Engine',
-    provider: 'aws-bedrock',
+    provider: 'rankmonk-studio',
     created_at: new Date().toISOString()
   };
 }
