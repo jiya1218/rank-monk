@@ -1,0 +1,1 @@
+globalThis.__RSC_MANIFEST=(globalThis.__RSC_MANIFEST||{});globalThis.__RSC_MANIFEST["/api/ai/generate-image/route"]={"moduleLoading":{"prefix":"/_next/"},"ssrModuleMapping":{},"edgeSSRModuleMapping":{},"clientModules":{},"entryCSSFiles":{"C:\\one drive folder\\Desktop\\scalezix\\rank monk\\app\\api\\ai\\generate-image\\route":[]},"rscModuleMapping":{},"edgeRscModuleMapping":{}};

@@ -495,7 +495,7 @@ img, svg {
   padding: 6px 10px !important;
   border-radius: 999px !important;
   transition: all 0.2s ease !important;
-  display: inline-flex !important;
+  display: inline-flex;
   align-items: center !important;
 }
 .nav-login-link:hover {
@@ -521,7 +521,7 @@ img, svg {
   white-space: nowrap !important;
   transition: all 0.2s ease !important;
   text-decoration: none !important;
-  display: inline-flex !important;
+  display: inline-flex;
   align-items: center !important;
   line-height: 1 !important;
 }
@@ -541,6 +541,128 @@ img, svg {
   background: rgba(255, 255, 255, 0.04) !important;
   color: var(--tan, #c9a27e) !important;
   border-color: var(--tan, #c9a27e) !important;
+}
+
+/* ==========================================================================
+   AUTHENTICATED USER NAVIGATION (SYNCED STATE)
+   ========================================================================== */
+.nav-guest-only {
+  display: inline-flex !important;
+}
+
+.nav-auth-only,
+.user-nav-authenticated {
+  display: none !important;
+}
+
+html.has-active-user .nav-guest-only,
+html.has-active-user .nav-book-demo-btn,
+html.has-active-user .nav-login-link,
+html.has-active-user .nav-actions a[href="/signup"],
+html.has-active-user .nav-actions a[href="signup"],
+html.has-active-user .mobile-sheet-links a[href*="calendly.com"],
+body.has-active-user .nav-guest-only,
+body.has-active-user .nav-book-demo-btn,
+body.has-active-user .nav-login-link,
+body.has-active-user .nav-actions a[href="/signup"],
+body.has-active-user .nav-actions a[href="signup"] {
+  display: none !important;
+}
+
+html.has-active-user .nav-auth-only,
+html.has-active-user .user-nav-authenticated,
+body.has-active-user .nav-auth-only,
+body.has-active-user .user-nav-authenticated {
+  display: inline-flex !important;
+}
+
+.user-nav-authenticated {
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.nav-dash-btn {
+  background: var(--ink, #1f1a16) !important;
+  color: #fffcf7 !important;
+  font-weight: 700 !important;
+  font-size: 0.86rem !important;
+  padding: 8px 18px !important;
+  border-radius: 999px !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+  transition: all 0.2s ease !important;
+  border: 1px solid transparent !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+.nav-dash-btn:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.15) !important;
+  opacity: 0.95 !important;
+}
+[data-theme="dark"] .nav-dash-btn {
+  background: #f5f2eb !important;
+  color: #12100e !important;
+}
+
+.nav-profile-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  background: var(--card, #ffffff) !important;
+  border: 1px solid var(--line, #e2d9cc) !important;
+  padding: 6px 14px !important;
+  border-radius: 999px !important;
+  text-decoration: none !important;
+  font-size: 0.84rem !important;
+  font-weight: 600 !important;
+  color: var(--ink, #1f1a16) !important;
+  transition: all 0.2s ease !important;
+  white-space: nowrap !important;
+  cursor: pointer;
+}
+.nav-profile-pill:hover {
+  background: var(--card-hover, #fdfbf7) !important;
+  border-color: var(--tan, #c5a059) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
+}
+[data-theme="dark"] .nav-profile-pill {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #f5f2eb !important;
+}
+[data-theme="dark"] .nav-profile-pill:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: var(--tan, #c5a059) !important;
+}
+
+.user-status-dot {
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  background: #10b981 !important;
+  display: inline-block !important;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6) !important;
+  flex-shrink: 0 !important;
+}
+
+.user-pill-name {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-pill-logout {
+  color: var(--muted, #8c7e72);
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-left: 2px;
+}
+.nav-profile-pill:hover .user-pill-logout {
+  color: #ef4444;
 }
 .theme-toggle {
   display: inline-flex !important;

@@ -714,7 +714,7 @@
       // Check if current session user has an active domain
       let activeUser = null;
       try {
-        const raw = localStorage.getItem('rankmonk_active_user_v3');
+        const raw = localStorage.getItem('rankmonk_user') || localStorage.getItem('rankmonk_active_user_v3') || localStorage.getItem('rankmonk_active_user_v6');
         if (raw) activeUser = JSON.parse(raw);
       } catch(e) {}
 
@@ -752,7 +752,7 @@
 
     getCurrentUser() {
       try {
-        const raw = localStorage.getItem('rankmonk_active_user_v3');
+        const raw = localStorage.getItem('rankmonk_user') || localStorage.getItem('rankmonk_active_user_v3') || localStorage.getItem('rankmonk_active_user_v6');
         if (raw) {
           const u = JSON.parse(raw);
           if (u && u.email) return u;
@@ -763,33 +763,60 @@
 
     // Strict Persistent Registry Helpers
     _getUsersDb() {
+      let list = [];
       try {
         const raw = localStorage.getItem('rankmonk_users_db');
-        if (raw) return JSON.parse(raw);
+        if (raw) list = JSON.parse(raw);
       } catch (e) {}
-      const defaultDb = [
-        {
-          id: 'usr_founder_01',
-          name: 'Rank Monk Architect',
-          email: 'founder@rankmonk.in',
-          phone: '+91 98765 43210',
-          password: 'Password123!',
-          plan: 'grow',
-          domain: 'rankmonk.in',
-          created_at: new Date().toISOString()
-        }
-      ];
+      if (!Array.isArray(list)) list = [];
+
+      const founder = {
+        id: 'usr_founder_01',
+        name: 'Rank Monk Architect',
+        email: 'founder@rankmonk.in',
+        phone: '+91 98765 43210',
+        password: 'Password123!',
+        role: 'owner',
+        plan: 'scale',
+        paid: true,
+        domain: 'rankmonk.in',
+        created_at: new Date().toISOString()
+      };
+      const demoAccount = {
+        id: 'usr_jiya_01',
+        name: 'Jiya',
+        email: 'jiya@gmail.com',
+        phone: '+91 98253 58617',
+        password: '123456',
+        role: 'owner',
+        plan: 'scale',
+        paid: true,
+        domain: 'scalezix.com',
+        created_at: new Date().toISOString()
+      };
+
+      if (!list.some(u => u.email.toLowerCase() === 'founder@rankmonk.in')) list.push(founder);
+      const jiyaIdx = list.findIndex(u => u.email.toLowerCase() === 'jiya@gmail.com');
+      if (jiyaIdx === -1) {
+        list.push(demoAccount);
+      } else {
+        list[jiyaIdx].password = '123456';
+        list[jiyaIdx].paid = true;
+        list[jiyaIdx].plan = 'scale';
+        list[jiyaIdx].domain = 'scalezix.com';
+      }
+
       try {
-        localStorage.setItem('rankmonk_users_db', JSON.stringify(defaultDb));
+        localStorage.setItem('rankmonk_users_db', JSON.stringify(list));
       } catch (e) {}
-      return defaultDb;
-    },
+      return list;
+    }
 
     _saveUsersDb(db) {
       try {
         localStorage.setItem('rankmonk_users_db', JSON.stringify(db));
       } catch (e) {}
-    },
+    }
 
     async login(email, password) {
       if (!email || !password) throw new Error('Email and password are required');
@@ -839,9 +866,17 @@
         name: localAccount.name,
         email: localAccount.email,
         phone: localAccount.phone,
-        plan: localAccount.plan || 'grow',
-        domain: localAccount.domain || ''
+        role: localAccount.role || (normEmail === 'jiya@gmail.com' ? 'owner' : 'member'),
+        plan: localAccount.plan || 'scale',
+        paid: localAccount.paid === true || normEmail === 'jiya@gmail.com' || normEmail === 'founder@rankmonk.in',
+        domain: localAccount.domain || 'scalezix.com'
       };
+
+      if (normEmail === 'jiya@gmail.com' || normEmail === 'founder@rankmonk.in') {
+        activeUser.paid = true;
+        activeUser.role = 'owner';
+        activeUser.plan = 'scale';
+      }
 
       this.data.currentUser = activeUser;
       if (activeUser.domain) {
@@ -849,15 +884,23 @@
       }
       this.save();
       try {
+        localStorage.setItem('rankmonk_user', JSON.stringify(activeUser));
         localStorage.setItem('rankmonk_active_user_v3', JSON.stringify(activeUser));
         localStorage.setItem('rankmonk_active_user_v6', JSON.stringify(activeUser));
+        if (activeUser.paid) {
+          const pList = JSON.parse(localStorage.getItem('rankmonk_paid_users_list') || '[]');
+          if (!pList.includes(normEmail)) {
+            pList.push(normEmail);
+            localStorage.setItem('rankmonk_paid_users_list', JSON.stringify(pList));
+          }
+        }
       } catch (e) {}
       return activeUser;
-    },
+    }
 
     demoLogin() {
       throw new Error('Demo login has been disabled. Please create an account or sign in with your credentials.');
-    },
+    }
 
     async signup({ name, domain, email, phone, password, plan }) {
       if (!email || !email.includes('@')) throw new Error('A valid work email is required.');
@@ -929,11 +972,12 @@
       }
       this.save();
       try {
+        localStorage.setItem('rankmonk_user', JSON.stringify(sessionUser));
         localStorage.setItem('rankmonk_active_user_v3', JSON.stringify(sessionUser));
         localStorage.setItem('rankmonk_active_user_v6', JSON.stringify(sessionUser));
       } catch (e) {}
       return sessionUser;
-    },
+    }
 
     async logout() {
       try {

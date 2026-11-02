@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Features · Rank Monk</title>
+  <meta name="description" content="Blogs, social posts, images, technical SEO audits and AI search visibility in one place. Autonomous organic growth with Rank Monk.">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+  <link rel="apple-touch-icon" href="assets/rank-monk-icon.png">
+
+  <!-- Anti-Flash Theme & Auth Sync Script -->
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem("rankmonk-theme") ||
+          (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.setAttribute("data-theme", t);
+        var raw = localStorage.getItem("rankmonk_user") || localStorage.getItem("rankmonk_active_user_v3") || localStorage.getItem("rankmonk_active_user_v6");
+        if (raw) {
+          var user = JSON.parse(raw);
+          if (user && user.email) {
+            document.documentElement.classList.add("has-active-user");
+            if (document.body) document.body.classList.add("has-active-user");
+            var displayName = user.name || (user.email ? user.email.split('@')[0] : 'Dashboard');
+            document.addEventListener('DOMContentLoaded', function(){
+              var el = document.getElementById('navUserDisplayName');
+              if (el) el.textContent = displayName;
+            });
+          }
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <script src="js/nav.js?v=20261102_rev10"></script>
+
+  <!-- Google Fonts: Fraunces & Instrument Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <!-- Core Stylesheets -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body class="page-fade-in">
+
+  <!-- ==========================================================================
+       SITE HEADER
+       ========================================================================== -->
+  <header class="site-header" id="siteHeader">
+    <div class="container nav-container">
+      
+      <a href="/" class="brand" aria-label="Rank Monk home">
+        <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="brand-logo-img logo-light">
+        <img src="assets/rank-monk-logo-horizontal-light.png" alt="Rank Monk" class="brand-logo-img logo-dark">
+      </a>
+
+      <nav class="nav-links">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/features" class="nav-link active">Features</a>
+        <a href="/engines" class="nav-link">AI Engines</a>
+        <a href="/comparison" class="nav-link">Stack Collapse</a>
+        <a href="/pricing" class="nav-link">Pricing</a>
+        <a href="/faq" class="nav-link">FAQ</a>
+      </nav>
+
+      <div class="nav-actions">
+        <!-- Guest controls (hidden when logged in) -->
+        <a href="https://calendly.com/utkarshmakwana31/demo-for-rankmonk" target="_blank" rel="noopener noreferrer" class="nav-book-demo-btn nav-guest-only">Book Demo</a>
+        <a href="/login" class="nav-login-link nav-guest-only">Log in</a>
+        <a href="/signup" class="btn btn-primary btn-sm nav-guest-only">Start climbing</a>
+
+        <!-- Authenticated controls (shown when logged in) -->
+        <div class="user-nav-authenticated nav-auth-only" id="userNavAuth">
+          <a href="/dashboard" class="btn btn-primary btn-sm nav-dash-btn" onclick="handleDashboardNavClick(event)">Dashboard →</a>
+          <a href="#" onclick="handleGlobalLogout(event)" class="nav-profile-pill" id="navProfilePill" title="Click to Log Out">
+            <span class="user-status-dot"></span>
+            <span class="user-pill-name" id="navUserDisplayName">Dashboard</span>
+            <span class="user-pill-logout">(Log out)</span>
+          </a>
+        </div>
+
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle theme">☾</button>
+        
+        <button class="mobile-nav-toggle" id="mobileNavToggle" aria-label="Toggle Navigation">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Mobile Drawer -->
+    <div class="mobile-nav-sheet" id="mobileNavSheet">
+      <div class="mobile-sheet-head">
+        <a href="/" class="brand">
+          <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="brand-logo-img logo-light" style="height: 44px;">
+          <img src="assets/rank-monk-logo-horizontal-light.png" alt="Rank Monk" class="brand-logo-img logo-dark" style="height: 44px;">
+        </a>
+        <button class="mobile-sheet-close" id="mobileSheetClose">✕</button>
+      </div>
+      <div class="mobile-sheet-links">
+        <a href="/" class="nav-link mobile-link"><span>🏠 Home</span></a>
+        <a href="/features" class="nav-link mobile-link active"><span>⚡ Features</span></a>
+        <a href="/engines" class="nav-link mobile-link"><span>⚙️ AI Engines</span></a>
+        <a href="/comparison" class="nav-link mobile-link"><span>⚖️ Stack Collapse</span></a>
+        <a href="/pricing" class="nav-link mobile-link"><span>🏷️ Pricing</span></a>
+        <a href="/faq" class="nav-link mobile-link"><span>📖 FAQ</span></a>
+        <a href="https://calendly.com/utkarshmakwana31/demo-for-rankmonk" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-block" style="margin-top: 10px;">Book Demo</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ==========================================================================
+         PAGE HERO
+         ========================================================================== -->
+    <section class="page-hero">
+      <div class="container">
+        <div class="crumbs"><a href="/">Home</a> / Features</div>
+        <span class="eyebrow">Features Overview</span>
+        <h1>Every piece of your <span class="accent">visibility</span>, in one place.</h1>
+        <p class="lead">From the first keyword idea to the moment an AI assistant names your brand, Rank Monk covers the entire autonomous path.</p>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         FEATURE DEEP DIVES
+         ========================================================================== -->
+    <section class="container" style="padding-top: 20px;">
+      
+      <!-- Feature 1: Blog & CMS Synapse -->
+      <div class="feature-row">
+        <div class="feature-copy">
+          <span class="eyebrow">Autonomous Blog Engine</span>
+          <h2>Articles that sound like you, engineered to rank.</h2>
+          <p>Rank Monk researches the topic, discovers questions searchers actually ask, drafts 2,500+ word deep-dive content, injects diagrams and citations, and syncs directly to your CMS.</p>
+          <div class="tag-row">
+            <span class="tag">Keyword Research</span>
+            <span class="tag">Brand Voice Sync</span>
+            <span class="tag">JSON-LD Schema</span>
+            <span class="tag">WordPress / Webflow / Shopify</span>
+          </div>
+        </div>
+        <div class="feature-visual">
+          <ul class="mini-list">
+            <li>
+              <span class="dot"></span>
+              <div>
+                <strong>Entity & Demand Discovery</strong>
+                <span>Scans high-intent keywords filtered by low competition and high transactional intent.</span>
+              </div>
+            </li>
+            <li>
+              <span class="dot"></span>
+              <div>
+                <strong>Autonomous Long-Form Synthesis</strong>
+                <span>2,500+ words structured with real-world examples, verified footnotes, and schema.</span>
+              </div>
+            </li>
+            <li>
+              <span class="dot"></span>
+              <div>
+                <strong>Instant 1-Click Publishing</strong>
+                <span>Auto-schedules drafts or live posts directly to your CMS collections via webhooks.</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Feature 2: AEO Radar -->
+      <div class="feature-row flip">
+        <div class="feature-copy">
+          <span class="eyebrow">Answer Engine Optimization (AEO)</span>
+          <h2>Get cited as the source in ChatGPT, Claude & Perplexity.</h2>
+          <p>Traditional SEO only optimizes for ten blue links. Rank Monk monitors how often generative AI engines recommend your company and tells you what information to publish next.</p>
+          <div class="tag-row">
+            <span class="tag">ChatGPT 4o Citations</span>
+            <span class="tag">Perplexity Pro Tracking</span>
+            <span class="tag">Claude 3.5 Sonnet</span>
+            <span class="tag">Vector Embeddings</span>
+          </div>
+        </div>
+        <div class="feature-visual">
+          <ul class="mini-list">
+            <li>
+              <span class="dot"></span>
+              <div>
+                <strong>Real-Time Citation Telemetry</strong>
+                <span>Know the moment your brand appears as a footnote in conversational search answers.</span>
+              </div>
+            </li>
+            <li>
+              <span class="dot"></span>
+              <div>
+                <strong>Knowledge Graph Insertion</strong>
+                <span>Shapes your public content so large language models index your brand as the primary authority.</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Feature 3: Social Repurposing Studio -->
+      <div class="feature-row">
+        <div class="feature-copy">
+          <span class="eyebrow">Omnichannel Social Studio</span>
+          <h2>A week of high-signal posts, written and scheduled in minutes.</h2>
+          <p>Captions and hashtags tailored for each network, 5-slide LinkedIn carousels, and X threads extracted automatically from your articles. Unlimited scheduling included.</p>
+          <div class="tag-row">
+            <span class="tag">LinkedIn Carousels</span>
+            <span class="tag">Viral X Threads</span>
+            <span class="tag">Instagram Visuals</span>
+            <span class="tag">Smart Queue Calendar</span>
+          </div>
+        </div>
+        <div class="feature-visual">
+          <ul class="mini-list">
+            <li>
+              <span class="dot"></span>
+              <div>
+                <strong>Platform-Native Voice Adaptors</strong>
+                <span>Short punchy hooks for X, story-driven narratives for LinkedIn, and visual briefs for Instagram.</span>
+              </div>
+            </li>
+            <li>
+              <span class="dot"></span>
+              <div>
+                <strong>Automatic Peak-Time Queue</strong>
+                <span>Posts drop precisely when your target audience is most active and engaged.</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Feature 4: Self-Healing Technical Headless Crawler -->
+      <div class="feature-row flip">
+        <div class="feature-copy">
+          <span class="eyebrow">Self-Healing Technical Crawler</span>
+          <h2>We don't just find website errors. We write the code fix.</h2>
+          <p>Weekly headless Chromium scans check page speed signals, canonical tags, broken links, and missing meta tags, generating 1-click code remedies ready to apply.</p>
+          <div class="tag-row">
+            <span class="tag">Headless Chromium Scans</span>
+            <span class="tag">Broken Canonical Repair</span>
+            <span class="tag">1-Click Remedies</span>
+            <span class="tag">Core Web Vitals</span>
+          </div>
+        </div>
+        <div class="feature-visual">
+          <ul class="mini-list">
+            <li>
+              <span class="dot"></span>
+              <div>
+                <strong>Prioritized Impact Scoring</strong>
+                <span>Fixes categorized by estimated ranking impact so high-leverage fixes happen first.</span>
+              </div>
+            </li>
+            <li>
+              <span class="dot"></span>
+              <div>
+                <strong>1-Click Code Injection</strong>
+                <span>Push fixes directly to your site or copy the exact HTML and schema snippets.</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==========================================================================
+         CTA BAND
+         ========================================================================== -->
+    <section class="section" style="padding-top: 20px;">
+      <div class="container">
+        <div class="cta-band">
+          <div>
+            <h2>Experience all features in action.</h2>
+            <p>Start your 14-day trial on any plan or test the interactive engine console.</p>
+          </div>
+          <div class="cta-actions">
+            <a href="/pricing" class="btn btn-primary">Start climbing</a>
+            <a href="/engines" class="btn btn-ghost">Open AI Console</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==========================================================================
+       SITE FOOTER
+       ========================================================================== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="/" class="brand">
+            <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="brand-logo-img logo-light" style="height: 58px;">
+            <img src="assets/rank-monk-logo-horizontal-light.png" alt="Rank Monk" class="brand-logo-img logo-dark" style="height: 58px;">
+          </a>
+          <p class="footer-desc">
+            Content, search, social and AI visibility, handled. So you can get back to building what matters.
+          </p>
+        </div>
+        <div>
+          <h4>Product</h4>
+          <ul>
+            <li><a href="/features">Features</a></li>
+            <li><a href="/engines">AI Engines</a></li>
+            <li><a href="/comparison">Stack Collapse</a></li>
+            <li><a href="/pricing">Pricing</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Pages</h4>
+          <ul>
+            <li><a href="/faq">FAQ & Docs</a></li>
+            <li><a href="/signup">Start Trial</a></li>
+            <li><a href="/login">Log In</a></li>
+            <li><a href="/features">CMS Integrations</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Company</h4>
+          <ul>
+            <li><a href="/">Manifesto</a></li>
+            <li><a href="/faq">Security & Privacy</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 Rank Monk. All rights reserved.</span>
+        <span>Made for founders who want to be found.</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Native Mobile App Bottom Tab Bar (Fixed Dock) -->
+  <nav class="mobile-app-bottom-bar" aria-label="Mobile Bottom Navigation">
+    <a href="/" class="bottom-tab-item">
+      <span class="tab-icon">🏠</span>
+      <span>Home</span>
+    </a>
+    <a href="/features" class="bottom-tab-item active">
+      <span class="tab-icon">⚡</span>
+      <span>Features</span>
+    </a>
+    <a href="/engines" class="bottom-tab-item">
+      <span class="tab-icon">⚙️</span>
+      <span>Engines</span>
+    </a>
+    <a href="/comparison" class="bottom-tab-item">
+      <span class="tab-icon">⚖️</span>
+      <span>Compare</span>
+    </a>
+    <a href="/pricing" class="bottom-tab-item">
+      <span class="tab-icon">🏷️</span>
+      <span>Pricing</span>
+    </a>
+  </nav>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

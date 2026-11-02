@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account · Rank Monk OS</title>
+  <meta name="description" content="Set up your Rank Monk OS autonomous organic growth account. Replace 5 fragmented tools with one disciplined loop.">
+  <link rel="icon" type="image/png" href="assets/favicon-32x32.png">
+
+  <!-- Immediate Theme Initializer -->
+  <script>
+    (function() {
+      try {
+        var saved = localStorage.getItem('rankmonk-theme');
+        var theme = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {}
+    })();
+  </script>
+
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <script src="js/nav.js?v=20261102_rev10"></script>
+</head>
+<body class="auth-page">
+
+  <!-- Top Auth Nav -->
+  <header class="auth-nav">
+    <a href="/" class="brand" aria-label="Rank Monk home">
+      <img src="assets/rank-monk-logo-horizontal.png" alt="Rank Monk" class="brand-logo-img logo-light">
+      <img src="assets/rank-monk-logo-horizontal-light.png" alt="Rank Monk" class="brand-logo-img logo-dark">
+    </a>
+
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="Toggle theme">◐</button>
+      <a href="/login" class="btn btn-secondary" style="font-size: 0.85rem; padding: 8px 16px;">Log In →</a>
+    </div>
+  </header>
+
+  <!-- Centered Onboarding Card -->
+  <main class="auth-container">
+    <div class="auth-card" style="max-width: 540px;">
+      <div class="auth-eyebrow">Direct Platform Access · Full Suite</div>
+      <h1>Create Your <span style="font-style: italic; font-family: var(--font-heading); color: var(--tan);">Rank Monk Account</span></h1>
+      <p class="auth-sub">Sign up to provision your autonomous organic growth loop and connect your website.</p>
+
+      <form id="signupForm" class="auth-form" onsubmit="handleSignupSubmit(event)">
+        
+        <div class="auth-row-split">
+          <div class="auth-field">
+            <label for="signupName">Full Name</label>
+            <input type="text" id="signupName" required placeholder="Gopal Sharma" autocomplete="name">
+          </div>
+          <div class="auth-field">
+            <label for="signupPhone">Contact Phone Number</label>
+            <input type="tel" id="signupPhone" required placeholder="+91 98765 43210" autocomplete="tel">
+          </div>
+        </div>
+
+        <div class="auth-row-split">
+          <div class="auth-field">
+            <label for="signupEmail">Work Email</label>
+            <input type="email" id="signupEmail" required placeholder="founder@company.com" autocomplete="email">
+          </div>
+          <div class="auth-field">
+            <label for="signupPassword">Password</label>
+            <input type="password" id="signupPassword" required minlength="6" placeholder="At least 6 characters" autocomplete="new-password">
+          </div>
+        </div>
+
+        <div class="auth-field">
+          <label for="signupDomain">Primary Website Domain <span style="font-weight: normal; color: var(--muted);">(Optional - can connect on dashboard)</span></label>
+          <input type="text" id="signupDomain" placeholder="example.com or https://yourbrand.com">
+        </div>
+
+        <!-- Plan Choice Selection -->
+        <div class="auth-field">
+          <label>Select Your Platform Tier (Billed Monthly, Cancel Anytime)</label>
+          <div class="plan-select-grid">
+            <label class="plan-option-label" id="planSeedLabel">
+              <input type="radio" name="selectedPlan" value="seed">
+              <span class="p-name">Seed</span>
+              <span class="p-price">₹10,000<small style="font-size: 10px; font-weight: normal;">/mo</small></span>
+              <span style="font-size: 10px; color: var(--muted); display: block; margin-top: 2px;">8 Blogs · 15 Visuals · 30 Socials</span>
+            </label>
+
+            <label class="plan-option-label selected" id="planGrowLabel">
+              <input type="radio" name="selectedPlan" value="grow" checked>
+              <span class="p-name">Grow ★</span>
+              <span class="p-price">₹20,000<small style="font-size: 10px; font-weight: normal;">/mo</small></span>
+              <span style="font-size: 10px; color: var(--muted); display: block; margin-top: 2px;">30 Blogs · 50 Visuals · Unlimited Socials</span>
+            </label>
+
+            <label class="plan-option-label" id="planScaleLabel">
+              <input type="radio" name="selectedPlan" value="scale">
+              <span class="p-name">Scale</span>
+              <span class="p-price">₹40,000<small style="font-size: 10px; font-weight: normal;">/mo</small></span>
+              <span style="font-size: 10px; color: var(--muted); display: block; margin-top: 2px;">100 Blogs · Unlimited Visuals & Socials</span>
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" id="signupSubmitBtn" class="btn-auth-submit">
+          <span>Create Account & Proceed to Payment</span>
+          <span>→</span>
+        </button>
+
+        <div id="signupErrorMsg" style="display:none; color: #d9534f; font-size: 0.86rem; text-align: center; margin-top: 10px; background: rgba(217, 83, 79, 0.08); border: 1px solid rgba(217, 83, 79, 0.2); border-radius: 8px; padding: 8px 12px;"></div>
+      </form>
+
+      <p class="auth-footer-text">
+        Already registered? <a href="/login">Log in to your console →</a>
+      </p>
+    </div>
+  </main>
+
+  <!-- State & Logic -->
+  <script src="js/rankmonk-state.js?v=20261023_rev6"></script>
+  <script>
+    // Theme Switcher
+    const themeBtn = document.getElementById('themeToggleBtn');
+    if (themeBtn) {
+      themeBtn.addEventListener('click', () => {
+        const cur = document.documentElement.getAttribute('data-theme') || 'light';
+        const next = cur === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('rankmonk-theme', next);
+      });
+    }
+
+    // Active session indicator
+    function checkActiveSessionNotice() {
+      try {
+        var rawUser = localStorage.getItem('rankmonk_user') || localStorage.getItem('rankmonk_active_user_v3') || localStorage.getItem('rankmonk_active_user_v6');
+        if (rawUser) {
+          var u = JSON.parse(rawUser);
+          if (u && u.email) {
+            var old = document.getElementById('alreadyLoggedInNotice');
+            if (old) old.remove();
+
+            var notice = document.createElement('div');
+            notice.id = 'alreadyLoggedInNotice';
+            notice.style.cssText = 'background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; font-size: 0.86rem; color: var(--ink); text-align: center;';
+            notice.innerHTML = 'Currently signed in as <strong>' + (u.name || u.email) + '</strong>.<br>' +
+              '<div style="margin-top: 10px; display: inline-flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center;">' +
+                '<a href="/dashboard" class="btn btn-primary btn-sm" style="font-weight: 700; padding: 6px 16px; font-size: 0.82rem; border-radius: 999px; text-decoration: none;">Dashboard →</a>' +
+                '<a href="#" onclick="handleLogoutFromSignup(event)" style="font-size: 0.82rem; color: var(--muted); text-decoration: underline;">Create New Account / Log Out</a>' +
+              '</div>';
+            var form = document.getElementById('signupForm');
+            if (form && form.parentNode) form.parentNode.insertBefore(notice, form);
+          }
+        }
+      } catch(e) {}
+    }
+
+    function handleLogoutFromSignup(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      localStorage.removeItem('rankmonk_user');
+      localStorage.removeItem('rankmonk_active_user_v3');
+      localStorage.removeItem('rankmonk_active_user_v6');
+      localStorage.removeItem('rankmonk_user_session');
+      localStorage.removeItem('rankmonk_just_completed_payment');
+      localStorage.removeItem('rankmonk_pending_checkout_plan');
+      try { fetch('/api/auth/logout', { method: 'POST' }); } catch(err) {}
+      var notice = document.getElementById('alreadyLoggedInNotice');
+      if (notice) notice.remove();
+    }
+
+    checkActiveSessionNotice();
+
+    // Pre-select plan from URL query (?plan=seed|grow|scale)
+    const urlParams = new URLSearchParams(window.location.search);
+    const planParam = (urlParams.get('plan') || 'grow').toLowerCase();
+    const radio = document.querySelector(`input[name="selectedPlan"][value="${planParam}"]`);
+    if (radio) {
+      radio.checked = true;
+      document.querySelectorAll('.plan-option-label').forEach(l => l.classList.remove('selected'));
+      radio.closest('.plan-option-label').classList.add('selected');
+    }
+
+    // Update label classes on radio click
+    document.querySelectorAll('input[name="selectedPlan"]').forEach(inp => {
+      inp.addEventListener('change', () => {
+        document.querySelectorAll('.plan-option-label').forEach(l => l.classList.remove('selected'));
+        inp.closest('.plan-option-label').classList.add('selected');
+      });
+    });
+
+    // Form Submit
+    async function handleSignupSubmit(e) {
+      e.preventDefault();
+      const name = (document.getElementById('signupName')?.value || '').trim();
+      const phone = (document.getElementById('signupPhone')?.value || '').trim();
+      const email = (document.getElementById('signupEmail')?.value || '').trim();
+      const pass = (document.getElementById('signupPassword')?.value || '').trim();
+      const domain = (document.getElementById('signupDomain')?.value || '').trim();
+      const selectedPlan = document.querySelector('input[name="selectedPlan"]:checked')?.value || 'grow';
+      const errBox = document.getElementById('signupErrorMsg');
+      const btn = document.getElementById('signupSubmitBtn');
+
+      if (errBox) {
+        errBox.style.display = 'none';
+        errBox.innerText = '';
+      }
+
+      if (!name) {
+        if (errBox) { errBox.innerText = 'Please enter your full name.'; errBox.style.display = 'block'; }
+        return;
+      }
+      if (!phone) {
+        if (errBox) { errBox.innerText = 'Please enter your contact phone number.'; errBox.style.display = 'block'; }
+        return;
+      }
+      if (!email || !email.includes('@')) {
+        if (errBox) { errBox.innerText = 'Please enter a valid work email address.'; errBox.style.display = 'block'; }
+        return;
+      }
+      if (!pass || pass.length < 6) {
+        if (errBox) { errBox.innerText = 'Password must be at least 6 characters.'; errBox.style.display = 'block'; }
+        return;
+      }
+
+      if (btn) {
+        btn.innerHTML = '<span>Creating your account...</span>';
+        btn.style.opacity = '0.75';
+        btn.disabled = true;
+      }
+
+      try {
+        if (!window.RankMonkState || typeof window.RankMonkState.signup !== 'function') {
+          throw new Error('Engine initializing. Please wait a moment and try again.');
+        }
+
+        const newUser = await window.RankMonkState.signup({
+          name: name,
+          phone: phone,
+          email: email,
+          password: pass,
+          domain: domain,
+          plan: selectedPlan
+        });
+
+        if (!newUser || !newUser.email) {
+          throw new Error('Registration could not be completed. Please try again.');
+        }
+
+        // Save unified user session and pending plan, redirect to homepage
+        localStorage.setItem('rankmonk_user', JSON.stringify(newUser));
+        localStorage.setItem('rankmonk_active_user_v3', JSON.stringify(newUser));
+        localStorage.setItem('rankmonk_active_user_v6', JSON.stringify(newUser));
+        localStorage.setItem('rankmonk_pending_checkout_plan', selectedPlan);
+        window.location.href = '/';
+        return;
+      } catch (err) {
+        if (btn) {
+          btn.innerHTML = '<span>Create Account & Continue</span><span>→</span>';
+          btn.style.opacity = '1';
+          btn.disabled = false;
+        }
+        if (errBox) {
+          errBox.innerText = err.message || 'An error occurred while creating your account. Please try again.';
+          errBox.style.display = 'block';
+        }
+      }
+    }
+  </script>
+</body>
+</html>

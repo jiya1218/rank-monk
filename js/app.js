@@ -3,175 +3,56 @@
    Zen Minimalist & Luxury Dark Interactive Engine
    ========================================================================== */
 
-document.addEventListener('DOMContentLoaded', () => {
-  initMobileNav();
-  initHeaderScroll();
-  initHeroScanner();
-  initHeroCanvas();
-  initHeroSpotlight();
-  initHeroParallax();
-  initConsoleAutoplay();
-  updateNavAuthState();
-});
-
 /* --------------------------------------------------------------------------
-   GLOBAL AUTH STATE & NAVIGATION SYNC
+   GLOBAL AUTH STATE & NAVIGATION DELEGATION
+   Delegates directly to js/nav.js (Single Source of Truth)
    -------------------------------------------------------------------------- */
 function updateNavAuthState() {
-  try {
-    const rawUser = localStorage.getItem('rankmonk_active_user_v3');
-    if (!rawUser) return;
-    const user = JSON.parse(rawUser);
-    if (!user || !user.email) return;
-
-    // User is logged in: Clean up all demo, sign up, and guest prompts across the page.
-    
-    // 1. Hide all "Book Demo" links
-    document.querySelectorAll('.nav-book-demo-btn, a[href*="calendly.com"]').forEach(el => {
-      el.style.display = 'none';
-    });
-
-    // 2. Hide all "Log in" links
-    document.querySelectorAll('.nav-login-link, a[href="/login"], a[href="login"]').forEach(el => {
-      el.style.display = 'none';
-    });
-
-    // 3. Transform header "Start climbing" / "Sign up" button into a "Dashboard →" button
-    document.querySelectorAll('.nav-actions a.btn, .nav-actions a[href="/signup"], .nav-actions a[href="signup"]').forEach(btn => {
-      btn.href = '/dashboard';
-      btn.innerText = 'Dashboard →';
-      btn.classList.add('nav-dashboard-active-btn');
-    });
-
-    // 4. Transform any "Get Started" or "Start Free Trial" or "Sign up" buttons across the site
-    document.querySelectorAll('a[href="/signup"], a[href="signup"]').forEach(btn => {
-      btn.href = '/dashboard';
-      btn.innerText = 'Go to Console →';
-    });
-
-    // 4. In mobile navigation sheet footer
-    const mobileFooters = document.querySelectorAll('.mobile-sheet-footer');
-    mobileFooters.forEach(footer => {
-      footer.innerHTML = `
-        <a href="/dashboard" class="btn btn-primary btn-block" style="margin-bottom: 8px;">Go to Dashboard →</a>
-        <a href="#" onclick="handleGlobalLogout(event)" class="btn btn-secondary btn-block" style="font-size: 0.82rem; opacity: 0.85;">Log Out (${user.name || user.email})</a>
-      `;
-    });
-
-    // 5. In nav actions, add user indicator with logout
-    const navActions = document.querySelector('.nav-actions');
-    if (navActions && !document.getElementById('navUserPill')) {
-      const userPill = document.createElement('a');
-      userPill.id = 'navUserPill';
-      userPill.href = '#';
-      userPill.onclick = handleGlobalLogout;
-      userPill.title = 'Logged in as ' + user.email + ' (Click to Log Out)';
-      userPill.style.cssText = 'font-size: 0.78rem; color: var(--muted); text-decoration: none; margin-right: 6px; display: inline-flex; align-items: center; gap: 4px;';
-      userPill.innerHTML = `<span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block;"></span> <span style="max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${user.name || user.email.split('@')[0]}</span> <span style="font-size: 0.7rem; opacity: 0.6;">(Logout)</span>`;
-      navActions.insertBefore(userPill, navActions.firstChild);
-    }
-  } catch (e) {
-    console.warn('[RankMonk] Auth state sync error:', e);
+  if (window.RankMonkNav && typeof window.RankMonkNav.sync === 'function') {
+    window.RankMonkNav.sync();
   }
+}
+
+function handleDashboardNavClick(e) {
+  if (window.RankMonkNav && typeof window.RankMonkNav.handleDashboardClick === 'function') {
+    return window.RankMonkNav.handleDashboardClick(e);
+  }
+  return true;
 }
 
 function handleGlobalLogout(e) {
-  if (e) e.preventDefault();
-  if (confirm('Are you sure you want to log out of Rank Monk OS?')) {
-    localStorage.removeItem('rankmonk_active_user_v3');
-    localStorage.removeItem('rankmonk_active_user_v6');
-    try {
-      fetch('/api/auth/logout', { method: 'POST' });
-    } catch(err) {}
-    window.location.href = '/';
+  if (window.RankMonkNav && typeof window.RankMonkNav.logout === 'function') {
+    return window.RankMonkNav.logout(e);
   }
+  localStorage.clear();
+  window.location.href = '/login';
+  return false;
 }
 
 window.handleGlobalLogout = handleGlobalLogout;
+window.handleDashboardNavClick = handleDashboardNavClick;
 window.updateNavAuthState = updateNavAuthState;
 
-/* --------------------------------------------------------------------------
-   0. KINETIC CONSTELLATION HERO CANVAS ANIMATION
-   -------------------------------------------------------------------------- */
-function initHeroCanvas() {
-  const canvas = document.getElementById('heroCanvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return;
-
-  let width = (canvas.width = canvas.parentElement ? canvas.parentElement.offsetWidth : window.innerWidth);
-  let height = (canvas.height = canvas.parentElement ? canvas.parentElement.offsetHeight : 640);
-
-  function onResize() {
-    if (!canvas.parentElement) return;
-    width = canvas.width = canvas.parentElement.offsetWidth;
-    height = canvas.height = canvas.parentElement.offsetHeight;
-  }
-  window.addEventListener('resize', onResize);
-
-  const count = Math.min(32, Math.floor(width / 38));
-  const particles = [];
-  const palette = [
-    'rgba(203, 173, 141, 0.5)',
-    'rgba(185, 139, 106, 0.45)',
-    'rgba(164, 131, 116, 0.35)',
-    'rgba(216, 192, 158, 0.4)'
-  ];
-
-  for (let i = 0; i < count; i++) {
-    particles.push({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      vx: (Math.random() - 0.5) * 0.4,
-      vy: (Math.random() - 0.5) * 0.4,
-      radius: Math.random() * 2 + 1,
-      color: palette[Math.floor(Math.random() * palette.length)]
-    });
-  }
-
-  function frame() {
-    ctx.clearRect(0, 0, width, height);
-
-    // Subtle connecting lines
-    for (let i = 0; i < particles.length; i++) {
-      for (let j = i + 1; j < particles.length; j++) {
-        const dx = particles[i].x - particles[j].x;
-        const dy = particles[i].y - particles[j].y;
-        const d = Math.sqrt(dx * dx + dy * dy);
-        if (d < 115) {
-          const alpha = (1 - d / 115) * 0.16;
-          ctx.strokeStyle = `rgba(185, 139, 106, ${alpha})`;
-          ctx.lineWidth = 0.8;
-          ctx.beginPath();
-          ctx.moveTo(particles[i].x, particles[i].y);
-          ctx.lineTo(particles[j].x, particles[j].y);
-          ctx.stroke();
-        }
-      }
-    }
-
-    // Nodes
-    for (let i = 0; i < particles.length; i++) {
-      const p = particles[i];
-      p.x += p.vx;
-      p.y += p.vy;
-
-      if (p.x < 0) p.x = width;
-      if (p.x > width) p.x = 0;
-      if (p.y < 0) p.y = height;
-      if (p.y > height) p.y = 0;
-
-      ctx.fillStyle = p.color;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    requestAnimationFrame(frame);
-  }
-
-  requestAnimationFrame(frame);
+// Run auth sync immediately if DOM already parsed
+if (document.readyState !== 'loading') {
+  updateNavAuthState();
+} else {
+  document.addEventListener('DOMContentLoaded', updateNavAuthState);
 }
+window.addEventListener('pageshow', updateNavAuthState);
+window.addEventListener('load', updateNavAuthState);
+
+// Safe DOM initialization wrapper
+document.addEventListener('DOMContentLoaded', () => {
+  try { initMobileNav(); } catch(e) {}
+  try { initHeaderScroll(); } catch(e) {}
+  try { initHeroScanner(); } catch(e) {}
+  try { initHeroCanvas(); } catch(e) {}
+  try { initHeroSpotlight(); } catch(e) {}
+  try { initHeroParallax(); } catch(e) {}
+  try { initConsoleAutoplay(); } catch(e) {}
+  updateNavAuthState();
+});
 
 /* --------------------------------------------------------------------------
    1. MOBILE NAVIGATION DRAWER & APP MENU
@@ -826,10 +707,12 @@ function closeAuditModal() {
 }
 
 // Close modal on backdrop click
-document.getElementById('auditModalBackdrop')?.addEventListener('click', (e) => {
-  if (e.target.id === 'auditModalBackdrop') {
-    closeComingSoonModal();
-  }
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('auditModalBackdrop')?.addEventListener('click', (e) => {
+    if (e.target.id === 'auditModalBackdrop') {
+      closeComingSoonModal();
+    }
+  });
 });
 
 /* --------------------------------------------------------------------------

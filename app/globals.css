@@ -1,0 +1,163 @@
+@import "../css/variables.css";
+@import "../css/base.css";
+@import "../css/components.css";
+@import "../css/animations.css";
+@import "../css/responsive.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Strict Light Theme Enforcer */
+:root, [data-theme="light"], html {
+  --bg: #f8f3ec !important;
+  --bg-alt: #f1e8dc !important;
+  --card: #fffcf7 !important;
+  --ink: #2b1b12 !important;
+  --muted: #6f5a4c !important;
+  --line: #e4d6c6 !important;
+  --espresso: #3b2519 !important;
+  --mocha: #7a5242 !important;
+  --tan: #b98b6a !important;
+  --sand: #d8c09e !important;
+  --cream: #fbf6ef !important;
+  --success: #5d7a4f !important;
+  color-scheme: light !important;
+}
+
+body {
+  background-color: var(--bg) !important;
+  color: var(--ink) !important;
+  overflow-x: hidden !important;
+}
+
+/* Logo Prominence in Header & Footer */
+.brand-logo-img, .brand img, header .brand img {
+  height: 48px !important;
+  max-height: 54px !important;
+  width: auto !important;
+  object-fit: contain !important;
+}
+
+/* Hero Headline Prominence & Sizing */
+.hero-headline {
+  font-family: var(--font-heading, 'Fraunces', serif) !important;
+  font-size: clamp(40px, 5vw, 64px) !important;
+  font-weight: 800 !important;
+  line-height: 1.1 !important;
+  letter-spacing: -0.035em !important;
+  margin-bottom: 20px !important;
+  color: var(--ink, #2b1b12) !important;
+}
+
+.hero-headline .accent, .hero-headline em {
+  font-style: italic !important;
+  color: var(--mocha, #7a5242) !important;
+  display: inline-block !important;
+}
+
+.hero-text-col .lead {
+  font-size: clamp(16px, 1.35vw, 18px) !important;
+  line-height: 1.6 !important;
+  color: var(--muted, #6f5a4c) !important;
+  margin-bottom: 24px !important;
+}
+
+/* Pipeline interactive demo tab active state */
+.pipeline-tab-btn.active {
+  background: #FFFFFF !important;
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+  border: 2px solid #000000 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Responsive fixes for Climb Card */
+.climb-card .float-chip {
+  bottom: -14px !important;
+  right: -10px !important;
+  z-index: 10 !important;
+}
+
+/* Pricing Plan List Styling */
+.plan li {
+  padding: 8px 0 8px 22px !important;
+  font-size: 0.86rem !important;
+  line-height: 1.4 !important;
+  border-bottom: 1px dashed var(--line, #e4d6c6) !important;
+}
+.plan li::before {
+  content: "✓" !important;
+  position: absolute !important;
+  left: 0 !important;
+  color: var(--tan, #b98b6a) !important;
+  font-weight: 700 !important;
+}
+.plan.featured li {
+  color: #fbf6ef !important;
+  border-bottom-color: rgba(255, 255, 255, 0.15) !important;
+}
+.plan.featured li::before {
+  color: #84e1bc !important;
+}
+.plan li:last-child {
+  border-bottom: none !important;
+}
+
+/* Airy Mobile Spacing - Removes Clutter & Crowding */
+@media (max-width: 991px) {
+  .section {
+    padding: 64px 0 !important;
+  }
+  .hero-section {
+    padding-top: 36px !important;
+    padding-bottom: 60px !important;
+  }
+  .hero-split-grid {
+    grid-template-columns: 1fr !important;
+    gap: 40px !important;
+  }
+  .hero-headline {
+    font-size: clamp(32px, 8.5vw, 44px) !important;
+    line-height: 1.15 !important;
+    margin-bottom: 16px !important;
+  }
+  .hero-text-col .lead {
+    font-size: 16px !important;
+    margin-bottom: 24px !important;
+  }
+  .hero-actions {
+    margin-bottom: 24px !important;
+    gap: 12px !important;
+  }
+  .hero-scanner-wrap {
+    margin-top: 16px !important;
+    margin-bottom: 20px !important;
+  }
+  .scanner-quick-chips {
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+  }
+  .climb-card {
+    margin-top: 12px !important;
+    max-width: 100% !important;
+  }
+  .climb-card .float-chip {
+    position: static !important;
+    margin-top: 14px !important;
+  }
+  .brand-logo-img, .brand img, header .brand img {
+    height: 40px !important;
+  }
+  .pricing-grid {
+    gap: 32px !important;
+  }
+  .stack-card {
+    padding: 24px 20px !important;
+  }
+  .faq-clean details {
+    margin-bottom: 14px !important;
+    padding: 16px 20px !important;
+  }
+}

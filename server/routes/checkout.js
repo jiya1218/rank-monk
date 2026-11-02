@@ -2,6 +2,9 @@ import express from 'express';
 import { createCheckoutOrder, verifyPaymentSignature } from '../services/checkout.js';
 import { memoryStore } from '../config/supabase.js';
 import { env } from '../config/env.js';
+import { registeredUsers } from './auth.js';
+import fs from 'fs';
+import path from 'path';
 
 const router = express.Router();
 
@@ -75,6 +78,22 @@ router.post('/verify', async (req, res) => {
       planId,
       userEmail: email
     });
+
+    if (email && registeredUsers) {
+      const norm = email.toLowerCase().trim();
+      const u = registeredUsers.get(norm);
+      if (u) {
+        u.paid = true;
+        u.plan = planId;
+        u.paymentId = razorpayPaymentId;
+        registeredUsers.set(norm, u);
+        try {
+          const DATA_DIR = path.resolve(process.cwd(), 'server/data');
+          fs.writeFileSync(path.join(DATA_DIR, 'users.json'), JSON.stringify(Array.from(registeredUsers.values()), null, 2), 'utf8');
+        } catch(e) {}
+      }
+    }
+
     res.json({ success: true, ...verification });
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });
