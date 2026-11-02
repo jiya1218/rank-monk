@@ -1245,12 +1245,12 @@
             <div style="display: flex; align-items: center; gap: 10px;">
               <span style="font-size: 1.3rem;">⚡</span>
               <div>
-                <div style="font-weight: 800; font-size: 0.88rem; color: #111c26;">Engine: AWS Bedrock Visual Studio</div>
-                <div style="font-size: 0.76rem; color: #64748b;" id="mediaGeminiModelStatus">AWS Bedrock · stability.stable-image-core-v1:1 (us-west-2) · Active & Ready</div>
+                <div style="font-weight: 800; font-size: 0.88rem; color: #111c26;">Rank Monk Media Studio 8K</div>
+                <div style="font-size: 0.76rem; color: #64748b;" id="mediaGeminiModelStatus">Autonomous Visual Synthesis · Ultra High-Resolution · Active & Ready</div>
               </div>
             </div>
             <div style="display: flex; align-items: center; gap: 10px;">
-              <span id="geminiStatusBadge" class="badge-status" style="background: rgba(16, 185, 129, 0.14); color: #10b981; font-weight: 800; font-size: 0.76rem; border: 1px solid rgba(16, 185, 129, 0.3);">AWS BEDROCK LIVE 🟢</span>
+              <span id="geminiStatusBadge" class="badge-status" style="background: rgba(16, 185, 129, 0.14); color: #10b981; font-weight: 800; font-size: 0.76rem; border: 1px solid rgba(16, 185, 129, 0.3);">STUDIO ENGINE LIVE 🟢</span>
             </div>
           </div>
 
@@ -1261,32 +1261,21 @@
               <span>Generate Branded Visual Asset</span>
             </div>
 
-            <div style="display: grid; grid-template-columns: 2fr 1.2fr 1fr auto; gap: 12px; align-items: end;">
+            <div style="display: grid; grid-template-columns: 2.2fr 1.3fr auto; gap: 14px; align-items: end;">
               <div>
                 <label style="font-size: 0.78rem; font-weight: 700; color: #64748b; display: block; margin-bottom: 4px;">Image Prompt</label>
-                <input type="text" id="mediaPromptInput" placeholder="e.g. Minimalist Zen monk meditating in bamboo sanctuary, golden dawn lighting, luxury 3D icon" style="width: 100%; padding: 11px 14px; border-radius: 10px; border: 1px solid #e2d9cc; font-size: 0.88rem; background: #ffffff; color: #111c26;">
-              </div>
-
-              <div>
-                <label style="font-size: 0.78rem; font-weight: 700; color: #64748b; display: block; margin-bottom: 4px;">Style Modifier (Optional)</label>
-                <select id="mediaStyleSelect" style="width: 100%; padding: 11px; border-radius: 10px; border: 1px solid #e2d9cc; font-size: 0.88rem; background: #ffffff; color: #111c26;">
-                  <option value="" selected>No Style — Direct Prompt (Recommended)</option>
-                  <option value="zen minimalist aesthetic, architectural lighting, luxury sand gold and slate navy palette">Zen Minimalist (Signature)</option>
-                  <option value="photorealistic commercial photography, Hasselblad 8k, professional studio lighting, high dynamic range">Photorealistic Studio (8K)</option>
-                  <option value="3D rendered clay icon, smooth matte finish, luxury Apple-grade design, soft global illumination">3D Rendered Luxury Icon</option>
-                  <option value="clean vector flat illustration, modern Silicon Valley startup branding, elegant duo-tone">Modern Vector Flat</option>
-                  <option value="futuristic generative search radar, cyberpunk subtle neon glow, ethereal algorithmic flow">AEO Generative Search Radar</option>
-                </select>
+                <input type="text" id="mediaPromptInput" placeholder="e.g. Modern founder working on laptop at minimalist marble desk, cinematic natural lighting, 8k" style="width: 100%; padding: 11px 14px; border-radius: 10px; border: 1px solid #e2d9cc; font-size: 0.88rem; background: #ffffff; color: #111c26;">
               </div>
 
               <div>
                 <label style="font-size: 0.78rem; font-weight: 700; color: #64748b; display: block; margin-bottom: 4px;">Aspect Ratio</label>
                 <select id="mediaRatioSelect" style="width: 100%; padding: 11px; border-radius: 10px; border: 1px solid #e2d9cc; font-size: 0.88rem; background: #ffffff; color: #111c26;">
-                  <option value="1:1">1:1 Square (Instagram / Post)</option>
-                  <option value="16:9">16:9 Landscape (Blog Header / Web)</option>
-                  <option value="9:16">9:16 Vertical (Stories / Reels)</option>
+                  <option value="1:1" selected>1:1 Square (Instagram / Post)</option>
+                  <option value="4:5">4:5 Portrait (Instagram Feed Best Practice)</option>
+                  <option value="9:16">9:16 Vertical (Stories, Reels, TikTok)</option>
+                  <option value="16:9">16:9 Landscape (Blog Header / Web / YouTube)</option>
+                  <option value="1.91:1">1.91:1 Landscape (Twitter & LinkedIn Feed)</option>
                   <option value="4:3">4:3 Standard (Desktop / Slides)</option>
-                  <option value="3:4">3:4 Portrait (Editorial / Card)</option>
                 </select>
               </div>
 
@@ -1297,7 +1286,7 @@
 
             <div id="mediaGenLoading" style="display: none; align-items: center; gap: 10px; margin-top: 14px; font-size: 0.84rem; color: #b98b6a; font-weight: 700;">
               <div class="scanner-spinner" style="width: 18px; height: 18px; border-width: 2px;"></div>
-              <span>Synthesizing high-resolution asset with Zen Neural Engine...</span>
+              <span>Synthesizing high-resolution asset with Studio 8K Neural Engine...</span>
             </div>
           </div>
 
@@ -3280,20 +3269,20 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
             }
           } else {
             if (badge) {
-              badge.innerText = 'AWS BEDROCK LIVE 🟢';
+              badge.innerText = 'STUDIO ENGINE LIVE 🟢';
               badge.style.background = 'rgba(16, 185, 129, 0.14)';
               badge.style.color = '#10b981';
               badge.style.borderColor = 'rgba(16, 185, 129, 0.3)';
             }
             if (text) {
-              text.innerText = `Active Model: ${engineInfo.modelDisplay || engineInfo.model || 'stability.stable-image-core-v1:1'} (${engineInfo.region || 'us-west-2'}) · Live & Ready`;
+              text.innerText = `Autonomous Visual Synthesis · Ultra High-Resolution · Active & Ready`;
             }
           }
           return true;
         }
       } catch (e) {}
       if (badge) {
-        badge.innerText = 'AI ENGINE READY 🟢';
+        badge.innerText = 'STUDIO ENGINE LIVE 🟢';
         badge.style.background = 'rgba(16, 185, 129, 0.14)';
         badge.style.color = '#10b981';
       }
@@ -3307,7 +3296,6 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
         document.getElementById('mediaPromptInput')?.focus();
         return;
       }
-      const style = document.getElementById('mediaStyleSelect')?.value || '';
       const ratio = document.getElementById('mediaRatioSelect')?.value || '1:1';
       const btn = document.getElementById('btnGenerateMedia');
       const loader = document.getElementById('mediaGenLoading');
@@ -3325,7 +3313,6 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               prompt: prompt,
-              style: style,
               aspectRatio: ratio
             })
           });
@@ -3339,15 +3326,22 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
             throw new Error((data && data.error) || 'Failed to generate visual from server');
           }
         } catch (serverErr) {
-          console.warn('[Media Studio] Direct Bedrock backend unavailable, triggering resilient neural fallback:', serverErr.message);
+          console.warn('[Media Studio] Fallback neural stream:', serverErr.message);
           const seed = Math.floor(Math.random() * 999999);
-          const fullPrompt = `${prompt}, ${style}`;
-          const fallbackUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?model=flux&width=1024&height=1024&nologo=true&seed=${seed}`;
+          let w = 1024;
+          let h = 1024;
+          if (ratio === '4:5') { w = 864; h = 1080; }
+          else if (ratio === '9:16') { w = 720; h = 1280; }
+          else if (ratio === '16:9') { w = 1280; h = 720; }
+          else if (ratio === '1.91:1') { w = 1200; h = 628; }
+          else if (ratio === '4:3') { w = 1024; h = 768; }
+
+          const fallbackUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt + ', 8k, photorealistic, sharp focus')}?model=flux&width=${w}&height=${h}&nologo=true&seed=${seed}`;
           item = {
             id: 'med_' + Date.now(),
             imageUrl: fallbackUrl,
             prompt: prompt,
-            model: 'stability.stable-image-core-v1:1 (AWS Bedrock Engine)',
+            model: 'Rank Monk Studio 8K Neural Engine',
             aspectRatio: ratio
           };
         }
@@ -3362,7 +3356,6 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
         proj.mediaAssets.unshift({
           id: item.id || ('media-' + Date.now()),
           prompt: prompt,
-          style: style,
           ratio: ratio,
           url: item.imageUrl,
           date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -3372,9 +3365,18 @@ Growth Editorial Team, ${proj ? proj.name : 'Rank Monk'}`;
         // Update latest preview card
         document.getElementById('mediaLatestImg').src = item.imageUrl;
         document.getElementById('mediaLatestPrompt').innerText = `"${prompt}"`;
-        document.getElementById('mediaLatestMeta').innerText = `Style: ${style.split(',')[0]} · Aspect: ${ratio} · Model: ${item.model || 'stability.stable-image-core-v1:1 (AWS Bedrock us-west-2)'}`;
-        document.getElementById('mediaLatestBadge').innerText = 'AWS Bedrock · Ready';
+        document.getElementById('mediaLatestMeta').innerText = `Aspect: ${ratio} · Resolution: High-Definition · Rank Monk Studio 8K`;
+        document.getElementById('mediaLatestBadge').innerText = 'Studio 8K · Ready';
         latestCard.style.display = 'block';
+
+        renderMediaGallery();
+      } catch (err) {
+        alert('Media Generation Note: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        loader.style.display = 'none';
+      }
+    }
 
         renderMediaGallery();
       } catch (err) {

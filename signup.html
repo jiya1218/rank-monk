@@ -210,12 +210,26 @@
             console.warn('[RankMonk] Remote signup skipped, local workspace activated:', syncErr);
           }
         }
+        var pendingPlan = localStorage.getItem('rankmonk_pending_checkout_plan');
+        var redirectParam = new URLSearchParams(window.location.search).get('redirect');
+        if (pendingPlan || redirectParam === 'pricing') {
+          window.location.href = '/pricing?autoCheckout=1';
+          return;
+        }
+
         if (domain && domain.trim()) {
           window.location.href = 'onboarding?domain=' + encodeURIComponent(domain.trim());
         } else {
           window.location.href = 'onboarding';
         }
       } catch (err) {
+        var pendingPlan = localStorage.getItem('rankmonk_pending_checkout_plan');
+        var redirectParam = new URLSearchParams(window.location.search).get('redirect');
+        if (pendingPlan || redirectParam === 'pricing') {
+          window.location.href = '/pricing?autoCheckout=1';
+          return;
+        }
+
         if (domain && domain.trim()) {
           window.location.href = 'onboarding?domain=' + encodeURIComponent(domain.trim());
         } else {

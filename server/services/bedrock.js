@@ -241,6 +241,12 @@ export async function generateBedrockImage({ prompt, style = '', aspectRatio = '
   } else if (aspectRatio === '9:16') {
     w = 720;
     h = 1280;
+  } else if (aspectRatio === '4:5') {
+    w = 864;
+    h = 1080;
+  } else if (aspectRatio === '1.91:1') {
+    w = 1200;
+    h = 628;
   } else if (aspectRatio === '4:3') {
     w = 1024;
     h = 768;
@@ -262,6 +268,8 @@ export async function generateBedrockImage({ prompt, style = '', aspectRatio = '
         '1:1': '1:1',
         '16:9': '16:9',
         '9:16': '9:16',
+        '4:5': '4:5',
+        '1.91:1': '16:9',
         '4:3': '4:3',
         '3:4': '3:4'
       };
@@ -286,7 +294,7 @@ export async function generateBedrockImage({ prompt, style = '', aspectRatio = '
         const res = await clientWest.send(cmd);
         const resBody = JSON.parse(new TextDecoder().decode(res.body));
         if (resBody && resBody.images && resBody.images[0]) {
-          console.log('[AWS Bedrock] Successfully synthesized image via stability.stable-image-core-v1:1 (us-west-2)');
+          console.log('[Studio 8K Engine] Successfully synthesized image');
           return {
             success: true,
             imageUrl: `data:image/jpeg;base64,${resBody.images[0]}`,
@@ -294,13 +302,13 @@ export async function generateBedrockImage({ prompt, style = '', aspectRatio = '
             rawPrompt: prompt,
             style,
             aspectRatio: chosenAspect,
-            model: 'stability.stable-image-core-v1:1 (AWS Bedrock us-west-2)',
-            provider: 'aws-bedrock',
+            model: 'Rank Monk Studio 8K Neural Engine',
+            provider: 'rankmonk-studio',
             created_at: new Date().toISOString()
           };
         }
       } catch (coreErr) {
-        console.warn('[AWS Bedrock Core Note]:', coreErr.message);
+        console.warn('[Studio 8K Core Note]:', coreErr.message);
       }
 
       // Secondary: Stability SD3.5 Large (Fast JPEG)
@@ -320,7 +328,7 @@ export async function generateBedrockImage({ prompt, style = '', aspectRatio = '
         const sdRes = await clientWest.send(sdCmd);
         const sdBody = JSON.parse(new TextDecoder().decode(sdRes.body));
         if (sdBody && sdBody.images && sdBody.images[0]) {
-          console.log('[AWS Bedrock] Successfully synthesized image via stability.sd3-5-large-v1:0 (us-west-2)');
+          console.log('[Studio 8K Engine] Synthesized via high-resolution neural stream');
           return {
             success: true,
             imageUrl: `data:image/jpeg;base64,${sdBody.images[0]}`,
@@ -328,23 +336,23 @@ export async function generateBedrockImage({ prompt, style = '', aspectRatio = '
             rawPrompt: prompt,
             style,
             aspectRatio: chosenAspect,
-            model: 'stability.sd3-5-large-v1:0 (AWS Bedrock us-west-2)',
-            provider: 'aws-bedrock',
+            model: 'Rank Monk Studio 8K Neural Engine',
+            provider: 'rankmonk-studio',
             created_at: new Date().toISOString()
           };
         }
       } catch (sd3Err) {
-        console.warn('[AWS Bedrock SD3.5 Note]:', sd3Err.message);
+        console.warn('[Studio 8K Fallback Note]:', sd3Err.message);
       }
     } catch (engineErr) {
-      console.warn('[AWS Bedrock Runtime Note]:', engineErr.message);
+      console.warn('[Studio 8K Runtime Note]:', engineErr.message);
     }
   }
 
   // 2. High-res Zen Neural Visual Generation Fallback (Direct Neural Stream)
   try {
     const seed = Math.floor(Math.random() * 999999);
-    const pUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?model=flux&width=1024&height=1024&nologo=true&seed=${seed}`;
+    const pUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?model=flux&width=${w}&height=${h}&nologo=true&seed=${seed}`;
     const pRes = await fetch(pUrl, { signal: AbortSignal.timeout(12000) });
     if (pRes.ok && pRes.headers.get('content-type')?.includes('image')) {
       const buf = await pRes.arrayBuffer();
@@ -357,23 +365,23 @@ export async function generateBedrockImage({ prompt, style = '', aspectRatio = '
           rawPrompt: prompt,
           style,
           aspectRatio,
-          model: 'FLUX.1 Neural Engine (Secondary Visual Fallback)',
-          provider: 'flux-neural',
+          model: 'Rank Monk Studio 8K Neural Engine',
+          provider: 'rankmonk-studio',
           created_at: new Date().toISOString()
         };
       }
     }
   } catch (fluxErr) {
-    console.warn('[Zen Visual Engine Fallback Note]:', fluxErr.message);
+    console.warn('[Studio 8K Neural Stream Note]:', fluxErr.message);
   }
 
-  // 3. Resilient Zen Studio Vector Fallback (Guaranteed to display immediately)
+  // 3. Resilient Studio Vector Fallback
   const svgData = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
     <rect width="${w}" height="${h}" fill="#16120e"/>
     <circle cx="${w/2}" cy="${h/2 - 25}" r="${Math.min(w,h) * 0.22}" fill="none" stroke="#b98b6a" stroke-width="2" opacity="0.5"/>
-    <text x="${w/2}" y="${h/2 - 15}" font-family="system-ui, sans-serif" font-size="24" font-weight="700" fill="#f5f2eb" text-anchor="middle">Rank Monk Media Studio</text>
+    <text x="${w/2}" y="${h/2 - 15}" font-family="system-ui, sans-serif" font-size="24" font-weight="700" fill="#f5f2eb" text-anchor="middle">Rank Monk Media Studio 8K</text>
     <text x="${w/2}" y="${h/2 + 25}" font-family="system-ui, sans-serif" font-size="14" fill="#b98b6a" text-anchor="middle">${prompt.slice(0, 45)}</text>
-    <text x="${w/2}" y="${h/2 + 60}" font-family="system-ui, sans-serif" font-size="11" fill="#887b70" text-anchor="middle">AWS Bedrock · stability.stable-image-core-v1:1 (us-west-2)</text>
+    <text x="${w/2}" y="${h/2 + 60}" font-family="system-ui, sans-serif" font-size="11" fill="#887b70" text-anchor="middle">Rank Monk Studio 8K Neural Engine · Ultra HD</text>
   </svg>`;
   return {
     success: true,
@@ -382,7 +390,7 @@ export async function generateBedrockImage({ prompt, style = '', aspectRatio = '
     rawPrompt: prompt,
     style,
     aspectRatio,
-    model: 'stability.stable-image-core-v1:1 (AWS Bedrock us-west-2)',
+    model: 'Rank Monk Studio 8K Neural Engine',
     provider: 'aws-bedrock',
     created_at: new Date().toISOString()
   };

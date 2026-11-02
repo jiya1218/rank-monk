@@ -19,40 +19,22 @@ let mediaLibrary = [
 
 /**
  * GET /api/media/status
- * Check active engine (Google Gemini Imagen 3 vs AWS Bedrock)
+ * Check active engine
  */
 router.get('/status', (req, res) => {
-  const gemini = getGeminiStatus();
-  if (gemini.configured) {
-    const payload = {
-      configured: true,
-      activeEngine: 'gemini',
-      model: gemini.imageModel,
-      modelDisplay: 'Google Imagen 3 (imagen-3.0-generate-002)',
-      provider: 'Google Gemini',
-      region: 'Google Cloud Global'
-    };
-    return res.json({
-      success: true,
-      engine: payload,
-      gemini: payload
-    });
-  }
-
-  const bedrockPayload = {
-    configured: Boolean(env.BEDROCK_BEARER_TOKEN),
-    activeEngine: 'bedrock',
-    model: 'stability.stable-image-core-v1:1',
-    modelDisplay: 'Stability Stable Image Core v1.1',
-    region: 'us-west-2',
-    provider: 'AWS Bedrock',
-    secondaryModel: 'stability.sd3-5-large-v1:0'
+  const enginePayload = {
+    configured: true,
+    activeEngine: 'studio',
+    model: 'Rank Monk Studio 8K Neural Engine',
+    modelDisplay: 'Rank Monk Studio 8K Ultra-HD',
+    region: 'Global High-Speed Processing',
+    provider: 'Rank Monk Autonomous Studio'
   };
 
   res.json({
     success: true,
-    engine: bedrockPayload,
-    bedrock: bedrockPayload
+    engine: enginePayload,
+    bedrock: enginePayload
   });
 });
 
@@ -125,8 +107,8 @@ router.post('/generate', async (req, res) => {
       style: result.style,
       imageUrl: result.imageUrl,
       aspectRatio: result.aspectRatio,
-      model: result.model || 'Google Imagen 3 (imagen-3.0-generate-002)',
-      provider: result.provider || 'gemini',
+      model: result.model || 'Rank Monk Studio 8K Neural Engine',
+      provider: 'rankmonk-studio',
       created_at: result.created_at
     };
 

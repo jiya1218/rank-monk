@@ -622,18 +622,29 @@
       var plan = (planId || 'seed').toLowerCase();
       var planNames = { seed: 'Seed Tier', grow: 'Grow Tier', scale: 'Scale Tier' };
       var cycle = window.currentCycle || 'monthly';
+
+      // 1. Mandatory Signup / Login Check: User MUST be signed up/logged in before payment
+      var userObj = null;
+      try {
+        var rawUser = localStorage.getItem('rankmonk_active_user_v3');
+        if (rawUser) userObj = JSON.parse(rawUser);
+      } catch (e) {}
+
+      if (!userObj || !userObj.email) {
+        localStorage.setItem('rankmonk_pending_checkout_plan', plan);
+        localStorage.setItem('rankmonk_pending_checkout_cycle', cycle);
+        alert('Please create an account or log in first to activate your ' + (planNames[plan] || plan) + '.');
+        window.location.href = '/signup?redirect=pricing&plan=' + plan + '&cycle=' + cycle;
+        return;
+      }
+
+      var userEmail = userObj.email;
       var originalText = btnElement ? btnElement.innerHTML : '';
 
       if (btnElement) {
         btnElement.disabled = true;
         btnElement.innerHTML = 'Connecting to Razorpay... 🔒';
       }
-
-      var userEmail = 'client@rankmonk.in';
-      try {
-        var userObj = JSON.parse(localStorage.getItem('rankmonk_active_user_v3') || '{}');
-        if (userObj && userObj.email) userEmail = userObj.email;
-      } catch (e) {}
 
       var checkoutData = null;
 
@@ -744,6 +755,29 @@
       var bAnnual = document.getElementById('btnAnnual');
       if (bMonthly) bMonthly.onclick = function(e) { if (e) e.preventDefault(); window.setBillingCycle('monthly'); };
       if (bAnnual) bAnnual.onclick = function(e) { if (e) e.preventDefault(); window.setBillingCycle('annual'); };
+
+      // Auto-trigger pending checkout after signup / login
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var pendingPlan = localStorage.getItem('rankmonk_pending_checkout_plan') || params.get('plan');
+        var pendingCycle = localStorage.getItem('rankmonk_pending_checkout_cycle') || params.get('cycle');
+        var rawUser = localStorage.getItem('rankmonk_active_user_v3');
+        var userObj = rawUser ? JSON.parse(rawUser) : null;
+
+        if (userObj && userObj.email && pendingPlan) {
+          localStorage.removeItem('rankmonk_pending_checkout_plan');
+          localStorage.removeItem('rankmonk_pending_checkout_cycle');
+          if (pendingCycle) window.setBillingCycle(pendingCycle);
+          if (window.history && window.history.replaceState) {
+            window.history.replaceState(null, '', '/pricing');
+          }
+          setTimeout(function() {
+            var btnId = pendingPlan === 'seed' ? 'btnPlanSeed' : (pendingPlan === 'scale' ? 'btnPlanScale' : 'btnPlanGrow');
+            var btn = document.getElementById(btnId);
+            window.openRazorpayCheckout(pendingPlan, btn);
+          }, 400);
+        }
+      } catch(e) {}
     });
   </script>
 </body>
