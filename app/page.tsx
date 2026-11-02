@@ -275,94 +275,207 @@ export default function HomePage() {
 
       <main>
         {/* ==========================================================================
-             2. HERO SECTION WITH SPLIT GRID & CLIMB CARD SIDE-BY-SIDE
+             2. HERO SECTION WITH SPLIT GRID & AUTONOMOUS COMMAND CENTER PREVIEW
              ========================================================================== */}
-        <section className="section hero-section" id="heroSection">
+        <section className="section hero-section relative overflow-hidden py-12 lg:py-20" id="heroSection">
           <HeroCanvas />
 
-          <div className="container hero-content">
-            <div className="hero-split-grid">
-              {/* LEFT COLUMN: Headline & Scanner */}
-              <div className="hero-text-col">
-                <span className="eyebrow">Content • Social • Search • AI Visibility</span>
-                <h1 className="hero-headline">
-                  Get found by people.<br />
-                  <span className="accent">Get chosen by AI.</span>
-                </h1>
-                <p className="lead">
-                  Rank Monk writes your blogs, schedules your posts, makes your visuals and fixes your SEO, so you stop juggling five tools and start getting noticed.
-                </p>
-
-                <div className="hero-actions flex items-center gap-3 flex-wrap">
-                  {user ? (
-                    <button onClick={handleDashboardClick} className="btn btn-primary" style={{ padding: '12px 26px', fontSize: '0.95rem', cursor: 'pointer', border: 'none' }}>
-                      Go to Dashboard →
-                    </button>
-                  ) : (
-                    <button onClick={() => setPricingModalOpen(true)} className="btn btn-primary" style={{ padding: '12px 26px', fontSize: '0.95rem', cursor: 'pointer', border: 'none' }}>
-                      Start climbing for ₹10,000
-                    </button>
-                  )}
-                  <a className="btn btn-ghost" href="#live-pipeline" style={{ padding: '12px 24px', fontSize: '0.95rem' }}>
-                    See live demo
-                  </a>
+          <div className="container relative z-10 mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+              {/* LEFT COLUMN: Headline, Value Proposition & Instant Scanner */}
+              <div className="lg:col-span-7 flex flex-col items-start text-left">
+                {/* Eyebrow Pill */}
+                <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#f4ebe0] border border-[#d6be96]/60 shadow-xs mb-5">
+                  <span className="w-2 h-2 rounded-full bg-[#c5a059] animate-pulse" />
+                  <span className="text-[11px] font-black uppercase tracking-wider text-[#8c6b2d]">
+                    Content • Social • Search • AI Citations
+                  </span>
                 </div>
 
-                {/* Instant Domain Scanner */}
-                <div className="hero-scanner-wrap" id="hero-scanner" style={{ marginTop: '28px' }}>
-                  <form className="scanner-box" id="heroScannerForm" onSubmit={handleDomainScan}>
-                    <div className="scanner-prefix-icon">
-                      <span>⌘ /</span>
+                {/* Hero Headline */}
+                <h1 className="font-editorial text-4xl sm:text-5xl lg:text-[58px] font-bold text-[#2b1b12] leading-[1.08] tracking-tight mb-5">
+                  Get found by people.<br />
+                  <span className="italic font-normal text-[#8c6b2d]">Get chosen by AI.</span>
+                </h1>
+
+                {/* Hero Lead Text */}
+                <p className="text-sm sm:text-base text-[#6f5a4c] leading-relaxed max-w-xl mb-7">
+                  Rank Monk writes your blogs, schedules your multi-channel posts, engineers your visuals, and fixes your SEO—so you stop juggling five disconnected tools and start dominating modern organic search.
+                </p>
+
+                {/* Primary Interactive Centerpiece: The Instant Domain Scanner */}
+                <div className="w-full max-w-xl mb-6">
+                  <form
+                    onSubmit={handleDomainScan}
+                    className="flex flex-col sm:flex-row items-stretch sm:items-center p-1.5 bg-[#fffcf7] border-2 border-[#e4d6c6] focus-within:border-[#2b1b12] rounded-2xl shadow-card transition-all gap-2 sm:gap-0"
+                  >
+                    <div className="hidden sm:flex items-center pl-3 pr-2 text-[#8c6b2d]">
+                      <span className="text-xs font-mono font-bold bg-[#f4ebe0] px-2 py-1 rounded-md border border-[#e4d6c6]">
+                        ⌘ /
+                      </span>
                     </div>
                     <input
                       type="text"
-                      id="heroScannerInput"
-                      className="scanner-input"
                       value={domainInput}
                       onChange={(e) => setDomainInput(e.target.value)}
-                      placeholder="Enter your domain to analyze (e.g. stripe.com)"
+                      placeholder="Enter your website domain (e.g. stripe.com)"
+                      className="flex-1 bg-transparent border-none text-xs sm:text-sm text-[#2b1b12] placeholder-[#a89587] font-medium focus:outline-none px-3 py-2 sm:py-0"
                       required
                     />
-                    <button type="submit" className="scanner-btn cursor-pointer">
+                    <button
+                      type="submit"
+                      className="px-5 py-3 rounded-xl bg-[#2b1b12] hover:bg-[#3d271a] text-[#fffcf7] text-xs sm:text-sm font-bold shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0"
+                    >
                       <span>Analyze Domain</span>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                      <span className="text-[#c5a059]">⚡</span>
                     </button>
                   </form>
 
-                  <div className="scanner-quick-chips">
-                    <span className="scanner-quick-label">Try instant scan:</span>
-                    <button type="button" className="scanner-chip" onClick={() => quickFillDomain('stripe.com')}>stripe.com</button>
-                    <button type="button" className="scanner-chip" onClick={() => quickFillDomain('linear.app')}>linear.app</button>
-                    <button type="button" className="scanner-chip" onClick={() => quickFillDomain('notion.so')}>notion.so</button>
+                  {/* Quick Chips */}
+                  <div className="flex items-center gap-2 mt-3 text-xs text-[#6f5a4c] flex-wrap">
+                    <span className="font-semibold text-[11px] uppercase tracking-wider text-[#a89587]">
+                      Try instant scan:
+                    </span>
+                    {['stripe.com', 'linear.app', 'notion.so', 'swiggy.com'].map((d) => (
+                      <button
+                        key={d}
+                        type="button"
+                        onClick={() => quickFillDomain(d)}
+                        className="px-2.5 py-1 rounded-lg bg-white border border-[#e4d6c6] hover:border-[#8c6b2d] hover:text-[#2b1b12] text-xs transition-colors cursor-pointer text-[#6f5a4c]"
+                      >
+                        {d}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
-                <p className="hero-note" style={{ marginTop: '16px' }}>
-                  <strong>No agency retainers.</strong> Plans from ₹10,000 a month. Cancel anytime.
-                </p>
+                {/* Harmonious Secondary Actions & Trust Line */}
+                <div className="flex items-center gap-4 text-xs text-[#6f5a4c] flex-wrap">
+                  {user ? (
+                    <button
+                      onClick={handleDashboardClick}
+                      className="px-5 py-2.5 rounded-xl bg-[#2b1b12] text-white font-bold text-xs shadow-sm hover:bg-[#3d271a] transition-all cursor-pointer flex items-center gap-2"
+                    >
+                      <span>Open Dashboard</span>
+                      <span>→</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setPricingModalOpen(true)}
+                      className="px-5 py-2.5 rounded-xl bg-white border border-[#2b1b12] text-[#2b1b12] font-bold text-xs hover:bg-[#fbf8f3] transition-all cursor-pointer shadow-xs"
+                    >
+                      Plans from ₹10,000/mo
+                    </button>
+                  )}
+                  <a
+                    href="#live-pipeline"
+                    className="font-bold text-xs text-[#8c6b2d] hover:text-[#2b1b12] flex items-center gap-1 underline underline-offset-4"
+                  >
+                    <span>See live demo</span>
+                    <span>↓</span>
+                  </a>
+                  <span className="text-[#c8b6a6] hidden sm:inline">•</span>
+                  <span className="text-[11px] text-[#6f5a4c]">No agency retainers. Cancel anytime.</span>
+                </div>
               </div>
 
-              {/* RIGHT COLUMN: The Climb Card (Side-by-side with headline on desktop) */}
-              <div className="hero-visual-col" id="heroVisualCol">
-                <div className="climb-card" aria-hidden="true">
-                  <div className="climb-top">
-                    <small>Organic visibility</small>
-                    <span className="pill-up">▲ 4.8x</span>
-                  </div>
-                  <div className="bars">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                  </div>
-                  <div className="climb-foot">
-                    <div>Months with Rank Monk<strong>6</strong></div>
-                    <div style={{ textAlign: 'right' }}>Average gain<strong>+212%</strong></div>
-                  </div>
-                  <div className="float-chip">
-                    <b>Cited by AI</b>
-                    Your brand now appears in 38 AI answers this month.
+              {/* RIGHT COLUMN: Autonomous Growth Command Center Preview */}
+              <div className="lg:col-span-5 w-full">
+                <div className="relative w-full max-w-md mx-auto">
+                  {/* Subtle ambient aura */}
+                  <div className="absolute -inset-2 bg-gradient-to-r from-[#d6be96]/40 via-[#c5a059]/20 to-[#a48374]/30 rounded-3xl blur-xl opacity-60 pointer-events-none" />
+
+                  {/* Main Product Stage Card */}
+                  <div className="relative bg-[#fffcf7] border border-[#e4d6c6] rounded-3xl p-6 shadow-2xl space-y-5">
+                    {/* Top Status Header */}
+                    <div className="flex items-center justify-between pb-3.5 border-b border-[#ebd8c5]">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-xl bg-[#2b1b12] text-[#c5a059] flex items-center justify-center font-bold text-xs shadow-xs">
+                          RM
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-xs text-[#2b1b12]">Organic Growth Velocity</h3>
+                          <p className="text-[10px] text-[#6f5a4c] flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            <span>Autonomous AI Calibration Active</span>
+                          </p>
+                        </div>
+                      </div>
+                      <span className="px-2.5 py-1 rounded-full text-[11px] font-black uppercase bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        ▲ 4.8x Velocity
+                      </span>
+                    </div>
+
+                    {/* Stepped Citations Velocity Chart */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-[11px] font-bold text-[#6f5a4c]">
+                        <span>Citations & Search Visibility</span>
+                        <span className="text-[#8c6b2d] font-black">+212% Average Gain</span>
+                      </div>
+
+                      <div className="h-36 flex items-end gap-3.5 pt-4 pb-2 px-2 border-b border-[#e4d6c6]">
+                        {[
+                          { month: 'M1', h: '28%', val: '4 cit.' },
+                          { month: 'M2', h: '42%', val: '9 cit.' },
+                          { month: 'M3', h: '58%', val: '18 cit.' },
+                          { month: 'M4', h: '74%', val: '26 cit.' },
+                          { month: 'M5', h: '88%', val: '32 cit.' },
+                          { month: 'M6', h: '100%', val: '38 cit.', peak: true },
+                        ].map((bar) => (
+                          <div key={bar.month} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group">
+                            <span className="text-[9px] font-bold text-[#8c6b2d] opacity-0 group-hover:opacity-100 transition-opacity">
+                              {bar.val}
+                            </span>
+                            <div
+                              style={{ height: bar.h }}
+                              className={`w-full rounded-t-lg transition-all duration-300 group-hover:scale-y-105 ${
+                                bar.peak
+                                  ? 'bg-gradient-to-t from-[#2b1b12] to-[#7a5242] shadow-sm'
+                                  : 'bg-gradient-to-t from-[#d8c09e] to-[#b98b6a]'
+                              }`}
+                            />
+                            <span className={`text-[10px] font-bold ${bar.peak ? 'text-[#2b1b12]' : 'text-[#6f5a4c]'}`}>
+                              {bar.month}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Real-Time AI Citations Badges */}
+                    <div className="grid grid-cols-3 gap-2 pt-1">
+                      <div className="bg-[#fbf8f3] border border-[#e4d6c6] rounded-xl p-2.5 text-center">
+                        <div className="text-[10px] font-black uppercase text-[#8c6b2d]">ChatGPT</div>
+                        <div className="text-xs font-bold text-[#2b1b12] mt-0.5">Top Answer</div>
+                        <div className="text-[9px] text-emerald-600 font-semibold">● Cited</div>
+                      </div>
+                      <div className="bg-[#fbf8f3] border border-[#e4d6c6] rounded-xl p-2.5 text-center">
+                        <div className="text-[10px] font-black uppercase text-[#8c6b2d]">Claude</div>
+                        <div className="text-xs font-bold text-[#2b1b12] mt-0.5">Primary Source</div>
+                        <div className="text-[9px] text-emerald-600 font-semibold">● Cited</div>
+                      </div>
+                      <div className="bg-[#fbf8f3] border border-[#e4d6c6] rounded-xl p-2.5 text-center">
+                        <div className="text-[10px] font-black uppercase text-[#8c6b2d]">Perplexity</div>
+                        <div className="text-xs font-bold text-[#2b1b12] mt-0.5">Verified URL</div>
+                        <div className="text-[9px] text-emerald-600 font-semibold">● Cited</div>
+                      </div>
+                    </div>
+
+                    {/* High-Impact Overlapping Live Status Chip */}
+                    <div className="bg-[#2b1b12] text-[#fffcf7] p-3.5 rounded-2xl shadow-xl flex items-center justify-between gap-3 border border-[#c5a059]/40">
+                      <div>
+                        <div className="text-xs font-bold text-[#c5a059] flex items-center gap-1.5">
+                          <span>✨ Cited by AI</span>
+                          <span className="text-[10px] px-1.5 py-0.2 bg-emerald-500/20 text-emerald-300 rounded font-bold">
+                            Live
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-[#e4d6c6] mt-0.5">
+                          Your brand now appears in <strong>38 AI answers</strong> this month.
+                        </div>
+                      </div>
+                      <span className="text-lg">📈</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -723,6 +836,7 @@ export default function HomePage() {
       {/* Connect Domain Modal */}
       <ConnectDomainModal
         isOpen={connectModalOpen}
+        initialDomain={domainInput}
         onClose={() => setConnectModalOpen(false)}
         onSuccess={() => {
           setConnectModalOpen(false);

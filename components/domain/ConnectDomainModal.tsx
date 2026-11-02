@@ -6,14 +6,15 @@ import { useRouter } from 'next/navigation';
 
 interface ConnectDomainModalProps {
   isOpen: boolean;
+  initialDomain?: string;
   onClose?: () => void;
   onSuccess?: (project: any) => void;
 }
 
-export function ConnectDomainModal({ isOpen, onClose, onSuccess }: ConnectDomainModalProps) {
+export function ConnectDomainModal({ isOpen, initialDomain, onClose, onSuccess }: ConnectDomainModalProps) {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
-  const [domainInput, setDomainInput] = useState('');
+  const [domainInput, setDomainInput] = useState(initialDomain || '');
   const [loading, setLoading] = useState(false);
   const [stepText, setStepText] = useState('');
   const [error, setError] = useState('');
@@ -21,6 +22,12 @@ export function ConnectDomainModal({ isOpen, onClose, onSuccess }: ConnectDomain
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (initialDomain) {
+      setDomainInput(initialDomain);
+    }
+  }, [initialDomain, isOpen]);
 
   if (!isOpen || !mounted) return null;
 
