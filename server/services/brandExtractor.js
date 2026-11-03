@@ -217,13 +217,6 @@ export function findLogoUrl(html, baseUrl, brandName, domainName) {
     }
   }
 
-  if (cleanDom.includes('scalezix')) {
-    return null; // Scalezix uses typographic wordmark Scalezix↗, never an icon
-  }
-  if (cleanDom.includes('solospider')) {
-    return `https://${cleanDom}/assets/solospider-logo.png`;
-  }
-
   const candidates = [];
 
   // Scan img tags (favicons & apple-touch-icons are strictly excluded; a favicon is not a logo)
@@ -376,8 +369,8 @@ export function findLogoUrl(html, baseUrl, brandName, domainName) {
     return decodeEntities(makeAbsolute(ogImageM[1], baseUrl));
   }
 
-  // If no authentic image logo is verified in HTML or JSON-LD, return null so wordmark is used
-  return null;
+  // If no authentic image logo is verified in HTML or JSON-LD, return standard domain logo asset
+  return makeAbsolute('/logo.png', baseUrl);
 }
 
 /**

@@ -105,7 +105,7 @@ export default function DashboardPage() {
           }
         }
 
-        // Cleanse Logo vs Favicon distinction (a favicon is a browser tab icon, never a brand logo!)
+        // Cleanse legacy favicon stored as logoUrl so dynamic scraper takes precedence
         const isFaviconUrl = (url: string | null | undefined) => {
           if (!url) return false;
           const l = url.toLowerCase();
@@ -123,21 +123,10 @@ export default function DashboardPage() {
                  url === p.faviconUrl;
         };
 
-        if (p.domain && p.domain.toLowerCase().includes('scalezix')) {
-          if (p.logoUrl !== null || p.wordmark !== 'Scalezix↗' || !p.faviconUrl) {
-            p.wordmark = 'Scalezix↗';
-            p.logoUrl = null; // Scalezix uses typographic wordmark in header, not an icon image
-            p.faviconUrl = 'https://scalezix.com/apple-touch-icon.png';
-            updated = true;
-          }
-        } else if (p.domain && p.domain.toLowerCase().includes('solospider')) {
-          if (p.logoUrl !== 'https://solospider.ai/assets/solospider-logo.png' || p.faviconUrl !== 'https://solospider.ai/favicon.ico') {
-            p.logoUrl = 'https://solospider.ai/assets/solospider-logo.png';
-            p.wordmark = 'SoloSpider';
-            p.faviconUrl = 'https://solospider.ai/favicon.ico';
-            updated = true;
-          }
-        } else if (isFaviconUrl(p.logoUrl)) {
+        if (isFaviconUrl(p.logoUrl)) {
+          p.logoUrl = null;
+          updated = true;
+        }
           p.logoUrl = null;
           if (!p.wordmark) p.wordmark = p.name || p.domain;
           updated = true;
