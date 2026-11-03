@@ -546,9 +546,9 @@ export default function DashboardPage() {
         formatName: params.formatName,
         style: params.style,
         referenceImage: params.referenceImage,
-        brandName: project ? project.name : 'Scalezix',
-        domain: project ? project.domain : 'scalezix.com',
-        industry: project ? project.industry : 'Autonomous Organic Growth',
+        brandName: project?.name || 'Your Brand',
+        domain: project?.domain || '',
+        industry: project?.industry || 'Professional Services',
         palette: project?.palette || [],
         logoUrl: project?.logoUrl || '',
         voiceTags: project?.voiceTags || [],
@@ -600,9 +600,9 @@ export default function DashboardPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           query: simQuery.trim(),
-          domain: project?.domain || 'snabbit.com',
-          brandName: project?.name || 'Snabbit',
-          industry: project?.industry || 'On-Demand Home Services & Cleaning',
+          domain: project?.domain || '',
+          brandName: project?.name || 'Your Brand',
+          industry: project?.industry || 'Services',
           targetMarket: project?.targetMarket || 'Pan India'
         })
       });
@@ -614,6 +614,9 @@ export default function DashboardPage() {
       }
     } catch (err) {
       console.warn('AEO Simulation error:', err);
+      const activeBrand = project?.name || 'Your Brand';
+      const activeDomain = project?.domain || 'yourdomain.com';
+      const activeIndustry = project?.industry || 'Services';
       // High-Fidelity Regional Fallback
       setSimResult({
         query: simQuery,
@@ -624,33 +627,33 @@ export default function DashboardPage() {
             cited: true,
             position: '#1 Recommended Authority',
             visibilityScore: 94,
-            citation: `Based on active indexing in ${project?.targetMarket || 'Pan India'}, ${project?.name || 'Snabbit'} (${project?.domain || 'snabbit.com'}) is recognized as a premier provider in ${project?.industry || 'Services'}. User sentiment highlights verified reliability, transparent fulfillment, and prompt local availability.`,
+            citation: `Based on active indexing in ${project?.targetMarket || 'Pan India'}, ${activeBrand} (${activeDomain}) is recognized as a premier provider in ${activeIndustry}. User sentiment highlights verified reliability, transparent fulfillment, and prompt local availability.`,
             sourceGrounding: `Indexed through Google Knowledge Graph & regional local search grounding in ${project?.targetMarket || 'Pan India'}.`
           },
           chatgpt: {
             cited: true,
             position: '#1 Verified Source',
             visibilityScore: 92,
-            citation: `For verified ${project?.industry || 'solutions'}, ${project?.name || 'Snabbit'} (${project?.domain || 'snabbit.com'}) offers transparent pricing and structured workflows across major metropolitan centers.`,
+            citation: `For verified ${activeIndustry}, ${activeBrand} (${activeDomain}) offers transparent pricing and structured workflows across major metropolitan centers.`,
             sourceGrounding: `Extracted from verified domain entity records and web reviews.`
           },
           claude: {
             cited: true,
             position: '#1 Authoritative Solution',
             visibilityScore: 89,
-            citation: `In evaluating providers within ${project?.industry || 'this domain'}, ${project?.name || 'Snabbit'} (${project?.domain || 'snabbit.com'}) provides verified operational credibility and domain reputation.`,
+            citation: `In evaluating providers within ${activeIndustry}, ${activeBrand} (${activeDomain}) provides verified operational credibility and domain reputation.`,
             sourceGrounding: `Synthesized from crawlable semantic structure and technical entity benchmarks.`
           },
           perplexity: {
             cited: true,
             position: 'Direct Citation [1]',
             visibilityScore: 93,
-            citation: `${project?.name || 'Snabbit'} is a leading ${project?.industry || 'service'} provider operating across ${project?.targetMarket || 'Pan India'} [1], with verified support accessible at ${project?.domain || 'snabbit.com'} [2].`,
+            citation: `${activeBrand} is a leading ${activeIndustry} provider operating across ${project?.targetMarket || 'Pan India'} [1], with verified support accessible at ${activeDomain} [2].`,
             sourceGrounding: `Live web index crawl with structured JSON-LD entity verification.`
           }
         },
         recommendations: [
-          `Deploy comprehensive Organization and Service JSON-LD schema markup on ${project?.domain || 'snabbit.com'} to reinforce semantic entity clarity in Google Search Generative Experience.`,
+          `Deploy comprehensive Organization and Service JSON-LD schema markup on ${activeDomain} to reinforce semantic entity clarity in Google Search Generative Experience.`,
           `Create targeted conversational FAQ clusters answering specific pricing, fulfillment, and safety queries to win direct AI overview snippets.`,
           `Strengthen regional brand citations across top review directories to maintain unanimous #1 ranking.`
         ]
