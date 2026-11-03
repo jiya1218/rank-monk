@@ -820,13 +820,13 @@ export default function DashboardPage() {
                 { id: 'overview', label: 'Dashboard', icon: '📊' },
                 { id: 'brand', label: 'Branding', icon: '🎨' },
                 { id: 'audit', label: 'SEO', icon: '🔍' },
-                { id: 'blogs', label: 'Blogs', icon: '✍️' },
-                { id: 'backlinks', label: 'Backlinks', icon: '🔗' },
+                { id: 'blogs', label: 'Blogs', icon: '✍️', isComingSoon: true },
+                { id: 'backlinks', label: 'Backlinks', icon: '🔗', isComingSoon: true },
                 { id: 'social', label: 'Social Media', icon: '📱' },
                 { id: 'aeo', label: 'AEO / GEO', icon: '⚡' },
                 { id: 'media', label: 'Media Studio', icon: '🖼️', badge: 'BETA' },
-                { id: 'reports', label: 'Reports', icon: '📈' },
-                { id: 'tracking', label: 'Rank Tracking', icon: '🎯' },
+                { id: 'reports', label: 'Reports', icon: '📈', isComingSoon: true },
+                { id: 'tracking', label: 'Rank Tracking', icon: '🎯', isComingSoon: true },
                 { id: 'integrations', label: 'Integrations', icon: '🔌' },
                 { id: 'settings', label: 'Settings', icon: '⚙️' },
               ].map((tab) => (
@@ -835,21 +835,34 @@ export default function DashboardPage() {
                   onClick={() => {
                     setActiveTab(tab.id as any);
                   }}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     activeTab === tab.id || (tab.id === 'overview' && activeTab === 'overview')
                       ? 'bg-[#2b1b12] text-[#fffcf7] shadow-sm'
                       : 'text-[#6f5a4c] hover:bg-white hover:text-[#2b1b12]'
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm">{tab.icon}</span>
-                    <span>{tab.label}</span>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-sm shrink-0">{tab.icon}</span>
+                    <span className="truncate">{tab.label}</span>
+                    {tab.isComingSoon && (
+                      <span className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-tight shrink-0 transition-colors ${
+                        activeTab === tab.id
+                          ? 'bg-amber-400 text-[#2b1b12]'
+                          : 'bg-amber-100 text-amber-800 border border-amber-300'
+                      }`}>
+                        Coming Soon
+                      </span>
+                    )}
+                    {tab.badge && (
+                      <span className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase shrink-0 transition-colors ${
+                        activeTab === tab.id
+                          ? 'bg-purple-300 text-purple-950'
+                          : 'bg-purple-100 text-purple-700 border border-purple-200'
+                      }`}>
+                        {tab.badge}
+                      </span>
+                    )}
                   </div>
-                  {tab.badge && (
-                    <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase bg-purple-500 text-white">
-                      {tab.badge}
-                    </span>
-                  )}
                 </button>
               ))}
             </nav>

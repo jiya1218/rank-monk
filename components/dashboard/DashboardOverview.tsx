@@ -18,8 +18,7 @@ import {
   Globe,
   ExternalLink,
   ChevronRight,
-  ShieldCheck,
-  Check
+  ShieldCheck
 } from 'lucide-react';
 
 interface DashboardOverviewProps {
@@ -33,26 +32,13 @@ export function DashboardOverview({ project, user, onNavigateTab }: DashboardOve
   const [gscConnected, setGscConnected] = useState(false);
   const [connectingGsc, setConnectingGsc] = useState(false);
 
-  // Issues State with interactive 1-click Fixes
-  const [issues, setIssues] = useState([
-    { id: 'dup-titles', text: '2 pages have duplicate title tags', severity: 'Medium', fixed: false },
-    { id: 'meta-desc', text: '10 pages are missing meta descriptions', severity: 'Medium', fixed: false },
-    { id: 'alt-text', text: '21 pages are missing alt text', severity: 'Low', fixed: false },
-    { id: 'schema', text: '5 pages lack structured JSON-LD schema', severity: 'Low', fixed: false }
+  // Top SEO Issues State
+  const [issues] = useState([
+    { id: 'dup-titles', text: '2 pages have duplicate title tags', severity: 'Medium' },
+    { id: 'meta-desc', text: '10 pages are missing meta descriptions', severity: 'Medium' },
+    { id: 'alt-text', text: '21 pages are missing alt text', severity: 'Low' },
+    { id: 'schema', text: '5 pages lack structured JSON-LD schema', severity: 'Low' }
   ]);
-  const [fixingIssueId, setFixingIssueId] = useState<string | null>(null);
-  const [fixSuccessNotice, setFixSuccessNotice] = useState<string | null>(null);
-
-  // Handle 1-click AI Issue Fix
-  const handleFixIssue = (issueId: string, issueText: string) => {
-    setFixingIssueId(issueId);
-    setTimeout(() => {
-      setIssues(prev => prev.map(item => item.id === issueId ? { ...item, fixed: true } : item));
-      setFixingIssueId(null);
-      setFixSuccessNotice(`✓ AI successfully generated remedy for "${issueText}"!`);
-      setTimeout(() => setFixSuccessNotice(null), 4000);
-    }, 900);
-  };
 
   // Handle Google Search Console Connection
   const handleConnectGsc = () => {
@@ -103,13 +89,6 @@ export function DashboardOverview({ project, user, onNavigateTab }: DashboardOve
           </button>
         </div>
       </div>
-
-      {fixSuccessNotice && (
-        <div className="p-3.5 bg-[#eef7ec] border border-[#84e1bc] rounded-xl text-xs text-[#03543f] font-semibold flex items-center justify-between shadow-sm animate-fade-in">
-          <span>{fixSuccessNotice}</span>
-          <button onClick={() => setFixSuccessNotice(null)} className="text-[#03543f] font-bold">✕</button>
-        </div>
-      )}
 
       {/* 2. Top Metric Cards Row (5 Cards exactly like SoloSpider) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -310,42 +289,29 @@ export function DashboardOverview({ project, user, onNavigateTab }: DashboardOve
               {issues.map((issue) => (
                 <div
                   key={issue.id}
-                  className={`p-3 rounded-xl border text-xs flex items-center justify-between gap-2 transition-all ${
-                    issue.fixed
-                      ? 'bg-[#eef7ec] border-[#84e1bc]'
-                      : 'bg-[#f8f3ec] border-[#e4d6c6]'
-                  }`}
+                  className="p-3 rounded-xl border text-xs flex items-center justify-between gap-2 bg-[#f8f3ec] border-[#e4d6c6] hover:border-[#c5a059] transition-all"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    {issue.fixed ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    ) : (
-                      <FileText className="w-4 h-4 text-amber-500 shrink-0" />
-                    )}
+                    <FileText className="w-4 h-4 text-amber-500 shrink-0" />
                     <div className="min-w-0">
-                      <p className={`font-semibold truncate ${issue.fixed ? 'text-[#03543f] line-through' : 'text-[#2b1b12]'}`}>
+                      <p className="font-semibold truncate text-[#2b1b12]">
                         {issue.text}
                       </p>
-                      <span className="text-[10px] font-bold text-amber-600">
-                        • {issue.severity}
+                      <span className="text-[10px] font-bold text-amber-700">
+                        • {issue.severity} Priority
                       </span>
                     </div>
                   </div>
 
-                  {issue.fixed ? (
-                    <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[10px] font-bold shrink-0">
-                      Fixed ✓
-                    </span>
-                  ) : (
-                    <button
-                      type="button"
-                      disabled={fixingIssueId === issue.id}
-                      onClick={() => handleFixIssue(issue.id, issue.text)}
-                      className="px-2.5 py-1 bg-[#2b1b12] hover:bg-[#3b2519] text-[#fffcf7] rounded-lg text-[11px] font-bold shrink-0 transition-all cursor-pointer disabled:opacity-60"
-                    >
-                      {fixingIssueId === issue.id ? 'Fixing...' : 'Fix Now'}
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => onNavigateTab('audit')}
+                    className="px-2.5 py-1 bg-white hover:bg-[#ebdcc8] text-[#2b1b12] border border-[#d8c09e] rounded-lg text-[10px] font-bold shrink-0 transition-all cursor-pointer flex items-center gap-1"
+                    title="View details in SEO Audit"
+                  >
+                    <span>Inspect</span>
+                    <ChevronRight className="w-3 h-3 text-[#6f5a4c]" />
+                  </button>
                 </div>
               ))}
             </div>
@@ -501,9 +467,9 @@ export function DashboardOverview({ project, user, onNavigateTab }: DashboardOve
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
-            { id: 'audit', title: 'SEO', desc: 'Audit, fix, and optimize your website for search engines.', icon: Search, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-            { id: 'blogs', title: 'Blogs', desc: 'Create SEO-optimized blogs with AI and auto-publish.', icon: FileText, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-            { id: 'backlinks', title: 'Backlinks', desc: 'Build quality backlinks and improve domain authority.', icon: LinkIcon, color: 'text-blue-600', bg: 'bg-blue-50' },
+            { id: 'audit', title: 'SEO', desc: 'Audit, inspect, and optimize your website for search engines.', icon: Search, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+            { id: 'blogs', title: 'Blogs', desc: 'Create SEO-optimized blogs with AI and auto-publish.', icon: FileText, color: 'text-indigo-600', bg: 'bg-indigo-50', isComingSoon: true },
+            { id: 'backlinks', title: 'Backlinks', desc: 'Build quality backlinks and improve domain authority.', icon: LinkIcon, color: 'text-blue-600', bg: 'bg-blue-50', isComingSoon: true },
             { id: 'social', title: 'Social Media', desc: 'Create, schedule & publish across all social platforms.', icon: Share2, color: 'text-pink-600', bg: 'bg-pink-50' },
             { id: 'aeo', title: 'AEO / GEO', desc: 'Improve visibility in AI search engines & generative AI.', icon: Sparkles, color: 'text-[#c5a059]', bg: 'bg-[#f1e8dc]' },
             { id: 'media', title: 'Media Studio', desc: 'Generate images, videos & creatives with AI.', isBeta: true, icon: ImageIcon, color: 'text-purple-600', bg: 'bg-purple-50' },
@@ -522,10 +488,20 @@ export function DashboardOverview({ project, user, onNavigateTab }: DashboardOve
                     BETA
                   </span>
                 )}
+                {mod.isComingSoon && (
+                  <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-black uppercase tracking-wider border border-amber-200">
+                    Coming Soon
+                  </span>
+                )}
               </div>
               <div>
                 <h4 className="font-bold text-sm text-[#2b1b12] group-hover:text-[#c5a059] transition-colors flex items-center gap-1.5">
                   {mod.title}
+                  {mod.isComingSoon && (
+                    <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase bg-amber-100 text-amber-800 border border-amber-300">
+                      Coming Soon
+                    </span>
+                  )}
                   <ArrowUpRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </h4>
                 <p className="text-xs text-[#6f5a4c] mt-1 leading-relaxed">

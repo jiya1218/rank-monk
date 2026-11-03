@@ -45,7 +45,10 @@ You MUST specify a stunning 3D conceptual visual metaphor tailored to their exac
 - If prompt is about Strategy / Outsmarting Competition: 3D translucent glowing sapphire blue glass chess king standing tall over defeated metallic silver pawns.
 - If prompt is about other tech topics: Craft a custom, sleek 3D conceptual metaphor matching their exact topic with soft ambient studio lighting.
 DO NOT describe stock photos of humans sitting in conference rooms or offices.`
-      : `VISUAL STYLE: High-end commercial advertising photography depicting authentic real-world specialists and service delivery in clean, modern, well-lit environments with sharp focus, natural contrast, 8k resolution.`;
+      : `VISUAL STYLE REQUIREMENT (SERVICES / HOME / CONSUMER / COMMERCE):
+Specify a breathtaking, ultra-premium commercial advertising hero scene representing their service or product in a pristine, sunlit, modern luxury environment with natural contrast, 8k resolution, razor-sharp focus.
+- If prompt is about Cleaning / Home Services: A sunlit, spotless modern luxury living room and kitchen, gleaming marble countertops, sparkling clean surfaces, architectural digest photography, 8k resolution, razor-sharp focus.
+- If prompt is about other businesses: Tailor a high-end commercial advertising hero photograph representing the service or product with sharp focus and cinematic lighting.`;
 
     const systemPrompt = `You are a world-class advertising creative director at an elite digital agency.
 A client needs an Instagram commercial marketing post for:
@@ -60,6 +63,17 @@ ${params.referenceImage ? `- NOTE: The user has attached a brand styling referen
 
 ${visualGuidance}
 
+CRITICAL RULE FOR "visualPrompt":
+The visual prompt will be sent directly to an AI image diffusion model to generate the central hero visual ONLY.
+Our graphic design layout engine will automatically overlay all typography, headlines, logo, pill badges, and footer.
+THEREFORE:
+- "visualPrompt" MUST describe ONLY the central visual or photographic subject.
+- DO NOT mention text, typography, letters, words, font names, or writing.
+- DO NOT mention logos, brand names, or watermarks.
+- DO NOT mention split-screen, grid, collage, multiple panels, or 4-box layout.
+- DO NOT mention rating stars, banners, buttons, or UI wireframes.
+- Ensure the prompt requests: "single seamless composition, razor-sharp focus, 8k resolution, cinematic lighting, no text, no watermarks, no split screen, no collage".
+
 Read the user's prompt carefully and honor their exact request.
 Transform their idea into a high-converting marketing post and generate a detailed visual scene prompt for the image generator reflecting their request.
 
@@ -67,13 +81,13 @@ Return a raw JSON object (strictly valid JSON, no markdown, no backticks):
 {
   "headline": "A punchy, catchy 3-6 word marketing headline tailored directly to their prompt",
   "subheadline": "A clear 1-2 sentence value proposition tailored to their prompt",
-  "badge": "A 2-4 word promotional pill badge (e.g. AI AGENTS • BUILT FOR BUSINESS, ZERO-TRUST DEFENSE, WEB ARCHITECTURE)",
+  "badge": "A 2-4 word promotional pill badge (e.g. ON-DEMAND SERVICE, AI AGENTS • BUILT FOR BUSINESS, ZERO-TRUST DEFENSE)",
   "cta": "Engaging call to action with emoji",
-  "visualPrompt": "A highly detailed visual scene prompt strictly adhering to the VISUAL STYLE REQUIREMENT above, 8k resolution, award-winning 3D render or commercial photography",
-  "featureNodes": ["3 short 2-3 word benefit nodes tailored to the prompt (e.g. Threat Detection, Zero-Trust, 24/7 Monitoring)"],
+  "visualPrompt": "A single coherent visual hero scene strictly adhering to the CRITICAL RULE above, 8k resolution, razor-sharp focus, no text, no split screens",
+  "featureNodes": ["3 short 2-3 word benefit nodes tailored to the prompt (e.g. Deep Sanitization, Kitchen & Bath, Same-Day Booking)"],
   "caption": "Full engaging Instagram marketing caption tailored to their prompt with emojis and call to action",
   "hashtags": ["#Tag1", "#Tag2", "#Tag3", "#Tag4", "#Tag5"],
-  "postStyle": "${isB2BTech ? 'b2b_poster' : 'commercial_photo'}"
+  "postStyle": "marketing_poster"
 }`;
 
     const contentParts: any[] = [];
@@ -140,8 +154,8 @@ Return a raw JSON object (strictly valid JSON, no markdown, no backticks):
   }
 }
 
-// Compose Publication-Ready B2B Tech Instagram Poster (Matching TangentCore & Scalezix Layout)
-async function composeB2BPoster(params: {
+// Compose Publication-Ready Commercial Instagram Poster (Universal for B2B Tech & B2C Services)
+async function composeMarketingPoster(params: {
   base64Image: string;
   brandName: string;
   domain: string;
@@ -151,102 +165,105 @@ async function composeB2BPoster(params: {
   featureNodes?: string[];
   palette?: string[];
   cta?: string;
+  industry?: string;
 }): Promise<string | null> {
   try {
     const sharp = (await import('sharp')).default;
 
     const words = params.headline.trim().split(/\s+/);
-    let part1 = words[0] || 'Strategic';
-    let part2 = words.slice(1).join(' ') || 'Advantage';
+    let part1 = words[0] || 'Premium';
+    let part2 = words.slice(1).join(' ') || 'Excellence';
     if (words.length > 2) {
       const mid = Math.ceil(words.length / 2);
       part1 = words.slice(0, mid).join(' ');
       part2 = words.slice(mid).join(' ');
     }
 
-    const badgeText = (params.badge || 'AI AGENTS • BUILT FOR BUSINESS').toUpperCase();
-    const cleanBrand = escapeXml(params.brandName || 'Scalezix');
-    const cleanSub = escapeXml(params.subheadline || 'Our AI-powered solutions simplify operations and drive exponential business growth.');
+    const badgeText = escapeXml((params.badge || 'VERIFIED STANDARDS').toUpperCase());
+    const cleanBrand = escapeXml(params.brandName || 'Brand');
+    const cleanDomain = escapeXml(params.domain?.replace(/^https?:\/\//i, '').replace(/\/$/, '') || 'company.com');
+    const cleanSub = escapeXml(params.subheadline || `Experience verified quality and high-velocity fulfillment with ${cleanBrand}.`);
     const cleanPart1 = escapeXml(part1);
     const cleanPart2 = escapeXml(part2);
-    const footerText = `${cleanBrand.toUpperCase()}  |  LET INTELLIGENCE OPERATE`;
 
     // Dynamic brand colors from dashboard project palette
     const primaryColor = (params.palette && params.palette.length > 0 && params.palette[0].startsWith('#'))
       ? params.palette[0]
-      : '#2563eb';
+      : '#FF2E74';
+
+    const categoryTag = escapeXml((params.badge || params.industry || 'OFFICIAL SERVICE SPOTLIGHT').toUpperCase());
+    const footerText = `${cleanDomain.toUpperCase()}  |  ${escapeXml(params.cta?.replace(/[^\w\s-]/g, '') || 'BOOK INSTANTLY').toUpperCase()}`;
 
     // Dynamic 3 feature benefit nodes from AI tailored to user's prompt
     const nodes = (params.featureNodes && params.featureNodes.length >= 3)
       ? params.featureNodes
-      : ['Automate Tasks', 'Drive Growth', 'Integrate Tools'];
+      : ['Verified Quality', 'On-Demand Delivery', 'Guaranteed Satisfaction'];
 
-    const node1 = escapeXml(nodes[0] || 'Automate Tasks');
-    const node2 = escapeXml(nodes[1] || 'Drive Growth');
-    const node3 = escapeXml(nodes[2] || 'Integrate Tools');
+    const node1 = escapeXml(nodes[0] || 'Verified Quality');
+    const node2 = escapeXml(nodes[1] || 'On-Demand Delivery');
+    const node3 = escapeXml(nodes[2] || 'Guaranteed Satisfaction');
 
     const svg = `<svg width="1080" height="1080" viewBox="0 0 1080 1080" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="1080" height="1080" fill="#f8fafc" />
-      <circle cx="540" cy="680" r="420" fill="url(#brand_glow)" opacity="0.25" />
+      <rect width="1080" height="1080" fill="#fcfcfc" />
+      <circle cx="540" cy="680" r="480" fill="url(#brand_glow)" opacity="0.14" />
 
-      <!-- Center 3D AI Visual Render -->
-      <g transform="translate(180, 360)">
-        <clipPath id="center_clip">
-          <rect width="720" height="540" rx="24" />
+      <!-- Center Hero Visual Render with clean rounded card mask and subtle shadow -->
+      <g transform="translate(90, 320)">
+        <rect width="900" height="510" rx="28" fill="#e2e8f0" filter="url(#hero_shadow)" />
+        <clipPath id="hero_clip">
+          <rect width="900" height="510" rx="28" />
         </clipPath>
-        <image href="data:image/jpeg;base64,${params.base64Image}" x="-10" y="-70" width="740" height="740" clip-path="url(#center_clip)" />
+        <image href="data:image/jpeg;base64,${params.base64Image}" x="-10" y="-140" width="920" height="920" clip-path="url(#hero_clip)" preserveAspectRatio="xMidYMid slice" />
       </g>
 
-      <!-- Brand Logo Top Left -->
-      <g transform="translate(70, 75)">
-        <text font-family="'Inter', -apple-system, sans-serif" font-weight="900" font-size="38" fill="#0f172a" letter-spacing="-1">${cleanBrand}</text>
-        <path d="M148 42 L162 28 M162 28 L152 28 M162 28 L162 38" stroke="${primaryColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+      <!-- Brand Logo / Badge Top Left -->
+      <g transform="translate(90, 75)">
+        <rect width="170" height="48" rx="14" fill="${primaryColor}" />
+        <text x="85" y="32" font-family="'Inter', -apple-system, sans-serif" font-weight="900" font-size="22" fill="#ffffff" text-anchor="middle" letter-spacing="0.5">${cleanBrand.toLowerCase()}</text>
+        <circle cx="190" cy="24" r="5" fill="#10b981" />
       </g>
 
       <!-- Pill Badge Top Right -->
-      <g transform="translate(700, 72)">
-        <rect width="310" height="38" rx="8" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5" />
-        <text x="155" y="24" font-family="'Inter', sans-serif" font-weight="800" font-size="11" fill="${primaryColor}" text-anchor="middle" letter-spacing="1">${escapeXml(badgeText)}</text>
+      <g transform="translate(680, 75)">
+        <rect width="310" height="44" rx="12" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5" />
+        <text x="155" y="28" font-family="'Inter', sans-serif" font-weight="800" font-size="11.5" fill="${primaryColor}" text-anchor="middle" letter-spacing="1.2">${badgeText}</text>
       </g>
 
       <!-- Editorial Typography Headline -->
-      <g transform="translate(70, 185)">
-        <text font-family="'Inter', sans-serif" font-weight="800" font-size="15" fill="#64748b" letter-spacing="2.5">AI INFRASTRUCTURE FOR MODERN BUSINESS</text>
-        <text y="60" font-family="'Inter', sans-serif" font-weight="900" font-size="58" fill="#0f172a" letter-spacing="-1.5">${cleanPart1} <tspan fill="${primaryColor}">${cleanPart2}</tspan></text>
+      <g transform="translate(90, 180)">
+        <text font-family="'Inter', sans-serif" font-weight="800" font-size="13.5" fill="#64748b" letter-spacing="2.5">${categoryTag}</text>
+        <text y="54" font-family="'Inter', sans-serif" font-weight="900" font-size="52" fill="#0f172a" letter-spacing="-1.5">${cleanPart1} <tspan fill="${primaryColor}">${cleanPart2}</tspan></text>
       </g>
 
       <!-- Subheadline -->
-      <g transform="translate(70, 285)">
-        <text font-family="'Inter', sans-serif" font-weight="500" font-size="18" fill="#475569">${cleanSub.slice(0, 75)}</text>
-        <text y="28" font-family="'Inter', sans-serif" font-weight="500" font-size="18" fill="#475569">${cleanSub.slice(75, 150)}</text>
+      <g transform="translate(90, 275)">
+        <text font-family="'Inter', sans-serif" font-weight="500" font-size="18" fill="#475569">${cleanSub.slice(0, 80)}</text>
+        ${cleanSub.length > 80 ? `<text y="26" font-family="'Inter', sans-serif" font-weight="500" font-size="18" fill="#475569">${cleanSub.slice(80, 160)}</text>` : ''}
       </g>
 
-      <!-- Connected Nodes -->
-      <g transform="translate(70, 540)">
-        <rect width="180" height="48" rx="12" fill="#ffffff" stroke="#bfdbfe" stroke-width="1.5" filter="url(#drop_shadow)" />
-        <circle cx="28" cy="24" r="8" fill="${primaryColor}" />
-        <text x="48" y="29" font-family="'Inter', sans-serif" font-weight="700" font-size="12.5" fill="#0f172a">${node1}</text>
-        <line x1="180" y1="24" x2="280" y2="24" stroke="${primaryColor}" stroke-width="2" stroke-dasharray="4 4" />
+      <!-- 3 Feature Benefit Node Pills -->
+      <g transform="translate(90, 855)">
+        <rect width="280" height="52" rx="16" fill="#ffffff" stroke="#f1f5f9" stroke-width="1.5" filter="url(#pill_shadow)" />
+        <circle cx="28" cy="26" r="8" fill="${primaryColor}" />
+        <text x="48" y="32" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#0f172a">${node1}</text>
       </g>
 
-      <g transform="translate(830, 540)">
-        <line x1="-100" y1="24" x2="0" y2="24" stroke="${primaryColor}" stroke-width="2" stroke-dasharray="4 4" />
-        <rect width="180" height="48" rx="12" fill="#ffffff" stroke="#bfdbfe" stroke-width="1.5" filter="url(#drop_shadow)" />
-        <circle cx="28" cy="24" r="8" fill="${primaryColor}" />
-        <text x="48" y="29" font-family="'Inter', sans-serif" font-weight="700" font-size="12.5" fill="#0f172a">${node2}</text>
+      <g transform="translate(400, 855)">
+        <rect width="280" height="52" rx="16" fill="#ffffff" stroke="#f1f5f9" stroke-width="1.5" filter="url(#pill_shadow)" />
+        <circle cx="28" cy="26" r="8" fill="${primaryColor}" />
+        <text x="48" y="32" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#0f172a">${node2}</text>
       </g>
 
-      <g transform="translate(70, 710)">
-        <rect width="180" height="48" rx="12" fill="#ffffff" stroke="#bfdbfe" stroke-width="1.5" filter="url(#drop_shadow)" />
-        <circle cx="28" cy="24" r="8" fill="${primaryColor}" />
-        <text x="48" y="29" font-family="'Inter', sans-serif" font-weight="700" font-size="12.5" fill="#0f172a">${node3}</text>
-        <line x1="180" y1="24" x2="270" y2="24" stroke="${primaryColor}" stroke-width="2" stroke-dasharray="4 4" />
+      <g transform="translate(710, 855)">
+        <rect width="280" height="52" rx="16" fill="#ffffff" stroke="#f1f5f9" stroke-width="1.5" filter="url(#pill_shadow)" />
+        <circle cx="28" cy="26" r="8" fill="#10b981" />
+        <text x="48" y="32" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#0f172a">${node3}</text>
       </g>
 
-      <!-- Footer -->
+      <!-- Footer Bar -->
       <g transform="translate(0, 990)">
         <rect width="1080" height="90" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" />
-        <text x="540" y="52" font-family="'Inter', sans-serif" font-weight="800" font-size="14" fill="#64748b" text-anchor="middle" letter-spacing="3">${escapeXml(footerText)}</text>
+        <text x="540" y="52" font-family="'Inter', sans-serif" font-weight="800" font-size="14.5" fill="#64748b" text-anchor="middle" letter-spacing="3">${footerText}</text>
       </g>
 
       <defs>
@@ -254,8 +271,11 @@ async function composeB2BPoster(params: {
           <stop offset="0%" stop-color="${primaryColor}" stop-opacity="0.8" />
           <stop offset="100%" stop-color="${primaryColor}" stop-opacity="0" />
         </radialGradient>
-        <filter id="drop_shadow" x="-4" y="-4" width="200" height="70" filterUnits="userSpaceOnUse">
-          <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0f172a" flood-opacity="0.06" />
+        <filter id="hero_shadow" x="-8" y="-4" width="940" height="550" filterUnits="userSpaceOnUse">
+          <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#0f172a" flood-opacity="0.10" />
+        </filter>
+        <filter id="pill_shadow" x="-4" y="-2" width="300" height="70" filterUnits="userSpaceOnUse">
+          <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#0f172a" flood-opacity="0.07" />
         </filter>
       </defs>
     </svg>`;
@@ -269,7 +289,7 @@ async function composeB2BPoster(params: {
     fs.writeFileSync(filePath, pngBuf);
     return `/generated-media/${fileName}`;
   } catch (e) {
-    console.warn('[composeB2BPoster Error]', (e as Error).message);
+    console.warn('[composeMarketingPoster Error]', (e as Error).message);
     return null;
   }
 }
@@ -298,6 +318,7 @@ async function generateImageWithBedrock(visualPrompt: string, ratio: string): Pr
       try {
         const payload = {
           prompt: visualPrompt,
+          negative_prompt: 'blurry, low quality, distorted, out of focus, duplicate, 4-panel, multi-panel, split screen, grid, collage, text, letters, words, watermarks, signature, border, frame',
           aspect_ratio: aspectRatio,
           mode: 'text-to-image',
           output_format: 'jpeg'
@@ -548,13 +569,10 @@ export async function POST(req: Request) {
       finalImageUrl = bedrockImg.url;
       engineUsed = bedrockImg.engine;
 
-      // For B2B / SaaS / Tech brands, composite into a publication-ready Instagram poster
-      const isB2B = (postData.postStyle === 'b2b_poster') ||
-        /software|ai|automation|cyber|tech|saas|agency|cloud|digital marketing|development|b2b/i.test(`${resolvedBrand} ${industry} ${cleanPrompt}`);
-
-      if (isB2B && bedrockImg.base64 && (ratio === '1:1' || !ratio)) {
+      // Universal Publication-Ready Instagram Marketing Poster Composer
+      if (bedrockImg.base64 && (ratio === '1:1' || !ratio)) {
         try {
-          const posterUrl = await composeB2BPoster({
+          const posterUrl = await composeMarketingPoster({
             base64Image: bedrockImg.base64,
             brandName: resolvedBrand,
             domain: resolvedDomain,
@@ -563,11 +581,12 @@ export async function POST(req: Request) {
             badge: postData.badge,
             featureNodes: postData.featureNodes,
             palette,
-            cta: postData.cta
+            cta: postData.cta,
+            industry
           });
           if (posterUrl) {
             finalImageUrl = posterUrl;
-            engineUsed = `${bedrockImg.engine} + B2B Layout Engine`;
+            engineUsed = `${bedrockImg.engine} + Universal Studio Poster Engine`;
           }
         } catch (composeErr) {
           console.warn('[Poster Compositing Fallback]', (composeErr as Error).message);
@@ -607,11 +626,38 @@ export async function POST(req: Request) {
       }
     }
 
-    // 6. Priority 3: Neural FLUX.1 Engine Fallback (faithful to prompt)
+    // 6. Priority 3: Neural FLUX.1 Engine Fallback (Universal Poster Engine)
     if (!finalImageUrl) {
       const encodedPrompt = encodeURIComponent(visualScene);
-      finalImageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}&nologo=true&model=flux`;
-      engineUsed = 'FLUX.1 Neural Engine';
+      const fluxUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}&nologo=true&model=flux`;
+      try {
+        const fluxRes = await fetch(fluxUrl, { signal: AbortSignal.timeout(12000) });
+        if (fluxRes.ok) {
+          const fluxBuf = Buffer.from(await fluxRes.arrayBuffer());
+          const posterUrl = await composeMarketingPoster({
+            base64Image: fluxBuf.toString('base64'),
+            brandName: resolvedBrand,
+            domain: resolvedDomain,
+            headline: postData.headline,
+            subheadline: postData.subheadline,
+            badge: postData.badge,
+            featureNodes: postData.featureNodes,
+            palette,
+            cta: postData.cta,
+            industry
+          });
+          if (posterUrl) {
+            finalImageUrl = posterUrl;
+            engineUsed = 'FLUX.1 Neural Engine + Universal Studio Poster Engine';
+          }
+        }
+      } catch (fluxErr) {
+        console.warn('[FLUX Composite Warning]', (fluxErr as Error).message);
+      }
+      if (!finalImageUrl) {
+        finalImageUrl = fluxUrl;
+        engineUsed = 'FLUX.1 Neural Engine';
+      }
     }
 
     const timestamp = Date.now();
