@@ -14,6 +14,7 @@ export interface ExtractedBrand {
   industry: string;
   businessCategory: string;
   targetAudience: string;
+  targetMarket?: string;
   brandPositioning?: string;
   competitors: { name: string; domain: string; positioning?: string; strengths: string; share: number }[];
   aeoScore: number;
@@ -105,7 +106,7 @@ function stripHtml(html: string): string {
 }
 
 // Dynamic AI Brand & Competitor Discovery (Powered by Live Web Content & Bedrock AI)
-async function analyzeWithAI(domain: string, title: string, metaDesc: string, h1: string, pageText: string) {
+async function analyzeWithAI(domain: string, title: string, metaDesc: string, h1: string, pageText: string, targetMarket: string = 'Pan India') {
   const token = process.env.AWS_BEARER_TOKEN_BEDROCK || process.env.VITE_BEDROCK_API_KEY;
   if (!token) return null;
 
@@ -113,8 +114,21 @@ async function analyzeWithAI(domain: string, title: string, metaDesc: string, h1
     process.env.AWS_BEARER_TOKEN_BEDROCK = token;
     const client = new BedrockRuntimeClient({ region: 'us-east-1' });
 
+    const isIndia = targetMarket.toLowerCase().includes('india') || targetMarket.toLowerCase() === 'in';
+    const regionDirective = isIndia
+      ? `TARGET GEOGRAPHIC REGION: PAN INDIA / INDIA (MANDATORY REQUIREMENT)
+The user has specifically selected their target market as INDIA / PAN INDIA.
+You MUST strictly return REAL DIRECT COMPETITORS OPERATING LOCALLY IN INDIA (for example, for on-demand home cleaning / maid / maintenance services in India, return real Indian companies like: Urban Company (urbancompany.com), Housejoy (housejoy.in), Broomberg (broomberg.in), NoBroker Home Services (nobroker.in), Helpr (helpr.in), Hicare (hicare.in)).
+NEVER return USA, UK, or global overseas companies like TaskRabbit or Handy when India is selected!`
+      : `TARGET GEOGRAPHIC REGION: ${targetMarket}
+You MUST strictly return real competitors that actively operate in ${targetMarket}.`;
+
     const prompt = `You are a world-class market research analyst.
 A user added the domain: "${domain}" to their SEO & Growth Engine.
+Configured Target Market: "${targetMarket}"
+
+${regionDirective}
+
 Here is the real data scraped from their website:
 - Title: "${title}"
 - Meta Description: "${metaDesc}"
@@ -130,10 +144,10 @@ Analyze what this specific company actually does from their website content and 
   "brandPositioning": "1-2 sentence core value proposition based on their site",
   "primaryHex": "#Hex color appropriate for their brand",
   "competitors": [
-    { "name": "Real Competitor 1", "domain": "realcompetitor1.com", "positioning": "their market positioning", "strengths": "key competitive strength", "share": 40 },
-    { "name": "Real Competitor 2", "domain": "realcompetitor2.com", "positioning": "their market positioning", "strengths": "key competitive strength", "share": 30 },
-    { "name": "Real Competitor 3", "domain": "realcompetitor3.com", "positioning": "their market positioning", "strengths": "key competitive strength", "share": 18 },
-    { "name": "Real Competitor 4", "domain": "realcompetitor4.com", "positioning": "their market positioning", "strengths": "key competitive strength", "share": 12 }
+    { "name": "Real Competitor 1 in ${targetMarket}", "domain": "realcompetitor1.com", "positioning": "their market positioning in ${targetMarket}", "strengths": "key competitive strength", "share": 40 },
+    { "name": "Real Competitor 2 in ${targetMarket}", "domain": "realcompetitor2.com", "positioning": "their market positioning in ${targetMarket}", "strengths": "key competitive strength", "share": 30 },
+    { "name": "Real Competitor 3 in ${targetMarket}", "domain": "realcompetitor3.com", "positioning": "their market positioning in ${targetMarket}", "strengths": "key competitive strength", "share": 18 },
+    { "name": "Real Competitor 4 in ${targetMarket}", "domain": "realcompetitor4.com", "positioning": "their market positioning in ${targetMarket}", "strengths": "key competitive strength", "share": 12 }
   ],
   "voiceSliders": { "professionalCasual": 70, "friendlyFormal": 20, "boldSubtle": 25, "premiumAccessible": 80, "simpleComplex": 20 },
   "voiceTags": ["VoiceTag1", "VoiceTag2", "VoiceTag3", "VoiceTag4"]
@@ -159,7 +173,7 @@ Analyze what this specific company actually does from their website content and 
 }
 
 // Pure Dynamic Semantic Parser (Fallback if AI network is unavailable)
-function dynamicSemanticParser(domain: string, title: string, metaDesc: string, h1: string, pageText: string) {
+function dynamicSemanticParser(domain: string, title: string, metaDesc: string, h1: string, pageText: string, targetMarket: string = 'Pan India') {
   const parts = domain.split('.')[0].split(/[-_]/);
   const derivedBrandName = parts.map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
 
@@ -221,6 +235,22 @@ function dynamicSemanticParser(domain: string, title: string, metaDesc: string, 
     ? metaDesc
     : `${brandName} delivers verified, high-performance solutions engineered for speed, convenience, and superior customer trust.`;
 
+  const isIndia = targetMarket.toLowerCase().includes('india') || targetMarket.toLowerCase() === 'in';
+  let regionalCompetitors = [
+    { name: `${brandName} Direct Sector Peer`, domain: `${parts[0]}hub.com`, positioning: 'Direct market peer provider', strengths: 'Established regional distribution', share: 44 },
+    { name: `${brandName} Digital Alternative`, domain: `${parts[0]}digital.com`, positioning: 'Digital-first alternative provider', strengths: 'Modern mobile customer acquisition', share: 32 },
+    { name: 'National Industry Benchmark', domain: `${parts[0]}national.com`, positioning: 'Broad multi-region operator', strengths: 'Comprehensive legacy customer footprint', share: 24 }
+  ];
+
+  if (isIndia && (combined.includes('clean') || combined.includes('maid') || combined.includes('home service') || combined.includes('chore') || combined.includes('repair'))) {
+    regionalCompetitors = [
+      { name: 'Urban Company', domain: 'urbancompany.com', positioning: 'Leading Indian on-demand home cleaning and salon services marketplace', strengths: 'Pan-India presence and verified trained service professionals', share: 45 },
+      { name: 'Housejoy', domain: 'housejoy.in', positioning: 'Full-suite home deep cleaning, repairs and maintenance across Indian metros', strengths: 'Established presence across Bangalore, Delhi and Mumbai', share: 28 },
+      { name: 'Broomberg', domain: 'broomberg.in', positioning: 'Premium specialized deep cleaning, sofa and kitchen sanitization in India', strengths: 'Commercial-grade equipment and specialized chemicals', share: 15 },
+      { name: 'NoBroker Home Services', domain: 'nobroker.in', positioning: 'On-demand house cleaning, painting and moving services across major Indian cities', strengths: 'Huge active Indian tenant and homeowner ecosystem', share: 12 }
+    ];
+  }
+
   return {
     name: brandName,
     industry,
@@ -228,18 +258,14 @@ function dynamicSemanticParser(domain: string, title: string, metaDesc: string, 
     targetAudience: `Consumers, professionals, and forward-looking clients seeking verified ${industry.toLowerCase()} solutions`,
     brandPositioning: positioning,
     primaryHex,
-    competitors: [
-      { name: `${brandName} Direct Sector Peer`, domain: `${parts[0]}hub.com`, positioning: 'Direct market peer provider', strengths: 'Established regional distribution', share: 44 },
-      { name: `${brandName} Digital Alternative`, domain: `${parts[0]}digital.com`, positioning: 'Digital-first alternative provider', strengths: 'Modern mobile customer acquisition', share: 32 },
-      { name: 'National Industry Benchmark', domain: `${parts[0]}national.com`, positioning: 'Broad multi-region operator', strengths: 'Comprehensive legacy customer footprint', share: 24 }
-    ],
+    competitors: regionalCompetitors,
     voiceSliders: { professionalCasual: 65, friendlyFormal: 20, boldSubtle: 25, premiumAccessible: 75, simpleComplex: 25 },
     voiceTags: ['Dependable', 'Transparent', 'Customer-Centric', 'Solution-Oriented', 'Modern']
   };
 }
 
 // 100% Dynamic Crawl & Extraction (NO Hardcoded Brand Names)
-export async function extractBrandFromDomain(rawDomain: string): Promise<ExtractedBrand> {
+export async function extractBrandFromDomain(rawDomain: string, targetMarket: string = 'Pan India'): Promise<ExtractedBrand> {
   const domain = cleanDomain(rawDomain);
   const parts = domain.split('.')[0].split(/[-_]/);
   const defaultBrandName = parts.map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
@@ -335,11 +361,11 @@ export async function extractBrandFromDomain(rawDomain: string): Promise<Extract
   }
 
   // 2. Intelligent AI Analysis from Crawled Content (Bedrock AI)
-  let intelligence = await analyzeWithAI(domain, title, metaDesc, h1, pageTextSnippet);
+  let intelligence = await analyzeWithAI(domain, title, metaDesc, h1, pageTextSnippet, targetMarket);
 
   // 3. Fallback to Dynamic Semantic Parser if AI is offline
   if (!intelligence) {
-    intelligence = dynamicSemanticParser(domain, title, metaDesc, h1, pageTextSnippet);
+    intelligence = dynamicSemanticParser(domain, title, metaDesc, h1, pageTextSnippet, targetMarket);
   }
 
   // 4. Construct Authentic Brand Palette
@@ -416,6 +442,7 @@ export async function extractBrandFromDomain(rawDomain: string): Promise<Extract
     industry: intelligence.industry,
     businessCategory: intelligence.businessCategory,
     targetAudience: intelligence.targetAudience,
+    targetMarket: targetMarket,
     brandPositioning: intelligence.brandPositioning,
     competitors: intelligence.competitors,
     aeoScore: 92,

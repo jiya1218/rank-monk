@@ -12,15 +12,15 @@
   --bg: #f8f3ec;
   --bg-alt: #f1e8dc;
   --card: #fffcf7;
-  --ink: #2b1b12;
-  --muted: #6f5a4c;
-  --line: #e4d6c6;
-  --espresso: #3b2519;
-  --mocha: #7a5242;
+  --ink: #180e07;
+  --muted: #423023;
+  --line: #ded0bf;
+  --espresso: #2e1a10;
+  --mocha: #5c3b2b;
   --tan: #b98b6a;
   --sand: #d8c09e;
   --cream: #fbf6ef;
-  --success: #5d7a4f;
+  --success: #436635;
 
   /* Aliases for legacy & component styles */
   --nude-espresso: #3b2519;
@@ -50,7 +50,7 @@
   --text-body: var(--ink);
   --text-secondary: var(--muted);
   --text-muted: var(--muted);
-  --text-subtle: #8a7364;
+  --text-subtle: #564335;
   --text-inverse: var(--cream);
   --text-inverse-muted: var(--sand);
 

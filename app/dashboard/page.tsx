@@ -22,7 +22,7 @@ export default function DashboardPage() {
 
   // Onboarding Domain Entry State (Only shown if user has not set a domain yet)
   const [onboardingDomain, setOnboardingDomain] = useState('');
-  const [onboardingMarket, setOnboardingMarket] = useState('Global');
+  const [onboardingMarket, setOnboardingMarket] = useState('Pan India');
   const [analyzingDomain, setAnalyzingDomain] = useState(false);
   const [analysisStep, setAnalysisStep] = useState('');
   const [onboardingError, setOnboardingError] = useState('');
@@ -44,6 +44,15 @@ export default function DashboardPage() {
     { id: 'soc_2', platform: 'twitter', text: 'Why SEO without AEO (AI Engine Optimization) is half the battle. A thread on brand knowledge graph structuring 🧵👇', date: 'Friday at 2:15 PM', status: 'Scheduled' }
   ]);
 
+  // Exclusive Multi-Domain Testing States for jiyapatel181224@gmail.com ONLY
+  const isSuperAdminTester = user?.email?.toLowerCase() === 'jiyapatel181224@gmail.com';
+  const [adminDomainList, setAdminDomainList] = useState<any[]>([]);
+  const [showDomainSwitcherDropdown, setShowDomainSwitcherDropdown] = useState(false);
+  const [showAddDomainModal, setShowAddDomainModal] = useState(false);
+  const [newDomainText, setNewDomainText] = useState('');
+  const [adminTargetMarket, setAdminTargetMarket] = useState('Pan India');
+  const [addingAdminDomain, setAddingAdminDomain] = useState(false);
+
   useEffect(() => {
     // 1. Verify User Session & Subscription
     try {
@@ -63,25 +72,58 @@ export default function DashboardPage() {
       const savedGeminiKey = localStorage.getItem('rankmonk_gemini_key');
       if (savedGeminiKey) setGeminiApiKey(savedGeminiKey);
 
-      // 2. Check for locked Single Fixed Domain Workspace
-      // If the user has not added any website yet, purge any stale/cached project data!
-      if (!u.domain) {
-        setProject(null);
-        localStorage.removeItem('rankmonk_active_project');
+      // 2. Multi-Domain Workspace for jiyapatel181224@gmail.com vs Single Domain for Production
+      if (u.email?.toLowerCase() === 'jiyapatel181224@gmail.com') {
+        const savedMulti = localStorage.getItem('rankmonk_multi_projects_jiyapatel');
+        let list: any[] = [];
+        if (savedMulti) {
+          try { list = JSON.parse(savedMulti); } catch (e) {}
+        }
+        setAdminDomainList(list);
+
+        const activeSaved = localStorage.getItem('rankmonk_active_project');
+        if (activeSaved) {
+          try {
+            const parsed = JSON.parse(activeSaved);
+            setProject(parsed);
+            if (parsed.mediaAssets) setGeneratedMediaList(parsed.mediaAssets);
+          } catch (e) {}
+        } else if (list.length > 0) {
+          setProject(list[0]);
+          if (list[0].mediaAssets) setGeneratedMediaList(list[0].mediaAssets);
+        } else if (u.domain) {
+          const userProjectKey = `rankmonk_project_${u.email.toLowerCase()}`;
+          const rawProject = localStorage.getItem(userProjectKey);
+          if (rawProject) {
+            try {
+              const p = JSON.parse(rawProject);
+              setProject(p);
+              const initialList = [p];
+              setAdminDomainList(initialList);
+              localStorage.setItem('rankmonk_multi_projects_jiyapatel', JSON.stringify(initialList));
+            } catch (e) {}
+          }
+        }
       } else {
-        const userProjectKey = `rankmonk_project_${u.email.toLowerCase()}`;
-        const rawProject = localStorage.getItem(userProjectKey) || localStorage.getItem('rankmonk_active_project');
-        if (rawProject) {
-          const p = JSON.parse(rawProject);
-          if (p.domain === u.domain) {
-            setProject(p);
-            if (p.mediaAssets) setGeneratedMediaList(p.mediaAssets);
+        // Standard production users (Locked Single Fixed Domain Workspace)
+        if (!u.domain) {
+          setProject(null);
+          localStorage.removeItem('rankmonk_active_project');
+        } else {
+          const userProjectKey = `rankmonk_project_${u.email.toLowerCase()}`;
+          const rawProject = localStorage.getItem(userProjectKey) || localStorage.getItem('rankmonk_active_project');
+          if (rawProject) {
+            const p = JSON.parse(rawProject);
+            if (p.domain === u.domain) {
+              setProject(p);
+              if (p.mediaAssets) setGeneratedMediaList(p.mediaAssets);
+            } else {
+              setProject(null);
+              localStorage.removeItem('rankmonk_active_project');
+            }
           } else {
             setProject(null);
-            localStorage.removeItem('rankmonk_active_project');
           }
-        } else {
-          setProject(null);
         }
       }
     } catch (e) {
@@ -144,6 +186,16 @@ export default function DashboardPage() {
 
       setProject(newProject);
       localStorage.setItem('rankmonk_active_project', JSON.stringify(newProject));
+
+      // Append to multi-domain list for jiyapatel181224@gmail.com
+      if (user?.email?.toLowerCase() === 'jiyapatel181224@gmail.com') {
+        const existingMulti = JSON.parse(localStorage.getItem('rankmonk_multi_projects_jiyapatel') || '[]');
+        const filtered = existingMulti.filter((p: any) => p.domain?.toLowerCase() !== cleanDomainName.toLowerCase());
+        const updatedMulti = [newProject, ...filtered];
+        localStorage.setItem('rankmonk_multi_projects_jiyapatel', JSON.stringify(updatedMulti));
+        setAdminDomainList(updatedMulti);
+      }
+
       if (user) {
         const updatedUser = { ...user, domain: cleanDomainName };
         setUser(updatedUser);
@@ -171,10 +223,11 @@ export default function DashboardPage() {
   const handleRefreshBrand = async () => {
     if (!project?.domain) return;
     try {
+      const currentMarket = project.targetMarket || 'Pan India';
       const res = await fetch('/api/brand/extract', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ domain: project.domain })
+        body: JSON.stringify({ domain: project.domain, targetMarket: currentMarket })
       });
       const json = await res.json();
       if (res.ok && json.success) {
@@ -186,6 +239,7 @@ export default function DashboardPage() {
           industry: brand.industry,
           businessCategory: brand.businessCategory,
           targetAudience: brand.targetAudience,
+          targetMarket: brand.targetMarket || currentMarket,
           summary: brand.summary,
           logoUrl: brand.logoUrl,
           faviconUrl: brand.faviconUrl,
@@ -203,6 +257,100 @@ export default function DashboardPage() {
       }
     } catch (e) {
       console.error('Failed to refresh brand:', e);
+    }
+  };
+
+  // Switch between testing domains (Exclusive for jiyapatel181224@gmail.com)
+  const handleSwitchDomain = (targetDomain: string) => {
+    const multi = JSON.parse(localStorage.getItem('rankmonk_multi_projects_jiyapatel') || '[]');
+    const found = multi.find((p: any) => p.domain?.toLowerCase() === targetDomain.toLowerCase());
+    if (found) {
+      setProject(found);
+      localStorage.setItem('rankmonk_active_project', JSON.stringify(found));
+      if (user) {
+        localStorage.setItem(`rankmonk_project_${user.email.toLowerCase()}`, JSON.stringify(found));
+      }
+      if (found.mediaAssets) setGeneratedMediaList(found.mediaAssets);
+      else setGeneratedMediaList([]);
+      setShowDomainSwitcherDropdown(false);
+    }
+  };
+
+  // Add a new testing domain dynamically (Exclusive for jiyapatel181224@gmail.com)
+  const handleAddNewDomainForAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanInput = newDomainText.trim().replace(/^https?:\/\//i, '').replace(/\/$/, '');
+    if (!cleanInput) return;
+
+    setAddingAdminDomain(true);
+    try {
+      const targetMkt = adminTargetMarket || 'Pan India';
+      const extractRes = await fetch('/api/brand/extract', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ domain: cleanInput, targetMarket: targetMkt })
+      });
+      const extractJson = await extractRes.json();
+      if (!extractRes.ok || !extractJson.success) {
+        throw new Error(extractJson.error || 'Failed to crawl website.');
+      }
+      const brand = extractJson.data;
+      const cleanDomainName = brand.domain || cleanInput;
+      const newProj = {
+        id: `proj_${Date.now()}`,
+        domain: cleanDomainName,
+        name: brand.name,
+        industry: brand.industry,
+        businessCategory: brand.businessCategory,
+        targetAudience: brand.targetAudience,
+        targetMarket: brand.targetMarket || targetMkt,
+        summary: brand.summary,
+        logoUrl: brand.logoUrl,
+        faviconUrl: brand.faviconUrl,
+        palette: brand.palette,
+        competitors: brand.competitors,
+        aeoScore: brand.aeoScore || 84,
+        seoScore: brand.seoScore || 88,
+        voiceSliders: brand.voiceSliders,
+        voiceTags: brand.voiceTags,
+        crawledPages: brand.crawledPages || [],
+        articles: brand.articles || [],
+        mediaAssets: [],
+        createdAt: new Date().toISOString()
+      };
+
+      const existingMulti = JSON.parse(localStorage.getItem('rankmonk_multi_projects_jiyapatel') || '[]');
+      const filtered = existingMulti.filter((p: any) => p.domain?.toLowerCase() !== cleanDomainName.toLowerCase());
+      const updatedMulti = [newProj, ...filtered];
+      localStorage.setItem('rankmonk_multi_projects_jiyapatel', JSON.stringify(updatedMulti));
+      setAdminDomainList(updatedMulti);
+
+      setProject(newProj);
+      setGeneratedMediaList([]);
+      localStorage.setItem('rankmonk_active_project', JSON.stringify(newProj));
+      if (user) {
+        localStorage.setItem(`rankmonk_project_${user.email.toLowerCase()}`, JSON.stringify(newProj));
+      }
+      setShowAddDomainModal(false);
+      setNewDomainText('');
+      setShowDomainSwitcherDropdown(false);
+    } catch (err) {
+      alert((err as Error).message);
+    } finally {
+      setAddingAdminDomain(false);
+    }
+  };
+
+  // Remove a testing domain (Exclusive for jiyapatel181224@gmail.com)
+  const handleDeleteAdminDomain = (domToDelete: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm(`Remove ${domToDelete} from your testing list?`)) return;
+    const existingMulti = JSON.parse(localStorage.getItem('rankmonk_multi_projects_jiyapatel') || '[]');
+    const updatedMulti = existingMulti.filter((p: any) => p.domain?.toLowerCase() !== domToDelete.toLowerCase());
+    localStorage.setItem('rankmonk_multi_projects_jiyapatel', JSON.stringify(updatedMulti));
+    setAdminDomainList(updatedMulti);
+    if (project?.domain?.toLowerCase() === domToDelete.toLowerCase() && updatedMulti.length > 0) {
+      handleSwitchDomain(updatedMulti[0].domain);
     }
   };
 
@@ -427,8 +575,8 @@ export default function DashboardPage() {
             <img src="/assets/rank-monk-logo-horizontal.png" alt="Rank Monk" className="h-10 sm:h-11 w-auto object-contain" />
           </Link>
 
-          {/* Fixed Single Domain Badge (NO Switch Button) */}
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-[#f1e8dc] border border-[#d8c09e] rounded-xl text-xs">
+          {/* Domain Badge / Switcher */}
+          <div className="relative flex items-center gap-2 px-3 py-1.5 bg-[#f1e8dc] border border-[#d8c09e] rounded-xl text-xs">
             <span className="w-2 h-2 rounded-full bg-[#5d7a4f] animate-pulse" />
             <span className="text-[#6f5a4c] font-medium hidden sm:inline">Active Domain:</span>
             <span className="font-bold text-[#2b1b12]">{project.domain?.replace(/^https?:\/\//i, '').replace(/\/$/, '')}</span>
@@ -441,6 +589,92 @@ export default function DashboardPage() {
             >
               ↗
             </a>
+
+            {/* ONLY FOR jiyapatel181224@gmail.com: Switcher & Add Button */}
+            {isSuperAdminTester && (
+              <div className="ml-2 pl-2 border-l border-[#d8c09e] flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setShowDomainSwitcherDropdown(prev => !prev)}
+                  className="px-2.5 py-1 rounded-lg bg-[#2b1b12] text-[#fffcf7] font-bold text-[10.5px] hover:bg-[#3b2519] transition-all flex items-center gap-1 shadow-sm cursor-pointer"
+                  title="Switch between testing domains"
+                >
+                  <span>⚡ Switch ({adminDomainList.length || 1})</span>
+                  <span>▼</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAddDomainModal(true)}
+                  className="px-2 py-1 rounded-lg bg-[#5d7a4f] text-white font-bold text-[10.5px] hover:opacity-90 transition-all flex items-center gap-1 shadow-sm cursor-pointer"
+                  title="Add Another Domain for Testing"
+                >
+                  <span>+ Add</span>
+                </button>
+              </div>
+            )}
+
+            {/* Dropdown Menu for jiyapatel181224@gmail.com */}
+            {isSuperAdminTester && showDomainSwitcherDropdown && (
+              <div className="absolute top-full left-0 mt-2 w-72 bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl shadow-xl z-50 p-3 space-y-2 animate-fade-in">
+                <div className="flex items-center justify-between pb-2 border-b border-[#e4d6c6]">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-[#6f5a4c]">
+                    Dev Testing Workspaces ({adminDomainList.length})
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowDomainSwitcherDropdown(false);
+                      setShowAddDomainModal(true);
+                    }}
+                    className="text-[10px] font-bold text-[#5d7a4f] hover:underline cursor-pointer"
+                  >
+                    + Add New
+                  </button>
+                </div>
+                <div className="max-h-60 overflow-y-auto space-y-1">
+                  {adminDomainList.map((p: any) => {
+                    const isActive = p.domain?.toLowerCase() === project.domain?.toLowerCase();
+                    return (
+                      <div
+                        key={p.domain}
+                        onClick={() => handleSwitchDomain(p.domain)}
+                        className={`p-2 rounded-xl flex items-center justify-between cursor-pointer transition-all ${
+                          isActive
+                            ? 'bg-[#f1e8dc] border border-[#d8c09e]'
+                            : 'hover:bg-[#f8f3ec]'
+                        }`}
+                      >
+                        <div className="min-w-0 flex items-center gap-2">
+                          <img
+                            src={p.faviconUrl || `https://www.google.com/s2/favicons?domain=${p.domain}&sz=64`}
+                            alt={p.name}
+                            className="w-4 h-4 rounded object-contain shrink-0"
+                            onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                          />
+                          <span className={`text-xs truncate ${isActive ? 'font-black text-[#2b1b12]' : 'font-medium text-[#6f5a4c]'}`}>
+                            {p.domain}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          {isActive ? (
+                            <span className="text-[9px] font-bold bg-[#5d7a4f] text-white px-1.5 py-0.5 rounded">Active</span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={(e) => handleDeleteAdminDomain(p.domain, e)}
+                              className="text-[#6f5a4c] hover:text-[#dc2626] text-xs p-1 cursor-pointer"
+                              title="Delete this test domain"
+                            >
+                              ✕
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -472,12 +706,28 @@ export default function DashboardPage() {
         {/* SIDEBAR NAVIGATION (SoloSpider Structure) */}
         <aside className="w-64 h-full bg-[#f8f3ec] border-r border-[#e4d6c6] p-4 flex flex-col justify-between hidden md:flex shrink-0 overflow-y-auto">
           <div className="space-y-4">
-            {/* WORKSPACE CARD (Single Fixed Domain Workspace) */}
+            {/* WORKSPACE CARD */}
             <div>
-              <div className="text-[10px] font-black uppercase tracking-wider text-[#6f5a4c] mb-2 px-1">
-                Workspace
+              <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-wider text-[#6f5a4c] mb-2 px-1">
+                <span>Workspace</span>
+                {isSuperAdminTester && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAddDomainModal(true)}
+                    className="text-[#5d7a4f] hover:underline font-bold text-[10px] cursor-pointer"
+                  >
+                    + Add Domain
+                  </button>
+                )}
               </div>
-              <div className="p-3 bg-white border border-[#e4d6c6] rounded-2xl flex items-center gap-3 shadow-sm">
+              <div
+                className={`p-3 bg-white border border-[#e4d6c6] rounded-2xl flex items-center gap-3 shadow-sm ${
+                  isSuperAdminTester ? 'cursor-pointer hover:border-[#c5a059]' : ''
+                }`}
+                onClick={() => {
+                  if (isSuperAdminTester) setShowDomainSwitcherDropdown(prev => !prev);
+                }}
+              >
                 <div className="w-9 h-9 rounded-xl bg-[#f8f3ec] border border-[#e4d6c6] flex items-center justify-center shrink-0 overflow-hidden">
                   <img
                     src={project.faviconUrl || `https://www.google.com/s2/favicons?domain=${project.domain?.replace(/^https?:\/\//i, '').replace(/\/$/, '')}&sz=128`}
@@ -487,11 +737,12 @@ export default function DashboardPage() {
                   />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="text-xs font-bold text-[#2b1b12] truncate">
-                    https://{project.domain?.replace(/^https?:\/\//i, '').replace(/\/$/, '')}
+                  <div className="text-xs font-bold text-[#2b1b12] truncate flex items-center justify-between">
+                    <span>https://{project.domain?.replace(/^https?:\/\//i, '').replace(/\/$/, '')}</span>
+                    {isSuperAdminTester && <span className="text-[10px] text-[#c5a059]">▼</span>}
                   </div>
                   <div className="text-[10px] text-purple-700 font-bold bg-purple-50 px-2 py-0.5 rounded-md inline-block mt-0.5 border border-purple-200">
-                    {user?.plan || 'Scale'} Plan
+                    {user?.plan || 'Scale'} Plan {isSuperAdminTester ? '• Multi-Domain Dev' : ''}
                   </div>
                 </div>
               </div>
@@ -812,6 +1063,93 @@ export default function DashboardPage() {
           )}
         </main>
       </div>
+
+      {/* Exclusive Add Testing Domain Modal for jiyapatel181224@gmail.com */}
+      {isSuperAdminTester && showAddDomainModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#e4d6c6]">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🌐</span>
+                <h3 className="font-editorial text-lg font-bold text-[#2b1b12]">
+                  Add Testing Domain
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAddDomainModal(false)}
+                className="text-[#6f5a4c] hover:text-[#2b1b12] text-sm p-1 font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-[#6f5a4c] leading-relaxed">
+              Superadmin Dev Feature: Add any website to test live crawling, brand identity, competitor extraction, and Media Studio without resetting your account.
+            </p>
+
+            <form onSubmit={handleAddNewDomainForAdmin} className="space-y-4">
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#6f5a4c] mb-1.5">
+                  Website Domain
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. cult.fit, nike.com, snabbit.com"
+                  value={newDomainText}
+                  onChange={(e) => setNewDomainText(e.target.value)}
+                  className="w-full p-3 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] font-semibold focus:outline-none focus:border-[#c5a059]"
+                  autoFocus
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#6f5a4c] mb-1.5">
+                  Target Geographic Market
+                </label>
+                <select
+                  value={adminTargetMarket}
+                  onChange={(e) => setAdminTargetMarket(e.target.value)}
+                  className="w-full p-3 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] font-semibold focus:outline-none focus:border-[#c5a059]"
+                >
+                  <option value="Pan India">🇮🇳 Pan India (Indian Competitors & Search Engines)</option>
+                  <option value="United States">🇺🇸 United States</option>
+                  <option value="United Arab Emirates">🇦🇪 United Arab Emirates</option>
+                  <option value="United Kingdom">🇬🇧 United Kingdom</option>
+                  <option value="Global">🌐 Global Worldwide</option>
+                </select>
+              </div>
+
+              {addingAdminDomain ? (
+                <div className="p-4 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl text-center space-y-2">
+                  <div className="w-5 h-5 border-2 border-[#5d7a4f] border-t-transparent rounded-full animate-spin mx-auto" />
+                  <p className="text-xs font-bold text-[#2b1b12] animate-pulse">
+                    Crawling live site and extracting brand profile...
+                  </p>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddDomainModal(false)}
+                    className="flex-1 py-2.5 bg-[#f8f3ec] text-[#6f5a4c] hover:text-[#2b1b12] rounded-xl text-xs font-bold transition-all border border-[#e4d6c6] cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={!newDomainText.trim()}
+                    className="flex-1 py-2.5 bg-[#2b1b12] hover:bg-[#3b2519] text-[#fffcf7] rounded-xl text-xs font-bold transition-all disabled:opacity-50 cursor-pointer shadow-sm"
+                  >
+                    Crawl & Add ✦
+                  </button>
+                </div>
+              )}
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Subscription Required Modal */}
       <PricingModal

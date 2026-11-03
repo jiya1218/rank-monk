@@ -8,27 +8,56 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Strict Light Theme Enforcer */
+/* Strict Light Theme Enforcer & Ultra-Crisp High-Contrast Typography */
 :root, [data-theme="light"], html {
   --bg: #f8f3ec !important;
   --bg-alt: #f1e8dc !important;
   --card: #fffcf7 !important;
-  --ink: #2b1b12 !important;
-  --muted: #6f5a4c !important;
-  --line: #e4d6c6 !important;
-  --espresso: #3b2519 !important;
-  --mocha: #7a5242 !important;
+  --ink: #180e07 !important;
+  --muted: #423023 !important;
+  --text-heading: #180e07 !important;
+  --text-body: #180e07 !important;
+  --text-secondary: #423023 !important;
+  --text-muted: #423023 !important;
+  --text-subtle: #564335 !important;
+  --line: #ded0bf !important;
+  --espresso: #2e1a10 !important;
+  --mocha: #5c3b2b !important;
   --tan: #b98b6a !important;
   --sand: #d8c09e !important;
   --cream: #fbf6ef !important;
-  --success: #5d7a4f !important;
+  --success: #436635 !important;
   color-scheme: light !important;
+}
+
+html, body {
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  text-rendering: optimizeLegibility !important;
 }
 
 body {
   background-color: var(--bg) !important;
   color: var(--ink) !important;
   overflow-x: hidden !important;
+  font-weight: 450;
+}
+
+/* Eliminate Faint/Blurry Text: Darker, High-Contrast Typography Overrides */
+.text-\[\#6f5a4c\] {
+  color: #423023 !important;
+}
+
+.text-\[\#7a5242\] {
+  color: #4d2f1f !important;
+}
+
+.text-\[\#8a7364\] {
+  color: #49372a !important;
+}
+
+.text-\[\#2b1b12\] {
+  color: #180e07 !important;
 }
 
 /* Logo Prominence in Header & Footer */

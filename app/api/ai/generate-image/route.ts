@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { BedrockRuntimeClient, ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
 import fs from 'fs';
 import path from 'path';
 
@@ -12,6 +13,51 @@ function escapeXml(unsafe: string): string {
     .replace(/'/g, '&apos;');
 }
 
+// Generate Dynamic Marketing Copy & Visual Prompt via AWS Bedrock Nova Pro
+async function generateMarketingWithBedrock(prompt: string, brandName: string, industry: string, domain: string) {
+  const token = process.env.AWS_BEARER_TOKEN_BEDROCK || process.env.VITE_BEDROCK_API_KEY;
+  if (!token) return null;
+
+  try {
+    process.env.AWS_BEARER_TOKEN_BEDROCK = token;
+    const client = new BedrockRuntimeClient({ region: 'us-east-1' });
+
+    const systemPrompt = `You are a world-class advertising creative director at an elite digital agency.
+A client needs an Instagram commercial marketing post for:
+- Brand Name: "${brandName}"
+- Domain: "${domain}"
+- Industry: "${industry}"
+- Client's Prompt & Requirements: "${prompt}"
+
+Read the user's prompt carefully.
+If they asked to show cleaners, services, staff, domestic help, cleaning equipment, availability across India, products, food, or specific features, the visual scene MUST prominently depict that in action! (NEVER generate an empty room with an empty couch when the client asked for cleaners/services/staff).
+
+Return a raw JSON object (strictly valid JSON, no markdown, no backticks):
+{
+  "headline": "A punchy, catchy 4-8 word marketing headline tailored to their prompt (e.g. 'Transform Your Space with ${brandName}')",
+  "subheadline": "A clear 1-sentence value proposition",
+  "badge": "A 2-3 word promotional badge (e.g. 'ALL INDIA SERVICE' or '100% VERIFIED')",
+  "cta": "Engaging call to action with emoji (e.g. 'Book with ${brandName} 📲')",
+  "visualPrompt": "A highly detailed, photorealistic commercial photography scene prompt for FLUX.1/DALL-E 3 depicting the exact service/subject in action (e.g. 'Award-winning commercial photography of professional, smiling domestic cleaners in neat branded polo uniforms holding cleaning supplies and spray bottles in an impeccably clean, sunlit modern home with gleaming floors and sparkling kitchen, shot on 50mm f/1.4 lens, 8k resolution, commercial advertising photography, sharp focus, natural warm contrast, magazine quality, no text, no watermarks')",
+  "caption": "Full engaging Instagram marketing caption with emojis, bullet points of services, and call to action",
+  "hashtags": ["#${brandName.replace(/[^\\w]/g, '')}", "#HomeCleaning", "#DeepCleaning", "#DoorstepServices", "#SpotlessHome"]
+}`;
+
+    const res = await client.send(new ConverseCommand({
+      modelId: 'amazon.nova-pro-v1:0',
+      messages: [{ role: 'user', content: [{ text: systemPrompt }] }]
+    }));
+
+    const text = res.output?.message?.content?.[0]?.text;
+    if (!text) return null;
+    const cleaned = text.replace(/```(?:json)?/gi, '').replace(/```/g, '').trim();
+    return JSON.parse(cleaned);
+  } catch (e) {
+    console.warn('[Bedrock Nova Pro Image Prompt Error]', (e as Error).message);
+    return null;
+  }
+}
+
 // Generate Universal Industry-Calibrated Marketing Post Copy
 function synthesizeMarketingPost(prompt: string, brandName: string, industry: string, domain: string) {
   const pLower = prompt.toLowerCase();
@@ -23,9 +69,7 @@ function synthesizeMarketingPost(prompt: string, brandName: string, industry: st
     indLower.includes('clean') || indLower.includes('home') || indLower.includes('maid') || indLower.includes('chore') || indLower.includes('repair') ||
     pLower.includes('clean') || pLower.includes('maid') || pLower.includes('house') || pLower.includes('chores')
   ) {
-    const headline = prompt.length > 5 && !prompt.includes('Launch')
-      ? prompt.slice(0, 50)
-      : `Spotless Spaces with Verified Ease`;
+    const headline = `Spotless Spaces & Expert Cleaning with ${brandName}`;
 
     const subheadline = `100% background-verified domestic help and professional care at your doorstep.`;
     const badge = `VERIFIED QUALITY`;
@@ -270,7 +314,7 @@ export async function POST(req: Request) {
 
     const apiKey = (geminiApiKey || process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || '').trim();
 
-    // 1. Synthesize Realistic Marketing Copy
+    // 1. Synthesize Realistic Marketing Copy & Visual Prompt
     let postData: {
       headline: string;
       subheadline: string;
@@ -278,14 +322,20 @@ export async function POST(req: Request) {
       cta: string;
       caption: string;
       hashtags: string[];
+      visualPrompt?: string;
     };
 
-    let engineUsed = 'Neural Image Synthesizer';
+    let engineUsed = 'FLUX.1 Ultra-HD Neural Engine';
 
-    if (apiKey) {
+    // Priority 1: AWS Bedrock Nova Pro (Active long-term key in .env)
+    const bedrockResult = await generateMarketingWithBedrock(prompt, brandName, industry, domain);
+    if (bedrockResult && bedrockResult.headline && bedrockResult.visualPrompt) {
+      postData = bedrockResult;
+      engineUsed = 'AWS Bedrock Nova Pro + FLUX.1 Engine';
+    } else if (apiKey) {
       try {
         postData = await callGeminiApi(apiKey, prompt, brandName, industry, domain);
-        engineUsed = 'Google Gemini 1.5 + Neural Engine';
+        engineUsed = 'Google Gemini + FLUX.1 Engine';
       } catch (geminiErr) {
         postData = synthesizeMarketingPost(prompt, brandName, industry, domain);
       }
@@ -307,42 +357,32 @@ export async function POST(req: Request) {
       height = 1350;
     }
 
-    // 3. Intelligent Photographic Scene Synthesizer (ChatGPT / DALL-E 3 Scene Translation)
+    // 3. Dynamic Visual Scene Synthesizer (Active Subjects, People, Products & Action)
     const cleanPrompt = prompt.trim();
     const indLower = (industry || '').toLowerCase();
     const pLower = cleanPrompt.toLowerCase();
 
-    // Strip abstract social UI phrases so they never corrupt the diffusion engine
-    const sanitizedPrompt = cleanPrompt
-      .replace(/instagram\s+(launch\s+)?post:?/gi, '')
-      .replace(/special\s+offer:?/gi, '')
-      .replace(/launch\s+announcement:?/gi, '')
-      .replace(/customer\s+trust:?/gi, '')
-      .replace(/service\s+spotlight:?/gi, '')
-      .replace(/lifestyle\s+hook:?/gi, '')
-      .replace(/why\s+busy\s+.*trust/gi, '')
-      .replace(/with\s+[A-Za-z0-9_-]+/gi, '')
-      .trim();
+    let visualScene = postData.visualPrompt || '';
 
-    let visualScene = '';
-
-    if (indLower.includes('clean') || indLower.includes('maid') || indLower.includes('chore') || indLower.includes('home') || pLower.includes('clean') || pLower.includes('maid')) {
-      visualScene = 'Award-winning commercial lifestyle photography of a sun-drenched modern luxury apartment living room with spotless gleaming hardwood floors, crisp natural morning light pouring through floor-to-ceiling windows, plush beige linen sofa, lush green house plants, impeccably organized and tidy atmosphere, Architectural Digest aesthetic, shot on Sony A7R V 35mm lens, photorealistic, 8k resolution, crisp detail, no text, no watermarks';
-    } else if (indLower.includes('food') || indLower.includes('restaurant') || indLower.includes('dining') || pLower.includes('food') || pLower.includes('meal')) {
-      visualScene = 'Michelin-star gourmet culinary food photography, exquisite artisanal dish beautifully plated on rustic slate stone, vibrant fresh ingredients, delicate steam rising, soft golden hour lighting, shallow depth of field, Bon Appétit magazine style, photorealistic, 8k resolution, no text';
-    } else if (indLower.includes('fitness') || indLower.includes('gym') || indLower.includes('sport') || pLower.includes('workout') || pLower.includes('fitness')) {
-      visualScene = 'High-performance commercial athletic photography in a modern luxury boutique gym, dramatic cinematic rim lighting, sleek matte black weights, dynamic energy, Nike campaign aesthetic, shot on Hasselblad, 8k resolution, photorealistic, no text';
-    } else if (indLower.includes('fashion') || indLower.includes('apparel') || indLower.includes('cloth') || pLower.includes('fashion')) {
-      visualScene = 'High-fashion editorial studio photography, contemporary minimalist setting with soft diffused natural light, stylish model in an elegant tailored outfit, warm earth tones, Vogue editorial styling, 8k resolution, photorealistic, no text';
-    } else if (indLower.includes('real estate') || indLower.includes('property') || indLower.includes('housing') || pLower.includes('villa') || pLower.includes('apartment')) {
-      visualScene = 'Breathtaking luxury architectural photography of a contemporary minimalist hillside villa with glass walls, warm glowing lights at twilight, serene infinity pool reflecting sunset sky, Architectural Digest cover, 8k resolution, photorealistic, no text';
-    } else if (indLower.includes('health') || indLower.includes('medical') || indLower.includes('wellness') || pLower.includes('care')) {
-      visualScene = 'Bright modern luxury wellness and clinic interior, light natural oak wood finishes, warm minimalist decor, tranquil and welcoming atmosphere, soft clean daylight, 8k resolution, photorealistic, crisp focus, no text';
-    } else if (indLower.includes('tech') || indLower.includes('saas') || indLower.includes('software') || pLower.includes('software')) {
-      visualScene = 'Sleek executive creator workspace with curved ultrawide monitor displaying subtle analytics glow, warm ambient LED studio backlighting, minimalist oak desk, cinematic commercial tech photography, 8k resolution, photorealistic, no text';
-    } else {
-      const subject = sanitizedPrompt.length > 5 ? sanitizedPrompt : 'premium modern lifestyle';
-      visualScene = `Award-winning commercial photography of ${subject}, cinematic lighting, shallow depth of field, sophisticated composition, shot on 35mm f/1.4 lens, 8k resolution, photorealistic commercial advertising aesthetic, no text, no watermark`;
+    // If dynamic AI visual prompt wasn't provided, use rich action scene (never an empty room)
+    if (!visualScene) {
+      if (indLower.includes('clean') || indLower.includes('maid') || indLower.includes('chore') || indLower.includes('home') || pLower.includes('clean') || pLower.includes('maid')) {
+        visualScene = 'Award-winning commercial photography of professional, smiling domestic cleaners in neat branded polo uniforms holding cleaning supplies and spray bottles in an impeccably clean, sunlit modern home with gleaming floors and sparkling kitchen, shot on 50mm f/1.4 lens, 8k resolution, commercial advertising photography, sharp focus, natural warm contrast, magazine quality, no text, no watermarks';
+      } else if (indLower.includes('food') || indLower.includes('restaurant') || indLower.includes('dining') || pLower.includes('food') || pLower.includes('meal')) {
+        visualScene = 'Michelin-star gourmet culinary food photography, exquisite artisanal dish beautifully plated on rustic slate stone, vibrant fresh ingredients, delicate steam rising, soft golden hour lighting, shallow depth of field, Bon Appétit magazine style, photorealistic, 8k resolution, no text';
+      } else if (indLower.includes('fitness') || indLower.includes('gym') || indLower.includes('sport') || pLower.includes('workout') || pLower.includes('fitness')) {
+        visualScene = 'High-performance commercial athletic photography in a modern luxury boutique gym, dramatic cinematic rim lighting, sleek matte black weights, dynamic energy, Nike campaign aesthetic, shot on Hasselblad, 8k resolution, photorealistic, no text';
+      } else if (indLower.includes('fashion') || indLower.includes('apparel') || indLower.includes('cloth') || pLower.includes('fashion')) {
+        visualScene = 'High-fashion editorial studio photography, contemporary minimalist setting with soft diffused natural light, stylish model in an elegant tailored outfit, warm earth tones, Vogue editorial styling, 8k resolution, photorealistic, no text';
+      } else if (indLower.includes('real estate') || indLower.includes('property') || indLower.includes('housing') || pLower.includes('villa') || pLower.includes('apartment')) {
+        visualScene = 'Breathtaking luxury architectural photography of a contemporary minimalist hillside villa with glass walls, warm glowing lights at twilight, serene infinity pool reflecting sunset sky, Architectural Digest cover, 8k resolution, photorealistic, no text';
+      } else if (indLower.includes('health') || indLower.includes('medical') || indLower.includes('wellness') || pLower.includes('care')) {
+        visualScene = 'Bright modern luxury wellness and clinic interior with compassionate smiling doctors in professional medical attire, light natural oak wood finishes, tranquil and welcoming atmosphere, soft daylight, 8k resolution, photorealistic, crisp focus, no text';
+      } else if (indLower.includes('tech') || indLower.includes('saas') || indLower.includes('software') || pLower.includes('software')) {
+        visualScene = 'Sleek executive creator workspace with curved ultrawide monitor displaying subtle analytics glow, warm ambient LED studio backlighting, minimalist oak desk, cinematic commercial tech photography, 8k resolution, photorealistic, no text';
+      } else {
+        visualScene = `Award-winning commercial photography depicting ${cleanPrompt}, vibrant dynamic energy, professional commercial advertising photography, cinematic lighting, shallow depth of field, 8k resolution, sharp focus, magazine quality, no text, no watermark`;
+      }
     }
 
     const seed = Math.floor(Math.random() * 10000000);
