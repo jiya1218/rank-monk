@@ -73,6 +73,35 @@ export function MediaStudio({
   const [referenceFile, setReferenceFile] = useState<string | null>(null);
   const [referenceImage, setReferenceImage] = useState<string | null>(null);
 
+  // Canva-style Live Designer State
+  const [activeTemplate, setActiveTemplate] = useState<'poster' | 'services_grid' | 'hero_metaphor' | 'luxury_editorial' | 'raw'>('poster');
+  const [customHeadline, setCustomHeadline] = useState('');
+  const [customSubheadline, setCustomSubheadline] = useState('');
+  const [customBadge, setCustomBadge] = useState('');
+  const [customServices, setCustomServices] = useState<any[]>([]);
+  const [isEditingInline, setIsEditingInline] = useState(false);
+
+  React.useEffect(() => {
+    if (activeAsset) {
+      setCustomHeadline(activeAsset.headline || '');
+      setCustomSubheadline(activeAsset.subheadline || '');
+      setCustomBadge(activeAsset.badge || '');
+      setCustomServices(activeAsset.services || [
+        { title: 'AI Automation', desc: 'Custom workflows & autonomous pipelines.', icon: '⚡' },
+        { title: 'Digital Marketing', desc: 'Predictive ROI campaigns & multi-channel ads.', icon: '📈' },
+        { title: 'Website Building', desc: 'Lightning-fast Next.js apps & landing pages.', icon: '🌐' },
+        { title: 'Cyber Security', desc: 'Zero-trust architecture & enterprise defense.', icon: '🛡️' }
+      ]);
+      if (activeAsset.postStyle === 'services_grid') {
+        setActiveTemplate('services_grid');
+      } else if (activeAsset.postStyle === 'hero_metaphor') {
+        setActiveTemplate('hero_metaphor');
+      } else {
+        setActiveTemplate('poster');
+      }
+    }
+  }, [activeAsset]);
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -534,11 +563,12 @@ export function MediaStudio({
                       onChange={(e) => setStyle(e.target.value)}
                       className="w-full rounded-xl border border-[#e4d6c6] bg-white p-2.5 text-xs font-bold text-[#2b1b12] focus:outline-none cursor-pointer"
                     >
-                      <option value="auto">Auto (Brand Based)</option>
-                      <option value="editorial">Realistic B2B Editorial</option>
-                      <option value="minimal">Minimal Flat Lay</option>
+                      <option value="auto">Auto (AI Layout & Theme)</option>
+                      <option value="services_grid">4-Service Grid Showcase (Overview & Capabilities)</option>
+                      <option value="hero_metaphor">3D Conceptual Metaphor (Chess / Domino / UI Nodes)</option>
+                      <option value="editorial">Commercial Editorial Photography</option>
+                      <option value="minimal">Minimalist Clean Studio</option>
                       <option value="3d">3D Render & Studio Lighting</option>
-                      <option value="vector">Modern Vector Graphic</option>
                     </select>
                   </div>
 
@@ -627,6 +657,125 @@ export function MediaStudio({
 
             {activeAsset ? (
               <div className="space-y-4">
+                {/* Canva-Style Template Switcher & Inline Edit Toolbar */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between bg-[#f8f3ec] p-1.5 rounded-xl border border-[#e4d6c6] gap-2">
+                  <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
+                    {[
+                      { id: 'services_grid', label: '⚡ 4-Service Grid' },
+                      { id: 'hero_metaphor', label: '♟️ Strategic Metaphor' },
+                      { id: 'luxury_editorial', label: '👑 Luxury Editorial' },
+                      { id: 'poster', label: '🎨 Master Poster' },
+                      { id: 'raw', label: '🖼️ Raw Visual' }
+                    ].map((tpl) => (
+                      <button
+                        key={tpl.id}
+                        type="button"
+                        onClick={() => setActiveTemplate(tpl.id as any)}
+                        className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition-all shrink-0 cursor-pointer ${
+                          activeTemplate === tpl.id
+                            ? 'bg-[#2b1b12] text-[#fffcf7] shadow-xs'
+                            : 'text-[#6f5a4c] hover:bg-white/70'
+                        }`}
+                      >
+                        {tpl.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingInline(!isEditingInline)}
+                    className={`px-3 py-1 text-[11px] font-bold rounded-lg border transition-all cursor-pointer shrink-0 text-center ${
+                      isEditingInline
+                        ? 'bg-amber-100 border-amber-300 text-amber-900 shadow-xs'
+                        : 'bg-white border-[#e4d6c6] text-[#2b1b12] hover:bg-[#f1e8dc]'
+                    }`}
+                  >
+                    {isEditingInline ? 'Done Editing ✓' : '✎ Edit Text'}
+                  </button>
+                </div>
+
+                {/* Inline Text Customizer Drawer */}
+                {isEditingInline && (
+                  <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200/80 space-y-3 animate-fade-in text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-amber-950 uppercase text-[10px] tracking-wider">
+                        Live Text Customizer (Instant Preview)
+                      </span>
+                      <span className="text-[10px] text-amber-700">Edits reflect live on the card below</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="text-[10px] font-bold text-amber-900 block mb-0.5">Headline</label>
+                        <input
+                          type="text"
+                          value={customHeadline}
+                          onChange={(e) => setCustomHeadline(e.target.value)}
+                          placeholder="Headline"
+                          className="w-full bg-white border border-amber-200 rounded-lg p-2 text-xs font-bold text-[#0f172a] focus:outline-none focus:ring-1 focus:ring-amber-400"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-amber-900 block mb-0.5">Badge Tag</label>
+                        <input
+                          type="text"
+                          value={customBadge}
+                          onChange={(e) => setCustomBadge(e.target.value)}
+                          placeholder="Promotional Badge"
+                          className="w-full bg-white border border-amber-200 rounded-lg p-2 text-xs font-bold text-[#0f172a] focus:outline-none focus:ring-1 focus:ring-amber-400"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] font-bold text-amber-900 block mb-0.5">Subheadline Value Prop</label>
+                      <input
+                        type="text"
+                        value={customSubheadline}
+                        onChange={(e) => setCustomSubheadline(e.target.value)}
+                        placeholder="Subheadline"
+                        className="w-full bg-white border border-amber-200 rounded-lg p-2 text-xs font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-400"
+                      />
+                    </div>
+
+                    {activeTemplate === 'services_grid' && customServices.length >= 4 && (
+                      <div className="space-y-1.5 pt-1">
+                        <label className="text-[10px] font-bold text-amber-900 block">4 Feature Service Cards</label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {customServices.slice(0, 4).map((svc, idx) => (
+                            <div key={idx} className="bg-white p-2 rounded-lg border border-amber-200 space-y-1">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-sm">{svc.icon || '⚡'}</span>
+                                <input
+                                  type="text"
+                                  value={svc.title}
+                                  onChange={(e) => {
+                                    const next = [...customServices];
+                                    next[idx] = { ...next[idx], title: e.target.value };
+                                    setCustomServices(next);
+                                  }}
+                                  className="font-bold text-[11px] text-[#0f172a] bg-transparent border-b border-transparent hover:border-amber-300 focus:border-amber-500 focus:outline-none w-full"
+                                />
+                              </div>
+                              <input
+                                type="text"
+                                value={svc.desc}
+                                onChange={(e) => {
+                                  const next = [...customServices];
+                                  next[idx] = { ...next[idx], desc: e.target.value };
+                                  setCustomServices(next);
+                                }}
+                                className="text-[10px] text-slate-600 bg-transparent border-b border-transparent hover:border-amber-300 focus:border-amber-500 focus:outline-none w-full"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Instagram Mock Card */}
                 <div className="bg-white border border-[#e4d6c6] rounded-2xl overflow-hidden shadow-sm">
                   {/* IG Top Profile Bar */}
@@ -646,13 +795,187 @@ export function MediaStudio({
                     <span className="text-xs font-bold text-slate-400">•••</span>
                   </div>
 
-                  {/* Graphic Visual Asset */}
-                  <div className="w-full bg-slate-900 flex items-center justify-center overflow-hidden max-h-[380px]">
-                    <img
-                      src={activeAsset.url}
-                      alt={activeAsset.prompt}
-                      className="w-full h-auto object-cover"
-                    />
+                  {/* Graphic Visual Asset Container */}
+                  <div className="w-full bg-slate-900 flex items-center justify-center overflow-hidden">
+                    {/* View 1: 4-Service Grid Showcase */}
+                    {activeTemplate === 'services_grid' && (
+                      <div className="w-full aspect-square bg-white p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden select-none border-b border-slate-100">
+                        {/* Ambient Glow */}
+                        <div
+                          className="absolute -top-16 -right-16 w-72 h-72 rounded-full blur-3xl opacity-15 pointer-events-none"
+                          style={{ backgroundColor: (project?.palette?.[0]?.startsWith('#') ? project.palette[0] : '#2563eb') }}
+                        />
+
+                        {/* Header */}
+                        <div className="flex items-center justify-between z-10">
+                          <div className="flex items-baseline gap-1">
+                            <span className="font-black text-xl text-[#0f172a] tracking-tight">{brandName}</span>
+                            <span className="font-bold text-xs text-blue-600">.™</span>
+                          </div>
+                          <span className="px-2.5 py-0.5 rounded-full text-[9.5px] font-black tracking-wider uppercase border border-slate-200 bg-slate-50 text-slate-600">
+                            {customBadge || activeAsset.badge || 'AI INFRASTRUCTURE FOR MODERN BUSINESS'}
+                          </span>
+                        </div>
+
+                        {/* Headline */}
+                        <div className="space-y-1 z-10 my-1">
+                          <h3 className="font-black text-lg sm:text-2xl text-[#0f172a] leading-tight tracking-tight">
+                            {customHeadline || activeAsset.headline || 'Build a System That Moves.'}
+                          </h3>
+                          <p className="text-[11px] sm:text-xs text-slate-500 font-medium leading-relaxed line-clamp-2">
+                            {customSubheadline || activeAsset.subheadline || 'Connect the work behind your business — from first enquiry to autonomous scale.'}
+                          </p>
+                        </div>
+
+                        {/* 4 Cards Matrix */}
+                        <div className="grid grid-cols-2 gap-2 z-10 my-1">
+                          {(customServices.length >= 4 ? customServices.slice(0, 4) : [
+                            { title: 'AI Automation', desc: 'Custom workflows & autonomous pipelines.', icon: '⚡' },
+                            { title: 'Digital Marketing', desc: 'Predictive ROI campaigns & multi-channel ads.', icon: '📈' },
+                            { title: 'Website Building', desc: 'Lightning-fast Next.js apps & landing pages.', icon: '🌐' },
+                            { title: 'Cyber Security', desc: 'Zero-trust architecture & enterprise defense.', icon: '🛡️' }
+                          ]).map((svc, i) => (
+                            <div key={i} className="p-2 sm:p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 shadow-xs flex flex-col justify-between">
+                              <div className="flex items-center gap-1.5 mb-0.5">
+                                <span className="text-sm">{svc.icon || '✦'}</span>
+                                <span className="font-bold text-[11px] sm:text-xs text-[#0f172a] truncate">{svc.title}</span>
+                              </div>
+                              <p className="text-[9.5px] sm:text-[10px] text-slate-500 line-clamp-2 font-medium leading-snug">{svc.desc}</p>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* 3D Hero Visual Render */}
+                        <div className="w-full h-24 sm:h-28 rounded-xl overflow-hidden bg-slate-950 border border-slate-200 relative z-10 shrink-0 shadow-sm">
+                          <img
+                            src={activeAsset.rawImageUrl || activeAsset.url}
+                            alt="Hero Visual"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+
+                        {/* Footer Bar */}
+                        <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] sm:text-[11px] font-bold z-10 text-slate-500">
+                          <span className="tracking-wider uppercase">{brandDomain}</span>
+                          <span className="px-3 py-1 rounded-lg text-white font-black text-[9.5px] sm:text-[10px] tracking-wide bg-blue-600">
+                            BOOK CONSULT ↗
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* View 2: Strategic Metaphor Layout */}
+                    {activeTemplate === 'hero_metaphor' && (
+                      <div className="w-full aspect-square bg-[#fcfcfc] p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden select-none border-b border-slate-100">
+                        {/* Header */}
+                        <div className="flex items-center justify-between z-10">
+                          <div className="flex items-baseline gap-1">
+                            <span className="font-black text-xl text-[#0f172a] tracking-tight">{brandName}</span>
+                            <span className="font-bold text-xs text-blue-600">.™</span>
+                          </div>
+                          <span className="px-2.5 py-0.5 rounded-full text-[9.5px] font-black tracking-wider uppercase border border-slate-200 bg-slate-50 text-slate-600">
+                            {customBadge || activeAsset.badge || 'AI AGENTS • BUILT FOR BUSINESS'}
+                          </span>
+                        </div>
+
+                        {/* Headline */}
+                        <div className="space-y-1 z-10 my-1">
+                          <h3 className="font-black text-lg sm:text-2xl text-[#0f172a] leading-tight tracking-tight">
+                            {customHeadline || activeAsset.headline || 'Turn Complexity into Strategic Advantage'}
+                          </h3>
+                          <p className="text-[11px] sm:text-xs text-slate-500 font-medium leading-relaxed line-clamp-2">
+                            {customSubheadline || activeAsset.subheadline || 'Our AI-powered solutions simplify operations and keep you ahead of the competition.'}
+                          </p>
+                        </div>
+
+                        {/* Large 3D Visual Render */}
+                        <div className="w-full flex-1 my-2 rounded-2xl overflow-hidden bg-slate-950 border border-slate-200 relative z-10 shadow-sm min-h-[140px]">
+                          <img
+                            src={activeAsset.rawImageUrl || activeAsset.url}
+                            alt="3D Metaphor"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+
+                        {/* 3 Benefit Pills */}
+                        <div className="grid grid-cols-3 gap-1.5 z-10 mb-1">
+                          {(activeAsset.featureNodes && activeAsset.featureNodes.length >= 3
+                            ? activeAsset.featureNodes.slice(0, 3)
+                            : ['Automate Operations', 'Integrate Tools', 'Drive Growth']
+                          ).map((node: string, i: number) => (
+                            <div key={i} className="p-1.5 rounded-xl bg-white border border-slate-200 shadow-xs flex items-center justify-center gap-1 text-center">
+                              <span className="w-1.5 h-1.5 rounded-full bg-blue-600 shrink-0" />
+                              <span className="text-[9.5px] sm:text-[10px] font-bold text-[#0f172a] truncate">{node}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Footer Bar */}
+                        <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] sm:text-[11px] font-bold z-10 text-slate-500">
+                          <span className="tracking-wider uppercase">{brandDomain}</span>
+                          <span className="px-3 py-1 rounded-lg text-white font-black text-[9.5px] sm:text-[10px] tracking-wide bg-blue-600">
+                            EXPLORE AI AGENTS ↗
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* View 3: TangentCore Luxury Editorial */}
+                    {activeTemplate === 'luxury_editorial' && (
+                      <div className="w-full aspect-square bg-[#faf7f2] p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden select-none border-b border-[#e4d6c6]">
+                        {/* Header */}
+                        <div className="flex items-center justify-between z-10">
+                          <span className="font-serif italic font-bold text-lg text-[#2b1b12]">{brandName}</span>
+                          <span className="px-2 py-0.5 rounded-md text-[9px] font-mono uppercase tracking-widest text-[#7a5242] border border-[#d8c09e] bg-[#f1e8dc]/60">
+                            {customBadge || activeAsset.badge || 'EDITORIAL SPOTLIGHT'}
+                          </span>
+                        </div>
+
+                        {/* Headline */}
+                        <div className="space-y-1.5 z-10 my-2">
+                          <h3 className="font-serif text-xl sm:text-2xl text-[#2b1b12] leading-tight font-medium">
+                            {customHeadline || activeAsset.headline || 'Search Has Changed. Have You?'}
+                          </h3>
+                          <div className="w-10 h-0.5 bg-[#c5a059]" />
+                          <p className="text-[11px] sm:text-xs text-[#6f5a4c] font-medium leading-relaxed line-clamp-2">
+                            {customSubheadline || activeAsset.subheadline || 'Find the gaps between what your audience needs and what your business actually delivers.'}
+                          </p>
+                        </div>
+
+                        {/* 3D Visual Render on Luxury Tone */}
+                        <div className="w-full flex-1 my-2 rounded-xl overflow-hidden bg-[#2b1b12] border border-[#e4d6c6] shadow-sm min-h-[140px]">
+                          <img
+                            src={activeAsset.rawImageUrl || activeAsset.url}
+                            alt="Luxury Hero"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+
+                        {/* Luxury Footer */}
+                        <div className="pt-2 border-t border-[#e4d6c6] flex items-center justify-between text-[10px] sm:text-[11px] text-[#6f5a4c] z-10">
+                          <span className="font-mono">{brandDomain}</span>
+                          <span className="text-[11px] font-serif italic text-[#c5a059] font-bold">Discover Excellence →</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* View 4: Master Server-Composed Poster */}
+                    {activeTemplate === 'poster' && (
+                      <img
+                        src={activeAsset.url}
+                        alt={activeAsset.prompt}
+                        className="w-full h-auto object-cover max-h-[460px]"
+                      />
+                    )}
+
+                    {/* View 5: Pure Raw Visual Asset */}
+                    {activeTemplate === 'raw' && (
+                      <img
+                        src={activeAsset.rawImageUrl || activeAsset.url}
+                        alt={activeAsset.prompt}
+                        className="w-full h-auto object-cover max-h-[460px]"
+                      />
+                    )}
                   </div>
 
                   {/* IG Action Icons */}
@@ -667,12 +990,12 @@ export function MediaStudio({
 
                   {/* Headline & Caption */}
                   <div className="p-3.5 bg-[#fffcf7] space-y-2 text-xs">
-                    {activeAsset.headline && (
+                    {(customHeadline || activeAsset.headline) && (
                       <h4 className="font-bold text-[#2b1b12] text-xs">
-                        {activeAsset.headline}
+                        {customHeadline || activeAsset.headline}
                       </h4>
                     )}
-                    <p className="text-[#6f5a4c] text-[11px] leading-relaxed">
+                    <p className="text-[#6f5a4c] text-[11px] leading-relaxed whitespace-pre-line">
                       {activeAsset.caption || activeAsset.prompt}
                     </p>
 
@@ -714,8 +1037,8 @@ export function MediaStudio({
                       href={activeAsset.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      download={`instagram_${Date.now()}.jpg`}
-                      className="py-2.5 bg-white hover:bg-[#f8f3ec] text-[#2b1b12] border border-[#e4d6c6] rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 text-center cursor-pointer"
+                      download={`instagram_${Date.now()}.png`}
+                      className="py-2.5 bg-white hover:bg-[#f8f3ec] text-[#2b1b12] border border-[#e4d6c6] rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 text-center cursor-pointer shadow-xs"
                     >
                       <Download className="w-3.5 h-3.5 text-[#5d7a4f]" />
                       <span>Download HD Image</span>
