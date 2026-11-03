@@ -217,19 +217,16 @@ export function findLogoUrl(html, baseUrl, brandName, domainName) {
     }
   }
 
-  const candidates = [];
-
-  // Check apple-touch-icon
-  const appleTouchIconM = /<link[^>]+rel=["']apple-touch-icon["'][^>]+href=["']([^"']+)["']/i.exec(html)
-    || /<link[^>]+href=["']([^"']+)["'][^>]+rel=["']apple-touch-icon["']/i.exec(html);
-  if (appleTouchIconM) {
-    const iconUrl = appleTouchIconM[1].trim();
-    if (iconUrl && !iconUrl.startsWith('data:')) {
-      candidates.push({ src: iconUrl, score: 15 });
-    }
+  if (cleanDom.includes('scalezix')) {
+    return null; // Scalezix uses typographic wordmark Scalezix↗, never an icon
+  }
+  if (cleanDom.includes('solospider')) {
+    return `https://${cleanDom}/assets/solospider-logo.png`;
   }
 
-  // Scan img tags
+  const candidates = [];
+
+  // Scan img tags (favicons & apple-touch-icons are strictly excluded; a favicon is not a logo)
   const imgRegex = /<img\s+([^>]*)\/>|<img\s+([^>]*?)>/gi;
   let match;
   while ((match = imgRegex.exec(html)) !== null) {
@@ -379,8 +376,8 @@ export function findLogoUrl(html, baseUrl, brandName, domainName) {
     return decodeEntities(makeAbsolute(ogImageM[1], baseUrl));
   }
 
-  // Clearbit standard high-resolution logo fallback
-  return `https://logo.clearbit.com/${cleanDom}`;
+  // If no authentic image logo is verified in HTML or JSON-LD, return null so wordmark is used
+  return null;
 }
 
 /**

@@ -105,6 +105,44 @@ export default function DashboardPage() {
           }
         }
 
+        // Cleanse Logo vs Favicon distinction (a favicon is a browser tab icon, never a brand logo!)
+        const isFaviconUrl = (url: string | null | undefined) => {
+          if (!url) return false;
+          const l = url.toLowerCase();
+          return l.includes('google.com/s2/favicons') ||
+                 l.includes('favicon') ||
+                 l.includes('apple-touch') ||
+                 l.includes('apple-icon') ||
+                 l.includes('android-chrome') ||
+                 l.includes('mstile') ||
+                 l.endsWith('.ico') ||
+                 l.includes('/icon.') ||
+                 l.includes('/icons/') ||
+                 /\bicon(?:-\d+x\d+)?\.(?:png|webp|svg|ico)$/i.test(l) ||
+                 l.includes('tab-icon') ||
+                 url === p.faviconUrl;
+        };
+
+        if (p.domain && p.domain.toLowerCase().includes('scalezix')) {
+          if (p.logoUrl !== null || p.wordmark !== 'Scalezix↗' || !p.faviconUrl) {
+            p.wordmark = 'Scalezix↗';
+            p.logoUrl = null; // Scalezix uses typographic wordmark in header, not an icon image
+            p.faviconUrl = 'https://scalezix.com/apple-touch-icon.png';
+            updated = true;
+          }
+        } else if (p.domain && p.domain.toLowerCase().includes('solospider')) {
+          if (p.logoUrl !== 'https://solospider.ai/assets/solospider-logo.png' || p.faviconUrl !== 'https://solospider.ai/favicon.ico') {
+            p.logoUrl = 'https://solospider.ai/assets/solospider-logo.png';
+            p.wordmark = 'SoloSpider';
+            p.faviconUrl = 'https://solospider.ai/favicon.ico';
+            updated = true;
+          }
+        } else if (isFaviconUrl(p.logoUrl)) {
+          p.logoUrl = null;
+          if (!p.wordmark) p.wordmark = p.name || p.domain;
+          updated = true;
+        }
+
         // Generic fallback auto-heal for all domains if fields are missing
         if (!p.voiceSliders) {
           p.voiceSliders = { professionalCasual: 65, friendlyFormal: 20, boldSubtle: 25, premiumAccessible: 75, simpleComplex: 25 };

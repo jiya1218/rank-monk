@@ -776,32 +776,63 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
             <div className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Logo</span>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">Logo</span>
+                    <span className="text-[9px] font-semibold text-slate-400 uppercase">
+                      {cleanDomain.includes('scalezix') || (!project?.logoUrl || (project?.logoUrl && (project.logoUrl.toLowerCase().includes('icon') || project.logoUrl.toLowerCase().includes('favicon')))) ? 'Wordmark' : 'Brand Asset'}
+                    </span>
+                  </div>
                   <div className="h-16 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center p-2 overflow-hidden shadow-xs">
                     {(() => {
-                      const displayLogo = (!logoFailed && project?.logoUrl && project.logoUrl !== project?.faviconUrl && !project.logoUrl.includes('google.com/s2/favicons'))
-                        ? project.logoUrl
-                        : (cleanDomain.includes('solospider')
-                            ? 'https://solospider.ai/assets/solospider-logo.png'
-                            : (project?.logoUrl || null));
+                      const isFavicon = (url: string | null | undefined) => {
+                        if (!url) return true;
+                        const lower = url.toLowerCase().trim();
+                        if (lower === (project?.faviconUrl || '').toLowerCase().trim()) return true;
+                        return lower.includes('google.com/s2/favicons') || 
+                               lower.includes('favicon') || 
+                               lower.includes('apple-touch') || 
+                               lower.includes('apple-icon') || 
+                               lower.includes('android-chrome') || 
+                               lower.includes('mstile') || 
+                               lower.endsWith('.ico') || 
+                               /\bicon(?:-\d+x\d+)?\.(?:png|webp|svg|ico)$/i.test(lower) || 
+                               lower.includes('/icon.') || 
+                               lower.includes('/icons/') || 
+                               lower.includes('tab-icon');
+                      };
 
-                      return displayLogo ? (
+                      let candidateLogo: string | null = null;
+                      if (cleanDomain.includes('scalezix')) {
+                        // Scalezix officially uses the clean typographic wordmark Scalezix↗, never an icon image
+                        candidateLogo = null;
+                      } else if (cleanDomain.includes('solospider')) {
+                        // SoloSpider official brand logo asset (jellyfish mark + solospider wordmark)
+                        candidateLogo = 'https://solospider.ai/assets/solospider-logo.png';
+                      } else if (!logoFailed && project?.logoUrl && !isFavicon(project.logoUrl)) {
+                        candidateLogo = project.logoUrl;
+                      }
+
+                      return candidateLogo ? (
                         <img
-                          src={displayLogo}
+                          src={candidateLogo}
                           alt={project?.name || 'Logo'}
                           className="max-h-12 max-w-full object-contain"
                           onError={() => setLogoFailed(true)}
                         />
                       ) : (
-                        <div className="flex items-center gap-2 px-1">
-                          <img
-                            src={project?.faviconUrl || `https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128`}
-                            alt="Brand Icon"
-                            className="w-7 h-7 object-contain rounded-md"
-                            onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
-                          />
-                          <span className="font-bold text-xs text-slate-900 truncate max-w-[80px]">
-                            {project?.name || cleanDomain}
+                        <div className="flex flex-col items-center justify-center h-full px-2 py-0.5">
+                          <span className="font-black text-base sm:text-lg tracking-tight text-slate-900 font-display flex items-center gap-0.5 select-none">
+                            {cleanDomain.includes('scalezix') ? (
+                              <>
+                                <span>Scalezix</span>
+                                <span className="text-[#473BFD] font-black">↗</span>
+                              </>
+                            ) : (
+                              <span>{project?.wordmark || project?.name || cleanDomain}</span>
+                            )}
+                          </span>
+                          <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider">
+                            Brand Wordmark
                           </span>
                         </div>
                       );
@@ -810,13 +841,24 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
                 </div>
 
                 <div>
-                  <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Favicon</span>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">Favicon</span>
+                    <span className="text-[9px] font-semibold text-slate-400 uppercase">Tab Icon</span>
+                  </div>
                   <div className="h-16 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center p-2 shadow-xs">
                     <img
-                      src={project?.faviconUrl || `https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128`}
+                      src={
+                        cleanDomain.includes('scalezix')
+                          ? 'https://scalezix.com/apple-touch-icon.png'
+                          : cleanDomain.includes('solospider')
+                            ? 'https://solospider.ai/favicon.ico'
+                            : (project?.faviconUrl || `https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128`)
+                      }
                       alt="Favicon"
-                      className="w-8 h-8 object-contain"
-                      onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                      className="w-8 h-8 rounded-md object-contain"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = `https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128`;
+                      }}
                     />
                   </div>
                 </div>

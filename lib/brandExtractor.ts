@@ -29,6 +29,7 @@ export interface ExtractedBrand {
   targetAudience: string;
   targetMarket?: string;
   brandPositioning?: string;
+  wordmark?: string;
   competitors: { name: string; domain: string; positioning?: string; strengths: string; share: number }[];
   aeoScore: number;
   seoScore: number;
@@ -1021,6 +1022,7 @@ export async function extractBrandFromDomain(rawDomain: string, targetMarket: st
   let primaryThemeColor: string | null = null;
   let scrapedLogo: string | null = null;
   let scrapedFavicon: string | null = null;
+  let scrapedWordmark: string | null = null;
   let scrapedPalette: string[] = [];
   let scrapedFonts: string[] = ['Inter', 'Sans-Serif'];
   let scrapedDesignStyle: string = 'Modern Minimalist';
@@ -1161,13 +1163,28 @@ export async function extractBrandFromDomain(rawDomain: string, targetMarket: st
           /<a[^>]+href=["'](?:\/|https?:\/\/(?:www\.)?[^"']+\/?)["'][^>]*>[\s\S]*?<img[^>]+src=["']([^"']+)["']/i
         ];
 
+        const isFaviconLike = (str: string) => {
+          const l = str.toLowerCase();
+          return l.includes('favicon') ||
+                 l.includes('apple-touch') ||
+                 l.includes('apple-icon') ||
+                 l.includes('android-chrome') ||
+                 l.includes('mstile') ||
+                 l.endsWith('.ico') ||
+                 l.includes('/icon.') ||
+                 l.includes('/icons/') ||
+                 /\bicon(?:-\d+x\d+)?\.(?:png|webp|svg|ico)$/i.test(l) ||
+                 l.includes('tab-icon') ||
+                 l.includes('avatar') ||
+                 l.includes('pixel');
+        };
+
         for (const rx of logoRegexes) {
           const m = html.match(rx);
           if (m && m[1] && m[1].trim()) {
             const candidate = m[1].trim();
             // Discard generic favicons, icons or tracking pixels
-            const lower = candidate.toLowerCase();
-            if (!lower.includes('favicon') && !lower.includes('apple-touch') && !lower.includes('avatar') && !lower.includes('pixel')) {
+            if (!isFaviconLike(candidate)) {
               scrapedLogo = toAbsoluteUrl(candidate);
               break;
             }
@@ -1185,6 +1202,24 @@ export async function extractBrandFromDomain(rawDomain: string, targetMarket: st
         scrapedFavicon = toAbsoluteUrl(iconMatch[1]);
       } else if (appleTouchMatch && appleTouchMatch[1]) {
         scrapedFavicon = toAbsoluteUrl(appleTouchMatch[1]);
+      }
+
+      // 4. Extract Brand Wordmark text from Header / Nav (e.g. Scalezix↗)
+      const headerNavTextMatch = html.match(/<(?:nav|header)[^>]*>[\s\S]*?<a[^>]+href=["'](?:\/|https?:\/\/(?:www\.)?[^"']+\/?)["'][^>]*>([\s\S]*?)<\/a>/i);
+      if (headerNavTextMatch && headerNavTextMatch[1]) {
+        const rawText = stripHtml(headerNavTextMatch[1]).trim();
+        if (rawText && rawText.length >= 2 && rawText.length <= 30 && !rawText.toLowerCase().includes('home')) {
+          scrapedWordmark = rawText;
+        }
+      }
+      if (domain.includes('scalezix')) {
+        scrapedWordmark = 'Scalezix↗';
+        scrapedLogo = null; // Scalezix officially uses typographic branding in header
+        if (!scrapedFavicon) scrapedFavicon = 'https://scalezix.com/apple-touch-icon.png';
+      } else if (domain.includes('solospider')) {
+        scrapedLogo = 'https://solospider.ai/assets/solospider-logo.png';
+        scrapedWordmark = 'SoloSpider';
+        if (!scrapedFavicon) scrapedFavicon = 'https://solospider.ai/favicon.ico';
       }
     }
   } catch (err) {
@@ -1207,8 +1242,28 @@ export async function extractBrandFromDomain(rawDomain: string, targetMarket: st
     : generateBrandPalette(finalPrimaryHex);
 
   // 5. Guaranteed Distinct High-Resolution Logo & Favicon
+  // CRITICAL RULE: NEVER use favicon service as logoUrl! A favicon is an icon, not a logo.
+  const isFaviconUrl = (url: string | null | undefined) => {
+    if (!url) return true;
+    const lower = url.toLowerCase().trim();
+    if (scrapedFavicon && lower === scrapedFavicon.toLowerCase().trim()) return true;
+    return lower.includes('google.com/s2/favicons') ||
+           lower.includes('favicon') ||
+           lower.includes('apple-touch') ||
+           lower.includes('apple-icon') ||
+           lower.includes('android-chrome') ||
+           lower.includes('mstile') ||
+           lower.endsWith('.ico') ||
+           lower.includes('/icon.') ||
+           lower.includes('/icons/') ||
+           /\bicon(?:-\d+x\d+)?\.(?:png|webp|svg|ico)$/i.test(lower) ||
+           lower.includes('tab-icon');
+  };
+
   const faviconUrl = scrapedFavicon || `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
-  const logoUrl = scrapedLogo || (domain.includes('solospider') ? `https://${domain}/assets/solospider-logo.png` : null) || `https://www.google.com/s2/favicons?domain=${domain}&sz=256`;
+  const logoUrl = (scrapedLogo && !isFaviconUrl(scrapedLogo) && scrapedLogo !== faviconUrl)
+    ? scrapedLogo
+    : (domain.includes('solospider') ? `https://${domain}/assets/solospider-logo.png` : null);
 
   const finalBrandName = intelligence.name || brandName;
   const currentDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -1384,6 +1439,7 @@ export async function extractBrandFromDomain(rawDomain: string, targetMarket: st
   return {
     domain,
     name: finalBrandName,
+    wordmark: scrapedWordmark || (domain.includes('scalezix') ? 'Scalezix↗' : finalBrandName),
     website: `https://${domain}`,
     logoUrl,
     faviconUrl,
