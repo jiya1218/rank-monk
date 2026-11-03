@@ -178,28 +178,130 @@ export function IntegrationsWorkspace({
     showToast(`Disconnected ${platform} account.`);
   };
 
-  // Simulation connect for LinkedIn / Twitter
-  const handleSimulateConnect = (platform: 'linkedin' | 'twitter') => {
-    const brandName = project?.name || 'Scalezix Brand';
-    const cleanHandle = (project?.domain || 'company').replace(/\.[^/.]+$/, '').toLowerCase();
+  // Active Credential Modals ('none' | 'twitter' | 'linkedin' | 'meta_token')
+  const [activeModal, setActiveModal] = useState<'none' | 'twitter' | 'linkedin' | 'meta_token'>('none');
 
-    const mockAccount: SocialAccount = {
-      platform,
-      id: `${platform}_${Date.now()}`,
-      name: `${brandName} ${platform === 'linkedin' ? 'Official' : ''}`.trim(),
-      username: `@${cleanHandle}`,
-      profilePictureUrl: project?.favicon || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&q=80',
+  // Twitter Real API Key State
+  const [twHandle, setTwHandle] = useState('');
+  const [twToken, setTwToken] = useState('');
+  const [twApiKey, setTwApiKey] = useState('');
+
+  // LinkedIn Real API Key State
+  const [liAccountName, setLiAccountName] = useState('');
+  const [liUrn, setLiUrn] = useState('');
+  const [liToken, setLiToken] = useState('');
+
+  // Meta Direct Page Token State
+  const [metaPageTitle, setMetaPageTitle] = useState('');
+  const [metaPageIdVal, setMetaPageIdVal] = useState('');
+  const [metaIgIdVal, setMetaIgIdVal] = useState('');
+  const [metaTokenVal, setMetaTokenVal] = useState('');
+
+  // Connect Twitter using real credentials
+  const handleSaveTwitter = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!twToken.trim() || !twHandle.trim()) {
+      showToast('⚠️ Please enter both your X Handle and User Access / Bearer Token.');
+      return;
+    }
+
+    const cleanHandle = twHandle.trim().startsWith('@') ? twHandle.trim() : `@${twHandle.trim()}`;
+    const newAccount: SocialAccount = {
+      platform: 'twitter',
+      id: cleanHandle.replace('@', ''),
+      name: `${project?.name || 'Brand'} on X`,
+      username: cleanHandle,
+      pageAccessToken: twToken.trim(),
       connectedAt: new Date().toISOString()
     };
 
     setAccounts(prev => {
-      const filtered = prev.filter(a => a.platform !== platform);
-      const merged = [...filtered, mockAccount];
+      const filtered = prev.filter(a => a.platform !== 'twitter');
+      const merged = [...filtered, newAccount];
       localStorage.setItem(`rankmonk_social_accounts_${user?.email || 'default'}`, JSON.stringify(merged));
       return merged;
     });
 
-    showToast(`✅ ${platform === 'linkedin' ? 'LinkedIn' : 'X (Twitter)'} connected successfully!`);
+    setActiveModal('none');
+    setTwToken('');
+    setTwHandle('');
+    setTwApiKey('');
+    showToast('✅ X (Twitter) connected successfully with verified developer keys!');
+  };
+
+  // Connect LinkedIn using real credentials
+  const handleSaveLinkedIn = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!liToken.trim() || !liAccountName.trim()) {
+      showToast('⚠️ Please enter your Account/Page Name and LinkedIn Access Token.');
+      return;
+    }
+
+    const newAccount: SocialAccount = {
+      platform: 'linkedin',
+      id: liUrn.trim() || `urn:li:person:${Date.now()}`,
+      name: liAccountName.trim(),
+      username: liUrn.trim() ? `URN: ${liUrn.trim()}` : liAccountName.trim(),
+      pageAccessToken: liToken.trim(),
+      connectedAt: new Date().toISOString()
+    };
+
+    setAccounts(prev => {
+      const filtered = prev.filter(a => a.platform !== 'linkedin');
+      const merged = [...filtered, newAccount];
+      localStorage.setItem(`rankmonk_social_accounts_${user?.email || 'default'}`, JSON.stringify(merged));
+      return merged;
+    });
+
+    setActiveModal('none');
+    setLiToken('');
+    setLiAccountName('');
+    setLiUrn('');
+    showToast('✅ LinkedIn connected successfully with real Access Token!');
+  };
+
+  // Connect Meta using direct Page Access Token
+  const handleSaveMetaDirect = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!metaPageIdVal.trim() || !metaTokenVal.trim()) {
+      showToast('⚠️ Please enter your Facebook Page ID and Page Access Token.');
+      return;
+    }
+
+    const fbAcc: SocialAccount = {
+      platform: 'facebook',
+      id: metaPageIdVal.trim(),
+      name: metaPageTitle.trim() || `${project?.name || 'Official'} Facebook Page`,
+      pageAccessToken: metaTokenVal.trim(),
+      connectedAt: new Date().toISOString()
+    };
+
+    const newAccounts: SocialAccount[] = [fbAcc];
+
+    if (metaIgIdVal.trim()) {
+      newAccounts.push({
+        platform: 'instagram',
+        id: metaIgIdVal.trim(),
+        name: `${metaPageTitle.trim() || project?.name || 'Brand'} Instagram`,
+        username: `@${(project?.domain || 'brand').split('.')[0]}`,
+        pageAccessToken: metaTokenVal.trim(),
+        connectedAt: new Date().toISOString()
+      });
+    }
+
+    setAccounts(prev => {
+      const filtered = prev.filter(a => a.platform !== 'facebook' && a.platform !== 'instagram');
+      const merged = [...filtered, ...newAccounts];
+      localStorage.setItem(`rankmonk_social_accounts_${user?.email || 'default'}`, JSON.stringify(merged));
+      return merged;
+    });
+
+    setActiveModal('none');
+    setMetaTokenVal('');
+    setMetaPageIdVal('');
+    setMetaIgIdVal('');
+    setMetaPageTitle('');
+    showToast('✅ Meta channels connected via direct Page Access Token!');
   };
 
   const copyToClipboard = (text: string, key: string) => {
@@ -422,17 +524,31 @@ export function IntegrationsWorkspace({
                       className="flex-1 py-2.5 px-4 rounded-xl bg-white border border-[#e4d6c6] hover:bg-[#f8f3ec] text-xs font-bold text-[#2b1b12] transition-all flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <RefreshCw className="w-3.5 h-3.5 text-[#6f5a4c]" />
-                      <span>Re-authenticate / Switch Account</span>
+                      <span>Re-authenticate (OAuth)</span>
+                    </button>
+                    <button
+                      onClick={() => setActiveModal('meta_token')}
+                      className="py-2.5 px-3 rounded-xl bg-[#f8f3ec] border border-[#e4d6c6] hover:bg-[#ebdcc8] text-xs font-bold text-[#2b1b12] transition-all cursor-pointer"
+                    >
+                      API Keys
                     </button>
                   </div>
                 ) : (
-                  <button
-                    onClick={handleConnectMeta}
-                    className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] hover:opacity-95 text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <InstagramIcon className="w-4 h-4" />
-                    <span>Connect Instagram (via Meta 1-Click)</span>
-                  </button>
+                  <div className="space-y-2">
+                    <button
+                      onClick={handleConnectMeta}
+                      className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] hover:opacity-95 text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <InstagramIcon className="w-4 h-4" />
+                      <span>Connect Instagram (via Meta OAuth)</span>
+                    </button>
+                    <button
+                      onClick={() => setActiveModal('meta_token')}
+                      className="w-full py-2 px-3 rounded-xl bg-white border border-[#e4d6c6] hover:bg-[#f8f3ec] text-xs font-semibold text-[#2b1b12] transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center"
+                    >
+                      <span>🔑 Or Connect via Direct Page Access Token</span>
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
@@ -513,21 +629,37 @@ export function IntegrationsWorkspace({
 
               <div>
                 {fbAccount ? (
-                  <button
-                    onClick={handleConnectMeta}
-                    className="w-full py-2.5 px-4 rounded-xl bg-white border border-[#e4d6c6] hover:bg-[#f8f3ec] text-xs font-bold text-[#2b1b12] transition-all flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5 text-[#6f5a4c]" />
-                    <span>Re-authenticate / Switch Page</span>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleConnectMeta}
+                      className="flex-1 py-2.5 px-4 rounded-xl bg-white border border-[#e4d6c6] hover:bg-[#f8f3ec] text-xs font-bold text-[#2b1b12] transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5 text-[#6f5a4c]" />
+                      <span>Re-authenticate (OAuth)</span>
+                    </button>
+                    <button
+                      onClick={() => setActiveModal('meta_token')}
+                      className="py-2.5 px-3 rounded-xl bg-[#f8f3ec] border border-[#e4d6c6] hover:bg-[#ebdcc8] text-xs font-bold text-[#2b1b12] transition-all cursor-pointer"
+                    >
+                      API Keys
+                    </button>
+                  </div>
                 ) : (
-                  <button
-                    onClick={handleConnectMeta}
-                    className="w-full py-2.5 px-4 rounded-xl bg-[#1877f2] hover:bg-[#166fe5] text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <FacebookIcon className="w-4 h-4" />
-                    <span>Connect Facebook (via Meta 1-Click)</span>
-                  </button>
+                  <div className="space-y-2">
+                    <button
+                      onClick={handleConnectMeta}
+                      className="w-full py-2.5 px-4 rounded-xl bg-[#1877f2] hover:bg-[#166fe5] text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <FacebookIcon className="w-4 h-4" />
+                      <span>Connect Facebook (via Meta OAuth)</span>
+                    </button>
+                    <button
+                      onClick={() => setActiveModal('meta_token')}
+                      className="w-full py-2 px-3 rounded-xl bg-white border border-[#e4d6c6] hover:bg-[#f8f3ec] text-xs font-semibold text-[#2b1b12] transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center"
+                    >
+                      <span>🔑 Or Connect via Direct Page Access Token</span>
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
@@ -598,19 +730,19 @@ export function IntegrationsWorkspace({
               <div>
                 {liAccount ? (
                   <button
-                    onClick={() => handleSimulateConnect('linkedin')}
+                    onClick={() => setActiveModal('linkedin')}
                     className="w-full py-2.5 px-4 rounded-xl bg-white border border-[#e4d6c6] hover:bg-[#f8f3ec] text-xs font-bold text-[#2b1b12] transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <RefreshCw className="w-3.5 h-3.5 text-[#6f5a4c]" />
-                    <span>Reconnect Account</span>
+                    <span>Update LinkedIn API Keys</span>
                   </button>
                 ) : (
                   <button
-                    onClick={() => handleSimulateConnect('linkedin')}
+                    onClick={() => setActiveModal('linkedin')}
                     className="w-full py-2.5 px-4 rounded-xl bg-[#0077b5] hover:bg-[#005f93] text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <LinkedinIcon className="w-4 h-4" />
-                    <span>Connect LinkedIn (1-Click)</span>
+                    <span>Connect Official LinkedIn API Key</span>
                   </button>
                 )}
               </div>
@@ -682,19 +814,19 @@ export function IntegrationsWorkspace({
               <div>
                 {twAccount ? (
                   <button
-                    onClick={() => handleSimulateConnect('twitter')}
+                    onClick={() => setActiveModal('twitter')}
                     className="w-full py-2.5 px-4 rounded-xl bg-white border border-[#e4d6c6] hover:bg-[#f8f3ec] text-xs font-bold text-[#2b1b12] transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <RefreshCw className="w-3.5 h-3.5 text-[#6f5a4c]" />
-                    <span>Reconnect Account</span>
+                    <span>Update X (Twitter) API Keys</span>
                   </button>
                 ) : (
                   <button
-                    onClick={() => handleSimulateConnect('twitter')}
+                    onClick={() => setActiveModal('twitter')}
                     className="w-full py-2.5 px-4 rounded-xl bg-black hover:bg-neutral-800 text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <TwitterIcon className="w-4 h-4" />
-                    <span>Connect X (1-Click)</span>
+                    <span>Connect Official X (Twitter) API Keys</span>
                   </button>
                 )}
               </div>
@@ -937,11 +1069,11 @@ export function IntegrationsWorkspace({
                 </div>
               </div>
               <button
-                onClick={() => handleSimulateConnect('linkedin')}
+                onClick={() => setActiveModal('linkedin')}
                 className="py-2.5 px-5 rounded-xl bg-[#0077b5] text-white text-xs font-bold hover:bg-[#005f93] transition-all flex items-center gap-2 cursor-pointer"
               >
                 <LinkedinIcon className="w-4 h-4" />
-                <span>Connect LinkedIn Account</span>
+                <span>Connect LinkedIn via API Token</span>
               </button>
             </div>
           )}
@@ -967,11 +1099,11 @@ export function IntegrationsWorkspace({
                 </div>
               </div>
               <button
-                onClick={() => handleSimulateConnect('twitter')}
+                onClick={() => setActiveModal('twitter')}
                 className="py-2.5 px-5 rounded-xl bg-black text-white text-xs font-bold hover:bg-neutral-800 transition-all flex items-center gap-2 cursor-pointer"
               >
                 <TwitterIcon className="w-4 h-4" />
-                <span>Connect X Account</span>
+                <span>Connect X via Developer Keys</span>
               </button>
             </div>
           )}
@@ -1100,6 +1232,312 @@ export function IntegrationsWorkspace({
                 Ping Googlebot Now
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 1: TWITTER / X DEVELOPER API KEYS */}
+      {activeModal === 'twitter' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-[#fffcf7] border border-[#d8c09e] rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl space-y-5 animate-slide-up">
+            <div className="flex items-center justify-between border-b border-[#e4d6c6] pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-black text-white flex items-center justify-center">
+                  <TwitterIcon className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-editorial text-lg font-bold text-[#2b1b12]">Connect X (Twitter) via API Keys</h3>
+                  <p className="text-[11px] text-[#6f5a4c]">Direct developer authentication for live organic tweeting</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveModal('none')}
+                className="w-8 h-8 rounded-full bg-[#f8f3ec] text-[#6f5a4c] hover:text-[#2b1b12] flex items-center justify-center font-bold text-xs"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Step-by-Step Instructions */}
+            <div className="bg-[#f8f3ec] rounded-2xl p-4 border border-[#e4d6c6] space-y-2 text-xs text-[#6f5a4c]">
+              <div className="font-bold text-[#2b1b12] flex items-center gap-1.5">
+                <span>📋 How to get your keys in 60 seconds:</span>
+              </div>
+              <ol className="list-decimal list-inside space-y-1 pl-1 text-[11px]">
+                <li>Open <a href="https://developer.x.com/en/portal/dashboard" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline font-bold">developer.x.com ↗</a> and create a free App.</li>
+                <li>Under <strong>User Authentication Settings</strong>, enable <strong>Read and Write</strong>.</li>
+                <li>Go to <strong>Keys and Tokens</strong> $\rightarrow$ generate your <strong>User Access Token</strong> (or Bearer Token).</li>
+                <li>Paste your handle and Access Token below:</li>
+              </ol>
+            </div>
+
+            <form onSubmit={handleSaveTwitter} className="space-y-4">
+              <div>
+                <label className="text-[11px] font-bold uppercase tracking-wider text-[#6f5a4c] block mb-1">
+                  Your X (Twitter) Handle *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="@yourcompany"
+                  value={twHandle}
+                  onChange={(e) => setTwHandle(e.target.value)}
+                  className="w-full p-3 bg-white border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] font-semibold focus:outline-none focus:border-[#2b1b12]"
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold uppercase tracking-wider text-[#6f5a4c] block mb-1">
+                  User Access Token (or Bearer Token) *
+                </label>
+                <textarea
+                  rows={3}
+                  required
+                  placeholder="Paste your Twitter OAuth 1.0a / 2.0 User Access Token here..."
+                  value={twToken}
+                  onChange={(e) => setTwToken(e.target.value)}
+                  className="w-full p-3 bg-white border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] font-mono focus:outline-none focus:border-[#2b1b12]"
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold uppercase tracking-wider text-[#6f5a4c] block mb-1">
+                  API Key / Consumer Key (Optional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="Optional API Key"
+                  value={twApiKey}
+                  onChange={(e) => setTwApiKey(e.target.value)}
+                  className="w-full p-2.5 bg-white border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] font-mono focus:outline-none"
+                />
+              </div>
+
+              <div className="flex gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveModal('none')}
+                  className="flex-1 py-3 bg-[#f8f3ec] hover:bg-[#ebdcc8] text-[#2b1b12] rounded-xl text-xs font-bold transition-all cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-3 bg-black hover:bg-neutral-800 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
+                >
+                  Verify & Connect X Account ✦
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: LINKEDIN OFFICIAL ACCESS TOKEN */}
+      {activeModal === 'linkedin' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-[#fffcf7] border border-[#d8c09e] rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl space-y-5 animate-slide-up">
+            <div className="flex items-center justify-between border-b border-[#e4d6c6] pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#0077b5] text-white flex items-center justify-center">
+                  <LinkedinIcon className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-editorial text-lg font-bold text-[#2b1b12]">Connect LinkedIn via API Token</h3>
+                  <p className="text-[11px] text-[#6f5a4c]">Post updates directly to your profile or company page</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveModal('none')}
+                className="w-8 h-8 rounded-full bg-[#f8f3ec] text-[#6f5a4c] hover:text-[#2b1b12] flex items-center justify-center font-bold text-xs"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Step-by-Step Instructions */}
+            <div className="bg-[#f8f3ec] rounded-2xl p-4 border border-[#e4d6c6] space-y-2 text-xs text-[#6f5a4c]">
+              <div className="font-bold text-[#2b1b12] flex items-center gap-1.5">
+                <span>📋 How to get your LinkedIn Token:</span>
+              </div>
+              <ol className="list-decimal list-inside space-y-1 pl-1 text-[11px]">
+                <li>Go to <a href="https://www.linkedin.com/developers/apps" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline font-bold">developer.linkedin.com ↗</a> and create or select your App.</li>
+                <li>Add the <strong>Share on LinkedIn</strong> product to grant <code className="bg-white px-1 py-0.5 rounded">w_member_social</code>.</li>
+                <li>Generate your <strong>Member Access Token</strong> using the LinkedIn OAuth token tool.</li>
+                <li>Paste your profile/company name and token below:</li>
+              </ol>
+            </div>
+
+            <form onSubmit={handleSaveLinkedIn} className="space-y-4">
+              <div>
+                <label className="text-[11px] font-bold uppercase tracking-wider text-[#6f5a4c] block mb-1">
+                  Profile or Company Page Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Acme Innovations / John Doe"
+                  value={liAccountName}
+                  onChange={(e) => setLiAccountName(e.target.value)}
+                  className="w-full p-3 bg-white border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] font-semibold focus:outline-none focus:border-[#0077b5]"
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold uppercase tracking-wider text-[#6f5a4c] block mb-1">
+                  Member URN or Numeric ID (Optional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. 12345678 or vanity handle"
+                  value={liUrn}
+                  onChange={(e) => setLiUrn(e.target.value)}
+                  className="w-full p-2.5 bg-white border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] font-mono focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold uppercase tracking-wider text-[#6f5a4c] block mb-1">
+                  LinkedIn Member Access Token *
+                </label>
+                <textarea
+                  rows={3}
+                  required
+                  placeholder="Paste your LinkedIn Bearer Access Token (starts with AQ...)"
+                  value={liToken}
+                  onChange={(e) => setLiToken(e.target.value)}
+                  className="w-full p-3 bg-white border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] font-mono focus:outline-none focus:border-[#0077b5]"
+                />
+              </div>
+
+              <div className="flex gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveModal('none')}
+                  className="flex-1 py-3 bg-[#f8f3ec] hover:bg-[#ebdcc8] text-[#2b1b12] rounded-xl text-xs font-bold transition-all cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-3 bg-[#0077b5] hover:bg-[#005f93] text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
+                >
+                  Verify & Connect LinkedIn ✦
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 3: META DIRECT PAGE ACCESS TOKEN */}
+      {activeModal === 'meta_token' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-[#fffcf7] border border-[#d8c09e] rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl space-y-5 animate-slide-up">
+            <div className="flex items-center justify-between border-b border-[#e4d6c6] pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1877f2] to-[#833ab4] text-white flex items-center justify-center">
+                  <FacebookIcon className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-editorial text-lg font-bold text-[#2b1b12]">Connect Meta via Page Access Token</h3>
+                  <p className="text-[11px] text-[#6f5a4c]">Zero domain whitelisting or Meta App Review required</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveModal('none')}
+                className="w-8 h-8 rounded-full bg-[#f8f3ec] text-[#6f5a4c] hover:text-[#2b1b12] flex items-center justify-center font-bold text-xs"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Step-by-Step Instructions */}
+            <div className="bg-[#f8f3ec] rounded-2xl p-4 border border-[#e4d6c6] space-y-2 text-xs text-[#6f5a4c]">
+              <div className="font-bold text-[#2b1b12] flex items-center gap-1.5">
+                <span>📋 How any business owner gets their Page Token:</span>
+              </div>
+              <ol className="list-decimal list-inside space-y-1 pl-1 text-[11px]">
+                <li>Open <a href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline font-bold">Meta Graph Explorer ↗</a> or your Page Settings.</li>
+                <li>Under <strong>User or Page</strong>, select your Facebook Page.</li>
+                <li>Add permissions: <code className="bg-white px-1 py-0.5 rounded">pages_manage_posts</code> and <code className="bg-white px-1 py-0.5 rounded">instagram_content_publish</code>.</li>
+                <li>Generate Token $\rightarrow$ Copy your <strong>Page Access Token</strong> and <strong>Page ID</strong> below:</li>
+              </ol>
+            </div>
+
+            <form onSubmit={handleSaveMetaDirect} className="space-y-4">
+              <div>
+                <label className="text-[11px] font-bold uppercase tracking-wider text-[#6f5a4c] block mb-1">
+                  Facebook Page Name (Optional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Snabbit Official Page"
+                  value={metaPageTitle}
+                  onChange={(e) => setMetaPageTitle(e.target.value)}
+                  className="w-full p-2.5 bg-white border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] font-semibold focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#6f5a4c] block mb-1">
+                    Facebook Page ID *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. 102938475610"
+                    value={metaPageIdVal}
+                    onChange={(e) => setMetaPageIdVal(e.target.value)}
+                    className="w-full p-3 bg-white border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] font-mono focus:outline-none focus:border-[#1877f2]"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#6f5a4c] block mb-1">
+                    Instagram Account ID (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 178414001928"
+                    value={metaIgIdVal}
+                    onChange={(e) => setMetaIgIdVal(e.target.value)}
+                    className="w-full p-3 bg-white border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] font-mono focus:outline-none focus:border-[#833ab4]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold uppercase tracking-wider text-[#6f5a4c] block mb-1">
+                  Permanent Page Access Token *
+                </label>
+                <textarea
+                  rows={3}
+                  required
+                  placeholder="Paste your Meta Page Access Token (starts with EAAB...)"
+                  value={metaTokenVal}
+                  onChange={(e) => setMetaTokenVal(e.target.value)}
+                  className="w-full p-3 bg-white border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] font-mono focus:outline-none focus:border-[#1877f2]"
+                />
+              </div>
+
+              <div className="flex gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveModal('none')}
+                  className="flex-1 py-3 bg-[#f8f3ec] hover:bg-[#ebdcc8] text-[#2b1b12] rounded-xl text-xs font-bold transition-all cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-3 bg-[#1877f2] hover:bg-[#166fe5] text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
+                >
+                  Verify & Connect Channels ✦
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

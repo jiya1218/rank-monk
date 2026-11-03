@@ -23,6 +23,7 @@ export function PricingModal({ isOpen, onClose, onSuccess }: PricingModalProps) 
   const [appliedCoupon, setAppliedCoupon] = useState('');
   const [isDiscountActive, setIsDiscountActive] = useState(false);
   const [couponError, setCouponError] = useState('');
+  const [showCouponInput, setShowCouponInput] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -58,7 +59,7 @@ export function PricingModal({ isOpen, onClose, onSuccess }: PricingModalProps) 
       setCouponError('');
       setCouponInput(code);
     } else {
-      setCouponError('Invalid coupon code. Try RANKMONK001 or RANKMONK100 for 100% OFF.');
+      setCouponError('Invalid coupon code.');
     }
   };
 
@@ -327,18 +328,15 @@ export function PricingModal({ isOpen, onClose, onSuccess }: PricingModalProps) 
           </div>
         </div>
 
-        {/* Promo Coupon Code Bar */}
-        <div style={{ maxWidth: '440px', margin: '0 auto 24px' }}>
+        {/* Promo Coupon Code Bar (Discreet / Hidden by default) */}
+        <div style={{ maxWidth: '400px', margin: '0 auto 20px' }}>
           {isDiscountActive ? (
-            <div style={{ padding: '12px 16px', backgroundColor: '#eef7ec', border: '1px solid #84e1bc', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '1.2rem' }}>🏷️</span>
+            <div style={{ padding: '10px 14px', backgroundColor: '#eef7ec', border: '1px solid #84e1bc', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '1.1rem' }}>🏷️</span>
                 <div>
-                  <span style={{ fontWeight: 800, color: '#03543f', textTransform: 'uppercase', display: 'block', fontSize: '10.5px' }}>
-                    Coupon {appliedCoupon} Active!
-                  </span>
-                  <span style={{ color: '#2b1b12', fontSize: '11px' }}>
-                    100% Discount — Instant <strong style={{ color: '#03543f' }}>₹0 Free Activation</strong> for testing!
+                  <span style={{ fontWeight: 800, color: '#03543f', display: 'block', fontSize: '11px' }}>
+                    Coupon {appliedCoupon} Applied (100% OFF)
                   </span>
                 </div>
               </div>
@@ -350,39 +348,54 @@ export function PricingModal({ isOpen, onClose, onSuccess }: PricingModalProps) 
                 Remove
               </button>
             </div>
-          ) : (
-            <div style={{ padding: '12px 16px', backgroundColor: '#f8f3ec', border: '1px solid #e4d6c6', borderRadius: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          ) : showCouponInput ? (
+            <div style={{ padding: '10px 14px', backgroundColor: '#f8f3ec', border: '1px solid #e4d6c6', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <input
                   type="text"
-                  placeholder="Coupon Code (e.g. RANKMONK100 or RANKMONK001)"
+                  placeholder="Enter promo code"
                   value={couponInput}
                   onChange={(e) => setCouponInput(e.target.value)}
-                  style={{ flex: 1, padding: '8px 12px', backgroundColor: '#fffcf7', border: '1px solid #e4d6c6', borderRadius: '10px', textTransform: 'uppercase', fontWeight: 700, fontSize: '0.78rem', color: '#2b1b12', outline: 'none' }}
+                  style={{ flex: 1, padding: '7px 11px', backgroundColor: '#fffcf7', border: '1px solid #e4d6c6', borderRadius: '8px', textTransform: 'uppercase', fontWeight: 700, fontSize: '0.78rem', color: '#2b1b12', outline: 'none' }}
                 />
                 <button
                   type="button"
                   onClick={() => handleApplyCoupon()}
-                  style={{ padding: '8px 16px', backgroundColor: '#2b1b12', color: '#fffcf7', fontWeight: 700, borderRadius: '10px', fontSize: '0.78rem', border: 'none', cursor: 'pointer' }}
+                  style={{ padding: '7px 14px', backgroundColor: '#2b1b12', color: '#fffcf7', fontWeight: 700, borderRadius: '8px', fontSize: '0.78rem', border: 'none', cursor: 'pointer' }}
                 >
                   Apply
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowCouponInput(false); setCouponError(''); }}
+                  style={{ background: 'none', border: 'none', color: '#7a5242', fontSize: '0.8rem', cursor: 'pointer', padding: '2px 4px' }}
+                  title="Close"
+                >
+                  ✕
                 </button>
               </div>
 
               {couponError && (
                 <div style={{ fontSize: '11px', color: '#dc2626', fontWeight: 600 }}>{couponError}</div>
               )}
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: '#6f5a4c', paddingTop: '6px', borderTop: '1px solid #e4d6c6' }}>
-                <span>Testing full platform?</span>
-                <button
-                  type="button"
-                  onClick={() => handleApplyCoupon('RANKMONK100')}
-                  style={{ fontWeight: 800, color: '#03543f', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
-                >
-                  ⚡ Apply 100% OFF (RANKMONK100)
-                </button>
-              </div>
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center' }}>
+              <button
+                type="button"
+                onClick={() => setShowCouponInput(true)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#7a5242',
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  textDecoration: 'underline'
+                }}
+              >
+                Have a promo code?
+              </button>
             </div>
           )}
         </div>

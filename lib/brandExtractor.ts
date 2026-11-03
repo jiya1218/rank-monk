@@ -1,3 +1,5 @@
+import { BedrockRuntimeClient, ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
+
 export interface ExtractedBrand {
   domain: string;
   name: string;
@@ -53,7 +55,6 @@ export function cleanDomain(raw: string): string {
     .trim()
     .toLowerCase()
     .replace(/^https?:\/\//i, '')
-    .replace(/^https?:\/\//i, '')
     .replace(/^www\./i, '')
     .split('/')[0]
     .split('?')[0]
@@ -64,24 +65,20 @@ export function cleanDomain(raw: string): string {
 export function generateBrandPalette(primaryHex: string): string[] {
   const cleanHex = primaryHex.startsWith('#') ? primaryHex : `#${primaryHex}`;
   
-  // Parse RGB
   const r = parseInt(cleanHex.slice(1, 3), 16) || 43;
   const g = parseInt(cleanHex.slice(3, 5), 16) || 120;
   const b = parseInt(cleanHex.slice(5, 7), 16) || 229;
 
-  // Derive dark shade
   const darkR = Math.max(0, Math.floor(r * 0.4)).toString(16).padStart(2, '0');
   const darkG = Math.max(0, Math.floor(g * 0.4)).toString(16).padStart(2, '0');
   const darkB = Math.max(0, Math.floor(b * 0.4)).toString(16).padStart(2, '0');
   const darkNeutral = `#${darkR}${darkG}${darkB}`;
 
-  // Derive light tint
   const lightR = Math.min(255, Math.floor(r + (255 - r) * 0.85)).toString(16).padStart(2, '0');
   const lightG = Math.min(255, Math.floor(g + (255 - g) * 0.85)).toString(16).padStart(2, '0');
   const lightB = Math.min(255, Math.floor(b + (255 - b) * 0.85)).toString(16).padStart(2, '0');
   const lightSurface = `#${lightR}${lightG}${lightB}`;
 
-  // Vibrant accent
   const accentR = Math.min(255, Math.floor(b * 0.9 + 30)).toString(16).padStart(2, '0');
   const accentG = Math.min(255, Math.floor(r * 0.8 + 20)).toString(16).padStart(2, '0');
   const accentB = Math.min(255, Math.floor(g * 0.9 + 40)).toString(16).padStart(2, '0');
@@ -89,501 +86,173 @@ export function generateBrandPalette(primaryHex: string): string[] {
 
   return [
     cleanHex,             // 1. Primary Brand Color
-    `#1e293b`,            // 2. Dark Slate Typography
+    `#1e293b`,            // 2. Dark Typography
     `#64748b`,            // 3. Muted Slate Secondary
-    lightSurface,         // 4. Subtle Brand Tint Surface
+    lightSurface,         // 4. Subtle Surface Tint
     `#f8fafc`,            // 5. Crisp Clean Background
     contrastAccent        // 6. Vibrant Functional Accent
   ];
 }
 
-// Comprehensive Verified Knowledge Base for 70+ Major Global and Indian Platforms
-const VERIFIED_BRANDS: Record<string, Partial<ExtractedBrand>> = {
-  'snabbit.com': {
-    name: 'Snabbit',
-    industry: 'Home Services & Domestic Help',
-    businessCategory: '10-Minute On-Demand Maid Service, Deep Cleaning & Daily House Help App',
-    targetAudience: 'Busy urban households, working couples & apartment residents across Bangalore seeking instant, verified domestic help',
-    brandPositioning: 'Instant house help at your doorstep in 10 minutes — affordable hourly chores by 100% background-verified professionals',
-    palette: ['#F70F79', '#1E293B', '#FF66A6', '#64748B', '#FFF0F6', '#8AD935'],
-    competitors: [
-      { name: 'Urban Company', domain: 'urbancompany.com', positioning: 'India’s largest multi-category home service & maintenance marketplace', strengths: 'Pan-India brand recognition and expansive service breadth', share: 54 },
-      { name: 'Housejoy', domain: 'housejoy.in', positioning: 'Home construction, maintenance and deep cleaning aggregator', strengths: 'Specialized deep cleaning and appliance repair services', share: 22 },
-      { name: 'BookMyBai', domain: 'bookmybai.com', positioning: 'Permanent and full-time domestic maid hiring platform', strengths: 'Long-term maid contracts and live-in maid placements', share: 14 },
-      { name: 'Bro4u', domain: 'bro4u.com', positioning: 'Bangalore-focused hyperlocal home service provider', strengths: 'Local Bangalore vendor network and flexible pricing', share: 10 }
-    ],
-    voiceSliders: { professionalCasual: 80, friendlyFormal: 15, boldSubtle: 20, premiumAccessible: 85, simpleComplex: 15 },
-    voiceTags: ['Dependable', 'Lightning-Fast', 'Trustworthy', 'Affordable', 'Friendly', 'Background-Verified']
-  },
-  'swiggy.com': {
-    name: 'Swiggy',
-    industry: 'Food Delivery & Quick Commerce',
-    businessCategory: 'On-Demand Food Delivery, Dining Out & Hyperlocal Grocery (Instamart)',
-    targetAudience: 'Urban consumers, working professionals, families, and convenience-first smartphone users across India',
-    brandPositioning: 'India’s leading convenience platform delivering food, grocery essentials in 10 minutes, and curated dining privileges',
-    palette: ['#FC8019', '#282C3F', '#FFA048', '#686B78', '#F2F2F2', '#60B246'],
-    competitors: [
-      { name: 'Zomato', domain: 'zomato.com', positioning: 'Leading Indian restaurant aggregator & quick food delivery network', strengths: 'Massive dining discovery network and high market share in North India', share: 48 },
-      { name: 'Zepto', domain: 'zeptonow.com', positioning: 'Dedicated 10-minute instant delivery quick commerce specialist', strengths: 'High-velocity dark store infrastructure in metro hubs', share: 22 },
-      { name: 'Blinkit', domain: 'blinkit.com', positioning: 'Zomato-owned instant grocery and everyday essentials platform', strengths: 'Extensive inventory breadth and integrated customer base', share: 20 },
-      { name: 'BigBasket', domain: 'bigbasket.com', positioning: 'Tata Enterprise comprehensive grocery and slotted supermarket platform', strengths: 'Massive SKU catalog, wholesale pricing and supply chain scale', share: 10 }
-    ],
-    voiceSliders: { professionalCasual: 75, friendlyFormal: 15, boldSubtle: 25, premiumAccessible: 85, simpleComplex: 15 },
-    voiceTags: ['Friendly', 'Approachable', 'Energetic', 'Customer-Centric', 'Fast-Paced', 'Solution Oriented']
-  },
-  'zomato.com': {
-    name: 'Zomato',
-    industry: 'Food Delivery & Restaurant Discovery',
-    businessCategory: 'Hyperlocal Food Delivery, Restaurant Discovery & Live Dining Events',
-    targetAudience: 'Food lovers, urban youth, dining out patrons, and modern Indian households',
-    brandPositioning: 'Never have a bad meal — India’s cultural icon for food discovery, dining perks, and hyper-fast delivery',
-    palette: ['#E23744', '#1C1C1C', '#FF5A60', '#828282', '#F8F8F8', '#2D9CDB'],
-    competitors: [
-      { name: 'Swiggy', domain: 'swiggy.com', positioning: 'Leading all-in-one convenience, food, and Instamart delivery platform', strengths: 'Strong presence in South/West India & multi-service ecosystem', share: 46 },
-      { name: 'Zepto', domain: 'zeptonow.com', positioning: '10-minute grocery delivery leader', strengths: 'Hyper-fast dark-store fulfillment speed', share: 24 },
-      { name: 'Magicpin', domain: 'magicpin.in', positioning: 'Local savings and dining discovery platform powered by ONDC', strengths: 'ONDC price competitiveness and local retail deals', share: 18 }
-    ],
-    voiceSliders: { professionalCasual: 85, friendlyFormal: 10, boldSubtle: 20, premiumAccessible: 80, simpleComplex: 10 },
-    voiceTags: ['Witty', 'Relatable', 'Playful', 'Culturally Tuned', 'Friendly', 'Pop-Culture Driven']
-  },
-  'zepto.com': {
-    name: 'Zepto',
-    industry: 'Quick Commerce & Hyperlocal Logistics',
-    businessCategory: '10-Minute Dark Store Grocery, Fresh Produce & Daily Essentials Delivery',
-    targetAudience: 'Time-strapped metro professionals, Gen-Z consumers, and instantaneous shoppers',
-    brandPositioning: 'Groceries delivered in 10 minutes flat with zero compromise on freshness',
-    palette: ['#7B1FA2', '#1A002C', '#FF1744', '#757575', '#F5F0FA', '#00C853'],
-    competitors: [
-      { name: 'Blinkit', domain: 'blinkit.com', strengths: 'Deep market penetration and category breadth', share: 42 },
-      { name: 'Swiggy Instamart', domain: 'swiggy.com', strengths: 'Massive user cross-sell from food delivery', share: 36 },
-      { name: 'BB Now', domain: 'bigbasket.com', strengths: 'Tata supply chain procurement advantage', share: 14 }
-    ],
-    voiceSliders: { professionalCasual: 80, friendlyFormal: 15, boldSubtle: 20, premiumAccessible: 80, simpleComplex: 15 },
-    voiceTags: ['Lightning-Fast', 'Energetic', 'Modern', 'Youthful', 'Convenience-Focused']
-  },
-  'blinkit.com': {
-    name: 'Blinkit',
-    industry: 'Quick Commerce & Instant Retail',
-    businessCategory: '10-Minute Instant Supermarket, Electronics & Everyday Essentials Delivery',
-    targetAudience: 'Busy families, young professionals, and spontaneous consumers across tier-1/2 Indian cities',
-    brandPositioning: 'Everything you need delivered in the blink of an eye',
-    palette: ['#F8CB46', '#222222', '#0C831F', '#666666', '#FFFBEA', '#E23744'],
-    competitors: [
-      { name: 'Zepto', domain: 'zeptonow.com', strengths: 'Pure-play quick commerce focus & high customer NPS', share: 40 },
-      { name: 'Swiggy Instamart', domain: 'swiggy.com', strengths: 'Unified rewards and high urban repeat frequency', share: 38 },
-      { name: 'Amazon Fresh', domain: 'amazon.in', strengths: 'Prime membership loyalty and broad catalog', share: 15 }
-    ],
-    voiceSliders: { professionalCasual: 75, friendlyFormal: 20, boldSubtle: 25, premiumAccessible: 85, simpleComplex: 15 },
-    voiceTags: ['Dependable', 'Speedy', 'Everyday Hero', 'Simple', 'Friendly']
-  },
-  'stripe.com': {
-    name: 'Stripe',
-    industry: 'Financial Technology & Payments Infrastructure',
-    businessCategory: 'Global Payment Gateway, Billing Automation & Financial SaaS Infrastructure',
-    targetAudience: 'Software developers, startup founders, CTOs, and global enterprise platforms',
-    brandPositioning: 'Financial infrastructure for the internet — building the economic engine of global commerce',
-    palette: ['#635BFF', '#0A2540', '#00D4FF', '#425466', '#F6F9FC', '#00D924'],
-    competitors: [
-      { name: 'Adyen', domain: 'adyen.com', positioning: 'Omnichannel global unified commerce gateway', strengths: 'Single platform global acquiring and low interchange fees', share: 34 },
-      { name: 'PayPal / Braintree', domain: 'paypal.com', positioning: 'Global consumer wallet and merchant processor', strengths: 'Massive global consumer trust and wallet acceptance', share: 30 },
-      { name: 'Checkout.com', domain: 'checkout.com', positioning: 'High-volume digital merchant payment architecture', strengths: 'Custom enterprise integration and granular processing data', share: 22 }
-    ],
-    voiceSliders: { professionalCasual: 20, friendlyFormal: 30, boldSubtle: 25, premiumAccessible: 30, simpleComplex: 80 },
-    voiceTags: ['Developer-First', 'Authoritative', 'Precise', 'Visionary', 'Rock-Solid']
-  },
-  'razorpay.com': {
-    name: 'Razorpay',
-    industry: 'Financial Services & FinTech',
-    businessCategory: 'Full-Stack Payments, Neobanking & Payroll Infrastructure for Indian Businesses',
-    targetAudience: 'Startups, digital merchants, D2C brands, and enterprises operating across India',
-    brandPositioning: 'Powering the financial future for businesses of every size in India',
-    palette: ['#0C2340', '#0284C7', '#52525B', '#E0F2FE', '#F8FAFC', '#10B981'],
-    competitors: [
-      { name: 'Cashfree', domain: 'cashfree.com', strengths: 'Bulk disbursals and API verification suite', share: 28 },
-      { name: 'PayU', domain: 'payu.in', strengths: 'Long-standing enterprise merchant relationships', share: 26 },
-      { name: 'PhonePe PG', domain: 'phonepe.com', strengths: 'Massive UPI consumer traffic and zero gateway dropoff', share: 24 }
-    ],
-    voiceSliders: { professionalCasual: 25, friendlyFormal: 35, boldSubtle: 30, premiumAccessible: 35, simpleComplex: 75 },
-    voiceTags: ['Trustworthy', 'Developer-Friendly', 'Compliant', 'Enterprise-Grade', 'Innovative']
-  },
-  'zerodha.com': {
-    name: 'Zerodha',
-    industry: 'Financial Technology & Stock Broking',
-    businessCategory: 'Discount Stock Broker, Direct Mutual Fund & Capital Markets Ecosystem',
-    targetAudience: 'Retail investors, algorithmic traders, long-term wealth builders, and financial enthusiasts',
-    brandPositioning: 'Zero brokerage, zero gimmicks — transparent, low-cost capital market access for everyone',
-    palette: ['#387ED1', '#222222', '#FF5722', '#666666', '#F3F8FD', '#4CAF50'],
-    competitors: [
-      { name: 'Groww', domain: 'groww.in', strengths: 'Simplified mobile-first UI for first-time retail investors', share: 44 },
-      { name: 'Angel One', domain: 'angelone.in', strengths: 'Tier-2/3 city penetration and assisted advisory model', share: 24 },
-      { name: 'Upstox', domain: 'upstox.com', strengths: 'Active pro trader tooling and charting features', share: 18 }
-    ],
-    voiceSliders: { professionalCasual: 35, friendlyFormal: 25, boldSubtle: 35, premiumAccessible: 50, simpleComplex: 40 },
-    voiceTags: ['Transparent', 'Unapologetic', 'Ethical', 'Simple', 'High-Integrity']
-  },
-  'flipkart.com': {
-    name: 'Flipkart',
-    industry: 'E-Commerce & Digital Marketplace',
-    businessCategory: 'Multi-Category Consumer Marketplace, Electronics, Fashion & Logistics',
-    targetAudience: 'Pan-India online shoppers, value-driven consumers, and smartphone/gadget enthusiasts',
-    brandPositioning: 'India ka fashion & electronics destination — making online shopping accessible and affordable',
-    palette: ['#2874F0', '#FB641B', '#212121', '#878787', '#F1F3F6', '#FFD814'],
-    competitors: [
-      { name: 'Amazon India', domain: 'amazon.in', strengths: 'Prime membership loyalty and AWS ecosystem infrastructure', share: 46 },
-      { name: 'Meesho', domain: 'meesho.com', strengths: 'Zero-commission unbranded long-tail apparel marketplace', share: 26 },
-      { name: 'Myntra', domain: 'myntra.com', strengths: 'Fashion vertical dominance and Gen-Z styling discovery', share: 16 }
-    ],
-    voiceSliders: { professionalCasual: 65, friendlyFormal: 20, boldSubtle: 25, premiumAccessible: 85, simpleComplex: 20 },
-    voiceTags: ['Mass-Market', 'Value-Driven', 'Festive', 'Inclusive', 'Customer-Centric']
-  },
-  'amazon.in': {
-    name: 'Amazon India',
-    industry: 'E-Commerce & Cloud Infrastructure',
-    businessCategory: 'Global Consumer Marketplace, Prime Video, Pay & Logistics Network',
-    targetAudience: 'Indian families, Prime subscribers, and online consumers looking for guaranteed fast delivery',
-    brandPositioning: 'Earth’s most customer-centric company — delivering everything from A to Z with unbeatable convenience',
-    palette: ['#FF9900', '#146EB4', '#131A22', '#565959', '#EAEDED', '#00A8E1'],
-    competitors: [
-      { name: 'Flipkart', domain: 'flipkart.com', strengths: 'Deep local festival promotions and mobile dominance', share: 48 },
-      { name: 'JioMart', domain: 'jiomart.com', strengths: 'Reliance physical store network integration', share: 18 },
-      { name: 'Meesho', domain: 'meesho.com', strengths: 'Tier-3/4 city penetration and low ticket prices', share: 18 }
-    ],
-    voiceSliders: { professionalCasual: 40, friendlyFormal: 30, boldSubtle: 25, premiumAccessible: 80, simpleComplex: 25 },
-    voiceTags: ['Customer-Obsessed', 'Reliable', 'Vast', 'Convenient', 'Trusted']
-  },
-  'notion.so': {
-    name: 'Notion',
-    industry: 'Productivity Software & Collaboration',
-    businessCategory: 'All-in-One Connected Workspace, Docs, Wikis & AI-Assisted Project Management',
-    targetAudience: 'Knowledge workers, product designers, engineering teams, and modern startups',
-    brandPositioning: 'Write, plan, and organize in one place — the all-in-one workspace with native AI',
-    palette: ['#000000', '#2E2E2E', '#37352F', '#787774', '#F7F6F3', '#0A85EA'],
-    competitors: [
-      { name: 'Coda', domain: 'coda.io', strengths: 'Interactive documents and powerful formula automation', share: 28 },
-      { name: 'Confluence', domain: 'atlassian.com', strengths: 'Deep Jira integration in enterprise IT departments', share: 36 },
-      { name: 'Slite', domain: 'slite.com', strengths: 'AI-first knowledge base simplicity', share: 16 }
-    ],
-    voiceSliders: { professionalCasual: 50, friendlyFormal: 20, boldSubtle: 25, premiumAccessible: 60, simpleComplex: 30 },
-    voiceTags: ['Minimalist', 'Thoughtful', 'Empowering', 'Artistic', 'Clean']
-  },
-  'linear.app': {
-    name: 'Linear',
-    industry: 'Developer Productivity & Issue Tracking',
-    businessCategory: 'High-Performance Issue Tracking, Product Roadmap & Sprint Management Software',
-    targetAudience: 'Software engineers, engineering leads, product managers, and modern high-velocity tech startups',
-    brandPositioning: 'The issue tracker built for high-performance software teams',
-    palette: ['#5E6AD2', '#0F1015', '#8A99AD', '#1E2029', '#08090C', '#27B576'],
-    competitors: [
-      { name: 'Jira', domain: 'atlassian.com', strengths: 'Legacy enterprise standard and complex compliance workflows', share: 55 },
-      { name: 'GitHub Projects', domain: 'github.com', strengths: 'Native code repository linkage and zero setup friction', share: 28 },
-      { name: 'Asana', domain: 'asana.com', strengths: 'Non-technical cross-departmental project workflows', share: 12 }
-    ],
-    voiceSliders: { professionalCasual: 30, friendlyFormal: 30, boldSubtle: 20, premiumAccessible: 40, simpleComplex: 60 },
-    voiceTags: ['Fast', 'Crafted', 'Opinionated', 'Precise', 'Sophisticated']
+// Strip HTML tags and clean whitespace
+function stripHtml(html: string): string {
+  return html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, ' ')
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// Dynamic AI Brand & Competitor Discovery (Powered by Live Web Content & Bedrock AI)
+async function analyzeWithAI(domain: string, title: string, metaDesc: string, h1: string, pageText: string) {
+  const token = process.env.AWS_BEARER_TOKEN_BEDROCK || process.env.VITE_BEDROCK_API_KEY;
+  if (!token) return null;
+
+  try {
+    process.env.AWS_BEARER_TOKEN_BEDROCK = token;
+    const client = new BedrockRuntimeClient({ region: 'us-east-1' });
+
+    const prompt = `You are a world-class market research analyst.
+A user added the domain: "${domain}" to their SEO & Growth Engine.
+Here is the real data scraped from their website:
+- Title: "${title}"
+- Meta Description: "${metaDesc}"
+- Main Heading: "${h1}"
+- Content Snippet: "${pageText.slice(0, 1800)}"
+
+Analyze what this specific company actually does from their website content and return a raw JSON object (no markdown, no backticks, only JSON):
+{
+  "name": "Official Brand Name",
+  "industry": "Specific Industry name",
+  "businessCategory": "Specific Business Category (8-14 words)",
+  "targetAudience": "Target Audience (10-18 words)",
+  "brandPositioning": "1-2 sentence core value proposition based on their site",
+  "primaryHex": "#Hex color appropriate for their brand",
+  "competitors": [
+    { "name": "Real Competitor 1", "domain": "realcompetitor1.com", "positioning": "their market positioning", "strengths": "key competitive strength", "share": 40 },
+    { "name": "Real Competitor 2", "domain": "realcompetitor2.com", "positioning": "their market positioning", "strengths": "key competitive strength", "share": 30 },
+    { "name": "Real Competitor 3", "domain": "realcompetitor3.com", "positioning": "their market positioning", "strengths": "key competitive strength", "share": 18 },
+    { "name": "Real Competitor 4", "domain": "realcompetitor4.com", "positioning": "their market positioning", "strengths": "key competitive strength", "share": 12 }
+  ],
+  "voiceSliders": { "professionalCasual": 70, "friendlyFormal": 20, "boldSubtle": 25, "premiumAccessible": 80, "simpleComplex": 20 },
+  "voiceTags": ["VoiceTag1", "VoiceTag2", "VoiceTag3", "VoiceTag4"]
+}`;
+
+    const command = new ConverseCommand({
+      modelId: 'amazon.nova-pro-v1:0',
+      messages: [{ role: 'user', content: [{ text: prompt }] }]
+    });
+
+    const response = await client.send(command);
+    const rawText = response.output?.message?.content?.[0]?.text;
+    if (!rawText) return null;
+
+    // Clean JSON markdown if wrapped
+    const cleanedJson = rawText.replace(/```(?:json)?/gi, '').replace(/```/g, '').trim();
+    const parsed = JSON.parse(cleanedJson);
+    return parsed;
+  } catch (err) {
+    console.warn('[BrandExtractor] AI analysis skipped/error:', (err as Error).message);
+    return null;
   }
-};
+}
 
-// Semantic Classification Engine for Dynamic Unknown Domains
-function classifyDomainIntelligence(cleanDomainStr: string, textCorpus: string) {
-  const d = cleanDomainStr.toLowerCase();
-  const c = textCorpus.toLowerCase();
+// Pure Dynamic Semantic Parser (Fallback if AI network is unavailable)
+function dynamicSemanticParser(domain: string, title: string, metaDesc: string, h1: string, pageText: string) {
+  const parts = domain.split('.')[0].split(/[-_]/);
+  const derivedBrandName = parts.map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
 
-  // 1. Food Delivery, Quick Commerce, Dining, Cloud Kitchen
-  if (d.includes('food') || d.includes('eat') || d.includes('kitchen') || d.includes('swiggy') || d.includes('zomato') || d.includes('dine') || d.includes('order') || c.includes('restaurant') || c.includes('food delivery') || c.includes('biryani') || c.includes('groceries') || c.includes('cuisine') || c.includes('dishes')) {
-    return {
-      industry: 'Food & Beverage / Quick Commerce',
-      businessCategory: 'On-Demand Food Delivery, Cloud Kitchen & Dining Experience Platform',
-      targetAudience: 'Urban consumers, working professionals, families, and convenience-focused smartphone users',
-      brandPositioning: 'Delivering exceptional food and dining experiences with hyper-fast fulfillment and local culinary excellence',
-      primaryHex: '#FC8019',
-      competitors: [
-        { name: 'Zomato', domain: 'zomato.com', positioning: 'India’s prominent restaurant search & food delivery leader', strengths: 'Massive dining discovery network and high market share in North India', share: 48 },
-        { name: 'Swiggy', domain: 'swiggy.com', positioning: 'Leading convenience and 10-minute grocery platform', strengths: 'Strong multi-service ecosystem and high repeat order density', share: 42 },
-        { name: 'Zepto', domain: 'zeptonow.com', positioning: 'Hyper-fast 10-minute quick commerce specialist', strengths: 'Speed-optimized dark store fulfillment infrastructure', share: 24 },
-        { name: 'EatSure', domain: 'eatsure.com', positioning: 'Multi-brand cloud kitchen collective delivery platform', strengths: 'Single-order multi-brand food delivery curation', share: 12 }
-      ],
-      voiceSliders: { professionalCasual: 80, friendlyFormal: 15, boldSubtle: 25, premiumAccessible: 85, simpleComplex: 15 },
-      voiceTags: ['Friendly', 'Appetizing', 'Approachable', 'Energetic', 'Customer-Centric']
-    };
+  // Clean brand name from title if title contains separator
+  let brandName = derivedBrandName;
+  if (title.includes('—') || title.includes('|') || title.includes('-')) {
+    const candidate = title.split(/[—|\-]/)[0].trim();
+    if (candidate.length > 1 && candidate.length < 25) {
+      brandName = candidate;
+    }
   }
 
-  // 2. FinTech, Banking, Payments & Wealth
-  if (d.includes('pay') || d.includes('bank') || d.includes('cash') || d.includes('card') || d.includes('fund') || d.includes('invest') || d.includes('wealth') || d.includes('fin') || c.includes('payment gateway') || c.includes('interest rate') || c.includes('mutual fund') || c.includes('trading')) {
-    return {
-      industry: 'Financial Services & FinTech',
-      businessCategory: 'Digital Payments, Neobanking & Wealth Management Infrastructure',
-      targetAudience: 'Retail investors, modern consumers, financial heads, and growing digital merchants',
-      brandPositioning: 'Empowering seamless, secure, and intelligent financial independence for individuals and businesses',
-      primaryHex: '#0284C7',
-      competitors: [
-        { name: 'Razorpay', domain: 'razorpay.com', strengths: 'Full-stack merchant payment infrastructure and developer APIs', share: 35 },
-        { name: 'PhonePe', domain: 'phonepe.com', strengths: 'Dominant consumer UPI market share and wallet penetration', share: 32 },
-        { name: 'Paytm', domain: 'paytm.com', strengths: 'Merchant soundbox distribution and consumer brand recognition', share: 22 },
-        { name: 'Zerodha', domain: 'zerodha.com', strengths: 'Zero-brokerage direct investment trust and trading tech', share: 18 }
-      ],
-      voiceSliders: { professionalCasual: 25, friendlyFormal: 30, boldSubtle: 25, premiumAccessible: 45, simpleComplex: 65 },
-      voiceTags: ['Trustworthy', 'Secure', 'Transparent', 'High-Integrity', 'Data-Backed']
-    };
+  const combined = `${domain} ${title} ${metaDesc} ${h1} ${pageText}`.toLowerCase();
+
+  // Dynamically determine industry & category from real scraped terminology
+  let industry = 'Specialized Commercial Services';
+  let category = 'Modern Direct-to-Consumer & Business Service Platform';
+  let primaryHex = '#2563EB';
+
+  if (combined.includes('clean') || combined.includes('maid') || combined.includes('chore') || combined.includes('home service') || combined.includes('plumb') || combined.includes('repair')) {
+    industry = 'Home Services & Domestic Assistance';
+    category = 'On-Demand Domestic Chores, Home Cleaning & Maintenance Platform';
+    primaryHex = '#F70F79';
+  } else if (combined.includes('food') || combined.includes('restaurant') || combined.includes('kitchen') || combined.includes('dining') || combined.includes('grocery')) {
+    industry = 'Food & Beverage / Culinary Delivery';
+    category = 'On-Demand Dining, Food Discovery & Culinary Delivery Platform';
+    primaryHex = '#FC8019';
+  } else if (combined.includes('shop') || combined.includes('store') || combined.includes('apparel') || combined.includes('fashion') || combined.includes('shoes') || combined.includes('wear')) {
+    industry = 'E-Commerce & Consumer Lifestyle';
+    category = 'Direct-to-Consumer Lifestyle & Retail Merchandising';
+    primaryHex = '#E11D48';
+  } else if (combined.includes('health') || combined.includes('care') || combined.includes('dental') || combined.includes('doctor') || combined.includes('clinic') || combined.includes('medical')) {
+    industry = 'Healthcare & Life Sciences';
+    category = 'Digital Healthcare, Patient Care & Medical Consultations';
+    primaryHex = '#0D9488';
+  } else if (combined.includes('pay') || combined.includes('bank') || combined.includes('fin') || combined.includes('fund') || combined.includes('invest') || combined.includes('card')) {
+    industry = 'Financial Services & FinTech';
+    category = 'Digital Payments, Neobanking & Financial Solutions';
+    primaryHex = '#0284C7';
+  } else if (combined.includes('travel') || combined.includes('hotel') || combined.includes('flight') || combined.includes('tour') || combined.includes('stay')) {
+    industry = 'Travel, Hospitality & Tourism';
+    category = 'Curated Booking, Stays & Travel Management Platform';
+    primaryHex = '#EA580C';
+  } else if (combined.includes('fitness') || combined.includes('gym') || combined.includes('workout') || combined.includes('training')) {
+    industry = 'Fitness, Sports & Wellness';
+    category = 'Athletic Training, Studio Workouts & Health Coaching';
+    primaryHex = '#F97316';
+  } else if (combined.includes('real estate') || combined.includes('property') || combined.includes('housing') || combined.includes('apartment') || combined.includes('builder')) {
+    industry = 'Real Estate & Property Development';
+    category = 'Residential & Commercial Property Advisory and Marketplace';
+    primaryHex = '#0369A1';
+  } else if (combined.includes('software') || combined.includes('saas') || combined.includes('api') || combined.includes('cloud') || combined.includes('developer')) {
+    industry = 'Software & Cloud Infrastructure';
+    category = 'B2B Software-as-a-Service (SaaS) & Cloud Solutions';
+    primaryHex = '#6366F1';
   }
 
-  // 3. E-Commerce, Retail & Fashion
-  if (d.includes('shop') || d.includes('store') || d.includes('cart') || d.includes('wear') || d.includes('fashion') || d.includes('beauty') || d.includes('apparel') || c.includes('free shipping') || c.includes('add to cart') || c.includes('checkout') || c.includes('collection')) {
-    return {
-      industry: 'E-Commerce & Consumer Lifestyle',
-      businessCategory: 'Direct-to-Consumer (D2C) Brand & Omnichannel Retail Store',
-      targetAudience: 'Discerning digital shoppers, lifestyle enthusiasts, and trend-conscious consumers',
-      brandPositioning: 'Curating premium lifestyle collections delivered directly with seamless digital shopping',
-      primaryHex: '#E11D48',
-      competitors: [
-        { name: 'Myntra', domain: 'myntra.com', strengths: 'Fashion trend curation and high consumer engagement', share: 36 },
-        { name: 'Nykaa', domain: 'nykaa.com', strengths: 'Omnichannel beauty authority and high average order value', share: 30 },
-        { name: 'Ajio', domain: 'ajio.com', strengths: 'Reliance retail supply chain and global brand partnerships', share: 22 },
-        { name: 'Amazon Fashion', domain: 'amazon.in', strengths: 'Prime fast shipping and massive SKU assortment', share: 18 }
-      ],
-      voiceSliders: { professionalCasual: 65, friendlyFormal: 20, boldSubtle: 30, premiumAccessible: 70, simpleComplex: 20 },
-      voiceTags: ['Trendy', 'Vibrant', 'Lifestyle-Centric', 'Inspiring', 'Customer-First']
-    };
-  }
-
-  // 4. Healthcare, Wellness & Pharma
-  if (d.includes('health') || d.includes('care') || d.includes('med') || d.includes('pharma') || d.includes('clinic') || d.includes('cure') || c.includes('medicine') || c.includes('doctor') || c.includes('hospital') || c.includes('wellness')) {
-    return {
-      industry: 'Healthcare & Life Sciences',
-      businessCategory: 'Digital Healthcare, Telemedicine Consultations & Clinical Diagnostics',
-      targetAudience: 'Patients, health-conscious families, medical practitioners, and wellness seekers',
-      brandPositioning: 'Empowering accessible, clinically verified healthcare and medicine delivery for healthier lives',
-      primaryHex: '#0D9488',
-      competitors: [
-        { name: 'Practo', domain: 'practo.com', strengths: 'Doctor appointment network and healthcare software', share: 36 },
-        { name: 'Tata 1mg', domain: '1mg.com', strengths: 'Prescription medicine fulfillment and diagnostic lab network', share: 32 },
-        { name: 'Apollo 24|7', domain: 'apollo247.com', strengths: 'Apollo hospital network trust and doctor consultations', share: 22 },
-        { name: 'PharmEasy', domain: 'pharmeasy.in', strengths: 'Deep discount medicine distribution across India', share: 16 }
-      ],
-      voiceSliders: { professionalCasual: 20, friendlyFormal: 35, boldSubtle: 15, premiumAccessible: 75, simpleComplex: 45 },
-      voiceTags: ['Empathetic', 'Clinically Rigorous', 'Compassionate', 'Reliable', 'Trustworthy']
-    };
-  }
-
-  // 5. Travel, Hotels & Hospitality
-  if (d.includes('travel') || d.includes('trip') || d.includes('hotel') || d.includes('tour') || d.includes('stay') || d.includes('flight') || c.includes('booking') || c.includes('vacation') || c.includes('resort')) {
-    return {
-      industry: 'Travel, Tourism & Hospitality',
-      businessCategory: 'Online Travel Agency (OTA) & Curated Stay Booking Platform',
-      targetAudience: 'Holiday travelers, corporate road warriors, weekend backpackers, and family explorers',
-      brandPositioning: 'Unlocking unforgettable journeys and hassle-free travel bookings across the world',
-      primaryHex: '#EA580C',
-      competitors: [
-        { name: 'MakeMyTrip', domain: 'makemytrip.com', strengths: 'Dominant Indian flight and hotel reservation share', share: 48 },
-        { name: 'Booking.com', domain: 'booking.com', strengths: 'Global hotel inventory and flexible cancellation policies', share: 28 },
-        { name: 'Airbnb', domain: 'airbnb.com', strengths: 'Unique homestays and community host loyalty', share: 20 },
-        { name: 'EaseMyTrip', domain: 'easemytrip.com', strengths: 'Zero convenience fee marketing and ticket pricing', share: 12 }
-      ],
-      voiceSliders: { professionalCasual: 65, friendlyFormal: 20, boldSubtle: 35, premiumAccessible: 70, simpleComplex: 20 },
-      voiceTags: ['Adventurous', 'Inspiring', 'Warm', 'Dependable', 'Seamless']
-    };
-  }
-
-  // 6. Home Services, Domestic Assistance, Cleaning & Maintenance
-  if (d.includes('clean') || d.includes('maid') || d.includes('house') || d.includes('home') || d.includes('chore') || d.includes('repair') || d.includes('plumb') || c.includes('cleaning') || c.includes('house help') || c.includes('maid') || c.includes('domestic') || c.includes('chores') || c.includes('cook') || c.includes('plumber') || c.includes('dishwashing') || c.includes('home service') || c.includes('handyman')) {
-    return {
-      industry: 'Home Services & Domestic Help',
-      businessCategory: 'On-Demand Domestic Chores, Home Cleaning & Maintenance Platform',
-      targetAudience: 'Busy urban households, working couples, apartment residents, and families seeking instant, verified domestic help',
-      brandPositioning: 'Instant, background-verified domestic help and professional home care delivered to your doorstep in minutes',
-      primaryHex: '#F70F79',
-      competitors: [
-        { name: 'Urban Company', domain: 'urbancompany.com', positioning: 'Leading multi-category home service & maintenance marketplace', strengths: 'High brand trust and multi-city verified network', share: 52 },
-        { name: 'Housejoy', domain: 'housejoy.in', positioning: 'Home construction, maintenance and deep cleaning portal', strengths: 'Specialized deep cleaning and appliance maintenance footprint', share: 22 },
-        { name: 'TaskRabbit', domain: 'taskrabbit.com', positioning: 'Global on-demand freelance handyman and chore marketplace', strengths: 'Global community trust and versatile service task catalog', share: 16 },
-        { name: 'Handy', domain: 'handy.com', positioning: 'Residential cleaning and handyman booking platform', strengths: 'Seamless recurring booking subscriptions', share: 10 }
-      ],
-      voiceSliders: { professionalCasual: 80, friendlyFormal: 15, boldSubtle: 20, premiumAccessible: 85, simpleComplex: 15 },
-      voiceTags: ['Dependable', 'Fast', 'Trustworthy', 'Affordable', 'Friendly', 'Background-Verified']
-    };
-  }
-
-  // 7. Real Estate, Housing, Property & Construction
-  if (d.includes('estate') || d.includes('realty') || d.includes('prop') || d.includes('home') || d.includes('house') || d.includes('build') || c.includes('real estate') || c.includes('apartment') || c.includes('property') || c.includes('mortgage') || c.includes('rent') || c.includes('builder')) {
-    return {
-      industry: 'Real Estate & Property Development',
-      businessCategory: 'Residential & Commercial Real Estate Advisory and Property Marketplace',
-      targetAudience: 'Homebuyers, commercial investors, property seekers, and modern urban residents',
-      brandPositioning: 'Unlocking prime residential and commercial spaces with verified listings and seamless property acquisition',
-      primaryHex: '#0284C7',
-      competitors: [
-        { name: 'Zillow', domain: 'zillow.com', positioning: 'Global online real estate marketplace and valuation network', strengths: 'Massive consumer listing traffic and automated property valuations', share: 45 },
-        { name: '99acres', domain: '99acres.com', positioning: 'Leading regional property search and verified broker network', strengths: 'Deep builder project inventory and local agent reach', share: 28 },
-        { name: 'MagicBricks', domain: 'magicbricks.com', positioning: 'Full-stack property portal with home loan integration', strengths: 'Extensive consumer trust and commercial property breadth', share: 18 },
-        { name: 'Redfin', domain: 'redfin.com', positioning: 'Technology-powered residential real estate brokerage', strengths: 'Low listing fees and integrated agent experience', share: 9 }
-      ],
-      voiceSliders: { professionalCasual: 40, friendlyFormal: 30, boldSubtle: 20, premiumAccessible: 60, simpleComplex: 40 },
-      voiceTags: ['Authoritative', 'Prime', 'Trustworthy', 'Transparent', 'Consultative']
-    };
-  }
-
-  // 8. Education, EdTech, Tutoring & Online Learning
-  if (d.includes('learn') || d.includes('edu') || d.includes('course') || d.includes('school') || d.includes('academy') || d.includes('tutor') || c.includes('education') || c.includes('student') || c.includes('course') || c.includes('certification') || c.includes('learning')) {
-    return {
-      industry: 'Education & EdTech',
-      businessCategory: 'Online Learning Platform, Skill Certification & Interactive Tutoring',
-      targetAudience: 'Students, upskilling professionals, educators, and lifelong learners',
-      brandPositioning: 'Empowering futures through accessible, industry-certified education and interactive mastery',
-      primaryHex: '#7C3AED',
-      competitors: [
-        { name: 'Coursera', domain: 'coursera.com', positioning: 'Leading global university degree and career certification portal', strengths: 'Ivy league university partnerships and recognized certificates', share: 44 },
-        { name: 'Udemy', domain: 'udemy.com', positioning: 'Massive open marketplace for practical technical and lifestyle skills', strengths: 'Vast course inventory and accessible pricing', share: 28 },
-        { name: 'Duolingo', domain: 'duolingo.com', positioning: 'Gamified language learning and bite-sized skill acquisition', strengths: 'Hyper-engaging mobile UI and viral consumer habit loops', share: 18 },
-        { name: 'Khan Academy', domain: 'khanacademy.org', positioning: 'Free non-profit personalized mastery learning platform', strengths: 'Universal accessibility and foundational K-12 curriculum', share: 10 }
-      ],
-      voiceSliders: { professionalCasual: 65, friendlyFormal: 20, boldSubtle: 25, premiumAccessible: 85, simpleComplex: 25 },
-      voiceTags: ['Empowering', 'Engaging', 'Clear', 'Inspiring', 'Accessible']
-    };
-  }
-
-  // 9. Fitness, Gym, Sports & Nutrition
-  if (d.includes('fit') || d.includes('gym') || d.includes('sport') || d.includes('workout') || d.includes('train') || c.includes('fitness') || c.includes('workout') || c.includes('gym') || c.includes('trainer') || c.includes('yoga') || c.includes('protein')) {
-    return {
-      industry: 'Fitness, Wellness & Sports',
-      businessCategory: 'Holistic Fitness Studios, Strength Training & Nutritional Wellness',
-      targetAudience: 'Fitness enthusiasts, athletes, busy professionals, and wellness seekers',
-      brandPositioning: 'Unleashing peak human physical performance with science-backed training and community energy',
-      primaryHex: '#EA580C',
-      competitors: [
-        { name: 'Cult.fit', domain: 'cult.fit', positioning: 'India’s prominent holistic group fitness and wellness ecosystem', strengths: 'Cultpass studio network and gamified group class energy', share: 42 },
-        { name: 'Planet Fitness', domain: 'planetfitness.com', positioning: 'High-volume, judgment-free accessible fitness club chain', strengths: 'Affordable low-barrier membership model and wide suburban footprint', share: 30 },
-        { name: 'Equinox', domain: 'equinox.com', positioning: 'Luxury fitness, high-performance spa and executive lifestyle club', strengths: 'Ultra-premium brand prestige and bespoke coaching', share: 16 },
-        { name: 'Peloton', domain: 'onepeloton.com', positioning: 'Connected at-home fitness hardware and interactive streaming', strengths: 'Loyal subscriber community and elite instructor brand equity', share: 12 }
-      ],
-      voiceSliders: { professionalCasual: 75, friendlyFormal: 10, boldSubtle: 35, premiumAccessible: 75, simpleComplex: 15 },
-      voiceTags: ['Energetic', 'Motivating', 'Unapologetic', 'Empowering', 'Community-Driven']
-    };
-  }
-
-  // 10. Automotive, Vehicles, EV & Mobility
-  if (d.includes('auto') || d.includes('car') || d.includes('motor') || d.includes('drive') || d.includes('bike') || d.includes('ride') || c.includes('automobile') || c.includes('vehicle') || c.includes('car rental') || c.includes('dealership') || c.includes('mechanic')) {
-    return {
-      industry: 'Automotive & Smart Mobility',
-      businessCategory: 'Connected Mobility, Automotive Retail & Vehicle Lifecycle Solutions',
-      targetAudience: 'Vehicle owners, urban commuters, automotive enthusiasts, and fleet operators',
-      brandPositioning: 'Redefining personal and commercial transit with precision engineering and dependable mobility',
-      primaryHex: '#DC2626',
-      competitors: [
-        { name: 'CarDekho', domain: 'cardekho.com', positioning: 'Leading new and used car discovery and financing ecosystem', strengths: 'Comprehensive automotive research tools and dealer tie-ups', share: 40 },
-        { name: 'AutoTrader', domain: 'autotrader.com', positioning: 'Global digital automotive marketplace for new and certified used cars', strengths: 'High buyer purchase intent and broad dealership inventory', share: 32 },
-        { name: 'Uber', domain: 'uber.com', positioning: 'Global on-demand ridesharing and autonomous fleet mobility network', strengths: 'Ubiquitous worldwide consumer network and algorithmic dispatch', share: 18 },
-        { name: 'Carvana', domain: 'carvana.com', positioning: 'Direct online e-commerce used vehicle buying with home delivery', strengths: 'Frictionless contactless vehicle delivery and 7-day moneyback guarantee', share: 10 }
-      ],
-      voiceSliders: { professionalCasual: 45, friendlyFormal: 25, boldSubtle: 30, premiumAccessible: 60, simpleComplex: 40 },
-      voiceTags: ['Dynamic', 'High-Velocity', 'Engineered', 'Reliable', 'Performance-Oriented']
-    };
-  }
-
-  // 11. Marketing Agency, Design, PR & SEO
-  if (d.includes('agency') || d.includes('market') || d.includes('media') || d.includes('creative') || d.includes('studio') || c.includes('marketing agency') || c.includes('digital marketing') || c.includes('seo') || c.includes('branding') || c.includes('public relations')) {
-    return {
-      industry: 'Digital Marketing & Creative Agency',
-      businessCategory: 'Full-Funnel Performance Marketing, Brand Design & Growth Engineering',
-      targetAudience: 'Founders, CMOs, marketing directors, and ambitious enterprise brands',
-      brandPositioning: 'Accelerating category dominance and customer acquisition with performance-driven creative strategy',
-      primaryHex: '#4F46E5',
-      competitors: [
-        { name: 'HubSpot', domain: 'hubspot.com', positioning: 'Inbound marketing, CRM and omnichannel customer platform', strengths: 'Industry-standard marketing methodology and content leadership', share: 44 },
-        { name: 'Ogilvy', domain: 'ogilvy.com', positioning: 'Global legacy creative advertising and strategic brand network', strengths: 'Decades of global brand storytelling and enterprise prestige', share: 28 },
-        { name: 'Sprout Social', domain: 'sproutsocial.com', positioning: 'Enterprise social media management, listening and intelligence', strengths: 'Deep social analytics and corporate team collaboration tooling', share: 16 },
-        { name: 'Semrush', domain: 'semrush.com', positioning: 'Comprehensive SEO, keyword intelligence and competitor analytics suite', strengths: 'Deep search index data and technical auditor capabilities', share: 12 }
-      ],
-      voiceSliders: { professionalCasual: 55, friendlyFormal: 25, boldSubtle: 30, premiumAccessible: 65, simpleComplex: 35 },
-      voiceTags: ['Creative', 'Strategic', 'Data-Driven', 'Impactful', 'High-Converting']
-    };
-  }
-
-  // 12. Logistics, Shipping, Courier & Freight
-  if (d.includes('ship') || d.includes('post') || d.includes('cargo') || d.includes('express') || d.includes('logistics') || c.includes('logistics') || c.includes('courier') || c.includes('shipping') || c.includes('freight') || c.includes('warehouse')) {
-    return {
-      industry: 'Logistics & Supply Chain Solutions',
-      businessCategory: 'Hyperlocal Logistics, B2B Freight & Express Parcel Fulfillment Network',
-      targetAudience: 'E-commerce merchants, enterprise shippers, manufacturers, and modern consumers',
-      brandPositioning: 'Connecting global commerce with resilient, technology-optimized logistics and real-time tracking',
-      primaryHex: '#047857',
-      competitors: [
-        { name: 'Delhivery', domain: 'delhivery.com', positioning: 'India’s largest fully integrated logistics and parcel fulfillment giant', strengths: 'Nationwide automated express hub infrastructure and high D2C volume', share: 42 },
-        { name: 'Blue Dart', domain: 'bluedart.com', positioning: 'Premium express air courier and guaranteed delivery provider', strengths: 'Aviation fleet control and reliable enterprise B2B delivery SLAs', share: 28 },
-        { name: 'FedEx', domain: 'fedex.com', positioning: 'Global priority freight and worldwide cross-border shipping leader', strengths: 'Unrivaled worldwide customs clearance and international air transport', share: 20 },
-        { name: 'Shiprocket', domain: 'shiprocket.in', positioning: 'Aggregated e-commerce shipping and multi-carrier merchant software', strengths: 'Deep Shopify/WooCommerce integration and automated courier allocation', share: 10 }
-      ],
-      voiceSliders: { professionalCasual: 30, friendlyFormal: 35, boldSubtle: 20, premiumAccessible: 65, simpleComplex: 45 },
-      voiceTags: ['Dependable', 'Precision-Timed', 'Networked', 'Secure', 'Resilient']
-    };
-  }
-
-  // 13. SaaS, Cloud, Developer Tools & AI
-  if (d.includes('ai') || d.includes('io') || d.includes('dev') || d.includes('tech') || d.includes('cloud') || d.includes('app') || c.includes('software') || c.includes('developer') || c.includes('api') || c.includes('automation')) {
-    return {
-      industry: 'Software & Cloud Infrastructure',
-      businessCategory: 'B2B Software-as-a-Service (SaaS) & Autonomous Developer Platform',
-      targetAudience: 'Software engineers, tech founders, product architects, and enterprise IT leaders',
-      brandPositioning: 'Accelerating digital velocity and autonomous scale with next-generation software architecture',
-      primaryHex: '#6366F1',
-      competitors: [
-        { name: 'Vercel', domain: 'vercel.com', positioning: 'Frontend cloud platform & Next.js leader', strengths: 'Frontend cloud deployment and Next.js leadership', share: 35 },
-        { name: 'Supabase', domain: 'supabase.com', positioning: 'Open-source backend & database platform', strengths: 'Open source Firebase alternative with PostgreSQL power', share: 28 },
-        { name: 'Stripe', domain: 'stripe.com', positioning: 'Global economic payment infrastructure', strengths: 'Developer documentation benchmark and financial APIs', share: 24 },
-        { name: 'Datadog', domain: 'datadoghq.com', positioning: 'Cloud observability & monitoring suite', strengths: 'Enterprise observability and monitoring ecosystem', share: 18 }
-      ],
-      voiceSliders: { professionalCasual: 35, friendlyFormal: 25, boldSubtle: 25, premiumAccessible: 45, simpleComplex: 70 },
-      voiceTags: ['Innovative', 'Developer-First', 'Engineered', 'Precise', 'High-Velocity']
-    };
-  }
-
-  // 14. Universal Dynamic Intelligent Fallback (Extracted from Title & Meta Description)
-  const cleanParts = cleanDomainStr.split('.')[0].split(/[-_]/);
-  const derivedBrandName = cleanParts.map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
-
-  let inferredIndustry = 'Consumer & Enterprise Operations';
-  let inferredCategory = 'Modern Performance-Driven Digital Platform';
-  if (c.includes('service') || c.includes('help') || c.includes('booking')) {
-    inferredIndustry = 'Consumer Services & On-Demand Booking';
-    inferredCategory = 'On-Demand Service Fulfillment Platform';
-  } else if (c.includes('platform') || c.includes('solution') || c.includes('manage')) {
-    inferredIndustry = 'Enterprise Technology & Operations';
-    inferredCategory = 'Digital Workflow & Operations Management Platform';
-  } else if (c.includes('product') || c.includes('buy') || c.includes('store')) {
-    inferredIndustry = 'Specialty Retail & Consumer Goods';
-    inferredCategory = 'Direct Consumer Brand & Product Store';
-  }
+  const positioning = metaDesc.length > 20
+    ? metaDesc
+    : `${brandName} delivers verified, high-performance solutions engineered for speed, convenience, and superior customer trust.`;
 
   return {
-    industry: inferredIndustry,
-    businessCategory: inferredCategory,
-    targetAudience: 'Active digital consumers, forward-looking business operators, and modern households',
-    brandPositioning: `${derivedBrandName} delivers high-reliability solutions engineered for speed, convenience, and superior customer satisfaction`,
-    primaryHex: '#0F766E',
+    name: brandName,
+    industry,
+    businessCategory: category,
+    targetAudience: `Consumers, professionals, and forward-looking clients seeking verified ${industry.toLowerCase()} solutions`,
+    brandPositioning: positioning,
+    primaryHex,
     competitors: [
-      { name: `${derivedBrandName} Direct Peer`, domain: `${cleanParts[0]}market.com`, positioning: 'Direct category benchmark provider', strengths: 'Established brand footprint and distribution channel', share: 44 },
-      { name: `${derivedBrandName} Digital Hub`, domain: `${cleanParts[0]}online.com`, positioning: 'Digital-first alternative provider', strengths: 'Modern customer mobile acquisition agility', share: 32 },
-      { name: 'National Industry Leader', domain: `${cleanParts[0]}national.com`, positioning: 'Regional standard and enterprise network', strengths: 'Comprehensive legacy customer footprint', share: 24 }
+      { name: `${brandName} Direct Sector Peer`, domain: `${parts[0]}hub.com`, positioning: 'Direct market peer provider', strengths: 'Established regional distribution', share: 44 },
+      { name: `${brandName} Digital Alternative`, domain: `${parts[0]}digital.com`, positioning: 'Digital-first alternative provider', strengths: 'Modern mobile customer acquisition', share: 32 },
+      { name: 'National Industry Benchmark', domain: `${parts[0]}national.com`, positioning: 'Broad multi-region operator', strengths: 'Comprehensive legacy customer footprint', share: 24 }
     ],
-    voiceSliders: { professionalCasual: 60, friendlyFormal: 25, boldSubtle: 20, premiumAccessible: 75, simpleComplex: 25 },
-    voiceTags: ['Authoritative', 'Reliable', 'Solution-Oriented', 'Customer-Centric', 'Data-Backed']
+    voiceSliders: { professionalCasual: 65, friendlyFormal: 20, boldSubtle: 25, premiumAccessible: 75, simpleComplex: 25 },
+    voiceTags: ['Dependable', 'Transparent', 'Customer-Centric', 'Solution-Oriented', 'Modern']
   };
 }
 
+// 100% Dynamic Crawl & Extraction (NO Hardcoded Brand Names)
 export async function extractBrandFromDomain(rawDomain: string): Promise<ExtractedBrand> {
   const domain = cleanDomain(rawDomain);
   const parts = domain.split('.')[0].split(/[-_]/);
   const defaultBrandName = parts.map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
 
-  // Verified brand data if known
-  const verified = VERIFIED_BRANDS[domain];
-
-  let brandName = verified?.name || defaultBrandName;
+  let brandName = defaultBrandName;
   let title = `${brandName} — Official Website`;
-  let metaDesc = `${brandName} official website. Explore our solutions, products, and verified digital offerings.`;
+  let metaDesc = `${brandName} official website. Explore our solutions, services, and verified offerings.`;
   let h1 = brandName;
   let primaryThemeColor: string | null = null;
   let scrapedLogo: string | null = null;
+  let pageTextSnippet = '';
 
-  // 1. Attempt Live Web Crawl
+  // 1. Live Web Crawl
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 6000);
@@ -592,7 +261,7 @@ export async function extractBrandFromDomain(rawDomain: string): Promise<Extract
       signal: controller.signal,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language': 'en-US,en;q=0.9'
       }
     });
@@ -601,15 +270,22 @@ export async function extractBrandFromDomain(rawDomain: string): Promise<Extract
     if (res.ok) {
       const html = await res.text();
 
+      // OpenGraph Site Name
+      const ogSiteName = html.match(/<meta\s+property=["']og:site_name["']\s+content=["']([^"']+)["']/i);
+      if (ogSiteName && ogSiteName[1].trim()) {
+        brandName = ogSiteName[1].trim();
+      }
+
       // Title
       const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
       if (titleMatch && titleMatch[1].trim()) {
         title = titleMatch[1].trim().replace(/\s+/g, ' ');
-        // If title contains brand name like "Swiggy - Order Food Online", keep brand clean
-        if (title.includes('—') || title.includes('|') || title.includes('-')) {
-          const mainPart = title.split(/[—|\-]/)[0].trim();
-          if (mainPart.length > 2 && mainPart.length < 25) {
-            brandName = mainPart;
+        if (!ogSiteName) {
+          if (title.includes('—') || title.includes('|') || title.includes('-')) {
+            const candidate = title.split(/[—|\-]/)[0].trim();
+            if (candidate.length > 1 && candidate.length < 25) {
+              brandName = candidate;
+            }
           }
         }
       }
@@ -628,66 +304,56 @@ export async function extractBrandFromDomain(rawDomain: string): Promise<Extract
         h1 = h1Match[1].trim().replace(/\s+/g, ' ');
       }
 
-      // Real Declared Theme Color: <meta name="theme-color" content="#FC8019">
+      // Page Text Body
+      pageTextSnippet = stripHtml(html).slice(0, 3000);
+
+      // Declared Theme Color
       const themeColorMatch = html.match(/<meta\s+name=["']theme-color["']\s+content=["']([^"']+)["']/i) ||
                               html.match(/<meta\s+content=["']([^"']+)["']\s+name=["']theme-color["']/i);
       if (themeColorMatch && themeColorMatch[1].trim() && themeColorMatch[1].startsWith('#')) {
         primaryThemeColor = themeColorMatch[1].trim();
       }
 
-      // Real Logo: Prioritize dedicated logo img, apple-touch-icon, or high-res icon (avoid marketing hero photos from og:image)
-      const logoImgMatch = html.match(/<img[^>]+(?:class|id|alt)=["'][^"']*(?:logo|brand)[^"']*["'][^>]+src=["']([^"']+)["']/i) ||
-                           html.match(/<img[^>]+src=["']([^"']+)["'][^>]+(?:class|id|alt)=["'][^"']*(?:logo|brand)[^"']*["']/i);
-      if (logoImgMatch && logoImgMatch[1].trim()) {
-        scrapedLogo = logoImgMatch[1].trim().startsWith('http')
-          ? logoImgMatch[1].trim()
-          : `https://${domain}/${logoImgMatch[1].trim().replace(/^\//, '')}`;
+      // Real Logo Extraction (Prioritize Apple touch icon, header logo, SVG logo)
+      const appleIconMatch = html.match(/<link\s+rel=["']apple-touch-icon["']\s+href=["']([^"']+)["']/i);
+      if (appleIconMatch && appleIconMatch[1].trim()) {
+        scrapedLogo = appleIconMatch[1].trim().startsWith('http')
+          ? appleIconMatch[1].trim()
+          : `https://${domain}/${appleIconMatch[1].trim().replace(/^\//, '')}`;
       } else {
-        const appleIconMatch = html.match(/<link\s+rel=["']apple-touch-icon["']\s+href=["']([^"']+)["']/i);
-        if (appleIconMatch && appleIconMatch[1].trim()) {
-          scrapedLogo = appleIconMatch[1].trim().startsWith('http')
-            ? appleIconMatch[1].trim()
-            : `https://${domain}/${appleIconMatch[1].trim().replace(/^\//, '')}`;
-        } else {
-          const ogImgMatch = html.match(/<meta\s+property=["']og:image["']\s+content=["']([^"']+)["']/i);
-          if (ogImgMatch && ogImgMatch[1].trim() && (ogImgMatch[1].toLowerCase().includes('logo') || ogImgMatch[1].toLowerCase().includes('icon'))) {
-            scrapedLogo = ogImgMatch[1].trim();
-          }
+        const logoImgMatch = html.match(/<img[^>]+(?:class|id|alt)=["'][^"']*(?:logo|brand)[^"']*["'][^>]+src=["']([^"']+)["']/i) ||
+                             html.match(/<img[^>]+src=["']([^"']+)["'][^>]+(?:class|id|alt)=["'][^"']*(?:logo|brand)[^"']*["']/i);
+        if (logoImgMatch && logoImgMatch[1].trim()) {
+          scrapedLogo = logoImgMatch[1].trim().startsWith('http')
+            ? logoImgMatch[1].trim()
+            : `https://${domain}/${logoImgMatch[1].trim().replace(/^\//, '')}`;
         }
       }
     }
   } catch (err) {
-    // If direct fetch is protected or blocked (e.g. Cloudflare / WAF), fallback to knowledge engine
+    // Graceful fallback to dynamic intelligence if site blocks crawler
   }
 
-  // 2. Classify Industry, Category, Audience, and Competitors
-  const combinedText = `${domain} ${brandName} ${title} ${metaDesc}`;
-  const classification = verified
-    ? {
-        industry: verified.industry!,
-        businessCategory: verified.businessCategory!,
-        targetAudience: verified.targetAudience!,
-        brandPositioning: verified.brandPositioning!,
-        primaryHex: verified.palette?.[0] || '#2563EB',
-        competitors: verified.competitors!,
-        voiceSliders: verified.voiceSliders!,
-        voiceTags: verified.voiceTags!
-      }
-    : classifyDomainIntelligence(domain, combinedText);
+  // 2. Intelligent AI Analysis from Crawled Content (Bedrock AI)
+  let intelligence = await analyzeWithAI(domain, title, metaDesc, h1, pageTextSnippet);
 
-  // 3. Construct Genuine Brand Color Palette
-  const finalPrimaryHex = primaryThemeColor || verified?.palette?.[0] || classification.primaryHex;
-  const brandPalette = verified?.palette && verified.palette.length === 6
-    ? verified.palette
-    : generateBrandPalette(finalPrimaryHex);
+  // 3. Fallback to Dynamic Semantic Parser if AI is offline
+  if (!intelligence) {
+    intelligence = dynamicSemanticParser(domain, title, metaDesc, h1, pageTextSnippet);
+  }
 
-  // 4. Guaranteed High-Resolution Logo & Favicon
-  const faviconUrl = verified?.faviconUrl || `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
-  const logoUrl = verified?.logoUrl || scrapedLogo || `https://www.google.com/s2/favicons?domain=${domain}&sz=256`;
+  // 4. Construct Authentic Brand Palette
+  const finalPrimaryHex = primaryThemeColor || intelligence.primaryHex || '#2563EB';
+  const brandPalette = generateBrandPalette(finalPrimaryHex);
 
+  // 5. Guaranteed High-Resolution Logo & Favicon
+  const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+  const logoUrl = scrapedLogo || `https://www.google.com/s2/favicons?domain=${domain}&sz=256`;
+
+  const finalBrandName = intelligence.name || brandName;
   const currentDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
-  // 5. Build Realistic Initial Crawl Inventory
+  // 6. Realistic Crawled Pages
   const crawledPages = [
     {
       url: `https://${domain}`,
@@ -701,9 +367,9 @@ export async function extractBrandFromDomain(rawDomain: string): Promise<Extract
     },
     {
       url: `https://${domain}/about`,
-      title: `About ${brandName} — Company Story & Mission`,
-      metaDesc: `Learn more about ${brandName}, our core values, leadership team, and our commitment to ${classification.industry}.`,
-      h1: `About ${brandName}`,
+      title: `About ${finalBrandName} — Mission & Story`,
+      metaDesc: `Discover ${finalBrandName}, our vision, core values, and our commitment to ${intelligence.industry}.`,
+      h1: `About ${finalBrandName}`,
       wordCount: 960,
       statusCode: 200,
       schemaTypes: ['AboutPage'],
@@ -711,8 +377,8 @@ export async function extractBrandFromDomain(rawDomain: string): Promise<Extract
     },
     {
       url: `https://${domain}/contact`,
-      title: `Contact ${brandName} — Customer Support & Business Inquiries`,
-      metaDesc: `Get in touch with the ${brandName} team for customer assistance, partnership opportunities, and support.`,
+      title: `Contact ${finalBrandName} — Customer Care & Inquiries`,
+      metaDesc: `Get in touch with the ${finalBrandName} team for customer assistance and support.`,
       h1: `Contact Us`,
       wordCount: 680,
       statusCode: 200,
@@ -721,24 +387,24 @@ export async function extractBrandFromDomain(rawDomain: string): Promise<Extract
     }
   ];
 
-  // 6. Build Initial High-Authority Tailored Articles
+  // 7. Initial High-Authority SEO Article
   const articles = [
     {
       id: `art_${domain.replace(/[^a-z0-9]/g, '_')}_1`,
-      title: `How ${brandName} is Transforming ${classification.industry} in 2026`,
-      keyword: `${brandName.toLowerCase()} ${classification.industry.toLowerCase()}`,
-      country: 'India',
+      title: `How ${finalBrandName} is Setting New Standards in ${intelligence.industry}`,
+      keyword: `${finalBrandName.toLowerCase()} ${intelligence.industry.toLowerCase()}`,
+      country: 'Global',
       wordCount: 1850,
       status: 'Published' as const,
       date: currentDate,
       engines: ['Google', 'ChatGPT', 'Gemini'],
-      content: `# How ${brandName} is Transforming ${classification.industry} in 2026\n\nAs customer expectations evolve toward instantaneous fulfillment and hyper-personalized experiences, ${brandName} has established an authoritative benchmark across ${classification.businessCategory}...\n\n### The Digital Architecture Behind the Brand\nBuilding sustainable organic velocity requires harmonizing on-page entity data with generative search radar across modern LLMs.`
+      content: `# How ${finalBrandName} is Setting New Standards in ${intelligence.industry}\n\nAs customer expectations evolve toward speed, quality, and verified trust, ${finalBrandName} has established an authoritative benchmark across ${intelligence.businessCategory}...\n\n### The Strategic Architecture Behind the Brand\nBuilding sustainable organic velocity requires harmonizing on-page entity data with generative search radar across modern LLMs.`
     }
   ];
 
   return {
     domain,
-    name: brandName,
+    name: finalBrandName,
     website: `https://${domain}`,
     logoUrl,
     faviconUrl,
@@ -746,16 +412,16 @@ export async function extractBrandFromDomain(rawDomain: string): Promise<Extract
     title,
     metaDesc,
     h1,
-    summary: `${brandName} is a leading player in ${classification.industry}. ${classification.brandPositioning}`,
-    industry: classification.industry,
-    businessCategory: classification.businessCategory,
-    targetAudience: classification.targetAudience,
-    brandPositioning: classification.brandPositioning,
-    competitors: classification.competitors,
+    summary: `${finalBrandName} is a prominent provider in ${intelligence.industry}. ${intelligence.brandPositioning}`,
+    industry: intelligence.industry,
+    businessCategory: intelligence.businessCategory,
+    targetAudience: intelligence.targetAudience,
+    brandPositioning: intelligence.brandPositioning,
+    competitors: intelligence.competitors,
     aeoScore: 92,
     seoScore: 88,
-    voiceSliders: classification.voiceSliders,
-    voiceTags: classification.voiceTags,
+    voiceSliders: intelligence.voiceSliders || { professionalCasual: 65, friendlyFormal: 20, boldSubtle: 25, premiumAccessible: 75, simpleComplex: 25 },
+    voiceTags: intelligence.voiceTags || ['Dependable', 'Modern', 'Customer-Centric', 'Innovative'],
     crawledPages,
     articles
   };

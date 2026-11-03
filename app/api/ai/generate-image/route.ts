@@ -307,35 +307,83 @@ export async function POST(req: Request) {
       height = 1350;
     }
 
-    // 3. Construct Industry-Calibrated Visual Prompt for Neural Generation
+    // 3. Intelligent Photographic Scene Synthesizer (ChatGPT / DALL-E 3 Scene Translation)
     const cleanPrompt = prompt.trim();
     const indLower = (industry || '').toLowerCase();
-    const brandLower = (brandName || '').toLowerCase();
+    const pLower = cleanPrompt.toLowerCase();
 
-    let visualAesthetic = 'high-end commercial photography, 8k resolution, cinematic lighting, photorealistic, sharp focus, professional color grading, magazine editorial';
+    // Strip abstract social UI phrases so they never corrupt the diffusion engine
+    const sanitizedPrompt = cleanPrompt
+      .replace(/instagram\s+(launch\s+)?post:?/gi, '')
+      .replace(/special\s+offer:?/gi, '')
+      .replace(/launch\s+announcement:?/gi, '')
+      .replace(/customer\s+trust:?/gi, '')
+      .replace(/service\s+spotlight:?/gi, '')
+      .replace(/lifestyle\s+hook:?/gi, '')
+      .replace(/why\s+busy\s+.*trust/gi, '')
+      .replace(/with\s+[A-Za-z0-9_-]+/gi, '')
+      .trim();
 
-    if (indLower.includes('clean') || indLower.includes('maid') || indLower.includes('chore')) {
-      visualAesthetic = 'sparkling clean luxury modern apartment interior, gleaming marble and polished floors, bright warm natural morning sunlight, tidy minimalist aesthetic, 8k resolution, commercial photography';
-    } else if (indLower.includes('food') || indLower.includes('restaurant') || indLower.includes('dining')) {
-      visualAesthetic = 'gourmet culinary presentation, delicious fresh food dish, rustic table setup, shallow depth of field, warm cinematic lighting, commercial food advertising';
-    } else if (indLower.includes('fashion') || indLower.includes('apparel') || indLower.includes('shoes') || indLower.includes('cloth')) {
-      visualAesthetic = 'editorial high-fashion studio photography, contemporary lifestyle, sharp aesthetic styling, soft ambient lighting, Vogue quality, 8k';
-    } else if (indLower.includes('fitness') || indLower.includes('gym') || indLower.includes('sport')) {
-      visualAesthetic = 'dynamic athletic training in modern boutique gym, dramatic lighting, peak physical performance, high intensity, 8k';
-    } else if (indLower.includes('real estate') || indLower.includes('property') || indLower.includes('housing')) {
-      visualAesthetic = 'architectural digest luxury residential property, sun-drenched modern living room, landscaped balcony view, high ceilings, 8k';
-    } else if (indLower.includes('health') || indLower.includes('medical') || indLower.includes('dental')) {
-      visualAesthetic = 'bright modern wellness and clinical environment, pristine clean aesthetic, compassionate professional care, natural daylight, 8k';
-    } else if (indLower.includes('tech') || indLower.includes('saas') || indLower.includes('software')) {
-      visualAesthetic = 'sleek futuristic minimalist creative workspace, dual monitors, soft warm ambient studio lighting, executive tech office aesthetic, 8k';
+    let visualScene = '';
+
+    if (indLower.includes('clean') || indLower.includes('maid') || indLower.includes('chore') || indLower.includes('home') || pLower.includes('clean') || pLower.includes('maid')) {
+      visualScene = 'Award-winning commercial lifestyle photography of a sun-drenched modern luxury apartment living room with spotless gleaming hardwood floors, crisp natural morning light pouring through floor-to-ceiling windows, plush beige linen sofa, lush green house plants, impeccably organized and tidy atmosphere, Architectural Digest aesthetic, shot on Sony A7R V 35mm lens, photorealistic, 8k resolution, crisp detail, no text, no watermarks';
+    } else if (indLower.includes('food') || indLower.includes('restaurant') || indLower.includes('dining') || pLower.includes('food') || pLower.includes('meal')) {
+      visualScene = 'Michelin-star gourmet culinary food photography, exquisite artisanal dish beautifully plated on rustic slate stone, vibrant fresh ingredients, delicate steam rising, soft golden hour lighting, shallow depth of field, Bon Appétit magazine style, photorealistic, 8k resolution, no text';
+    } else if (indLower.includes('fitness') || indLower.includes('gym') || indLower.includes('sport') || pLower.includes('workout') || pLower.includes('fitness')) {
+      visualScene = 'High-performance commercial athletic photography in a modern luxury boutique gym, dramatic cinematic rim lighting, sleek matte black weights, dynamic energy, Nike campaign aesthetic, shot on Hasselblad, 8k resolution, photorealistic, no text';
+    } else if (indLower.includes('fashion') || indLower.includes('apparel') || indLower.includes('cloth') || pLower.includes('fashion')) {
+      visualScene = 'High-fashion editorial studio photography, contemporary minimalist setting with soft diffused natural light, stylish model in an elegant tailored outfit, warm earth tones, Vogue editorial styling, 8k resolution, photorealistic, no text';
+    } else if (indLower.includes('real estate') || indLower.includes('property') || indLower.includes('housing') || pLower.includes('villa') || pLower.includes('apartment')) {
+      visualScene = 'Breathtaking luxury architectural photography of a contemporary minimalist hillside villa with glass walls, warm glowing lights at twilight, serene infinity pool reflecting sunset sky, Architectural Digest cover, 8k resolution, photorealistic, no text';
+    } else if (indLower.includes('health') || indLower.includes('medical') || indLower.includes('wellness') || pLower.includes('care')) {
+      visualScene = 'Bright modern luxury wellness and clinic interior, light natural oak wood finishes, warm minimalist decor, tranquil and welcoming atmosphere, soft clean daylight, 8k resolution, photorealistic, crisp focus, no text';
+    } else if (indLower.includes('tech') || indLower.includes('saas') || indLower.includes('software') || pLower.includes('software')) {
+      visualScene = 'Sleek executive creator workspace with curved ultrawide monitor displaying subtle analytics glow, warm ambient LED studio backlighting, minimalist oak desk, cinematic commercial tech photography, 8k resolution, photorealistic, no text';
+    } else {
+      const subject = sanitizedPrompt.length > 5 ? sanitizedPrompt : 'premium modern lifestyle';
+      visualScene = `Award-winning commercial photography of ${subject}, cinematic lighting, shallow depth of field, sophisticated composition, shot on 35mm f/1.4 lens, 8k resolution, photorealistic commercial advertising aesthetic, no text, no watermark`;
     }
 
-    const fullVisualPrompt = `${cleanPrompt}, ${visualAesthetic}`;
     const seed = Math.floor(Math.random() * 10000000);
-    const encodedPrompt = encodeURIComponent(fullVisualPrompt);
+    let finalImageUrl = '';
 
-    // 4. Ultra-HD Neural Image Stream (Valid JPEG/PNG URL accessible to Instagram & Web)
-    const neuralImageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}&nologo=true`;
+    // 4. Check for OpenAI DALL-E 3 Key (ChatGPT Image Engine)
+    const openAiKey = (body.openaiApiKey || process.env.OPENAI_API_KEY || '').trim();
+    if (openAiKey) {
+      try {
+        const dalleRes = await fetch('https://api.openai.com/v1/images/generations', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${openAiKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: 'dall-e-3',
+            prompt: visualScene,
+            n: 1,
+            size: ratio === '9:16' ? '1024x1792' : (ratio === '16:9' ? '1792x1024' : '1024x1024'),
+            quality: 'hd'
+          })
+        });
+        if (dalleRes.ok) {
+          const dalleData = await dalleRes.json();
+          if (dalleData.data?.[0]?.url) {
+            finalImageUrl = dalleData.data[0].url;
+            engineUsed = 'OpenAI DALL-E 3 HD';
+          }
+        }
+      } catch (dalleErr) {
+        console.warn('[DALL-E 3 Fallback to Flux]', (dalleErr as Error).message);
+      }
+    }
+
+    // 5. If DALL-E not configured, use State-of-the-Art FLUX.1 Engine
+    if (!finalImageUrl) {
+      const encodedPrompt = encodeURIComponent(visualScene);
+      finalImageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}&nologo=true&model=flux&enhance=true`;
+      engineUsed = 'FLUX.1 Ultra-HD Neural Engine';
+    }
 
     const timestamp = Date.now();
 
@@ -344,8 +392,8 @@ export async function POST(req: Request) {
       data: {
         id: `post_${timestamp}`,
         prompt: cleanPrompt,
-        url: neuralImageUrl,
-        rawImageUrl: neuralImageUrl,
+        url: finalImageUrl,
+        rawImageUrl: finalImageUrl,
         ratio,
         date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
         postType: 'instagram_post',

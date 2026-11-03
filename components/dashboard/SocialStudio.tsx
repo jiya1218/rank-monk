@@ -201,30 +201,6 @@ export function SocialStudio({ project, user, mediaAssets = [], onNavigateToInte
     showToast(`Disconnected ${platform} account.`);
   };
 
-  // 1-Click Connect for LinkedIn / Twitter
-  const handleSimulateConnect = (platform: 'linkedin' | 'twitter') => {
-    const brand = project?.name || 'Scalezix Brand';
-    const cleanHandle = (project?.domain || 'company').replace(/\.[^/.]+$/, '').toLowerCase();
-
-    const mockAccount: SocialAccount = {
-      platform,
-      id: `${platform}_${Date.now()}`,
-      name: `${brand} ${platform === 'linkedin' ? 'Official' : ''}`.trim(),
-      username: `@${cleanHandle}`,
-      profilePictureUrl: project?.favicon || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&q=80',
-      connectedAt: new Date().toISOString()
-    };
-
-    setAccounts(prev => {
-      const filtered = prev.filter(a => a.platform !== platform);
-      const merged = [...filtered, mockAccount];
-      localStorage.setItem(`rankmonk_social_accounts_${user?.email || 'default'}`, JSON.stringify(merged));
-      return merged;
-    });
-
-    showToast(`✅ ${platform === 'linkedin' ? 'LinkedIn' : 'X (Twitter)'} connected successfully!`);
-  };
-
   // Toggle platform selection in composer
   const togglePlatform = (p: 'instagram' | 'facebook' | 'linkedin' | 'twitter') => {
     if (selectedPlatforms.includes(p)) {
@@ -508,10 +484,13 @@ What’s your primary organic focus this quarter? Let us know in the comments be
               </div>
             ) : (
               <button
-                onClick={() => handleSimulateConnect('linkedin')}
+                onClick={() => {
+                  if (onNavigateToIntegrations) onNavigateToIntegrations();
+                  showToast('Enter your official LinkedIn Access Token in the Integrations Workspace');
+                }}
                 className="w-full py-2 bg-[#0077b5] hover:bg-[#005f93] text-white rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer"
               >
-                Connect LinkedIn →
+                Connect LinkedIn API →
               </button>
             )}
           </div>
@@ -552,10 +531,13 @@ What’s your primary organic focus this quarter? Let us know in the comments be
               </div>
             ) : (
               <button
-                onClick={() => handleSimulateConnect('twitter')}
+                onClick={() => {
+                  if (onNavigateToIntegrations) onNavigateToIntegrations();
+                  showToast('Enter your official X (Twitter) Developer Keys in the Integrations Workspace');
+                }}
                 className="w-full py-2 bg-black hover:bg-neutral-800 text-white rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer"
               >
-                Connect X →
+                Connect X API Keys →
               </button>
             )}
           </div>

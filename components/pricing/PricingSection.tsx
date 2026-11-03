@@ -20,6 +20,7 @@ export function PricingSection({ initialPlan, requirePaymentNotice }: PricingSec
   const [appliedCoupon, setAppliedCoupon] = useState('');
   const [isDiscountActive, setIsDiscountActive] = useState(false);
   const [couponError, setCouponError] = useState('');
+  const [showCouponInput, setShowCouponInput] = useState(false);
 
   useEffect(() => {
     try {
@@ -52,7 +53,7 @@ export function PricingSection({ initialPlan, requirePaymentNotice }: PricingSec
       setCouponError('');
       setCouponInput(code);
     } else {
-      setCouponError('Invalid coupon code. Try RANKMONK100 or RANKMONK001 for 100% OFF.');
+      setCouponError('Invalid coupon code.');
     }
   };
 
@@ -206,46 +207,54 @@ export function PricingSection({ initialPlan, requirePaymentNotice }: PricingSec
           </div>
         </div>
 
-        {/* PROMO COUPON CODE BAR */}
-        <div style={{ maxWidth: '480px', margin: '0 auto 36px' }}>
+        {/* PROMO COUPON CODE (DISCREET / HIDDEN BY DEFAULT) */}
+        <div style={{ maxWidth: '420px', margin: '0 auto 28px' }}>
           {isDiscountActive ? (
-            <div style={{ background: 'var(--card)', border: '2px solid var(--success)', borderRadius: '16px', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: 'var(--shadow)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '1.4rem' }}>🏷️</span>
+            <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: '14px', padding: '12px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: 'var(--shadow)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '1.1rem' }}>🏷️</span>
                 <div>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--success)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    Coupon {appliedCoupon} Applied!
+                  <div style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--ink)' }}>
+                    Coupon <strong style={{ color: 'var(--success)' }}>{appliedCoupon}</strong> Applied
                   </div>
-                  <div style={{ fontSize: '0.86rem', color: 'var(--ink)', fontWeight: 600 }}>
-                    100% Discount Active — Instant <strong style={{ color: 'var(--success)' }}>₹0 Free Activation</strong> for any tier!
+                  <div style={{ fontSize: '0.78rem', color: 'var(--muted)' }}>
+                    100% OFF discount active
                   </div>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={handleRemoveCoupon}
-                style={{ fontSize: '0.8rem', color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontWeight: 700 }}
+                style={{ fontSize: '0.8rem', color: 'var(--muted)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontWeight: 600 }}
               >
                 Remove
               </button>
             </div>
-          ) : (
-            <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: '16px', padding: '14px 18px', boxShadow: 'var(--shadow)' }}>
+          ) : showCouponInput ? (
+            <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: '14px', padding: '12px 16px', boxShadow: 'var(--shadow)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <input
                   type="text"
-                  placeholder="Promo Code (e.g. RANKMONK100 or RANKMONK001)"
+                  placeholder="Enter promo code"
                   value={couponInput}
                   onChange={(e) => setCouponInput(e.target.value)}
-                  style={{ flex: 1, padding: '10px 14px', background: 'var(--bg-alt)', border: '1px solid var(--line)', borderRadius: '10px', fontSize: '0.85rem', color: 'var(--ink)', textTransform: 'uppercase', fontWeight: 700, outline: 'none' }}
+                  style={{ flex: 1, padding: '9px 12px', background: 'var(--bg-alt)', border: '1px solid var(--line)', borderRadius: '8px', fontSize: '0.84rem', color: 'var(--ink)', textTransform: 'uppercase', fontWeight: 700, outline: 'none' }}
                 />
                 <button
                   type="button"
                   onClick={() => handleApplyCoupon()}
                   className="btn btn-primary btn-sm"
-                  style={{ padding: '10px 18px', fontSize: '0.85rem', fontWeight: 700 }}
+                  style={{ padding: '9px 16px', fontSize: '0.82rem', fontWeight: 700 }}
                 >
                   Apply
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowCouponInput(false); setCouponError(''); }}
+                  style={{ background: 'none', border: 'none', color: 'var(--muted)', fontSize: '0.85rem', cursor: 'pointer', padding: '4px' }}
+                  title="Close"
+                >
+                  ✕
                 </button>
               </div>
 
@@ -254,18 +263,27 @@ export function PricingSection({ initialPlan, requirePaymentNotice }: PricingSec
                   {couponError}
                 </div>
               )}
-
-              {/* 1-Click Test Promo Button */}
-              <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem' }}>
-                <span style={{ color: 'var(--muted)' }}>Testing full platform?</span>
-                <button
-                  type="button"
-                  onClick={() => handleApplyCoupon('RANKMONK100')}
-                  style={{ background: 'none', border: 'none', color: 'var(--success)', fontWeight: 800, cursor: 'pointer', textDecoration: 'underline' }}
-                >
-                  ⚡ Click to Apply 100% OFF (RANKMONK100)
-                </button>
-              </div>
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center' }}>
+              <button
+                type="button"
+                onClick={() => setShowCouponInput(true)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--muted)',
+                  fontSize: '0.84rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  textDecoration: 'underline'
+                }}
+              >
+                <span>Have a promo code?</span>
+              </button>
             </div>
           )}
         </div>
