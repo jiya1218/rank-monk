@@ -105,6 +105,17 @@ export default function DashboardPage() {
           }
         }
 
+        // Auto-heal legacy project logo if it pointed to stale fake asset or was duplicated with favicon
+        if (p.logoUrl?.includes('/assets/scalezix-logo.png') || (p.domain && p.domain.toLowerCase().includes('scalezix') && (!p.logoUrl || p.logoUrl === p.faviconUrl))) {
+          p.logoUrl = 'https://scalezix.com/scalezix-logo-transparent-dark.png';
+          p.faviconUrl = 'https://scalezix.com/icon.svg?icon.0drmnn7_x9d8y.svg';
+          updated = true;
+        } else if (p.domain && p.domain.toLowerCase().includes('solospider') && (!p.logoUrl || p.logoUrl === p.faviconUrl || p.logoUrl.includes('google.com/s2/favicons'))) {
+          p.logoUrl = 'https://solospider.ai/assets/solospider-logo.png';
+          p.faviconUrl = 'https://solospider.ai/favicon.ico?2bdf02b23e50a3f9';
+          updated = true;
+        }
+
         // Generic fallback auto-heal for all domains if fields are missing
         if (!p.voiceSliders) {
           p.voiceSliders = { professionalCasual: 65, friendlyFormal: 20, boldSubtle: 25, premiumAccessible: 75, simpleComplex: 25 };

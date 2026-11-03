@@ -781,9 +781,7 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
                     {(() => {
                       const displayLogo = (!logoFailed && project?.logoUrl && project.logoUrl !== project?.faviconUrl && !project.logoUrl.includes('google.com/s2/favicons'))
                         ? project.logoUrl
-                        : (cleanDomain.includes('solospider')
-                            ? 'https://solospider.ai/assets/solospider-logo.png'
-                            : (project?.logoUrl || null));
+                        : null;
 
                       return displayLogo ? (
                         <img

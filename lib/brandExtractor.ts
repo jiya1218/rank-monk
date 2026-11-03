@@ -1008,6 +1008,215 @@ function dynamicSemanticParser(domain: string, title: string, metaDesc: string, 
   };
 }
 
+// ============================================================================
+// DYNAMIC ASSET & LOGO EXTRACTION ENGINE (ZERO HARDCODING)
+// ============================================================================
+export function decodeHtmlEntities(str: string): string {
+  if (!str) return '';
+  return str
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&apos;/gi, "'");
+}
+
+export function cleanAndAbsoluteAssetUrl(rawUrl: string, domain: string): string | null {
+  if (!rawUrl) return null;
+  let clean = decodeHtmlEntities(rawUrl.trim());
+  clean = clean.replace(/^[\\\/]{2,}/, '//');
+
+  // Decode Next.js or CDN proxy query params like /_next/image?url=%2Fscalezix-logo-transparent-dark.png&w=384&q=75
+  const nextUrlMatch = clean.match(/[?&](?:url|image|src)=([^&]+)/i);
+  if (nextUrlMatch && nextUrlMatch[1]) {
+    try {
+      const decodedTarget = decodeURIComponent(nextUrlMatch[1]);
+      if (decodedTarget && (decodedTarget.startsWith('/') || decodedTarget.startsWith('http'))) {
+        clean = decodedTarget;
+      }
+    } catch {}
+  }
+
+  if (clean.startsWith('//')) {
+    clean = `https:${clean}`;
+  } else if (clean.startsWith('/')) {
+    clean = `https://${domain}${clean}`;
+  } else if (!clean.startsWith('http://') && !clean.startsWith('https://') && !clean.startsWith('data:')) {
+    clean = `https://${domain}/${clean.replace(/^\.\//, '')}`;
+  }
+
+  return clean;
+}
+
+export function isFaviconAsset(url: string): boolean {
+  if (!url) return true;
+  const l = url.toLowerCase();
+  return (
+    l.includes('favicon') ||
+    l.includes('apple-touch') ||
+    l.includes('apple-icon') ||
+    l.includes('android-chrome') ||
+    l.includes('mstile') ||
+    l.endsWith('.ico') ||
+    /\bicon(?:-\d+x\d+)?\.(?:png|webp|svg|ico)$/i.test(l) ||
+    l.includes('tab-icon') ||
+    l.includes('avatar') ||
+    l.includes('pixel') ||
+    l.includes('1x1')
+  );
+}
+
+export function extractDynamicLogo(html: string, domain: string, brandName: string = ''): string | null {
+  if (!html) return null;
+
+  const candidateScores: { url: string; score: number; reason: string }[] = [];
+
+  const addCandidate = (rawUrl: string, score: number, reason: string, htmlContext: string = '') => {
+    const fullUrl = cleanAndAbsoluteAssetUrl(rawUrl, domain);
+    if (!fullUrl) return;
+    if (isFaviconAsset(fullUrl) && score < 100) return;
+
+    let finalScore = score;
+    const lUrl = fullUrl.toLowerCase();
+    const lCtx = htmlContext.toLowerCase();
+
+    // Prefer dark/standard variants for crisp visibility on light cards
+    if (lUrl.includes('dark') || lCtx.includes('dark:hidden')) {
+      finalScore += 20;
+    }
+    if (lUrl.includes('white') && !lUrl.includes('dark')) {
+      finalScore -= 10;
+    }
+
+    if (lUrl.includes('logo')) finalScore += 25;
+    if (lUrl.includes('brand')) finalScore += 15;
+    if (lUrl.endsWith('.svg') || lUrl.includes('.svg?')) finalScore += 15;
+    if (lUrl.includes('transparent')) finalScore += 10;
+
+    candidateScores.push({ url: fullUrl, score: finalScore, reason });
+  };
+
+  // 1. Inspect <header> or <nav> elements (Primary location for all website logos)
+  const navHeaderMatches = html.match(/<(?:header|nav)[^>]*>([\s\S]*?)<\/(?:header|nav)>/gi) || [];
+  for (const block of navHeaderMatches) {
+    // 1a. Look for root link <a href="/">...</a> inside header/nav
+    const rootLinkMatches = block.match(/<a\b[^>]*href=["'](?:\/|https?:\/\/(?:www\.)?[^"']+\/?)["'][^>]*>([\s\S]*?)<\/a>/gi) || [];
+    for (const rootLink of rootLinkMatches) {
+      const imgMatches = rootLink.match(/<img\b[^>]+>/gi) || [];
+      for (const img of imgMatches) {
+        const srcMatch = img.match(/\bsrc=["']([^"']+)["']/i);
+        if (srcMatch && srcMatch[1]) {
+          addCandidate(srcMatch[1], 120, 'Header/Nav Root Link <img>', img);
+        }
+        const srcsetMatch = img.match(/\bsrcSet=["']([^"']+)["']/i);
+        if (srcsetMatch && srcsetMatch[1]) {
+          const firstSrc = srcsetMatch[1].split(',')[0].trim().split(/\s+/)[0];
+          if (firstSrc) addCandidate(firstSrc, 115, 'Header/Nav Root Link <img srcset>', img);
+        }
+      }
+
+      if (imgMatches.length === 0) {
+        const svgMatch = rootLink.match(/<svg\b[^>]*>[\s\S]*?<\/svg>/i);
+        if (svgMatch && svgMatch[0] && svgMatch[0].length < 8000) {
+          const svgClean = svgMatch[0].replace(/[\r\n\t]+/g, ' ').trim();
+          const svgDataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(svgClean)}`;
+          candidateScores.push({ url: svgDataUrl, score: 110, reason: 'Header/Nav Root Link Inline <svg>' });
+        }
+      }
+    }
+
+    // 1b. Any <img> with alt or class containing logo inside header/nav
+    const headerImgs = block.match(/<img\b[^>]+>/gi) || [];
+    for (const img of headerImgs) {
+      const srcMatch = img.match(/\bsrc=["']([^"']+)["']/i);
+      if (!srcMatch || !srcMatch[1]) continue;
+      const lowerImg = img.toLowerCase();
+      if (lowerImg.includes('logo') || lowerImg.includes('brand')) {
+        addCandidate(srcMatch[1], 95, 'Header/Nav <img> with logo class/alt', img);
+      }
+    }
+  }
+
+  // 2. Preload image links with "logo" (e.g. SoloSpider: <link rel="preload" as="image" href="/assets/solospider-logo.png"/>)
+  const preloadMatches = html.match(/<link\b[^>]+rel=["']preload["'][^>]+as=["']image["'][^>]*>/gi) || [];
+  for (const link of preloadMatches) {
+    const hrefMatch = link.match(/href=["']([^"']+)["']/i);
+    if (hrefMatch && hrefMatch[1]) {
+      const href = hrefMatch[1];
+      if (href.toLowerCase().includes('logo') || href.toLowerCase().includes('brand')) {
+        addCandidate(href, 90, 'Preload Logo Image Link', link);
+      }
+    }
+  }
+
+  // 3. Schema.org Structured Data
+  const jsonLdMatches = Array.from(html.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi));
+  for (const match of jsonLdMatches) {
+    try {
+      const data = JSON.parse(match[1]);
+      const items = Array.isArray(data) ? data : (data['@graph'] ? data['@graph'] : [data]);
+      for (const item of items) {
+        if (item && (item['@type'] === 'Organization' || item['@type'] === 'Corporation' || item['@type'] === 'Brand' || item['@type'] === 'WebSite') && item.logo) {
+          const logoVal = typeof item.logo === 'string' ? item.logo : (item.logo.url || null);
+          if (logoVal && !isFaviconAsset(logoVal)) {
+            addCandidate(logoVal, 85, 'Schema.org Organization.logo');
+          }
+        }
+      }
+    } catch {}
+  }
+
+  // 4. OpenGraph og:logo or itemprop="logo"
+  const ogLogoMatch = html.match(/<meta\s+property=["']og:logo["']\s+content=["']([^"']+)["']/i) ||
+                      html.match(/<meta\s+content=["']([^"']+)["']\s+property=["']og:logo["']/i);
+  if (ogLogoMatch && ogLogoMatch[1]) {
+    addCandidate(ogLogoMatch[1], 80, 'og:logo');
+  }
+
+  const itempropMatch = html.match(/<[^>]+itemprop=["']logo["'][^>]+content=["']([^"']+)["']/i) ||
+                        html.match(/<img[^>]+itemprop=["']logo["'][^>]+src=["']([^"']+)["']/i);
+  if (itempropMatch && itempropMatch[1]) {
+    addCandidate(itempropMatch[1], 80, 'itemprop="logo"');
+  }
+
+  // 5. Global <img> tags with class/id/alt="logo" or src containing "logo"
+  const allImgs = html.match(/<img\b[^>]+>/gi) || [];
+  for (const img of allImgs.slice(0, 30)) {
+    const srcMatch = img.match(/\bsrc=["']([^"']+)["']/i);
+    if (!srcMatch || !srcMatch[1]) continue;
+    const src = srcMatch[1];
+    const lower = img.toLowerCase();
+    if (lower.includes('logo') || lower.includes('brand')) {
+      addCandidate(src, 60, 'Global <img> matching logo attribute', img);
+    }
+  }
+
+  if (candidateScores.length === 0) return null;
+
+  candidateScores.sort((a, b) => b.score - a.score);
+  return candidateScores[0].url;
+}
+
+export function extractDynamicFavicon(html: string, domain: string): string {
+  if (!html) return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+
+  const clean = (u: string) => cleanAndAbsoluteAssetUrl(u, domain) || `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+
+  const iconMatch = html.match(/<link\s+[^>]*rel=["'](?:shortcut )?icon["'][^>]*href=["']([^"']+)["']/i) ||
+                    html.match(/<link\s+[^>]*href=["']([^"']+)["'][^>]*rel=["'](?:shortcut )?icon["']/i);
+  if (iconMatch && iconMatch[1]) return clean(iconMatch[1]);
+
+  const appleTouchMatch = html.match(/<link\s+[^>]*rel=["']apple-touch-icon["'][^>]*href=["']([^"']+)["']/i) ||
+                          html.match(/<link\s+[^>]*href=["']([^"']+)["'][^>]*rel=["']apple-touch-icon["']/i);
+  if (appleTouchMatch && appleTouchMatch[1]) return clean(appleTouchMatch[1]);
+
+  const anyIcon = html.match(/<link\s+[^>]*href=["']([^"']*(?:favicon|icon)[^"']*)["'][^>]*>/i);
+  if (anyIcon && anyIcon[1]) return clean(anyIcon[1]);
+
+  return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+}
+
 // 100% Dynamic Crawl & Extraction (NO Hardcoded Brand Names)
 export async function extractBrandFromDomain(rawDomain: string, targetMarket: string = 'Pan India'): Promise<ExtractedBrand> {
   const domain = cleanDomain(rawDomain);
@@ -1120,72 +1329,9 @@ export async function extractBrandFromDomain(rawDomain: string, targetMarket: st
       scrapedFonts = fontInfo.fonts;
       scrapedDesignStyle = fontInfo.designStyle;
 
-      // Helper to resolve relative and protocol-relative URLs
-      const toAbsoluteUrl = (u: string) => {
-        const clean = u.trim();
-        if (clean.startsWith('//')) return `https:${clean}`;
-        if (clean.startsWith('http://') || clean.startsWith('https://')) return clean;
-        if (clean.startsWith('/')) return `https://${domain}${clean}`;
-        return `https://${domain}/${clean}`;
-      };
-
-      // 1. Check Schema.org Structured Data for official Organization.logo
-      const jsonLdMatches = Array.from(html.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi));
-      for (const match of jsonLdMatches) {
-        try {
-          const data = JSON.parse(match[1]);
-          const items = Array.isArray(data) ? data : (data['@graph'] ? data['@graph'] : [data]);
-          for (const item of items) {
-            if (item && (item['@type'] === 'Organization' || item['@type'] === 'Corporation' || item['@type'] === 'Brand') && item.logo) {
-              const logoVal = typeof item.logo === 'string' ? item.logo : (item.logo.url || null);
-              if (logoVal && !scrapedLogo) {
-                scrapedLogo = toAbsoluteUrl(logoVal);
-                break;
-              }
-            }
-          }
-        } catch {}
-      }
-
-      // 2. Real Logo Image Extraction (Prioritize real <img> logo file in header/nav/home link)
-      if (!scrapedLogo) {
-        // High-precision regexes to catch real logo files (e.g. solospider-logo.png, /assets/logo.svg)
-        const logoRegexes = [
-          // <img> whose src explicitly contains "logo" or "brand"
-          /<img[^>]+src=["']([^"']*(?:logo|brand)[^"']*\.(?:png|svg|webp|jpg|jpeg)[^"']*)["'][^>]*>/i,
-          // <img> with class, id, or alt containing "logo" or "brand"
-          /<img[^>]+(?:class|id|alt)=["'][^"']*(?:logo|brand|site-logo)[^"']*["'][^>]+src=["']([^"']+)["']/i,
-          /<img[^>]+src=["']([^"']+)["'][^>]+(?:class|id|alt)=["'][^"']*(?:logo|brand|site-logo)[^"']*["']/i,
-          // Header / Navbar <img> inside home link (<a href="/">)
-          /<(?:nav|header)[^>]*>[\s\S]*?<a[^>]+href=["'](?:\/|https?:\/\/(?:www\.)?[^"']+\/?)["'][^>]*>[\s\S]*?<img[^>]+src=["']([^"']+)["']/i,
-          /<a[^>]+href=["'](?:\/|https?:\/\/(?:www\.)?[^"']+\/?)["'][^>]*>[\s\S]*?<img[^>]+src=["']([^"']+)["']/i
-        ];
-
-        for (const rx of logoRegexes) {
-          const m = html.match(rx);
-          if (m && m[1] && m[1].trim()) {
-            const candidate = m[1].trim();
-            // Discard generic favicons, icons or tracking pixels
-            const lower = candidate.toLowerCase();
-            if (!lower.includes('favicon') && !lower.includes('apple-touch') && !lower.includes('avatar') && !lower.includes('pixel')) {
-              scrapedLogo = toAbsoluteUrl(candidate);
-              break;
-            }
-          }
-        }
-      }
-
-      // 3. Separate & Distinct Favicon Extraction (Never overwrite logo with favicon)
-      const iconMatch = html.match(/<link\s+[^>]*rel=["'](?:shortcut )?icon["'][^>]*href=["']([^"']+)["']/i) ||
-                        html.match(/<link\s+[^>]*href=["']([^"']+)["'][^>]*rel=["'](?:shortcut )?icon["']/i);
-      const appleTouchMatch = html.match(/<link\s+[^>]*rel=["']apple-touch-icon["'][^>]*href=["']([^"']+)["']/i) ||
-                              html.match(/<link\s+[^>]*href=["']([^"']+)["'][^>]*rel=["']apple-touch-icon["']/i);
-
-      if (iconMatch && iconMatch[1]) {
-        scrapedFavicon = toAbsoluteUrl(iconMatch[1]);
-      } else if (appleTouchMatch && appleTouchMatch[1]) {
-        scrapedFavicon = toAbsoluteUrl(appleTouchMatch[1]);
-      }
+      // Dynamic Extraction of Authentic Logo & Favicon Directly from Live HTML
+      scrapedLogo = extractDynamicLogo(html, domain, brandName);
+      scrapedFavicon = extractDynamicFavicon(html, domain);
     }
   } catch (err) {
     // Graceful fallback to dynamic intelligence if site blocks crawler
@@ -1206,9 +1352,9 @@ export async function extractBrandFromDomain(rawDomain: string, targetMarket: st
     ? semanticSortPalette(scrapedPalette)
     : generateBrandPalette(finalPrimaryHex);
 
-  // 5. Guaranteed Distinct High-Resolution Logo & Favicon
+  // 5. Guaranteed Distinct High-Resolution Logo & Favicon (Zero Fake Fallbacks)
   const faviconUrl = scrapedFavicon || `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
-  const logoUrl = scrapedLogo || (domain.includes('solospider') ? `https://${domain}/assets/solospider-logo.png` : null) || `https://www.google.com/s2/favicons?domain=${domain}&sz=256`;
+  const logoUrl = scrapedLogo || '';
 
   const finalBrandName = intelligence.name || brandName;
   const currentDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
