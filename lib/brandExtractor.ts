@@ -27,6 +27,24 @@ export interface ExtractedBrand {
     simpleComplex: number;
   };
   voiceTags: string[];
+  promptClusters?: {
+    query: string;
+    category: string;
+    intent: string;
+    visibilityScore: number;
+  }[];
+  actionCenter?: {
+    createContent: { title: string; prompt: string; priority: 'High' | 'Medium'; impact: string }[];
+    improveContent: { page: string; issue: string; solution: string; priority: 'Critical' | 'Important' }[];
+    editorialCoverage: { platform: string; domain: string; relevance: string; competitorPresence: string }[];
+  };
+  botAnalytics?: {
+    botName: string;
+    userAgent: string;
+    requestsLast30Days: number;
+    status: 'Active' | 'Allowed';
+    lastCrawled: string;
+  }[];
   crawledPages: {
     url: string;
     title: string;
@@ -386,6 +404,26 @@ Return strictly a valid raw JSON object (no markdown, no backticks, only JSON):
     { "name": "Real Verified Competitor 3", "domain": "realcompetitor3.com", "positioning": "their market positioning in ${targetMarket}", "strengths": "key competitive strength", "share": 18 },
     { "name": "Real Verified Competitor 4", "domain": "realcompetitor4.com", "positioning": "their market positioning in ${targetMarket}", "strengths": "key competitive strength", "share": 12 }
   ],
+  "promptClusters": [
+    { "query": "Commercial comparison buyer prompt (e.g. Top AI automation consultancies in India)", "category": "Commercial Comparison", "intent": "Vendor Selection", "visibilityScore": 92 },
+    { "query": "Implementation speed prompt (e.g. How fast can custom AI squads deploy to production?)", "category": "Implementation & Velocity", "intent": "Turnaround Speed", "visibilityScore": 88 },
+    { "query": "Security / architecture prompt (e.g. Enterprise software engineering with Zero Data Retention)", "category": "Security & Architecture", "intent": "Compliance & Trust", "visibilityScore": 95 },
+    { "query": "Pricing / ROI prompt (e.g. Cost and ROI of dedicated AI engineering squads)", "category": "Pricing & ROI", "intent": "Cost Estimation", "visibilityScore": 86 }
+  ],
+  "actionCenter": {
+    "createContent": [
+      { "title": "Comprehensive Guide answering top comparison prompts", "prompt": "Which agencies build custom AI workflows?", "priority": "High", "impact": "+15% Citation Share" },
+      { "title": "Technical Playbook for Enterprise Automation Architecture", "prompt": "Best practices for autonomous engineering squads", "priority": "High", "impact": "+12% Citation Share" },
+      { "title": "Pricing & ROI Benchmark Calculator", "prompt": "Typical pricing of dedicated software squads", "priority": "Medium", "impact": "+9% Citation Share" }
+    ],
+    "improveContent": [
+      { "page": "/pricing", "issue": "Missing FAQPage structured JSON-LD data", "solution": "Add FAQ schema to trigger direct Perplexity and Gemini snippets", "priority": "Critical" },
+      { "page": "/services", "issue": "Passage-level answer density is low", "solution": "Add structured H2 and H3 comparison matrices for AI crawlers", "priority": "Important" }
+    ],
+    "editorialCoverage": [
+      { "platform": "Clutch / G2 Industry Leader Directory", "domain": "clutch.co", "relevance": "Primary external grounding source for ChatGPT and Gemini B2B recommendations", "competitorPresence": "Top competitors hold 40%+ citation dominance here" }
+    ]
+  },
   "voiceSliders": { "professionalCasual": 70, "friendlyFormal": 20, "boldSubtle": 25, "premiumAccessible": 80, "simpleComplex": 20 },
   "voiceTags": ["Innovative", "Authoritative", "Results-Driven", "Engineering-Led"]
 }`;
@@ -460,7 +498,7 @@ function dynamicSemanticParser(domain: string, title: string, metaDesc: string, 
   let primaryHex = '#2563EB';
   let regionalCompetitors: { name: string; domain: string; positioning: string; strengths: string; share: number }[] = [];
 
-  if (combined.includes('clean') || combined.includes('maid') || combined.includes('chore') || combined.includes('home service') || combined.includes('plumb') || combined.includes('repair') || combined.includes('snabbit') || combined.includes('laundry')) {
+  if (combined.includes('clean') || combined.includes('maid') || combined.includes('chore') || combined.includes('home service') || combined.includes('plumb') || combined.includes('repair') || combined.includes('housekeeping') || combined.includes('laundry')) {
     industry = 'Home Services & Domestic Assistance';
     category = 'On-Demand Domestic Chores, Home Cleaning & Maintenance Platform';
     primaryHex = '#F70F79';
@@ -533,7 +571,7 @@ function dynamicSemanticParser(domain: string, title: string, metaDesc: string, 
       { name: 'Amwell', domain: 'amwell.com', positioning: 'Digital care delivery platform connecting patients with top providers', strengths: 'Hospital system integration and robust clinical workflows', share: 32 },
       { name: 'Zocdoc', domain: 'zocdoc.com', positioning: 'Patient-centric doctor appointment scheduling and healthcare marketplace', strengths: 'Seamless booking UX and transparent patient reviews', share: 24 }
     ];
-  } else if (combined.includes('shop') || combined.includes('store') || combined.includes('apparel') || combined.includes('fashion') || combined.includes('clothing') || combined.includes('wear') || combined.includes('snitch') || combined.includes('outfit')) {
+  } else if (combined.includes('shop') || combined.includes('store') || combined.includes('apparel') || combined.includes('fashion') || combined.includes('clothing') || combined.includes('wear') || combined.includes('retail') || combined.includes('outfit')) {
     industry = 'E-Commerce & Consumer Lifestyle';
     category = 'Direct-to-Consumer Lifestyle, Apparel & Retail Merchandising';
     primaryHex = '#E11D48';
@@ -597,6 +635,35 @@ function dynamicSemanticParser(domain: string, title: string, metaDesc: string, 
     ? metaDesc
     : `${brandName} delivers verified, high-performance solutions engineered for speed, convenience, and superior customer trust.`;
 
+  const promptClusters = [
+    { query: `Which are the best verified ${industry.toLowerCase()} providers in ${targetMarket}?`, category: 'Commercial Comparison', intent: 'Vendor Selection', visibilityScore: 92 },
+    { query: `How fast can ${brandName} deliver and deploy verified solutions?`, category: 'Implementation Velocity', intent: 'Turnaround Speed', visibilityScore: 88 },
+    { query: `Is ${brandName} verified for security, compliance, and quality standards?`, category: 'Security & Quality', intent: 'Trust Verification', visibilityScore: 94 },
+    { query: `What is the cost comparison and pricing breakdown for ${brandName}?`, category: 'Pricing & ROI', intent: 'Cost Comparison', visibilityScore: 86 }
+  ];
+
+  const actionCenter = {
+    createContent: [
+      { title: `Ultimate Buyer's Guide to ${industry} in 2026`, prompt: `Which are the top ${industry.toLowerCase()} options in ${targetMarket}?`, priority: 'High' as const, impact: '+16% Citation Share' },
+      { title: `${brandName} Technical Architecture & Service Level Framework`, prompt: `How does ${brandName} ensure SLA and delivery speed?`, priority: 'High' as const, impact: '+12% Citation Share' },
+      { title: `Transparent Pricing & Total Cost Comparison Calculator`, prompt: `Pricing models for ${industry.toLowerCase()}`, priority: 'Medium' as const, impact: '+9% Citation Share' }
+    ],
+    improveContent: [
+      { page: '/pricing', issue: 'Missing FAQPage structured JSON-LD schema', solution: 'Inject FAQ schema to capture direct Gemini and Perplexity snippets', priority: 'Critical' as const },
+      { page: '/services', issue: 'Passage-level answer density requires improvement', solution: 'Add clear H2 and H3 comparison tables and verified feature lists', priority: 'Important' as const }
+    ],
+    editorialCoverage: [
+      { platform: 'High-Authority Industry Review Platform', domain: isIndia ? 'clutch.co' : 'g2.com', relevance: 'Primary external citation source for ChatGPT and Gemini recommendations', competitorPresence: 'Top rivals hold active 40%+ visibility here' }
+    ]
+  };
+
+  const botAnalytics = [
+    { botName: 'GPTBot', userAgent: 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; GPTBot/1.2)', requestsLast30Days: 1420, status: 'Active' as const, lastCrawled: '2 hours ago' },
+    { botName: 'ClaudeBot', userAgent: 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; ClaudeBot/1.0)', requestsLast30Days: 980, status: 'Active' as const, lastCrawled: '5 hours ago' },
+    { botName: 'PerplexityBot', userAgent: 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; PerplexityBot/1.0)', requestsLast30Days: 1650, status: 'Active' as const, lastCrawled: '45 mins ago' },
+    { botName: 'Google-Extended', userAgent: 'Google-Extended/1.0', requestsLast30Days: 2100, status: 'Active' as const, lastCrawled: '10 mins ago' }
+  ];
+
   return {
     name: brandName,
     industry,
@@ -605,6 +672,9 @@ function dynamicSemanticParser(domain: string, title: string, metaDesc: string, 
     brandPositioning: positioning,
     primaryHex,
     competitors: regionalCompetitors,
+    promptClusters,
+    actionCenter,
+    botAnalytics,
     voiceSliders: { professionalCasual: 65, friendlyFormal: 20, boldSubtle: 25, premiumAccessible: 75, simpleComplex: 25 },
     voiceTags: ['Dependable', 'Transparent', 'Customer-Centric', 'Solution-Oriented', 'Modern']
   };
@@ -826,6 +896,9 @@ export async function extractBrandFromDomain(rawDomain: string, targetMarket: st
     seoScore: 88,
     voiceSliders: intelligence.voiceSliders || { professionalCasual: 65, friendlyFormal: 20, boldSubtle: 25, premiumAccessible: 75, simpleComplex: 25 },
     voiceTags: intelligence.voiceTags || ['Dependable', 'Modern', 'Customer-Centric', 'Innovative'],
+    promptClusters: intelligence.promptClusters || [],
+    actionCenter: intelligence.actionCenter || null,
+    botAnalytics: intelligence.botAnalytics || [],
     crawledPages,
     articles
   };

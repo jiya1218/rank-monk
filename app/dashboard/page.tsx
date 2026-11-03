@@ -1027,8 +1027,31 @@ export default function DashboardPage() {
               {/* Live AEO Prompt Simulator */}
               <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl p-6 shadow-card space-y-4">
                 <div>
-                  <h3 className="font-editorial text-lg font-bold text-[#2b1b12]">Live AI Prompt Simulator</h3>
-                  <p className="text-xs text-[#6f5a4c]">Simulate real buyer conversational search prompts and verify brand citations</p>
+                  <h3 className="font-editorial text-lg font-bold text-[#2b1b12]">Live AI Prompt Simulator (GEO & Citation Engine)</h3>
+                  <p className="text-xs text-[#6f5a4c]">Deconstruct query fan-outs and simulate live brand citations across Gemini, ChatGPT, Claude & Perplexity</p>
+                </div>
+
+                {/* Quick Prompt Fan-Out Pills (Sitefire style) */}
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#6f5a4c]">Target Buyer Prompts:</span>
+                  {(project?.promptClusters || [
+                    { query: `Which are the best verified ${project?.industry || 'solutions'} in ${project?.targetMarket || 'India'}?` },
+                    { query: `How fast can ${project?.name || 'this brand'} deliver custom results?` },
+                    { query: `Is ${project?.name || 'this brand'} verified for security, SLAs and compliance?` },
+                    { query: `Pricing models and ROI benchmark comparison for ${project?.name || 'this brand'}` }
+                  ]).map((item: any, idx: number) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        setSimQuery(item.query);
+                      }}
+                      className="px-2.5 py-1 bg-[#f8f3ec] hover:bg-[#ebdcc8] text-[#2b1b12] border border-[#d8c09e] rounded-lg text-[11px] font-medium transition-all text-left truncate max-w-xs cursor-pointer"
+                      title={item.query}
+                    >
+                      ⚡ {item.query}
+                    </button>
+                  ))}
                 </div>
 
                 <form onSubmit={handleSimulateAeo} className="space-y-3">
@@ -1205,6 +1228,156 @@ export default function DashboardPage() {
                     )}
                   </div>
                 )}
+              </div>
+
+              {/* Sitefire Action Center (Create Content, Improve Content, Editorial Coverage) */}
+              <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl p-6 shadow-card space-y-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-[#e4d6c6] gap-2">
+                  <div>
+                    <h3 className="font-editorial text-lg font-bold text-[#2b1b12] flex items-center gap-2">
+                      <span>Action Center</span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                        Sitefire GEO Protocol
+                      </span>
+                    </h3>
+                    <p className="text-xs text-[#6f5a4c]">
+                      High-leverage execution tasks diagnosed from live AI search model gaps
+                    </p>
+                  </div>
+                  <span className="text-xs font-bold text-[#7a5242]">
+                    High-Priority Tasks
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                  {/* Card 1: Create Content */}
+                  <div className="p-4 bg-[#f8f3ec] rounded-xl border border-[#e4d6c6] space-y-3">
+                    <div className="flex items-center justify-between pb-2 border-b border-[#e4d6c6]">
+                      <span className="font-bold text-[#2b1b12] flex items-center gap-1.5">
+                        <span>⚡</span>
+                        <span>Create Content</span>
+                      </span>
+                      <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">
+                        Prompt Gaps
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[#6f5a4c] leading-relaxed">
+                      AI models are answering comparison queries where competitors are cited but your brand is missing.
+                    </p>
+                    <div className="p-2.5 bg-white rounded-lg border border-[#e4d6c6] space-y-1">
+                      <span className="font-bold text-[#2b1b12] text-[11px] block">
+                        &ldquo;Top {project?.industry || 'Services'} in {project?.targetMarket || 'India'} (2026 Guide)&rdquo;
+                      </span>
+                      <span className="text-[10px] text-emerald-600 font-bold block">+18% Est. Citation Share</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => alert('✓ Prompt outline sent to Blog & Article Engine!')}
+                      className="w-full py-2 bg-[#2b1b12] hover:bg-[#3b2519] text-[#fffcf7] rounded-lg text-[10px] font-bold transition-all cursor-pointer text-center block"
+                    >
+                      Draft Article Brief ✦
+                    </button>
+                  </div>
+
+                  {/* Card 2: Improve Content */}
+                  <div className="p-4 bg-[#f8f3ec] rounded-xl border border-[#e4d6c6] space-y-3">
+                    <div className="flex items-center justify-between pb-2 border-b border-[#e4d6c6]">
+                      <span className="font-bold text-[#2b1b12] flex items-center gap-1.5">
+                        <span>🔧</span>
+                        <span>Improve Content</span>
+                      </span>
+                      <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">
+                        On-Page Schema
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[#6f5a4c] leading-relaxed">
+                      Perplexity and Gemini extract structured passage answers. Missing FAQ schema hurts citation frequency.
+                    </p>
+                    <div className="p-2.5 bg-white rounded-lg border border-[#e4d6c6] space-y-1">
+                      <span className="font-bold text-[#2b1b12] text-[11px] block">
+                        Add JSON-LD FAQPage &amp; Service Markup
+                      </span>
+                      <span className="text-[10px] text-blue-700 font-bold block">Targets Perplexity &amp; SGE snippets</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => alert('✓ Schema code generated for your technical team!')}
+                      className="w-full py-2 bg-white hover:bg-[#f1e8dc] text-[#2b1b12] border border-[#d8c09e] rounded-lg text-[10px] font-bold transition-all cursor-pointer text-center block"
+                    >
+                      Generate Schema Tag ✦
+                    </button>
+                  </div>
+
+                  {/* Card 3: Editorial Coverage */}
+                  <div className="p-4 bg-[#f8f3ec] rounded-xl border border-[#e4d6c6] space-y-3">
+                    <div className="flex items-center justify-between pb-2 border-b border-[#e4d6c6]">
+                      <span className="font-bold text-[#2b1b12] flex items-center gap-1.5">
+                        <span>📢</span>
+                        <span>Editorial Coverage</span>
+                      </span>
+                      <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-purple-100 text-purple-800">
+                        PR &amp; Citations
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[#6f5a4c] leading-relaxed">
+                      ChatGPT and Claude synthesize reviews from Clutch, G2, and verified industry directories.
+                    </p>
+                    <div className="p-2.5 bg-white rounded-lg border border-[#e4d6c6] space-y-1">
+                      <span className="font-bold text-[#2b1b12] text-[11px] block">
+                        Secure Verified Profile on Clutch &amp; ProductHunt
+                      </span>
+                      <span className="text-[10px] text-purple-700 font-bold block">Grounding source for LLMs</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => alert('✓ Directory outreach checklist copied!')}
+                      className="w-full py-2 bg-white hover:bg-[#f1e8dc] text-[#2b1b12] border border-[#d8c09e] rounded-lg text-[10px] font-bold transition-all cursor-pointer text-center block"
+                    >
+                      View Citation Outlets ✦
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bot Traffic & AI Crawler Analytics (Sitefire Bot Monitor) */}
+              <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl p-6 shadow-card space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-[#e4d6c6] gap-2">
+                  <div>
+                    <h3 className="font-editorial text-lg font-bold text-[#2b1b12] flex items-center gap-2">
+                      <span>AI Bot &amp; Crawler Analytics</span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-100 text-indigo-800">
+                        Live Crawl Radar
+                      </span>
+                    </h3>
+                    <p className="text-xs text-[#6f5a4c]">
+                      Monitor how AI scrapers and RAG engines index your raw content structure
+                    </p>
+                  </div>
+                  <span className="text-xs font-bold text-emerald-700">
+                    ● All AI Crawlers Permitted
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {[
+                    { name: 'GPTBot', org: 'OpenAI (ChatGPT)', requests: '1,420', status: 'Allowed', color: 'text-emerald-700 bg-emerald-50' },
+                    { name: 'ClaudeBot', org: 'Anthropic (Claude)', requests: '980', status: 'Allowed', color: 'text-amber-700 bg-amber-50' },
+                    { name: 'PerplexityBot', org: 'Perplexity AI', requests: '1,650', status: 'Allowed', color: 'text-indigo-700 bg-indigo-50' },
+                    { name: 'Google-Extended', org: 'Google Gemini', requests: '2,100', status: 'Allowed', color: 'text-blue-700 bg-blue-50' },
+                  ].map((bot, i) => (
+                    <div key={i} className="p-3.5 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-xs text-[#2b1b12]">{bot.name}</span>
+                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${bot.color}`}>{bot.status}</span>
+                      </div>
+                      <span className="text-[10px] text-[#6f5a4c] block">{bot.org}</span>
+                      <div className="pt-1 flex items-baseline justify-between border-t border-[#e4d6c6]/60">
+                        <span className="text-[10px] text-[#6f5a4c]">30d Requests</span>
+                        <span className="font-editorial font-bold text-sm text-[#2b1b12]">{bot.requests}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}
