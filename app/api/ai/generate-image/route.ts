@@ -13,7 +13,7 @@ function escapeXml(unsafe: string): string {
     .replace(/'/g, '&apos;');
 }
 
-// Generate Dynamic Marketing Copy & Visual Prompt via AWS Bedrock Nova Pro
+// Generate Dynamic Marketing Copy & Visual Prompt via AWS Bedrock (Claude 3.5 Sonnet / Nova Pro)
 async function generateMarketingWithBedrock(prompt: string, brandName: string, industry: string, domain: string) {
   const token = process.env.AWS_BEARER_TOKEN_BEDROCK || process.env.VITE_BEDROCK_API_KEY;
   if (!token) return null;
@@ -29,223 +29,91 @@ A client needs an Instagram commercial marketing post for:
 - Industry: "${industry}"
 - Client's Prompt & Requirements: "${prompt}"
 
-Read the user's prompt carefully.
-If they asked to show cleaners, services, staff, domestic help, cleaning equipment, availability across India, products, food, or specific features, the visual scene MUST prominently depict that in action! (NEVER generate an empty room with an empty couch when the client asked for cleaners/services/staff).
+Read the user's prompt carefully and honor their exact request.
+Transform their idea into a high-converting marketing post and generate a detailed, photographic scene prompt for the image generator reflecting EXACTLY what they asked for in their prompt.
 
 Return a raw JSON object (strictly valid JSON, no markdown, no backticks):
 {
-  "headline": "A punchy, catchy 4-8 word marketing headline tailored to their prompt (e.g. 'Transform Your Space with ${brandName}')",
+  "headline": "A punchy, catchy 4-8 word marketing headline tailored directly to their prompt",
   "subheadline": "A clear 1-sentence value proposition",
-  "badge": "A 2-3 word promotional badge (e.g. 'ALL INDIA SERVICE' or '100% VERIFIED')",
-  "cta": "Engaging call to action with emoji (e.g. 'Book with ${brandName} 📲')",
-  "visualPrompt": "A highly detailed, photorealistic commercial photography scene prompt for FLUX.1/DALL-E 3 depicting the exact service/subject in action (e.g. 'Award-winning commercial photography of professional, smiling domestic cleaners in neat branded polo uniforms holding cleaning supplies and spray bottles in an impeccably clean, sunlit modern home with gleaming floors and sparkling kitchen, shot on 50mm f/1.4 lens, 8k resolution, commercial advertising photography, sharp focus, natural warm contrast, magazine quality, no text, no watermarks')",
-  "caption": "Full engaging Instagram marketing caption with emojis, bullet points of services, and call to action",
-  "hashtags": ["#${brandName.replace(/[^\\w]/g, '')}", "#HomeCleaning", "#DeepCleaning", "#DoorstepServices", "#SpotlessHome"]
+  "badge": "A 2-3 word promotional badge",
+  "cta": "Engaging call to action with emoji",
+  "visualPrompt": "A highly detailed, photorealistic visual scene prompt depicting the exact subject matter and actions requested in the user's prompt, commercial advertising photography, sharp focus, natural contrast, 8k resolution, no text, no watermarks",
+  "caption": "Full engaging Instagram marketing caption tailored to their prompt with emojis and call to action",
+  "hashtags": ["#Tag1", "#Tag2", "#Tag3", "#Tag4", "#Tag5"]
 }`;
 
-    const res = await client.send(new ConverseCommand({
-      modelId: 'amazon.nova-pro-v1:0',
-      messages: [{ role: 'user', content: [{ text: systemPrompt }] }]
-    }));
+    let text: string | undefined;
 
-    const text = res.output?.message?.content?.[0]?.text;
+    // Try Claude 3.5 Sonnet first on Bedrock
+    try {
+      const claudeRes = await client.send(new ConverseCommand({
+        modelId: 'us.anthropic.claude-3-5-sonnet-20241022-v2:0',
+        messages: [{ role: 'user', content: [{ text: systemPrompt }] }]
+      }));
+      text = claudeRes.output?.message?.content?.[0]?.text;
+    } catch (e1) {
+      try {
+        const claudeRes2 = await client.send(new ConverseCommand({
+          modelId: 'anthropic.claude-3-5-sonnet-20241022-v2:0',
+          messages: [{ role: 'user', content: [{ text: systemPrompt }] }]
+        }));
+        text = claudeRes2.output?.message?.content?.[0]?.text;
+      } catch (e2) {
+        // Fallback to Amazon Nova Pro if Claude model access is not yet approved
+        const novaRes = await client.send(new ConverseCommand({
+          modelId: 'amazon.nova-pro-v1:0',
+          messages: [{ role: 'user', content: [{ text: systemPrompt }] }]
+        }));
+        text = novaRes.output?.message?.content?.[0]?.text;
+      }
+    }
+
     if (!text) return null;
     const cleaned = text.replace(/```(?:json)?/gi, '').replace(/```/g, '').trim();
     return JSON.parse(cleaned);
   } catch (e) {
-    console.warn('[Bedrock Nova Pro Image Prompt Error]', (e as Error).message);
+    console.warn('[Bedrock Image Prompt Error]', (e as Error).message);
     return null;
   }
 }
 
-// Generate Universal Industry-Calibrated Marketing Post Copy
+// Generate Universal Industry-Calibrated Marketing Post Copy (Dynamic from User Prompt)
 function synthesizeMarketingPost(prompt: string, brandName: string, industry: string, domain: string) {
-  const pLower = prompt.toLowerCase();
-  const indLower = (industry || '').toLowerCase();
+  const cleanPrompt = prompt.trim();
   const cleanBrand = brandName.replace(/[^\w]/g, '');
 
-  // 1. Home Services, Domestic Assistance & Cleaning
-  if (
-    indLower.includes('clean') || indLower.includes('home') || indLower.includes('maid') || indLower.includes('chore') || indLower.includes('repair') ||
-    pLower.includes('clean') || pLower.includes('maid') || pLower.includes('house') || pLower.includes('chores')
-  ) {
-    const headline = `Spotless Spaces & Expert Cleaning with ${brandName}`;
+  const words = cleanPrompt.replace(/[^\w\s]/gi, '').split(/\s+/).filter(Boolean);
+  const headline = words.slice(0, 6).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || `Discover ${brandName}`;
+  const subheadline = `Experience premium, verified ${industry || 'solutions'} with ${brandName}.`;
+  const badge = `OFFICIAL SPOTLIGHT`;
+  const cta = `Explore with ${brandName} ↗`;
 
-    const subheadline = `100% background-verified domestic help and professional care at your doorstep.`;
-    const badge = `VERIFIED QUALITY`;
-    const cta = `Book with ${brandName} 📲`;
+  const caption = `✨ ${cleanPrompt}
 
-    const caption = `✨ Coming home tired after a long day to an endless list of chores?
+Why modern clients choose ${brandName}:
+✅ High-velocity fulfillment and verified service standards
+✅ Seamless customer onboarding with total transparency
+✅ Backed by certified experts and dedicated quality control
 
-Meet ${brandName}: Your on-demand trusted household partner! 🧹⚡
+📲 Tap the link in bio to learn more and get started today! 👇`;
 
-What we deliver with dedicated care:
-🧹 Thorough sweeping, mopping & surface care
-🍽️ Kitchen deep-cleaning & dishwashing
-🧺 Fresh laundry folding & linen care
-🚿 Sparkling bathroom & sanitization services
-
-✅ 100% background-checked, certified professionals
-⏱️ Rapid on-demand scheduling & doorstep arrival
-💰 Transparent, affordable pricing with zero hidden fees
-⭐ Flexible bookings with no long-term contracts
-
-📲 Tap the link in bio to book your verified professional in under 60 seconds! 👇`;
-
-    const hashtags = [
-      `#${cleanBrand}`,
-      '#HomeServices',
-      '#HouseHelp',
-      '#HomeCleaning',
-      '#DeepCleaning',
-      '#ConvenientLiving',
-      '#VerifiedProfessionals',
-      '#SpotlessHome',
-      '#HouseholdCare'
-    ];
-
-    return { headline, subheadline, badge, cta, caption, hashtags };
-  }
-
-  // 2. Food, Dining, Cloud Kitchen & Grocery
-  if (indLower.includes('food') || indLower.includes('restaurant') || indLower.includes('dining') || pLower.includes('food') || pLower.includes('eat') || pLower.includes('meal')) {
-    return {
-      headline: `Cravings Satisfied in Minutes`,
-      subheadline: `Fresh culinary favorites delivered hyper-fast straight to your door.`,
-      badge: `FRESH & FAST`,
-      cta: `Order with ${brandName} 🍽️`,
-      caption: `🍕 Hungry? Skip the cooking and enjoy your favorite dishes delivered fresh and piping hot!
-
-With ${brandName}, satisfy every craving:
-🔥 Top-rated local restaurant partners & signature recipes
-⚡ Lightning-fast doorstep delivery to your location
-🎁 Exclusive app specials and loyalty rewards
-
-Tap the link in bio to treat yourself right now! 👇`,
-      hashtags: [`#${cleanBrand}`, '#FoodDelivery', '#FoodLovers', '#DailyDeals', '#FreshFlavors', '#FoodieLife', '#DeliciousEveryday']
-    };
-  }
-
-  // 3. E-Commerce, Fashion, Apparel & Retail
-  if (indLower.includes('shop') || indLower.includes('store') || indLower.includes('fashion') || indLower.includes('apparel') || indLower.includes('retail') || pLower.includes('shop') || pLower.includes('collection') || pLower.includes('wear')) {
-    return {
-      headline: `Elevate Your Everyday Style & Living`,
-      subheadline: `Curated premium collections delivered with seamless doorstep shopping.`,
-      badge: `NEW ARRIVALS`,
-      cta: `Shop ${brandName} 🛍️`,
-      caption: `✨ Refresh your aesthetic with the latest collection from ${brandName}.
-
-🌿 Crafted with premium quality and meticulous attention to detail
-🚚 Fast, reliable shipping straight to your doorstep
-🔄 Hassle-free exchanges and satisfaction guarantee
-
-Tap the link in bio to explore the full collection today! 👇`,
-      hashtags: [`#${cleanBrand}`, '#StyleInspo', '#NewDrop', '#ShopOnline', '#FashionDaily', '#PremiumQuality', '#TrendAlert']
-    };
-  }
-
-  // 4. Healthcare, Medical, Dental & Wellness
-  if (indLower.includes('health') || indLower.includes('care') || indLower.includes('dental') || indLower.includes('medical') || indLower.includes('clinic') || pLower.includes('health') || pLower.includes('doctor')) {
-    return {
-      headline: `Compassionate & Clinically Verified Care`,
-      subheadline: `Your health, wellness, and peace of mind supported by trusted experts.`,
-      badge: `EXPERT CARE`,
-      cta: `Book Appointment 🩺`,
-      caption: `🩺 Put your health and wellness first with ${brandName}.
-
-✅ Board-certified practitioners & dedicated specialists
-🏥 State-of-the-art facilities and gentle patient care
-📅 Instant digital appointment scheduling with zero waiting time
-
-Your wellness journey begins today. Tap the link in bio to schedule your consultation! 👇`,
-      hashtags: [`#${cleanBrand}`, '#Healthcare', '#WellnessFirst', '#PatientCare', '#HealthyLiving', '#MedicalExcellence', '#TrustedCare']
-    };
-  }
-
-  // 5. Fitness, Gym & Sports
-  if (indLower.includes('fitness') || indLower.includes('gym') || indLower.includes('sport') || indLower.includes('workout') || pLower.includes('fitness') || pLower.includes('training')) {
-    return {
-      headline: `Unleash Your Peak Performance`,
-      subheadline: `Science-backed training, high-energy coaching, and guaranteed results.`,
-      badge: `TRANSFORM TODAY`,
-      cta: `Join ${brandName} ⚡`,
-      caption: `🔥 Stop waiting for next Monday. Transform your strength, endurance, and energy with ${brandName}!
-
-💪 Personalized workout programs tailored to your goals
-🏋️ World-class equipment and passionate expert trainers
-🎯 Proven track record of measurable client transformations
-
-Tap the link in bio to claim your first trial session today! 👇`,
-      hashtags: [`#${cleanBrand}`, '#FitnessMotivation', '#TrainHard', '#HealthyLifestyle', '#PeakPerformance', '#NoExcuses', '#Transformation']
-    };
-  }
-
-  // 6. Real Estate, Housing & Property
-  if (indLower.includes('real estate') || indLower.includes('property') || indLower.includes('housing') || pLower.includes('property') || pLower.includes('home')) {
-    return {
-      headline: `Find Your Perfect Space & Home`,
-      subheadline: `Prime residential and commercial properties curated for your future.`,
-      badge: `PRIME LISTING`,
-      cta: `Explore with ${brandName} 🏡`,
-      caption: `🏡 Discover spaces designed for living, working, and growing with ${brandName}.
-
-📍 Premium locations with world-class connectivity and amenities
-📐 Thoughtfully architected floor plans and modern finishes
-🔑 Transparent advisory and seamless end-to-end buying experience
-
-Tap the link in bio to view featured listings and schedule a private tour! 👇`,
-      hashtags: [`#${cleanBrand}`, '#RealEstate', '#DreamHome', '#PropertySearch', '#LuxuryLiving', '#HomeGoals', '#Architecture']
-    };
-  }
-
-  // 7. FinTech, Banking & Wealth
-  if (indLower.includes('fin') || indLower.includes('pay') || indLower.includes('bank') || pLower.includes('pay') || pLower.includes('finance')) {
-    return {
-      headline: `Frictionless Financial Freedom`,
-      subheadline: `Instant, secure payments and modern financial infrastructure built for you.`,
-      badge: `SECURE & FAST`,
-      cta: `Get Started with ${brandName} ↗`,
-      caption: `💳 Take full control of your transactions and business growth with ${brandName}.
-
-🔒 Bank-grade 256-bit encryption & strict regulatory compliance
-⚡ 99.99% gateway success rate for instant settlements
-📊 Real-time financial insights and automated reconciliation
-
-Link in bio to elevate your financial operations today! 👇`,
-      hashtags: [`#${cleanBrand}`, '#FinTech', '#DigitalPayments', '#SmartFinance', '#StartupGrowth', '#SecurePayments']
-    };
-  }
-
-  // 8. Universal High-Converting Marketing Post (Any Brand / Any Vertical)
-  const cleanKeyword = prompt.replace(/[^\w\s]/gi, '').split(' ').slice(0, 7).join(' ');
-  const derivedHeadline = cleanKeyword.length > 5
-    ? cleanKeyword.charAt(0).toUpperCase() + cleanKeyword.slice(1)
-    : `Experience the Standard in ${industry || 'Excellence'}`;
+  const hashtags = [
+    `#${cleanBrand}`,
+    `#${(industry || 'Services').replace(/[^\w]/g, '')}`,
+    '#QualityFirst',
+    '#CustomerExcellence',
+    '#VerifiedSolutions'
+  ];
 
   return {
-    headline: derivedHeadline,
-    subheadline: `High-velocity performance, verified customer trust, and seamless delivery with ${brandName}.`,
-    badge: `OFFICIAL SPOTLIGHT`,
-    cta: `Explore with ${brandName} ↗`,
-    caption: `🚀 Ready to elevate your standards with ${brandName}?
-
-Here is why thousands of modern customers and professionals choose us:
-✅ Industry-leading quality and verified customer standards
-✅ Seamless onboarding with transparent, dependable service
-✅ Proven results that save you time and maximize satisfaction
-
-Double-tap if you appreciate quality and speed! 👇
-
-🔗 Tap the link in bio to learn more and get started today.`,
-    hashtags: [
-      `#${cleanBrand}`,
-      '#BrandExcellence',
-      '#CustomerFirst',
-      '#QualityMatters',
-      '#IndustryLeader',
-      '#ModernLiving',
-      '#DailyGrowth'
-    ]
+    headline,
+    subheadline,
+    badge,
+    cta,
+    visualPrompt: cleanPrompt,
+    caption,
+    hashtags
   };
 }
 
@@ -357,33 +225,11 @@ export async function POST(req: Request) {
       height = 1350;
     }
 
-    // 3. Dynamic Visual Scene Synthesizer (Active Subjects, People, Products & Action)
+    // 3. Dynamic Visual Scene Synthesizer (Honors User's Prompt Directly — ZERO Hardcoded Replacements)
     const cleanPrompt = prompt.trim();
-    const indLower = (industry || '').toLowerCase();
-    const pLower = cleanPrompt.toLowerCase();
-
-    let visualScene = postData.visualPrompt || '';
-
-    // If dynamic AI visual prompt wasn't provided, use rich action scene (never an empty room)
-    if (!visualScene) {
-      if (indLower.includes('clean') || indLower.includes('maid') || indLower.includes('chore') || indLower.includes('home') || pLower.includes('clean') || pLower.includes('maid')) {
-        visualScene = 'Award-winning commercial photography of professional, smiling domestic cleaners in neat branded polo uniforms holding cleaning supplies and spray bottles in an impeccably clean, sunlit modern home with gleaming floors and sparkling kitchen, shot on 50mm f/1.4 lens, 8k resolution, commercial advertising photography, sharp focus, natural warm contrast, magazine quality, no text, no watermarks';
-      } else if (indLower.includes('food') || indLower.includes('restaurant') || indLower.includes('dining') || pLower.includes('food') || pLower.includes('meal')) {
-        visualScene = 'Michelin-star gourmet culinary food photography, exquisite artisanal dish beautifully plated on rustic slate stone, vibrant fresh ingredients, delicate steam rising, soft golden hour lighting, shallow depth of field, Bon Appétit magazine style, photorealistic, 8k resolution, no text';
-      } else if (indLower.includes('fitness') || indLower.includes('gym') || indLower.includes('sport') || pLower.includes('workout') || pLower.includes('fitness')) {
-        visualScene = 'High-performance commercial athletic photography in a modern luxury boutique gym, dramatic cinematic rim lighting, sleek matte black weights, dynamic energy, Nike campaign aesthetic, shot on Hasselblad, 8k resolution, photorealistic, no text';
-      } else if (indLower.includes('fashion') || indLower.includes('apparel') || indLower.includes('cloth') || pLower.includes('fashion')) {
-        visualScene = 'High-fashion editorial studio photography, contemporary minimalist setting with soft diffused natural light, stylish model in an elegant tailored outfit, warm earth tones, Vogue editorial styling, 8k resolution, photorealistic, no text';
-      } else if (indLower.includes('real estate') || indLower.includes('property') || indLower.includes('housing') || pLower.includes('villa') || pLower.includes('apartment')) {
-        visualScene = 'Breathtaking luxury architectural photography of a contemporary minimalist hillside villa with glass walls, warm glowing lights at twilight, serene infinity pool reflecting sunset sky, Architectural Digest cover, 8k resolution, photorealistic, no text';
-      } else if (indLower.includes('health') || indLower.includes('medical') || indLower.includes('wellness') || pLower.includes('care')) {
-        visualScene = 'Bright modern luxury wellness and clinic interior with compassionate smiling doctors in professional medical attire, light natural oak wood finishes, tranquil and welcoming atmosphere, soft daylight, 8k resolution, photorealistic, crisp focus, no text';
-      } else if (indLower.includes('tech') || indLower.includes('saas') || indLower.includes('software') || pLower.includes('software')) {
-        visualScene = 'Sleek executive creator workspace with curved ultrawide monitor displaying subtle analytics glow, warm ambient LED studio backlighting, minimalist oak desk, cinematic commercial tech photography, 8k resolution, photorealistic, no text';
-      } else {
-        visualScene = `Award-winning commercial photography depicting ${cleanPrompt}, vibrant dynamic energy, professional commercial advertising photography, cinematic lighting, shallow depth of field, 8k resolution, sharp focus, magazine quality, no text, no watermark`;
-      }
-    }
+    const visualScene = (postData.visualPrompt && postData.visualPrompt.trim().length > 10)
+      ? postData.visualPrompt.trim()
+      : `Award-winning commercial photography depicting ${cleanPrompt}, sharp focus, natural contrast, 8k resolution, professional advertising photography, no text, no watermarks`;
 
     const seed = Math.floor(Math.random() * 10000000);
     let finalImageUrl = '';

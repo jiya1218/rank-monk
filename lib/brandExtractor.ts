@@ -62,7 +62,168 @@ export function cleanDomain(raw: string): string {
     .replace(/[^a-z0-9.-]/g, '');
 }
 
-// Generate harmonious 6-color brand palette from a single primary hex
+// Converts rgb/rgba/hex to standard 6-char #rrggbb
+export function normalizeHexColor(raw: string): string | null {
+  if (!raw) return null;
+  const str = raw.trim().toLowerCase();
+  if (str.startsWith('#')) {
+    if (str.length === 4) {
+      return `#${str[1]}${str[1]}${str[2]}${str[2]}${str[3]}${str[3]}`;
+    }
+    if (str.length === 7 && /^#[0-9a-f]{6}$/i.test(str)) {
+      return str;
+    }
+    return null;
+  }
+  const rgbMatch = str.match(/rgba?\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+  if (rgbMatch) {
+    const r = Math.max(0, Math.min(255, parseInt(rgbMatch[1])));
+    const g = Math.max(0, Math.min(255, parseInt(rgbMatch[2])));
+    const b = Math.max(0, Math.min(255, parseInt(rgbMatch[3])));
+    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+  }
+  return null;
+}
+
+export function getColorLuminance(hex: string): number {
+  const r = parseInt(hex.slice(1, 3), 16) || 0;
+  const g = parseInt(hex.slice(3, 5), 16) || 0;
+  const b = parseInt(hex.slice(5, 7), 16) || 0;
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+}
+
+export function getColorSaturation(hex: string): number {
+  const r = (parseInt(hex.slice(1, 3), 16) || 0) / 255;
+  const g = (parseInt(hex.slice(3, 5), 16) || 0) / 255;
+  const b = (parseInt(hex.slice(5, 7), 16) || 0) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  return max === 0 ? 0 : (max - min) / max;
+}
+
+// Distance between two hex colors (to prevent almost identical duplicate swatches like #181818 and #191919)
+export function isColorTooClose(hex1: string, hex2: string): boolean {
+  const r1 = parseInt(hex1.slice(1, 3), 16) || 0;
+  const g1 = parseInt(hex1.slice(3, 5), 16) || 0;
+  const b1 = parseInt(hex1.slice(5, 7), 16) || 0;
+  const r2 = parseInt(hex2.slice(1, 3), 16) || 0;
+  const g2 = parseInt(hex2.slice(3, 5), 16) || 0;
+  const b2 = parseInt(hex2.slice(5, 7), 16) || 0;
+  const dist = Math.sqrt(Math.pow(r1 - r2, 2) + Math.pow(g1 - g2, 2) + Math.pow(b1 - b2, 2));
+  return dist < 28;
+}
+
+// Extract the ACTUAL colors present directly on the website (HTML, inline styles, SVGs & CSS)
+export function extractAuthenticColorsFromSite(html: string, cssSnippets: string[] = [], themeColor?: string | null): string[] {
+  const fullText = `${html} ${cssSnippets.join(' ')}`;
+  const colorCounts: Record<string, number> = {};
+
+  // If declared <meta name="theme-color"> exists, prioritize it
+  if (themeColor) {
+    const norm = normalizeHexColor(themeColor);
+    if (norm && norm !== '#ffffff' && norm !== '#000000') {
+      colorCounts[norm] = 500;
+    }
+  }
+
+  // 1. Hex codes
+  const hexMatches = fullText.match(/#[0-9a-fA-F]{3,8}\b/g) || [];
+  for (const m of hexMatches) {
+    const hex = normalizeHexColor(m);
+    if (hex && hex !== '#ffffff' && hex !== '#000000') {
+      colorCounts[hex] = (colorCounts[hex] || 0) + 1;
+    }
+  }
+
+  // 2. RGB/RGBA codes
+  const rgbMatches = fullText.match(/rgba?\s*\(\s*\d+\s*,\s*\d+\s*,\s*\d+[^)]*\)/gi) || [];
+  for (const m of rgbMatches) {
+    const hex = normalizeHexColor(m);
+    if (hex && hex !== '#ffffff' && hex !== '#000000') {
+      colorCounts[hex] = (colorCounts[hex] || 0) + 1;
+    }
+  }
+
+  const entries = Object.entries(colorCounts).sort((a, b) => b[1] - a[1]);
+  if (entries.length === 0) {
+    return [];
+  }
+
+  // Find saturated colors (vibrant brand / accent candidates)
+  const saturated = entries
+    .filter(([hex]) => getColorSaturation(hex) > 0.22 && getColorLuminance(hex) > 0.08 && getColorLuminance(hex) < 0.92);
+
+  // Find dark neutrals (dark typography)
+  const darkNeutrals = entries
+    .filter(([hex]) => getColorLuminance(hex) <= 0.28);
+
+  // Find light tints/surfaces
+  const lightSurfaces = entries
+    .filter(([hex]) => getColorLuminance(hex) >= 0.82);
+
+  // Find mid neutrals (borders, secondary elements)
+  const midNeutrals = entries
+    .filter(([hex]) => getColorLuminance(hex) > 0.28 && getColorLuminance(hex) < 0.82 && getColorSaturation(hex) <= 0.25);
+
+  const selectedPalette: string[] = [];
+
+  const tryAdd = (color: string) => {
+    if (!color) return false;
+    if (selectedPalette.includes(color)) return false;
+    if (selectedPalette.some(c => isColorTooClose(c, color))) return false;
+    selectedPalette.push(color);
+    return true;
+  };
+
+  // 1. Dominant Brand Primary (highest frequency saturated color from the website)
+  if (saturated.length > 0) {
+    tryAdd(saturated[0][0]);
+  } else if (entries.length > 0) {
+    tryAdd(entries[0][0]);
+  }
+
+  // 2. Authentic Dark Typography from the website
+  if (darkNeutrals.length > 0) {
+    tryAdd(darkNeutrals[0][0]);
+  }
+
+  // 3. Secondary Brand Color or Top Saturated Accent from the website
+  if (saturated.length > 1) {
+    tryAdd(saturated[1][0]);
+  } else if (midNeutrals.length > 0) {
+    tryAdd(midNeutrals[0][0]);
+  }
+
+  // 4. Authentic Light Surface / Card / Tint from the website
+  if (lightSurfaces.length > 0) {
+    tryAdd(lightSurfaces[0][0]);
+  }
+
+  // 5. Border / Neutral Divider from the website
+  if (midNeutrals.length > 0) {
+    tryAdd(midNeutrals[0][0]);
+  } else if (lightSurfaces.length > 1) {
+    tryAdd(lightSurfaces[1][0]);
+  }
+
+  // 6. Another real distinct color from the site's top colors
+  for (const [hex] of entries) {
+    if (selectedPalette.length >= 6) break;
+    tryAdd(hex);
+  }
+
+  // Fill up to 6 with remaining top colors from the site if needed
+  for (const [hex] of entries) {
+    if (selectedPalette.length >= 6) break;
+    if (!selectedPalette.includes(hex)) {
+      selectedPalette.push(hex);
+    }
+  }
+
+  return selectedPalette.slice(0, 6);
+}
+
+// Generate harmonious brand palette from a single primary hex (NEVER opposite or inverted colors)
 export function generateBrandPalette(primaryHex: string): string[] {
   const cleanHex = primaryHex.startsWith('#') ? primaryHex : `#${primaryHex}`;
   
@@ -70,28 +231,31 @@ export function generateBrandPalette(primaryHex: string): string[] {
   const g = parseInt(cleanHex.slice(3, 5), 16) || 120;
   const b = parseInt(cleanHex.slice(5, 7), 16) || 229;
 
-  const darkR = Math.max(0, Math.floor(r * 0.4)).toString(16).padStart(2, '0');
-  const darkG = Math.max(0, Math.floor(g * 0.4)).toString(16).padStart(2, '0');
-  const darkB = Math.max(0, Math.floor(b * 0.4)).toString(16).padStart(2, '0');
-  const darkNeutral = `#${darkR}${darkG}${darkB}`;
+  // Dark shade of primary brand color
+  const darkR = Math.max(0, Math.floor(r * 0.35)).toString(16).padStart(2, '0');
+  const darkG = Math.max(0, Math.floor(g * 0.35)).toString(16).padStart(2, '0');
+  const darkB = Math.max(0, Math.floor(b * 0.35)).toString(16).padStart(2, '0');
+  const brandDark = `#${darkR}${darkG}${darkB}`;
 
-  const lightR = Math.min(255, Math.floor(r + (255 - r) * 0.85)).toString(16).padStart(2, '0');
-  const lightG = Math.min(255, Math.floor(g + (255 - g) * 0.85)).toString(16).padStart(2, '0');
-  const lightB = Math.min(255, Math.floor(b + (255 - b) * 0.85)).toString(16).padStart(2, '0');
-  const lightSurface = `#${lightR}${lightG}${lightB}`;
+  // Soft pastel surface tint of the primary brand color
+  const lightR = Math.min(255, Math.floor(r + (255 - r) * 0.9)).toString(16).padStart(2, '0');
+  const lightG = Math.min(255, Math.floor(g + (255 - g) * 0.9)).toString(16).padStart(2, '0');
+  const lightB = Math.min(255, Math.floor(b + (255 - b) * 0.9)).toString(16).padStart(2, '0');
+  const brandTint = `#${lightR}${lightG}${lightB}`;
 
-  const accentR = Math.min(255, Math.floor(b * 0.9 + 30)).toString(16).padStart(2, '0');
-  const accentG = Math.min(255, Math.floor(r * 0.8 + 20)).toString(16).padStart(2, '0');
-  const accentB = Math.min(255, Math.floor(g * 0.9 + 40)).toString(16).padStart(2, '0');
-  const contrastAccent = `#${accentR}${accentG}${accentB}`;
+  // Medium tone of primary brand color
+  const midR = Math.min(255, Math.floor(r * 0.8 + 25)).toString(16).padStart(2, '0');
+  const midG = Math.min(255, Math.floor(g * 0.8 + 25)).toString(16).padStart(2, '0');
+  const midB = Math.min(255, Math.floor(b * 0.8 + 25)).toString(16).padStart(2, '0');
+  const brandMid = `#${midR}${midG}${midB}`;
 
   return [
     cleanHex,             // 1. Primary Brand Color
-    `#1e293b`,            // 2. Dark Typography
-    `#64748b`,            // 3. Muted Slate Secondary
-    lightSurface,         // 4. Subtle Surface Tint
-    `#f8fafc`,            // 5. Crisp Clean Background
-    contrastAccent        // 6. Vibrant Functional Accent
+    `#18181b`,            // 2. High-Contrast Dark Typography
+    brandDark,            // 3. Deep Brand Shade
+    brandTint,            // 4. Subtle Pastel Brand Tint
+    `#f4f4f5`,            // 5. Clean Neutral Surface
+    brandMid              // 6. Harmonious Brand Accent
   ];
 }
 
@@ -153,13 +317,33 @@ Analyze what this specific company actually does from their website content and 
   "voiceTags": ["VoiceTag1", "VoiceTag2", "VoiceTag3", "VoiceTag4"]
 }`;
 
-    const command = new ConverseCommand({
-      modelId: 'amazon.nova-pro-v1:0',
-      messages: [{ role: 'user', content: [{ text: prompt }] }]
-    });
+    let rawText: string | undefined;
 
-    const response = await client.send(command);
-    const rawText = response.output?.message?.content?.[0]?.text;
+    // Try Anthropic Claude 3.5 Sonnet on Bedrock first
+    try {
+      const claudeRes = await client.send(new ConverseCommand({
+        modelId: 'us.anthropic.claude-3-5-sonnet-20241022-v2:0',
+        messages: [{ role: 'user', content: [{ text: prompt }] }]
+      }));
+      rawText = claudeRes.output?.message?.content?.[0]?.text;
+    } catch (e1) {
+      try {
+        const claudeRes2 = await client.send(new ConverseCommand({
+          modelId: 'anthropic.claude-3-5-sonnet-20241022-v2:0',
+          messages: [{ role: 'user', content: [{ text: prompt }] }]
+        }));
+        rawText = claudeRes2.output?.message?.content?.[0]?.text;
+      } catch (e2) {
+        // Fallback to Amazon Nova Pro if Claude access is pending
+        const command = new ConverseCommand({
+          modelId: 'amazon.nova-pro-v1:0',
+          messages: [{ role: 'user', content: [{ text: prompt }] }]
+        });
+        const response = await client.send(command);
+        rawText = response.output?.message?.content?.[0]?.text;
+      }
+    }
+
     if (!rawText) return null;
 
     // Clean JSON markdown if wrapped
@@ -276,6 +460,7 @@ export async function extractBrandFromDomain(rawDomain: string, targetMarket: st
   let h1 = brandName;
   let primaryThemeColor: string | null = null;
   let scrapedLogo: string | null = null;
+  let scrapedPalette: string[] = [];
   let pageTextSnippet = '';
 
   // 1. Live Web Crawl
@@ -340,6 +525,33 @@ export async function extractBrandFromDomain(rawDomain: string, targetMarket: st
         primaryThemeColor = themeColorMatch[1].trim();
       }
 
+      // Fetch linked stylesheets to extract full CSS color palette
+      const cssMatches = Array.from(html.matchAll(/href=["']([^"']+\.css[^"']*)["']/gi)).map(m => m[1]);
+      const cssSnippets: string[] = [];
+      for (const href of cssMatches.slice(0, 3)) {
+        let fullUrl = href.trim();
+        if (fullUrl.startsWith('//')) fullUrl = `https:${fullUrl}`;
+        else if (fullUrl.startsWith('/')) fullUrl = `https://${domain}${fullUrl}`;
+        else if (!fullUrl.startsWith('http')) fullUrl = `https://${domain}/${fullUrl}`;
+        
+        try {
+          const cssController = new AbortController();
+          const cssTimeout = setTimeout(() => cssController.abort(), 2000);
+          const cssRes = await fetch(fullUrl, {
+            signal: cssController.signal,
+            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+          });
+          clearTimeout(cssTimeout);
+          if (cssRes.ok) {
+            const cssText = await cssRes.text();
+            cssSnippets.push(cssText.slice(0, 150000));
+          }
+        } catch (ce) {}
+      }
+
+      // Extract Authentic Website Palette Directly from HTML & CSS
+      scrapedPalette = extractAuthenticColorsFromSite(html, cssSnippets, primaryThemeColor);
+
       // Real Logo Extraction (Prioritize Apple touch icon, header logo, SVG logo)
       const appleIconMatch = html.match(/<link\s+rel=["']apple-touch-icon["']\s+href=["']([^"']+)["']/i);
       if (appleIconMatch && appleIconMatch[1].trim()) {
@@ -368,9 +580,12 @@ export async function extractBrandFromDomain(rawDomain: string, targetMarket: st
     intelligence = dynamicSemanticParser(domain, title, metaDesc, h1, pageTextSnippet, targetMarket);
   }
 
-  // 4. Construct Authentic Brand Palette
-  const finalPrimaryHex = primaryThemeColor || intelligence.primaryHex || '#2563EB';
-  const brandPalette = generateBrandPalette(finalPrimaryHex);
+  // 4. Construct Authentic Brand Palette (Direct from Website)
+  const sitePrimaryHex = (scrapedPalette.length > 0) ? scrapedPalette[0] : primaryThemeColor;
+  const finalPrimaryHex = sitePrimaryHex || intelligence.primaryHex || '#2563EB';
+  const brandPalette = (scrapedPalette.length >= 4)
+    ? scrapedPalette
+    : generateBrandPalette(finalPrimaryHex);
 
   // 5. Guaranteed High-Resolution Logo & Favicon
   const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;

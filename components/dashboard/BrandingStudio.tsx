@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Sparkles,
   Edit2,
@@ -88,9 +88,18 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
         { name: 'Global Platform C', positioning: "Enterprise standard with deep distribution channels", strengths: "High brand recognition and broad product catalog", share: 28 }
       ];
 
-  const palette = (project?.palette && project.palette.length >= 6)
-    ? project.palette
-    : ['#FC8019', '#282C3F', '#FFA048', '#686B78', '#F2F2F2', '#60B246'];
+  const palette: string[] = useMemo(() => {
+    if (project?.palette && Array.isArray(project.palette) && project.palette.length > 0) {
+      if (project.palette.length >= 6) return project.palette.slice(0, 6);
+      return [...project.palette, '#18181b', '#3f3f46', '#f4f4f5', '#e4e4e7', '#71717a'].slice(0, 6);
+    }
+    return ['#f70f79', '#333333', '#181f1f', '#f0f0f0', '#ababab', '#efc3d7'];
+  }, [project?.palette]);
+
+  const [customPalette, setCustomPalette] = useState<string[]>(palette);
+  React.useEffect(() => {
+    setCustomPalette(palette);
+  }, [palette]);
 
   const voiceTags = project?.voiceTags || ['Authoritative', 'Reliable', 'Customer-Centric', 'Solution Oriented'];
 
@@ -326,13 +335,25 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
                 <Palette className="w-4 h-4 text-pink-500" />
                 Visual Identity
               </h3>
-              <button
-                type="button"
-                onClick={() => setEditingModal('visual')}
-                className="flex items-center gap-1.5 px-3 py-1 text-xs font-bold text-[#7a5242] bg-[#f8f3ec] border border-[#e4d6c6] rounded-lg hover:bg-[#f1e8dc] transition-colors"
-              >
-                <Edit2 className="w-3 h-3" /> Edit
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleRefresh}
+                  disabled={isRefreshing}
+                  className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold text-[#7a5242] bg-[#f8f3ec] border border-[#e4d6c6] rounded-lg hover:bg-[#f1e8dc] transition-colors cursor-pointer disabled:opacity-50"
+                  title="Scan live website HTML and CSS for exact brand colors"
+                >
+                  <RefreshCw className={`w-3 h-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+                  <span>{isRefreshing ? 'Scanning...' : '↻ Re-fetch Colors'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditingModal('visual')}
+                  className="flex items-center gap-1.5 px-3 py-1 text-xs font-bold text-[#7a5242] bg-[#f8f3ec] border border-[#e4d6c6] rounded-lg hover:bg-[#f1e8dc] transition-colors cursor-pointer"
+                >
+                  <Edit2 className="w-3 h-3" /> Edit
+                </button>
+              </div>
             </div>
 
             {/* Logo and Favicon Previews */}
@@ -692,6 +713,125 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
           ))}
         </div>
       </div>
+
+      {/* Visual Identity & Palette Edit Modal */}
+      {editingModal === 'visual' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5">
+            <div className="flex items-center justify-between pb-3 border-b border-[#e4d6c6]">
+              <div className="flex items-center gap-2">
+                <Palette className="w-5 h-5 text-pink-500" />
+                <h3 className="font-editorial text-lg font-bold text-[#2b1b12]">
+                  Edit Brand Color Palette
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingModal(null)}
+                className="text-[#6f5a4c] hover:text-[#2b1b12] text-sm p-1 font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-[#6f5a4c] leading-relaxed">
+              These 6 hex colors are extracted directly from your website HTML and stylesheets to power consistent graphics, buttons, and media assets.
+            </p>
+
+            {/* 6 Palette Slots */}
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                'Primary Brand Color',
+                'Dark Typography',
+                'Brand Shade / Tint',
+                'Surface Background',
+                'Neutral Border',
+                'Accent Highlight'
+              ].map((label, idx) => {
+                const hexVal = customPalette[idx] || '#2563eb';
+                return (
+                  <div key={idx} className="p-3 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl space-y-1.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#6f5a4c] block">
+                      {idx + 1}. {label}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={hexVal.startsWith('#') && hexVal.length === 7 ? hexVal : '#2563eb'}
+                        onChange={(e) => {
+                          const updated = [...customPalette];
+                          updated[idx] = e.target.value;
+                          setCustomPalette(updated);
+                        }}
+                        className="w-8 h-8 rounded-lg cursor-pointer border border-[#e4d6c6] bg-transparent p-0"
+                      />
+                      <input
+                        type="text"
+                        value={hexVal}
+                        onChange={(e) => {
+                          const updated = [...customPalette];
+                          updated[idx] = e.target.value;
+                          setCustomPalette(updated);
+                        }}
+                        className="flex-1 p-1.5 bg-[#fffcf7] border border-[#e4d6c6] rounded-lg text-xs font-mono font-bold text-[#2b1b12] uppercase focus:outline-none focus:border-[#c5a059]"
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="flex items-center justify-between pt-3 border-t border-[#e4d6c6] gap-2">
+              <button
+                type="button"
+                disabled={isRefreshing}
+                onClick={async () => {
+                  await handleRefresh();
+                  showToast('✓ Colors re-extracted from website!');
+                }}
+                className="flex items-center gap-1.5 px-3 py-2 bg-[#f8f3ec] hover:bg-[#ebdcc8] text-[#7a5242] border border-[#d8c09e] rounded-xl text-xs font-bold transition-all cursor-pointer disabled:opacity-50"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                <span>{isRefreshing ? 'Scanning Website...' : '↻ Auto-Detect from Website'}</span>
+              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingModal(null)}
+                  className="px-4 py-2 bg-[#f8f3ec] text-[#6f5a4c] hover:text-[#2b1b12] rounded-xl text-xs font-bold transition-all border border-[#e4d6c6] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (project) {
+                      const updated = { ...project, palette: customPalette };
+                      localStorage.setItem('rankmonk_active_project', JSON.stringify(updated));
+                      try {
+                        const rawU = localStorage.getItem('rankmonk_user');
+                        if (rawU) {
+                          const u = JSON.parse(rawU);
+                          if (u.email) {
+                            localStorage.setItem(`rankmonk_project_${u.email.toLowerCase()}`, JSON.stringify(updated));
+                          }
+                        }
+                      } catch (e) {}
+                      showToast('✓ Brand color palette updated successfully!');
+                      setEditingModal(null);
+                      window.location.reload();
+                    }
+                  }}
+                  className="px-5 py-2 bg-[#2b1b12] hover:bg-[#3b2519] text-[#fffcf7] rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm"
+                >
+                  Save Palette ✓
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
