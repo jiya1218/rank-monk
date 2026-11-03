@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
+import { auditPageForGeo, GeoTestResult } from '@/lib/brandExtractor';
 import {
   Globe,
   RefreshCw,
@@ -18,7 +19,11 @@ import {
   Layers,
   ArrowUpRight,
   TrendingUp,
-  Loader2
+  Loader2,
+  Zap,
+  ShieldCheck,
+  BookOpen,
+  Cpu
 } from 'lucide-react';
 
 interface SeoAuditWorkspaceProps {
@@ -29,7 +34,7 @@ interface SeoAuditWorkspaceProps {
 export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceProps) {
   const [crawlLimit, setCrawlLimit] = useState('50');
   const [isReRunningAudit, setIsReRunningAudit] = useState(false);
-  const [activeSubTab, setActiveSubTab] = useState<'issues' | 'pages'>('issues');
+  const [activeSubTab, setActiveSubTab] = useState<'issues' | 'pages' | 'geo'>('issues');
   const [issueFilter, setIssueFilter] = useState<'all' | 'critical' | 'important' | 'minor' | 'passed'>('all');
   const [pageFilter, setPageFilter] = useState('all');
   const [issuesSearchQuery, setIssuesSearchQuery] = useState('');
@@ -38,6 +43,7 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [auditData, setAuditData] = useState<any>(null);
+  const [selectedGeoUrl, setSelectedGeoUrl] = useState<string>('');
 
   const domain = project?.domain || 'company.com';
   const cleanDomain = domain.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '');
@@ -446,7 +452,7 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
 
   const topCompetitors = (project?.competitors && project.competitors.length > 0)
     ? project.competitors.map((c: any) => typeof c === 'string' ? c : (c.domain || c.name))
-    : ['urbancompany.com', 'housejoy.in', 'broomberg.in', 'nobroker.in'];
+    : ['simform.com', 'appinventiv.com', 'markovate.com', 'witslab.com'];
 
   const currentSeoScore = auditData?.seoScore || project?.seoScore || 86;
 
@@ -630,7 +636,7 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
             </span>
             <div className="flex items-center gap-2">
               <span className="text-sm font-bold text-[#2b1b12] flex items-center gap-1.5">
-                <Globe className="w-4 h-4 text-emerald-600" /> India
+                <Globe className="w-4 h-4 text-emerald-600" /> {project?.targetMarket || 'Pan India'}
               </span>
             </div>
             <p className="text-[11px] text-[#6f5a4c] mt-1 leading-relaxed">
@@ -744,31 +750,50 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
         </div>
       </div>
 
-      {/* 5. Sub-Tabs Bar: SEO Issues (5) vs Audited Pages (50) */}
+      {/* 5. Sub-Tabs Bar: SEO Issues vs Audited Pages vs Sitefire GEO Audit */}
       <div className="bg-white rounded-2xl border border-[#e4d6c6] shadow-sm overflow-hidden">
         <div className="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-100 px-6 pt-4 bg-[#f8f3ec]/30 gap-3">
-          <div className="flex gap-6">
+          <div className="flex flex-wrap gap-4 sm:gap-6">
             <button
               type="button"
               onClick={() => setActiveSubTab('issues')}
-              className={`pb-4 text-sm font-black transition-all border-b-2 cursor-pointer ${
+              className={`pb-4 text-xs sm:text-sm font-black transition-all border-b-2 cursor-pointer ${
                 activeSubTab === 'issues'
                   ? 'border-purple-600 text-purple-700'
                   : 'border-transparent text-[#6f5a4c] hover:text-[#2b1b12]'
               }`}
             >
-              SEO Issues (5)
+              SEO Issues ({issuesList.length})
             </button>
             <button
               type="button"
               onClick={() => setActiveSubTab('pages')}
-              className={`pb-4 text-sm font-black transition-all border-b-2 cursor-pointer ${
+              className={`pb-4 text-xs sm:text-sm font-black transition-all border-b-2 cursor-pointer ${
                 activeSubTab === 'pages'
                   ? 'border-purple-600 text-purple-700'
                   : 'border-transparent text-[#6f5a4c] hover:text-[#2b1b12]'
               }`}
             >
-              Audited Pages (50)
+              Audited Pages ({pagesList.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveSubTab('geo');
+                if (!selectedGeoUrl && pagesList.length > 0) {
+                  setSelectedGeoUrl(pagesList[0].url);
+                }
+              }}
+              className={`pb-4 text-xs sm:text-sm font-black transition-all border-b-2 cursor-pointer flex items-center gap-1.5 ${
+                activeSubTab === 'geo'
+                  ? 'border-purple-600 text-purple-700'
+                  : 'border-transparent text-[#6f5a4c] hover:text-[#2b1b12]'
+              }`}
+            >
+              <span>⚡ Sitefire GEO Audit (11 Tests)</span>
+              <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase bg-purple-100 text-purple-800 border border-purple-200">
+                AEO
+              </span>
             </button>
           </div>
 
@@ -879,10 +904,9 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
                       </div>
                     </div>
 
-                    {/* Expandable Diagnostic Breakdown (Screenshot 4) */}
+                    {/* Expandable Diagnostic Breakdown */}
                     {isExpanded && (
                       <div className="p-5 bg-white border-t border-[#e4d6c6] space-y-4 animate-fade-in">
-                        {/* What is this & How do I fix */}
                         <div className="p-4 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl space-y-3 text-xs">
                           <div>
                             <span className="font-black text-[10px] text-[#2b1b12] uppercase tracking-wider block mb-1">
@@ -931,7 +955,7 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
                                   <button
                                     type="button"
                                     onClick={() => handleCopy(page.url)}
-                                    className="p-1.5 rounded-lg text-slate-500 hover:text-[#2b1b12] border border-[#e4d6c6] hover:bg-[#f8f3ec] transition-colors"
+                                    className="p-1.5 rounded-lg text-slate-500 hover:text-[#2b1b12] border border-[#e4d6c6] hover:bg-[#f8f3ec] transition-colors cursor-pointer"
                                     title="Copy URL"
                                   >
                                     <Copy className="w-3.5 h-3.5" />
@@ -960,7 +984,7 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
           </div>
         )}
 
-        {/* SUB-TAB 2: AUDITED PAGES (Screenshot 5) */}
+        {/* SUB-TAB 2: AUDITED PAGES WITH SITEFIRE GEO SCORE COLUMN */}
         {activeSubTab === 'pages' && (
           <div className="p-5 sm:p-6 space-y-5">
             {/* Filter Dropdown & Search / Export Row */}
@@ -972,9 +996,9 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
                   onChange={(e) => setPageFilter(e.target.value)}
                   className="bg-transparent text-[#2b1b12] focus:outline-none cursor-pointer"
                 >
-                  <option value="all">All Pages (50)</option>
-                  <option value="issues">Pages with Issues (34)</option>
-                  <option value="healthy">Healthy Pages (16)</option>
+                  <option value="all">All Pages ({pagesList.length})</option>
+                  <option value="issues">Pages with Issues</option>
+                  <option value="healthy">Healthy Pages</option>
                 </select>
               </div>
 
@@ -1001,76 +1025,298 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
               </div>
             </div>
 
-            {/* Audited Pages Table (Screenshot 5 exact table) */}
+            {/* Audited Pages Table with Sitefire GEO Column */}
             <div className="overflow-x-auto border border-[#e4d6c6] rounded-2xl">
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="bg-[#f8f3ec]/60 border-b border-[#e4d6c6] text-[10px] font-black uppercase tracking-wider text-[#6f5a4c]">
                     <th className="p-3.5">Page URL</th>
                     <th className="p-3.5">Status</th>
+                    <th className="p-3.5">Sitefire GEO Score</th>
                     <th className="p-3.5">Title</th>
                     <th className="p-3.5">Meta Description</th>
-                    <th className="p-3.5">H1</th>
                     <th className="p-3.5">Word Count</th>
-                    <th className="p-3.5 text-right">Action</th>
+                    <th className="p-3.5 text-right">Inspect</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#e4d6c6]">
-                  {filteredPages.map((page) => (
-                    <tr key={page.id} className="hover:bg-[#f8f3ec]/40 transition-colors">
-                      <td className="p-3.5 font-medium text-slate-800 max-w-[200px]">
-                        <div className="flex items-center gap-2">
-                          <Globe className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span className="truncate">{page.url}</span>
-                        </div>
-                      </td>
+                  {filteredPages.map((page) => {
+                    const geoAudit = auditPageForGeo(
+                      page.url,
+                      page.title,
+                      page.metaDesc || '',
+                      page.h1 || '',
+                      page.wordCount || 1000,
+                      page.schemaTypes || []
+                    );
 
-                      <td className="p-3.5">
-                        <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold text-[10px] border border-emerald-200">
-                          {page.status}
-                        </span>
-                      </td>
+                    return (
+                      <tr key={page.id} className="hover:bg-[#f8f3ec]/40 transition-colors">
+                        <td className="p-3.5 font-medium text-slate-800 max-w-[200px]">
+                          <div className="flex items-center gap-2">
+                            <Globe className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            <span className="truncate">{page.url}</span>
+                          </div>
+                        </td>
 
-                      <td className="p-3.5 max-w-[180px]">
-                        <div className="font-semibold text-[#2b1b12] truncate">{page.title}</div>
-                        <span className="text-[10px] text-[#6f5a4c]">{page.titleChars} chars</span>
-                      </td>
-
-                      <td className="p-3.5 max-w-[220px]">
-                        <div className="text-[11px] text-[#6f5a4c] truncate">{page.metaDesc}</div>
-                        <span className="text-[10px] text-[#6f5a4c]">{page.metaChars} chars</span>
-                      </td>
-
-                      <td className="p-3.5">
-                        {page.h1 ? (
-                          <span className="text-[11px] text-[#2b1b12] font-medium truncate max-w-[120px] block">
-                            {page.h1}
+                        <td className="p-3.5">
+                          <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold text-[10px] border border-emerald-200">
+                            {page.status}
                           </span>
-                        ) : (
-                          <span className="px-2 py-0.5 rounded bg-amber-50 text-amber-700 font-bold text-[10px] border border-amber-200">
-                            Missing H1
-                          </span>
-                        )}
-                      </td>
+                        </td>
 
-                      <td className="p-3.5 font-bold text-[#2b1b12]">
-                        {page.wordCount}
-                      </td>
+                        {/* Sitefire GEO Score Column */}
+                        <td className="p-3.5">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedGeoUrl(page.url);
+                              setActiveSubTab('geo');
+                            }}
+                            className="flex items-center gap-1.5 px-2.5 py-1 bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-900 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                            title="Click to view full 11-test breakdown"
+                          >
+                            <Zap className="w-3 h-3 text-purple-600" />
+                            <span>{geoAudit.geoScore}%</span>
+                            <span className="text-[10px] text-purple-700 font-normal">→ 11 Tests</span>
+                          </button>
+                        </td>
 
-                      <td className="p-3.5 text-right">
-                        <button
-                          type="button"
-                          onClick={() => showToast(`Audited details for ${page.url} are calibrated.`)}
-                          className="p-1 rounded-lg border border-[#e4d6c6] bg-white hover:bg-[#f8f3ec] text-slate-600 cursor-pointer"
-                        >
-                          <ChevronDown className="w-3.5 h-3.5" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                        <td className="p-3.5 max-w-[180px]">
+                          <div className="font-semibold text-[#2b1b12] truncate">{page.title}</div>
+                          <span className="text-[10px] text-[#6f5a4c]">{page.titleChars} chars</span>
+                        </td>
+
+                        <td className="p-3.5 max-w-[220px]">
+                          <div className="text-[11px] text-[#6f5a4c] truncate">{page.metaDesc}</div>
+                          <span className="text-[10px] text-[#6f5a4c]">{page.metaChars} chars</span>
+                        </td>
+
+                        <td className="p-3.5 font-bold text-[#2b1b12]">
+                          {page.wordCount}
+                        </td>
+
+                        <td className="p-3.5 text-right">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedGeoUrl(page.url);
+                              setActiveSubTab('geo');
+                            }}
+                            className="p-1 rounded-lg border border-[#e4d6c6] bg-white hover:bg-[#f8f3ec] text-slate-600 cursor-pointer"
+                            title="Inspect 11 Sitefire GEO Tests"
+                          >
+                            <ChevronDown className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
+          </div>
+        )}
+
+        {/* SUB-TAB 3: SITEFIRE 11-TEST GEO SCORE AUDIT MATRIX */}
+        {activeSubTab === 'geo' && (
+          <div className="p-5 sm:p-6 space-y-6 animate-fade-in">
+            {/* Top Selector & Summary Banner */}
+            {(() => {
+              const activePageUrl = selectedGeoUrl || (pagesList.length > 0 ? pagesList[0].url : `https://${cleanDomain}`);
+              const currentPage = pagesList.find(p => p.url === activePageUrl) || pagesList[0] || {
+                url: `https://${cleanDomain}`,
+                title: `${brandName} — Platform`,
+                metaDesc: `Official platform for ${brandName}.`,
+                h1: brandName,
+                wordCount: 1480,
+                schemaTypes: ['Organization']
+              };
+
+              const audit = auditPageForGeo(
+                currentPage.url,
+                currentPage.title,
+                currentPage.metaDesc || '',
+                currentPage.h1 || '',
+                currentPage.wordCount || 1000,
+                currentPage.schemaTypes || []
+              );
+
+              const t1Tests = audit.geoTests.filter(t => t.tier === 'T1');
+              const t2Tests = audit.geoTests.filter(t => t.tier === 'T2');
+              const t3Tests = audit.geoTests.filter(t => t.tier === 'T3');
+
+              return (
+                <div className="space-y-6">
+                  {/* Page Selector & Score Overview Card */}
+                  <div className="p-5 bg-[#f8f3ec] border border-[#e4d6c6] rounded-2xl flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                    <div className="space-y-1.5 flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-[#7a5242] bg-[#ebdcc8] px-2 py-0.5 rounded-md">
+                          Sitefire GEO Framework
+                        </span>
+                        <span className="text-xs text-[#6f5a4c] font-medium">11 Tests Evaluated</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={activePageUrl}
+                          onChange={(e) => setSelectedGeoUrl(e.target.value)}
+                          className="font-bold text-sm text-[#2b1b12] bg-white border border-[#e4d6c6] rounded-xl px-3 py-1.5 max-w-full sm:max-w-md focus:outline-none focus:border-[#2b1b12] cursor-pointer"
+                        >
+                          {pagesList.map((p) => (
+                            <option key={p.url} value={p.url}>
+                              {p.url}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <p className="text-xs text-[#6f5a4c] truncate">
+                        Title: &ldquo;{currentPage.title}&rdquo; • {(currentPage.wordCount || 1000).toLocaleString()} words
+                      </p>
+                    </div>
+
+                    {/* Big Circular Score */}
+                    <div className="flex items-center gap-4 bg-white border border-[#e4d6c6] p-4 rounded-xl shadow-sm shrink-0">
+                      <div className="relative w-14 h-14 flex items-center justify-center">
+                        <svg className="w-14 h-14 transform -rotate-90" viewBox="0 0 80 80">
+                          <circle cx="40" cy="40" r="32" stroke="#f1e8dc" strokeWidth="6" fill="transparent" />
+                          <circle
+                            cx="40"
+                            cy="40"
+                            r="32"
+                            stroke="#8b5cf6"
+                            strokeWidth="6"
+                            fill="transparent"
+                            strokeDasharray={2 * Math.PI * 32}
+                            strokeDashoffset={2 * Math.PI * 32 * (1 - audit.geoScore / 100)}
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                        <div className="absolute flex flex-col items-center justify-center">
+                          <span className="text-sm font-black text-[#2b1b12]">{audit.geoScore}</span>
+                          <span className="text-[7px] text-[#6f5a4c] font-bold">/100</span>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-purple-700">Page GEO Score</div>
+                        <div className="text-[10px] text-[#6f5a4c]">Optimized for AI Engine Citations</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 3 Impact Tier Summary Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="p-4 bg-white border border-[#e4d6c6] rounded-2xl shadow-sm space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
+                          Tier 1 (3x Weight)
+                        </span>
+                        <Zap className="w-4 h-4 text-rose-500" />
+                      </div>
+                      <h4 className="font-bold text-xs text-[#2b1b12]">Authority & Direct Answers</h4>
+                      <p className="text-[11px] text-[#6f5a4c] leading-relaxed">
+                        Evaluates whether LLMs can instantly extract trusted answers, metrics, and citations.
+                      </p>
+                      <div className="text-xs font-bold text-rose-700 pt-1">
+                        {t1Tests.filter(t => t.status === 'Passed').length} / {t1Tests.length} Tests Passed
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-white border border-[#e4d6c6] rounded-2xl shadow-sm space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                          Tier 2 (2x Weight)
+                        </span>
+                        <BookOpen className="w-4 h-4 text-amber-500" />
+                      </div>
+                      <h4 className="font-bold text-xs text-[#2b1b12]">Readability & Scannability</h4>
+                      <p className="text-[11px] text-[#6f5a4c] leading-relaxed">
+                        Ensures discrete 2-3 sentence blocks suitable for vector embeddings and E-E-A-T bylines.
+                      </p>
+                      <div className="text-xs font-bold text-amber-700 pt-1">
+                        {t2Tests.filter(t => t.status === 'Passed').length} / {t2Tests.length} Tests Passed
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-white border border-[#e4d6c6] rounded-2xl shadow-sm space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
+                          Tier 3 (1x Weight)
+                        </span>
+                        <ShieldCheck className="w-4 h-4 text-purple-500" />
+                      </div>
+                      <h4 className="font-bold text-xs text-[#2b1b12]">Structure & Bot Crawl</h4>
+                      <p className="text-[11px] text-[#6f5a4c] leading-relaxed">
+                        Verifies JSON-LD structured schemas, bot crawlability, and entity co-occurrence.
+                      </p>
+                      <div className="text-xs font-bold text-purple-700 pt-1">
+                        {t3Tests.filter(t => t.status === 'Passed').length} / {t3Tests.length} Tests Passed
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* The 11 Detailed Test Cards */}
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center pb-2 border-b border-[#e4d6c6]">
+                      <h4 className="font-bold text-xs uppercase tracking-wider text-[#2b1b12]">
+                        11 Individual Test Diagnostics for {activePageUrl}
+                      </h4>
+                      <span className="text-[11px] text-[#6f5a4c] font-semibold">
+                        Impact weights scaled according to Sitefire GEO standard
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {audit.geoTests.map((t, idx) => (
+                        <div
+                          key={idx}
+                          className="p-4 bg-white border border-[#e4d6c6] rounded-2xl shadow-sm space-y-2 hover:border-[#c5a059] transition-all"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <span className="w-5 h-5 rounded-full bg-[#f8f3ec] border border-[#e4d6c6] text-[10px] font-black flex items-center justify-center text-[#2b1b12]">
+                                {idx + 1}
+                              </span>
+                              <h5 className="font-bold text-xs text-[#2b1b12]">{t.name}</h5>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                                t.tier === 'T1'
+                                  ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                                  : (t.tier === 'T2' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-purple-50 text-purple-700 border border-purple-200')
+                              }`}>
+                                {t.tier} ({t.weight}x)
+                              </span>
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                t.status === 'Passed'
+                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                  : (t.status === 'Warning' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-rose-50 text-rose-700 border border-rose-200')
+                              }`}>
+                                {t.status}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between text-[11px]">
+                            <span className="text-[#6f5a4c]">Category: <strong>{t.category}</strong></span>
+                            <span className="font-mono font-bold text-purple-700">{t.score} / 10 pts</span>
+                          </div>
+
+                          <p className="text-[11px] text-[#2b1b12] bg-[#f8f3ec]/60 p-2.5 rounded-xl border border-[#e4d6c6] leading-relaxed">
+                            <strong>Diagnostic:</strong> {t.diagnostic}
+                          </p>
+
+                          <p className="text-[10px] text-[#6f5a4c] leading-tight">
+                            ⚡ <strong>Sitefire Fix:</strong> {t.fix}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         )}
       </div>
