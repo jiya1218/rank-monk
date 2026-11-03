@@ -131,32 +131,43 @@ Return a raw JSON object (strictly valid JSON, no markdown, no backticks):
       let rawText: string | undefined;
       let engineName = 'AWS Bedrock Nova Pro (Live AEO Radar)';
 
-      // Try Anthropic Claude 3.5 Sonnet on Bedrock first
+      // Try Anthropic Claude Sonnet 4.5 on Bedrock first
       try {
         const claudeCmd = new ConverseCommand({
-          modelId: 'us.anthropic.claude-3-5-sonnet-20241022-v2:0',
+          modelId: 'us.anthropic.claude-sonnet-4-5-20250929-v1:0',
           messages: [{ role: 'user', content: [{ text: prompt }] }]
         });
         const claudeRes = await client.send(claudeCmd);
         rawText = claudeRes.output?.message?.content?.[0]?.text;
-        if (rawText) engineName = 'Anthropic Claude 3.5 Sonnet (AWS Bedrock)';
+        if (rawText) engineName = 'Anthropic Claude Sonnet 4.5 (AWS Bedrock)';
       } catch (e1) {
         try {
-          const claudeCmd2 = new ConverseCommand({
-            modelId: 'anthropic.claude-3-5-sonnet-20241022-v2:0',
+          const haikuCmd = new ConverseCommand({
+            modelId: 'us.anthropic.claude-haiku-4-5-20251001-v1:0',
             messages: [{ role: 'user', content: [{ text: prompt }] }]
           });
-          const claudeRes2 = await client.send(claudeCmd2);
-          rawText = claudeRes2.output?.message?.content?.[0]?.text;
-          if (rawText) engineName = 'Anthropic Claude 3.5 Sonnet (AWS Bedrock)';
+          const haikuRes = await client.send(haikuCmd);
+          rawText = haikuRes.output?.message?.content?.[0]?.text;
+          if (rawText) engineName = 'Anthropic Claude Haiku 4.5 (AWS Bedrock)';
         } catch (e2) {
-          // Fallback to Amazon Nova Pro if Claude model access is not yet approved in console
-          const command = new ConverseCommand({
-            modelId: 'amazon.nova-pro-v1:0',
-            messages: [{ role: 'user', content: [{ text: prompt }] }]
-          });
-          const response = await client.send(command);
-          rawText = response.output?.message?.content?.[0]?.text;
+          try {
+            const llamaCmd = new ConverseCommand({
+              modelId: 'us.meta.llama3-3-70b-instruct-v1:0',
+              messages: [{ role: 'user', content: [{ text: prompt }] }]
+            });
+            const llamaRes = await client.send(llamaCmd);
+            rawText = llamaRes.output?.message?.content?.[0]?.text;
+            if (rawText) engineName = 'Meta Llama 3.3 70B (AWS Bedrock)';
+          } catch (e3) {
+            // Fallback to Amazon Nova Pro
+            const command = new ConverseCommand({
+              modelId: 'us.amazon.nova-pro-v1:0',
+              messages: [{ role: 'user', content: [{ text: prompt }] }]
+            });
+            const response = await client.send(command);
+            rawText = response.output?.message?.content?.[0]?.text;
+            if (rawText) engineName = 'Amazon Nova Pro (AWS Bedrock)';
+          }
         }
       }
 

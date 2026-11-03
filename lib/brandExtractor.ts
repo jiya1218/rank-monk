@@ -319,28 +319,36 @@ Analyze what this specific company actually does from their website content and 
 
     let rawText: string | undefined;
 
-    // Try Anthropic Claude 3.5 Sonnet on Bedrock first
+    // Try Anthropic Claude Sonnet 4.5 on Bedrock first
     try {
       const claudeRes = await client.send(new ConverseCommand({
-        modelId: 'us.anthropic.claude-3-5-sonnet-20241022-v2:0',
+        modelId: 'us.anthropic.claude-sonnet-4-5-20250929-v1:0',
         messages: [{ role: 'user', content: [{ text: prompt }] }]
       }));
       rawText = claudeRes.output?.message?.content?.[0]?.text;
     } catch (e1) {
       try {
-        const claudeRes2 = await client.send(new ConverseCommand({
-          modelId: 'anthropic.claude-3-5-sonnet-20241022-v2:0',
+        const haikuRes = await client.send(new ConverseCommand({
+          modelId: 'us.anthropic.claude-haiku-4-5-20251001-v1:0',
           messages: [{ role: 'user', content: [{ text: prompt }] }]
         }));
-        rawText = claudeRes2.output?.message?.content?.[0]?.text;
+        rawText = haikuRes.output?.message?.content?.[0]?.text;
       } catch (e2) {
-        // Fallback to Amazon Nova Pro if Claude access is pending
-        const command = new ConverseCommand({
-          modelId: 'amazon.nova-pro-v1:0',
-          messages: [{ role: 'user', content: [{ text: prompt }] }]
-        });
-        const response = await client.send(command);
-        rawText = response.output?.message?.content?.[0]?.text;
+        try {
+          const llamaRes = await client.send(new ConverseCommand({
+            modelId: 'us.meta.llama3-3-70b-instruct-v1:0',
+            messages: [{ role: 'user', content: [{ text: prompt }] }]
+          }));
+          rawText = llamaRes.output?.message?.content?.[0]?.text;
+        } catch (e3) {
+          // Fallback to Amazon Nova Pro
+          const command = new ConverseCommand({
+            modelId: 'us.amazon.nova-pro-v1:0',
+            messages: [{ role: 'user', content: [{ text: prompt }] }]
+          });
+          const response = await client.send(command);
+          rawText = response.output?.message?.content?.[0]?.text;
+        }
       }
     }
 

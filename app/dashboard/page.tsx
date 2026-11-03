@@ -355,7 +355,13 @@ export default function DashboardPage() {
   };
 
   // Handle Media Studio Generation for MediaStudio component
-  const handleGenerateMediaStudio = async (params: { prompt: string; ratio: string; formatName: string; style: string }) => {
+  const handleGenerateMediaStudio = async (params: {
+    prompt: string;
+    ratio: string;
+    formatName: string;
+    style: string;
+    referenceImage?: string;
+  }) => {
     const res = await fetch('/api/ai/generate-image', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -364,9 +370,14 @@ export default function DashboardPage() {
         ratio: params.ratio,
         formatName: params.formatName,
         style: params.style,
-        brandName: project ? project.name : 'Rank Monk',
-        domain: project ? project.domain : 'rankmonk.in',
+        referenceImage: params.referenceImage,
+        brandName: project ? project.name : 'Scalezix',
+        domain: project ? project.domain : 'scalezix.com',
         industry: project ? project.industry : 'Autonomous Organic Growth',
+        palette: project?.palette || [],
+        logoUrl: project?.logoUrl || '',
+        voiceTags: project?.voiceTags || [],
+        targetMarket: project?.targetMarket || 'India',
         geminiApiKey: geminiApiKey || undefined
       })
     });

@@ -27,7 +27,13 @@ interface MediaStudioProps {
   project: any;
   user: any;
   mediaAssets: any[];
-  onGenerateMedia: (params: { prompt: string; ratio: string; formatName: string; style: string }) => Promise<any>;
+  onGenerateMedia: (params: {
+    prompt: string;
+    ratio: string;
+    formatName: string;
+    style: string;
+    referenceImage?: string;
+  }) => Promise<any>;
   onPushToSocialQueue: (asset: any) => void;
 }
 
@@ -65,6 +71,26 @@ export function MediaStudio({
   const [copiedCaptionToast, setCopiedCaptionToast] = useState(false);
   const [fetchingSite, setFetchingSite] = useState(false);
   const [referenceFile, setReferenceFile] = useState<string | null>(null);
+  const [referenceImage, setReferenceImage] = useState<string | null>(null);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setReferenceFile(file.name);
+      const reader = new FileReader();
+      reader.onload = () => {
+        setReferenceImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveReference = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setReferenceFile(null);
+    setReferenceImage(null);
+  };
 
   // Gemini API Key locally stored if user wants custom key
   const [showKeyDrawer, setShowKeyDrawer] = useState(false);
@@ -157,7 +183,8 @@ export function MediaStudio({
         prompt,
         ratio: activeFormat.replace('-banner', ''),
         formatName: selectedFormatObj.name,
-        style
+        style,
+        referenceImage: referenceImage || undefined
       });
       if (newAsset) {
         setActiveAsset(newAsset);
@@ -425,22 +452,50 @@ export function MediaStudio({
 
                 {/* Upload Reference Dropzone */}
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#6f5a4c]">
-                    Upload Reference (Optional)
-                  </label>
-                  <label className="flex items-center justify-center gap-2 p-3.5 border-2 border-dashed border-[#e4d6c6] rounded-xl bg-[#f8f3ec]/40 hover:bg-[#f8f3ec] transition-colors cursor-pointer text-xs font-medium text-[#6f5a4c]">
-                    <Upload className="w-4 h-4 text-slate-400" />
-                    <span>{referenceFile ? `Reference loaded: ${referenceFile}` : 'Drag & drop image or click to upload brand styling reference'}</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) setReferenceFile(file.name);
-                      }}
-                    />
-                  </label>
+                  <div className="flex justify-between items-center">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-[#6f5a4c]">
+                      Upload Reference (Optional)
+                    </label>
+                    {referenceImage && (
+                      <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
+                        Visual Style Active ✓
+                      </span>
+                    )}
+                  </div>
+
+                  {referenceImage ? (
+                    <div className="flex items-center justify-between p-3 border border-[#c5a059] rounded-xl bg-[#fffcf7] shadow-sm animate-fade-in">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <img
+                          src={referenceImage}
+                          alt="Style Reference"
+                          className="w-10 h-10 rounded-lg object-cover border border-[#e4d6c6] shrink-0"
+                        />
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-[#2b1b12] truncate">{referenceFile}</p>
+                          <p className="text-[10px] text-emerald-600 font-semibold">Loaded into Multimodal AI Vision</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleRemoveReference}
+                        className="px-2.5 py-1 text-[11px] font-bold text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                      >
+                        ✕ Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex items-center justify-center gap-2 p-3.5 border-2 border-dashed border-[#e4d6c6] rounded-xl bg-[#f8f3ec]/40 hover:bg-[#f8f3ec] transition-colors cursor-pointer text-xs font-medium text-[#6f5a4c]">
+                      <Upload className="w-4 h-4 text-slate-400" />
+                      <span>Drag & drop image or click to upload brand styling reference</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleFileUpload}
+                      />
+                    </label>
+                  )}
                 </div>
 
                 {/* Format Selector (5 Tiles) */}
