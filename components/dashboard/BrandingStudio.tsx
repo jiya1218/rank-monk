@@ -346,9 +346,6 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
     if (score >= 50) return { label: 'Developing', color: 'text-amber-600', dot: 'bg-amber-500', barBg: 'bg-amber-500', trend: '↑ Emerging' };
     return { label: 'Needs Focus', color: 'text-rose-600', dot: 'bg-rose-500', barBg: 'bg-rose-500', trend: '↓ Early Stage' };
   };
-    if (score >= 60) return { label: 'Moderate', color: 'text-amber-600', dot: 'bg-amber-500', barBg: 'bg-amber-500', trend: '→ Needs Polish' };
-    return { label: 'Incomplete', color: 'text-rose-600', dot: 'bg-rose-500', barBg: 'bg-rose-500', trend: '↓ Action Required' };
-  };
 
   const handleSaveBrandGuidelines = () => {
     if (project) {
