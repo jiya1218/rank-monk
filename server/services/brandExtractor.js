@@ -219,7 +219,17 @@ export function findLogoUrl(html, baseUrl, brandName, domainName) {
 
   const candidates = [];
 
-  // Scan img tags (favicons & apple-touch-icons are strictly excluded; a favicon is not a logo)
+  // Check apple-touch-icon
+  const appleTouchIconM = /<link[^>]+rel=["']apple-touch-icon["'][^>]+href=["']([^"']+)["']/i.exec(html)
+    || /<link[^>]+href=["']([^"']+)["'][^>]+rel=["']apple-touch-icon["']/i.exec(html);
+  if (appleTouchIconM) {
+    const iconUrl = appleTouchIconM[1].trim();
+    if (iconUrl && !iconUrl.startsWith('data:')) {
+      candidates.push({ src: iconUrl, score: 15 });
+    }
+  }
+
+  // Scan img tags
   const imgRegex = /<img\s+([^>]*)\/>|<img\s+([^>]*?)>/gi;
   let match;
   while ((match = imgRegex.exec(html)) !== null) {
@@ -369,8 +379,8 @@ export function findLogoUrl(html, baseUrl, brandName, domainName) {
     return decodeEntities(makeAbsolute(ogImageM[1], baseUrl));
   }
 
-  // If no authentic image logo is verified in HTML or JSON-LD, return standard domain logo asset
-  return makeAbsolute('/logo.png', baseUrl);
+  // Clearbit standard high-resolution logo fallback
+  return `https://logo.clearbit.com/${cleanDom}`;
 }
 
 /**

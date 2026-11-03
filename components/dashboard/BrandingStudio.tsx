@@ -44,12 +44,12 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
   const [isRegeneratingSummary, setIsRegeneratingSummary] = useState(false);
   const [expandedCompIdx, setExpandedCompIdx] = useState<number | null>(null);
   const [editingModal, setEditingModal] = useState<'profile' | 'visual' | 'voice' | null>(null);
-  const [logoAttempt, setLogoAttempt] = useState(0);
+  const [logoFailed, setLogoFailed] = useState(false);
   const [activeScoreTooltip, setActiveScoreTooltip] = useState<'health' | 'tone' | 'audience' | 'visual' | null>(null);
 
   React.useEffect(() => {
-    setLogoAttempt(0);
-  }, [project?.logoUrl, project?.brand_logo_url, project?.domain]);
+    setLogoFailed(false);
+  }, [project?.logoUrl]);
 
   // Sliders state (0 to 100)
   const [voiceSliders, setVoiceSliders] = useState(project?.voiceSliders || {
@@ -172,25 +172,6 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
   const domain = project?.domain || 'company.com';
   const cleanDomain = domain.replace(/^(https?:\/\/)+/gi, '').replace(/^www\./i, '').replace(/\/$/, '');
   const websiteUrl = `https://${cleanDomain}`;
-
-  // 100% Dynamic Cascading Logo Candidates (Scraped URL -> Domain Root Assets -> Clearbit)
-  const logoCandidates = useMemo(() => {
-    const list: string[] = [];
-    if (project?.logoUrl) list.push(project.logoUrl);
-    if (project?.brand_logo_url) list.push(project.brand_logo_url);
-    if (cleanDomain) {
-      list.push(`https://${cleanDomain}/logo.png`);
-      list.push(`https://${cleanDomain}/logo.svg`);
-      list.push(`https://${cleanDomain}/assets/logo.png`);
-      list.push(`https://${cleanDomain}/assets/logo.svg`);
-      list.push(`https://${cleanDomain}/images/logo.png`);
-      list.push(`https://${cleanDomain}/img/logo.png`);
-      list.push(`https://logo.clearbit.com/${cleanDomain}`);
-    }
-    return Array.from(new Set(list.filter(Boolean)));
-  }, [project?.logoUrl, project?.brand_logo_url, cleanDomain]);
-
-  const currentLogoUrl = logoAttempt < logoCandidates.length ? logoCandidates[logoAttempt] : null;
 
   const competitorsList = (project?.competitors && project.competitors.length > 0)
     ? project.competitors
@@ -797,20 +778,34 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
                 <div>
                   <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Logo</span>
                   <div className="h-16 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center p-2 overflow-hidden shadow-xs">
-                    {currentLogoUrl ? (
-                      <img
-                        src={currentLogoUrl}
-                        alt={project?.name || cleanDomain || 'Logo'}
-                        className="max-h-12 max-w-full object-contain"
-                        onError={() => setLogoAttempt((prev) => prev + 1)}
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center h-full px-2 py-0.5">
-                        <span className="font-bold text-sm text-slate-800">
-                          {project?.name || cleanDomain}
-                        </span>
-                      </div>
-                    )}
+                    {(() => {
+                      const displayLogo = (!logoFailed && project?.logoUrl && project.logoUrl !== project?.faviconUrl && !project.logoUrl.includes('google.com/s2/favicons'))
+                        ? project.logoUrl
+                        : (cleanDomain.includes('solospider')
+                            ? 'https://solospider.ai/assets/solospider-logo.png'
+                            : (project?.logoUrl || null));
+
+                      return displayLogo ? (
+                        <img
+                          src={displayLogo}
+                          alt={project?.name || 'Logo'}
+                          className="max-h-12 max-w-full object-contain"
+                          onError={() => setLogoFailed(true)}
+                        />
+                      ) : (
+                        <div className="flex items-center gap-2 px-1">
+                          <img
+                            src={project?.faviconUrl || `https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128`}
+                            alt="Brand Icon"
+                            className="w-7 h-7 object-contain rounded-md"
+                            onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                          />
+                          <span className="font-bold text-xs text-slate-900 truncate max-w-[80px]">
+                            {project?.name || cleanDomain}
+                          </span>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
 
@@ -818,14 +813,10 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
                   <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Favicon</span>
                   <div className="h-16 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center p-2 shadow-xs">
                     <img
-                      src={project?.faviconUrl || (cleanDomain ? `https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128` : '')}
+                      src={project?.faviconUrl || `https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128`}
                       alt="Favicon"
-                      className="w-8 h-8 rounded-md object-contain"
-                      onError={(e) => {
-                        if (cleanDomain) {
-                          (e.target as HTMLImageElement).src = `https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128`;
-                        }
-                      }}
+                      className="w-8 h-8 object-contain"
+                      onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
                     />
                   </div>
                 </div>

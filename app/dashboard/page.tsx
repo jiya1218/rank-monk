@@ -105,33 +105,6 @@ export default function DashboardPage() {
           }
         }
 
-        // Cleanse legacy favicon stored as logoUrl so dynamic scraper takes precedence
-        const isFaviconUrl = (url: string | null | undefined) => {
-          if (!url) return false;
-          const l = url.toLowerCase();
-          return l.includes('google.com/s2/favicons') ||
-                 l.includes('favicon') ||
-                 l.includes('apple-touch') ||
-                 l.includes('apple-icon') ||
-                 l.includes('android-chrome') ||
-                 l.includes('mstile') ||
-                 l.endsWith('.ico') ||
-                 l.includes('/icon.') ||
-                 l.includes('/icons/') ||
-                 /\bicon(?:-\d+x\d+)?\.(?:png|webp|svg|ico)$/i.test(l) ||
-                 l.includes('tab-icon') ||
-                 url === p.faviconUrl;
-        };
-
-        if (isFaviconUrl(p.logoUrl)) {
-          p.logoUrl = null;
-          updated = true;
-        }
-          p.logoUrl = null;
-          if (!p.wordmark) p.wordmark = p.name || p.domain;
-          updated = true;
-        }
-
         // Generic fallback auto-heal for all domains if fields are missing
         if (!p.voiceSliders) {
           p.voiceSliders = { professionalCasual: 65, friendlyFormal: 20, boldSubtle: 25, premiumAccessible: 75, simpleComplex: 25 };
