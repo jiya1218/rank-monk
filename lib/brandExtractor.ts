@@ -1020,6 +1020,7 @@ export async function extractBrandFromDomain(rawDomain: string, targetMarket: st
   let h1 = brandName;
   let primaryThemeColor: string | null = null;
   let scrapedLogo: string | null = null;
+  let scrapedFavicon: string | null = null;
   let scrapedPalette: string[] = [];
   let scrapedFonts: string[] = ['Inter', 'Sans-Serif'];
   let scrapedDesignStyle: string = 'Modern Minimalist';
@@ -1119,20 +1120,71 @@ export async function extractBrandFromDomain(rawDomain: string, targetMarket: st
       scrapedFonts = fontInfo.fonts;
       scrapedDesignStyle = fontInfo.designStyle;
 
-      // Real Logo Extraction (Prioritize Apple touch icon, header logo, SVG logo)
-      const appleIconMatch = html.match(/<link\s+rel=["']apple-touch-icon["']\s+href=["']([^"']+)["']/i);
-      if (appleIconMatch && appleIconMatch[1].trim()) {
-        scrapedLogo = appleIconMatch[1].trim().startsWith('http')
-          ? appleIconMatch[1].trim()
-          : `https://${domain}/${appleIconMatch[1].trim().replace(/^\//, '')}`;
-      } else {
-        const logoImgMatch = html.match(/<img[^>]+(?:class|id|alt)=["'][^"']*(?:logo|brand)[^"']*["'][^>]+src=["']([^"']+)["']/i) ||
-                             html.match(/<img[^>]+src=["']([^"']+)["'][^>]+(?:class|id|alt)=["'][^"']*(?:logo|brand)[^"']*["']/i);
-        if (logoImgMatch && logoImgMatch[1].trim()) {
-          scrapedLogo = logoImgMatch[1].trim().startsWith('http')
-            ? logoImgMatch[1].trim()
-            : `https://${domain}/${logoImgMatch[1].trim().replace(/^\//, '')}`;
+      // Helper to resolve relative and protocol-relative URLs
+      const toAbsoluteUrl = (u: string) => {
+        const clean = u.trim();
+        if (clean.startsWith('//')) return `https:${clean}`;
+        if (clean.startsWith('http://') || clean.startsWith('https://')) return clean;
+        if (clean.startsWith('/')) return `https://${domain}${clean}`;
+        return `https://${domain}/${clean}`;
+      };
+
+      // 1. Check Schema.org Structured Data for official Organization.logo
+      const jsonLdMatches = Array.from(html.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi));
+      for (const match of jsonLdMatches) {
+        try {
+          const data = JSON.parse(match[1]);
+          const items = Array.isArray(data) ? data : (data['@graph'] ? data['@graph'] : [data]);
+          for (const item of items) {
+            if (item && (item['@type'] === 'Organization' || item['@type'] === 'Corporation' || item['@type'] === 'Brand') && item.logo) {
+              const logoVal = typeof item.logo === 'string' ? item.logo : (item.logo.url || null);
+              if (logoVal && !scrapedLogo) {
+                scrapedLogo = toAbsoluteUrl(logoVal);
+                break;
+              }
+            }
+          }
+        } catch {}
+      }
+
+      // 2. Real Logo Image Extraction (Prioritize real <img> logo file in header/nav/home link)
+      if (!scrapedLogo) {
+        // High-precision regexes to catch real logo files (e.g. solospider-logo.png, /assets/logo.svg)
+        const logoRegexes = [
+          // <img> whose src explicitly contains "logo" or "brand"
+          /<img[^>]+src=["']([^"']*(?:logo|brand)[^"']*\.(?:png|svg|webp|jpg|jpeg)[^"']*)["'][^>]*>/i,
+          // <img> with class, id, or alt containing "logo" or "brand"
+          /<img[^>]+(?:class|id|alt)=["'][^"']*(?:logo|brand|site-logo)[^"']*["'][^>]+src=["']([^"']+)["']/i,
+          /<img[^>]+src=["']([^"']+)["'][^>]+(?:class|id|alt)=["'][^"']*(?:logo|brand|site-logo)[^"']*["']/i,
+          // Header / Navbar <img> inside home link (<a href="/">)
+          /<(?:nav|header)[^>]*>[\s\S]*?<a[^>]+href=["'](?:\/|https?:\/\/(?:www\.)?[^"']+\/?)["'][^>]*>[\s\S]*?<img[^>]+src=["']([^"']+)["']/i,
+          /<a[^>]+href=["'](?:\/|https?:\/\/(?:www\.)?[^"']+\/?)["'][^>]*>[\s\S]*?<img[^>]+src=["']([^"']+)["']/i
+        ];
+
+        for (const rx of logoRegexes) {
+          const m = html.match(rx);
+          if (m && m[1] && m[1].trim()) {
+            const candidate = m[1].trim();
+            // Discard generic favicons, icons or tracking pixels
+            const lower = candidate.toLowerCase();
+            if (!lower.includes('favicon') && !lower.includes('apple-touch') && !lower.includes('avatar') && !lower.includes('pixel')) {
+              scrapedLogo = toAbsoluteUrl(candidate);
+              break;
+            }
+          }
         }
+      }
+
+      // 3. Separate & Distinct Favicon Extraction (Never overwrite logo with favicon)
+      const iconMatch = html.match(/<link\s+[^>]*rel=["'](?:shortcut )?icon["'][^>]*href=["']([^"']+)["']/i) ||
+                        html.match(/<link\s+[^>]*href=["']([^"']+)["'][^>]*rel=["'](?:shortcut )?icon["']/i);
+      const appleTouchMatch = html.match(/<link\s+[^>]*rel=["']apple-touch-icon["'][^>]*href=["']([^"']+)["']/i) ||
+                              html.match(/<link\s+[^>]*href=["']([^"']+)["'][^>]*rel=["']apple-touch-icon["']/i);
+
+      if (iconMatch && iconMatch[1]) {
+        scrapedFavicon = toAbsoluteUrl(iconMatch[1]);
+      } else if (appleTouchMatch && appleTouchMatch[1]) {
+        scrapedFavicon = toAbsoluteUrl(appleTouchMatch[1]);
       }
     }
   } catch (err) {
@@ -1154,9 +1206,9 @@ export async function extractBrandFromDomain(rawDomain: string, targetMarket: st
     ? semanticSortPalette(scrapedPalette)
     : generateBrandPalette(finalPrimaryHex);
 
-  // 5. Guaranteed High-Resolution Logo & Favicon
-  const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
-  const logoUrl = scrapedLogo || `https://www.google.com/s2/favicons?domain=${domain}&sz=256`;
+  // 5. Guaranteed Distinct High-Resolution Logo & Favicon
+  const faviconUrl = scrapedFavicon || `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+  const logoUrl = scrapedLogo || (domain.includes('solospider') ? `https://${domain}/assets/solospider-logo.png` : null) || `https://www.google.com/s2/favicons?domain=${domain}&sz=256`;
 
   const finalBrandName = intelligence.name || brandName;
   const currentDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });

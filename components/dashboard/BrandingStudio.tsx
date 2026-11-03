@@ -781,26 +781,34 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
                 <div>
                   <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Logo</span>
                   <div className="h-16 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center p-2 overflow-hidden shadow-xs">
-                    {!logoFailed && project?.logoUrl ? (
-                      <img
-                        src={project.logoUrl}
-                        alt={project?.name || 'Logo'}
-                        className="max-h-12 max-w-full object-contain"
-                        onError={() => setLogoFailed(true)}
-                      />
-                    ) : (
-                      <div className="flex items-center gap-2 px-1">
+                    {(() => {
+                      const displayLogo = (!logoFailed && project?.logoUrl && project.logoUrl !== project?.faviconUrl && !project.logoUrl.includes('google.com/s2/favicons'))
+                        ? project.logoUrl
+                        : (cleanDomain.includes('solospider')
+                            ? 'https://solospider.ai/assets/solospider-logo.png'
+                            : (project?.logoUrl || null));
+
+                      return displayLogo ? (
                         <img
-                          src={project?.faviconUrl || `https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128`}
-                          alt="Brand Icon"
-                          className="w-7 h-7 object-contain rounded-md"
-                          onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                          src={displayLogo}
+                          alt={project?.name || 'Logo'}
+                          className="max-h-12 max-w-full object-contain"
+                          onError={() => setLogoFailed(true)}
                         />
-                        <span className="font-bold text-xs text-slate-900 truncate max-w-[80px]">
-                          {project?.name || cleanDomain}
-                        </span>
-                      </div>
-                    )}
+                      ) : (
+                        <div className="flex items-center gap-2 px-1">
+                          <img
+                            src={project?.faviconUrl || `https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128`}
+                            alt="Brand Icon"
+                            className="w-7 h-7 object-contain rounded-md"
+                            onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                          />
+                          <span className="font-bold text-xs text-slate-900 truncate max-w-[80px]">
+                            {project?.name || cleanDomain}
+                          </span>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
 
