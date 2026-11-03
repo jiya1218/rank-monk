@@ -44,19 +44,10 @@ body {
   position: relative;
 }
 
-/* Subtle Architectural Ambient Lighting (Warm Sand & Linen Radiance) */
+/* Ambient Lighting Disabled to prevent washed-out layers and blurry overlays */
 body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 1200px;
-  height: 600px;
-  background: radial-gradient(circle at 50% 0%, rgba(203, 173, 141, 0.18) 0%, rgba(235, 227, 219, 0.3) 45%, transparent 70%);
-  pointer-events: none;
-  z-index: 0;
+  content: none !important;
+  display: none !important;
 }
 
 /* Standard Container */

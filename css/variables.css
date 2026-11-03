@@ -8,23 +8,23 @@
 @import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@500;700&display=swap");
 
 :root {
-  /* 1. Core Palette Swatches */
+  /* 1. Core Palette Swatches - Signature Warm Editorial Palette with Ultra-Dark Text */
   --bg: #f8f3ec;
   --bg-alt: #f1e8dc;
   --card: #fffcf7;
-  --ink: #180e07;
-  --muted: #423023;
+  --ink: #000000;
+  --muted: #1a0f0a;
   --line: #ded0bf;
-  --espresso: #2e1a10;
-  --mocha: #5c3b2b;
+  --espresso: #000000;
+  --mocha: #1a0f0a;
   --tan: #b98b6a;
   --sand: #d8c09e;
   --cream: #fbf6ef;
-  --success: #436635;
+  --success: #1b6329;
 
   /* Aliases for legacy & component styles */
-  --nude-espresso: #3b2519;
-  --nude-taupe: #7a5242;
+  --nude-espresso: #000000;
+  --nude-taupe: #1a0f0a;
   --nude-sand: #b98b6a;
   --nude-stone: #d8c09e;
   --nude-linen: #f1e8dc;

@@ -792,7 +792,7 @@ export default function DashboardPage() {
 
   // ACTIVE DASHBOARD VIEW (Single Fixed Domain Loaded)
   return (
-    <div className="h-screen bg-[#f8f3ec] text-[#2b1b12] flex flex-col font-sans overflow-hidden">
+    <div className="h-screen bg-[#f8f3ec] text-[#2b1b12] flex flex-col font-sans overflow-hidden relative z-10">
       {/* FIXED TOP HEADER (NO DOMAIN SWITCHER) */}
       <header className="h-16 shrink-0 bg-[#fffcf7] border-b border-[#e4d6c6] px-4 sm:px-6 flex items-center justify-between z-40">
         <div className="flex items-center gap-6">

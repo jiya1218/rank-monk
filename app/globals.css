@@ -13,20 +13,20 @@
   --bg: #f8f3ec !important;
   --bg-alt: #f1e8dc !important;
   --card: #fffcf7 !important;
-  --ink: #180e07 !important;
-  --muted: #423023 !important;
-  --text-heading: #180e07 !important;
-  --text-body: #180e07 !important;
-  --text-secondary: #423023 !important;
-  --text-muted: #423023 !important;
-  --text-subtle: #564335 !important;
+  --ink: #000000 !important;
+  --muted: #1c1009 !important;
+  --text-heading: #000000 !important;
+  --text-body: #000000 !important;
+  --text-secondary: #1c1009 !important;
+  --text-muted: #2d1b10 !important;
+  --text-subtle: #3a2316 !important;
   --line: #ded0bf !important;
-  --espresso: #2e1a10 !important;
-  --mocha: #5c3b2b !important;
+  --espresso: #110d0a !important;
+  --mocha: #331f14 !important;
   --tan: #b98b6a !important;
   --sand: #d8c09e !important;
   --cream: #fbf6ef !important;
-  --success: #436635 !important;
+  --success: #1b6329 !important;
   color-scheme: light !important;
 }
 
@@ -40,24 +40,34 @@ body {
   background-color: var(--bg) !important;
   color: var(--ink) !important;
   overflow-x: hidden !important;
-  font-weight: 450;
+  font-weight: 500;
 }
 
-/* Eliminate Faint/Blurry Text: Darker, High-Contrast Typography Overrides */
+/* Eliminate any phantom transparent/milky overlays that wash out colors or blur text */
+body::before, body::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Make all text ultra-dark, pitch black, and bold so nothing is blurry or light */
 .text-\[\#6f5a4c\] {
-  color: #423023 !important;
+  color: #110d0a !important;
+  font-weight: 600 !important;
 }
 
 .text-\[\#7a5242\] {
-  color: #4d2f1f !important;
+  color: #000000 !important;
+  font-weight: 700 !important;
 }
 
 .text-\[\#8a7364\] {
-  color: #49372a !important;
+  color: #1a0f0a !important;
+  font-weight: 600 !important;
 }
 
 .text-\[\#2b1b12\] {
-  color: #180e07 !important;
+  color: #000000 !important;
+  font-weight: 700 !important;
 }
 
 /* Logo Prominence in Header & Footer */
