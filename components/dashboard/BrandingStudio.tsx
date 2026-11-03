@@ -90,10 +90,9 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
 
   const palette: string[] = useMemo(() => {
     if (project?.palette && Array.isArray(project.palette) && project.palette.length > 0) {
-      if (project.palette.length >= 6) return project.palette.slice(0, 6);
-      return [...project.palette, '#18181b', '#3f3f46', '#f4f4f5', '#e4e4e7', '#71717a'].slice(0, 6);
+      return project.palette.slice(0, 4);
     }
-    return ['#f70f79', '#333333', '#181f1f', '#f0f0f0', '#ababab', '#efc3d7'];
+    return ['#FF2E74', '#0F172A', '#F8FAFC', '#E2E8F0'];
   }, [project?.palette]);
 
   const [customPalette, setCustomPalette] = useState<string[]>(palette);
@@ -398,28 +397,40 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
                 </div>
               </div>
 
-              {/* Color Palette */}
+              {/* Color Palette (Clean Core Identity - Zero 1-Button Noise) */}
               <div>
-                <span className="text-[11px] font-bold text-[#6f5a4c] uppercase tracking-wider block mb-1.5">
-                  Color Palette
-                </span>
-                <div className="grid grid-cols-6 gap-2">
-                  {palette.slice(0, 6).map((hex: string, i: number) => (
-                    <div key={i} className="text-center group">
-                      <div
-                        onClick={() => {
-                          navigator.clipboard?.writeText(hex);
-                          showToast(`✓ Copied ${hex} to clipboard!`);
-                        }}
-                        className="h-10 rounded-lg border border-[#e4d6c6] shadow-sm cursor-pointer hover:scale-110 transition-transform"
-                        style={{ backgroundColor: hex }}
-                        title={`Click to copy: ${hex}`}
-                      />
-                      <span className="text-[9px] font-mono text-[#6f5a4c] block mt-1 truncate">
-                        {hex}
-                      </span>
-                    </div>
-                  ))}
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] font-bold text-[#6f5a4c] uppercase tracking-wider block">
+                    Core Brand Palette
+                  </span>
+                  <span className="text-[10px] text-[#6f5a4c] font-medium">
+                    {palette.length} Core Brand Colors
+                  </span>
+                </div>
+                <div className={`grid ${palette.length <= 3 ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-4'} gap-2`}>
+                  {palette.map((hex: string, i: number) => {
+                    const roles = ['Primary Brand', 'Secondary Accent', 'Dark Neutral', 'Light Surface'];
+                    const role = roles[i] || `Brand Color ${i + 1}`;
+                    return (
+                      <div key={i} className="text-center group bg-[#f8f3ec] p-2 rounded-xl border border-[#e4d6c6]">
+                        <div
+                          onClick={() => {
+                            navigator.clipboard?.writeText(hex);
+                            showToast(`✓ Copied ${hex} to clipboard!`);
+                          }}
+                          className="h-9 rounded-lg border border-black/10 shadow-xs cursor-pointer hover:scale-105 transition-transform"
+                          style={{ backgroundColor: hex }}
+                          title={`Click to copy: ${hex}`}
+                        />
+                        <span className="text-[10px] font-mono font-bold text-[#2b1b12] block mt-1 truncate">
+                          {hex}
+                        </span>
+                        <span className="text-[9px] font-medium text-[#6f5a4c] block truncate">
+                          {role}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -498,142 +509,187 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
         </div>
       </div>
 
-      {/* 4. Second Row (3 Columns: AI Brand Summary, Competitor Snapshot, Quick Actions) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Column 1: AI Brand Summary */}
-        <div className="lg:col-span-3 bg-purple-50/60 rounded-2xl border border-purple-100 p-6 shadow-sm flex flex-col justify-between relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-            <Sparkles className="w-24 h-24 text-purple-600" />
+      {/* 4. Second Row: Spacious Competitor Snapshot (col-8) + Side Intelligence Stack (col-4) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Column 1: Spacious Competitor Snapshot with Live Websites */}
+        <div className="lg:col-span-8 bg-white rounded-2xl border border-[#e4d6c6] p-6 shadow-sm space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600">
+                <Users className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-bold text-sm sm:text-base text-[#2b1b12]">
+                    Competitor Snapshot
+                  </h3>
+                  <span className="text-[10px] font-bold text-[#5d7a4f] bg-[#f1e8dc] px-2 py-0.5 rounded-md border border-[#d8c09e]">
+                    {project?.targetMarket?.toLowerCase()?.includes('india') ? '🇮🇳 Pan India' : `🌐 ${project?.targetMarket || 'Global'}`}
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#6f5a4c] mt-0.5">
+                  Direct competitive benchmarks with verified website presence and voice share
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="px-3 py-1.5 text-xs font-bold text-[#7a5242] bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl hover:bg-[#f1e8dc] transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                title="Rescan competitors for this target market"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                <span>{isRefreshing ? 'Scanning...' : 'Rescan Market'}</span>
+              </button>
+              <span className="text-xs font-bold text-[#6f5a4c]">({competitorsList.length} Rivals)</span>
+            </div>
           </div>
 
-          <div>
-            <h3 className="font-bold text-sm text-[#2b1b12] flex items-center gap-2 mb-3">
+          <div className="overflow-x-auto -mx-2 sm:mx-0">
+            <table className="w-full text-left text-xs min-w-[620px]">
+              <thead>
+                <tr className="border-b border-slate-100 text-[#6f5a4c] uppercase tracking-wider text-[10px]">
+                  <th className="py-2.5 px-3 font-bold w-[34%]">Competitor & Website</th>
+                  <th className="py-2.5 px-3 font-bold w-[30%]">Positioning</th>
+                  <th className="py-2.5 px-3 font-bold w-[22%]">Key Strength</th>
+                  <th className="py-2.5 px-3 font-bold text-right w-[14%]">Share</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {competitorsList.map((comp: any, idx: number) => {
+                  const cName = typeof comp === 'string' ? comp : comp.name;
+                  const rawDomain = (typeof comp === 'object' && (comp.domain || comp.website))
+                    ? (comp.domain || comp.website)
+                    : (cName.includes('.') ? cName : `${cName.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`);
+                  const compDomain = rawDomain.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '');
+                  const compUrl = `https://${compDomain}`;
+                  const faviconUrl = `https://www.google.com/s2/favicons?domain=${compDomain}&sz=64`;
+
+                  return (
+                    <tr key={idx} className="hover:bg-[#f8f3ec]/50 transition-colors group">
+                      {/* Competitor & Verified Website */}
+                      <td className="py-3.5 px-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-xl bg-[#f8f3ec] border border-[#e4d6c6] flex items-center justify-center shrink-0 overflow-hidden shadow-xs">
+                            <img
+                              src={faviconUrl}
+                              alt={cName}
+                              className="w-5 h-5 object-contain"
+                              onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                            />
+                          </div>
+                          <div className="min-w-0">
+                            <span className="font-bold text-xs sm:text-sm text-[#2b1b12] block truncate">
+                              {cName}
+                            </span>
+                            <a
+                              href={compUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[11px] font-mono text-[#7a5242] hover:text-[#2b1b12] hover:underline flex items-center gap-1 mt-0.5"
+                              title={`Visit https://${compDomain}`}
+                            >
+                              <span className="truncate max-w-[160px]">{compDomain}</span>
+                              <ExternalLink className="w-2.5 h-2.5 shrink-0 opacity-70 group-hover:opacity-100" />
+                            </a>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Positioning */}
+                      <td className="py-3.5 px-3">
+                        <p className="text-xs text-[#2b1b12] font-medium leading-relaxed line-clamp-2">
+                          {comp.positioning || `${cName} Market Segment`}
+                        </p>
+                      </td>
+
+                      {/* Strengths */}
+                      <td className="py-3.5 px-3">
+                        <p className="text-xs text-[#6f5a4c] font-medium leading-relaxed line-clamp-2">
+                          {comp.strengths || 'Established regional footprint'}
+                        </p>
+                      </td>
+
+                      {/* Share of Voice */}
+                      <td className="py-3.5 px-3 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <span className="font-bold text-[#2b1b12] text-xs shrink-0">{comp.share || 25}%</span>
+                          <div className="w-16 h-1.5 bg-[#f1e8dc] rounded-full overflow-hidden shrink-0">
+                            <div
+                              className="h-full bg-gradient-to-r from-[#c5a059] to-[#8a5b13] rounded-full"
+                              style={{ width: `${comp.share || 25}%` }}
+                            />
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Column 2: Side Intelligence Stack (AI Brand Summary & Quick Actions) */}
+        <div className="lg:col-span-4 space-y-6">
+          {/* AI Brand Summary */}
+          <div className="bg-purple-50/70 rounded-2xl border border-purple-100 p-6 shadow-sm space-y-3 relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+              <Sparkles className="w-20 h-20 text-purple-600" />
+            </div>
+
+            <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-purple-600" />
-              AI Brand Summary
-            </h3>
+              <h3 className="font-bold text-sm text-[#2b1b12]">
+                AI Brand Summary
+              </h3>
+            </div>
             <p className="text-xs text-[#2b1b12] font-medium leading-relaxed relative z-10">
               {brandSummaryText}
             </p>
-          </div>
 
-          <div className="mt-5 pt-3 border-t border-purple-200/60">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-purple-100 text-purple-800 text-[10px] font-black uppercase tracking-wider">
-              <Sparkles className="w-3 h-3" /> Generated by Rank Monk AI
-            </span>
-          </div>
-        </div>
-
-        {/* Column 2: Competitor Snapshot */}
-        <div className="lg:col-span-6 bg-white rounded-2xl border border-[#e4d6c6] p-6 shadow-sm flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-              <div className="flex items-center gap-2">
-                <h3 className="font-bold text-sm text-[#2b1b12] flex items-center gap-2">
-                  <Users className="w-4 h-4 text-indigo-500" />
-                  Competitor Snapshot
-                </h3>
-                <span className="text-[10px] font-bold text-[#5d7a4f] bg-[#f1e8dc] px-2 py-0.5 rounded-md border border-[#d8c09e]">
-                  {project?.targetMarket?.toLowerCase()?.includes('india') ? '🇮🇳 Pan India' : `🌐 ${project?.targetMarket || 'Global'}`}
-                </span>
-              </div>
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={handleRefresh}
-                  disabled={isRefreshing}
-                  className="text-[11px] font-bold text-[#7a5242] hover:text-[#2b1b12] underline cursor-pointer flex items-center gap-1"
-                  title="Rescan competitors for this target market"
-                >
-                  <RefreshCw className={`w-3 h-3 ${isRefreshing ? 'animate-spin' : ''}`} />
-                  <span>{isRefreshing ? 'Scanning...' : 'Rescan Market'}</span>
-                </button>
-                <span className="text-xs text-[#6f5a4c] font-medium">({competitorsList.length} Monitored)</span>
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-slate-100 text-[#6f5a4c] uppercase tracking-wider text-[10px]">
-                    <th className="py-2 font-bold">Competitor</th>
-                    <th className="py-2 font-bold">Positioning</th>
-                    <th className="py-2 font-bold">Strengths</th>
-                    <th className="py-2 font-bold text-right">Share of Voice</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {competitorsList.map((comp: any, idx: number) => {
-                    const cName = typeof comp === 'string' ? comp : comp.name;
-                    const cInitial = cName.replace(/^(https?:\/\/)?(www\.)?/, '').charAt(0).toUpperCase();
-                    return (
-                      <tr key={idx} className="hover:bg-[#f8f3ec]/40 transition-colors">
-                        <td className="py-3 font-bold text-[#2b1b12]">
-                          <div className="flex items-center gap-2">
-                            <span className="w-5 h-5 rounded-full bg-[#f1e8dc] text-[#7a5242] flex items-center justify-center text-[10px] font-black">
-                              {cInitial}
-                            </span>
-                            <span className="truncate max-w-[110px]">{cName}</span>
-                          </div>
-                        </td>
-                        <td className="py-3 text-[#6f5a4c] max-w-xs truncate font-medium">
-                          {comp.positioning || `${cName} Market Segment`}
-                        </td>
-                        <td className="py-3 text-[#6f5a4c] max-w-xs truncate font-medium">
-                          {comp.strengths || 'Established global market footprint'}
-                        </td>
-                        <td className="py-3 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <span className="font-bold text-[#2b1b12] text-[11px]">{comp.share || 25}%</span>
-                            <div className="w-16 h-1.5 bg-[#f1e8dc] rounded-full overflow-hidden">
-                              <div
-                                className="h-full bg-indigo-500 rounded-full"
-                                style={{ width: `${comp.share || 25}%` }}
-                              />
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+            <div className="pt-2 border-t border-purple-200/60">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-purple-100 text-purple-800 text-[10px] font-black uppercase tracking-wider">
+                <Sparkles className="w-3 h-3" /> Grounded in Website Content
+              </span>
             </div>
           </div>
-        </div>
 
-        {/* Column 3: Quick Actions */}
-        <div className="lg:col-span-3 bg-white rounded-2xl border border-[#e4d6c6] p-6 shadow-sm flex flex-col justify-between">
-          <div>
-            <h3 className="font-bold text-sm text-[#2b1b12] pb-3 border-b border-slate-100 mb-4 flex items-center gap-2">
+          {/* Quick Actions */}
+          <div className="bg-white rounded-2xl border border-[#e4d6c6] p-6 shadow-sm space-y-3">
+            <h3 className="font-bold text-sm text-[#2b1b12] pb-2 border-b border-slate-100 flex items-center gap-2">
               <Zap className="w-4 h-4 text-purple-600" />
               Quick Actions
             </h3>
 
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               <button
                 type="button"
                 disabled={isRefreshing}
                 onClick={handleRefresh}
-                className="w-full flex items-center gap-3 p-3 rounded-xl border border-[#e4d6c6] hover:border-[#c5a059] hover:bg-[#f8f3ec] transition-all text-left bg-white cursor-pointer group disabled:opacity-60"
+                className="w-full flex items-center gap-3 p-2.5 rounded-xl border border-[#e4d6c6] hover:border-[#c5a059] hover:bg-[#f8f3ec] transition-all text-left bg-white cursor-pointer group disabled:opacity-60"
               >
                 <div className="p-2 rounded-lg bg-purple-50 text-purple-600 shrink-0">
-                  <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                  <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
                 </div>
                 <div>
                   <span className="block text-xs font-bold text-[#2b1b12] group-hover:text-[#c5a059]">
                     Refresh Brand Data
                   </span>
-                  <span className="block text-[10px] text-[#6f5a4c]">Pull latest data from web</span>
+                  <span className="block text-[10px] text-[#6f5a4c]">Pull latest live metadata</span>
                 </div>
               </button>
 
               <button
                 type="button"
                 onClick={() => setEditingModal('voice')}
-                className="w-full flex items-center gap-3 p-3 rounded-xl border border-[#e4d6c6] hover:border-[#c5a059] hover:bg-[#f8f3ec] transition-all text-left bg-white cursor-pointer group"
+                className="w-full flex items-center gap-3 p-2.5 rounded-xl border border-[#e4d6c6] hover:border-[#c5a059] hover:bg-[#f8f3ec] transition-all text-left bg-white cursor-pointer group"
               >
                 <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600 shrink-0">
-                  <FileEdit className="w-4 h-4" />
+                  <FileEdit className="w-3.5 h-3.5" />
                 </div>
                 <div>
                   <span className="block text-xs font-bold text-[#2b1b12] group-hover:text-[#c5a059]">
@@ -646,26 +702,26 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
               <button
                 type="button"
                 onClick={() => showToast('✨ Generated 3 new positioning hooks for AEO discovery!')}
-                className="w-full flex items-center gap-3 p-3 rounded-xl border border-[#e4d6c6] hover:border-[#c5a059] hover:bg-[#f8f3ec] transition-all text-left bg-white cursor-pointer group"
+                className="w-full flex items-center gap-3 p-2.5 rounded-xl border border-[#e4d6c6] hover:border-[#c5a059] hover:bg-[#f8f3ec] transition-all text-left bg-white cursor-pointer group"
               >
                 <div className="p-2 rounded-lg bg-amber-50 text-amber-600 shrink-0">
-                  <Sparkles className="w-4 h-4" />
+                  <Sparkles className="w-3.5 h-3.5" />
                 </div>
                 <div>
                   <span className="block text-xs font-bold text-[#2b1b12] group-hover:text-[#c5a059]">
                     Generate Brand Suggestions
                   </span>
-                  <span className="block text-[10px] text-[#6f5a4c]">Get AI-powered ideas</span>
+                  <span className="block text-[10px] text-[#6f5a4c]">Get AI-powered hooks</span>
                 </div>
               </button>
 
               <button
                 type="button"
                 onClick={handleSyncModules}
-                className="w-full flex items-center gap-3 p-3 rounded-xl border border-[#e4d6c6] hover:border-[#c5a059] hover:bg-[#f8f3ec] transition-all text-left bg-white cursor-pointer group"
+                className="w-full flex items-center gap-3 p-2.5 rounded-xl border border-[#e4d6c6] hover:border-[#c5a059] hover:bg-[#f8f3ec] transition-all text-left bg-white cursor-pointer group"
               >
                 <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600 shrink-0">
-                  <Share2 className="w-4 h-4" />
+                  <Share2 className="w-3.5 h-3.5" />
                 </div>
                 <div>
                   <span className="block text-xs font-bold text-[#2b1b12] group-hover:text-[#c5a059]">

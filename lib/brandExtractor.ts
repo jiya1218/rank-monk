@@ -149,20 +149,29 @@ export function extractAuthenticColorsFromSite(html: string, cssSnippets: string
     return [];
   }
 
+  // Filter out single-occurrence noise (e.g. random 1-off button, alert icon, social badge)
+  // Authentic brand colors appear repeatedly across headers, buttons, cards, typography, and CSS classes.
+  const meaningfulEntries = entries.filter(([hex, count]) => {
+    if (themeColor && normalizeHexColor(themeColor) === hex) return true;
+    return count >= 4; // Must appear at least 4 times to qualify as brand palette
+  });
+
+  const activeEntries = meaningfulEntries.length >= 2 ? meaningfulEntries : entries.slice(0, 4);
+
   // Find saturated colors (vibrant brand / accent candidates)
-  const saturated = entries
+  const saturated = activeEntries
     .filter(([hex]) => getColorSaturation(hex) > 0.22 && getColorLuminance(hex) > 0.08 && getColorLuminance(hex) < 0.92);
 
   // Find dark neutrals (dark typography)
-  const darkNeutrals = entries
+  const darkNeutrals = activeEntries
     .filter(([hex]) => getColorLuminance(hex) <= 0.28);
 
   // Find light tints/surfaces
-  const lightSurfaces = entries
+  const lightSurfaces = activeEntries
     .filter(([hex]) => getColorLuminance(hex) >= 0.82);
 
   // Find mid neutrals (borders, secondary elements)
-  const midNeutrals = entries
+  const midNeutrals = activeEntries
     .filter(([hex]) => getColorLuminance(hex) > 0.28 && getColorLuminance(hex) < 0.82 && getColorSaturation(hex) <= 0.25);
 
   const selectedPalette: string[] = [];
@@ -178,49 +187,29 @@ export function extractAuthenticColorsFromSite(html: string, cssSnippets: string
   // 1. Dominant Brand Primary (highest frequency saturated color from the website)
   if (saturated.length > 0) {
     tryAdd(saturated[0][0]);
-  } else if (entries.length > 0) {
-    tryAdd(entries[0][0]);
+  } else if (activeEntries.length > 0) {
+    tryAdd(activeEntries[0][0]);
   }
 
-  // 2. Authentic Dark Typography from the website
+  // 2. Secondary Brand Tone (second saturated brand color if it has high presence)
+  if (saturated.length > 1 && saturated[1][1] >= 4) {
+    tryAdd(saturated[1][0]);
+  }
+
+  // 3. Authentic Dark Typography from the website
   if (darkNeutrals.length > 0) {
     tryAdd(darkNeutrals[0][0]);
-  }
-
-  // 3. Secondary Brand Color or Top Saturated Accent from the website
-  if (saturated.length > 1) {
-    tryAdd(saturated[1][0]);
-  } else if (midNeutrals.length > 0) {
-    tryAdd(midNeutrals[0][0]);
   }
 
   // 4. Authentic Light Surface / Card / Tint from the website
   if (lightSurfaces.length > 0) {
     tryAdd(lightSurfaces[0][0]);
-  }
-
-  // 5. Border / Neutral Divider from the website
-  if (midNeutrals.length > 0) {
+  } else if (midNeutrals.length > 0) {
     tryAdd(midNeutrals[0][0]);
-  } else if (lightSurfaces.length > 1) {
-    tryAdd(lightSurfaces[1][0]);
   }
 
-  // 6. Another real distinct color from the site's top colors
-  for (const [hex] of entries) {
-    if (selectedPalette.length >= 6) break;
-    tryAdd(hex);
-  }
-
-  // Fill up to 6 with remaining top colors from the site if needed
-  for (const [hex] of entries) {
-    if (selectedPalette.length >= 6) break;
-    if (!selectedPalette.includes(hex)) {
-      selectedPalette.push(hex);
-    }
-  }
-
-  return selectedPalette.slice(0, 6);
+  // Return strictly the 3-4 genuine core brand identity swatches (zero single-button noise)
+  return selectedPalette.slice(0, 4);
 }
 
 // Generate harmonious brand palette from a single primary hex (NEVER opposite or inverted colors)
@@ -231,32 +220,16 @@ export function generateBrandPalette(primaryHex: string): string[] {
   const g = parseInt(cleanHex.slice(3, 5), 16) || 120;
   const b = parseInt(cleanHex.slice(5, 7), 16) || 229;
 
-  // Dark shade of primary brand color
-  const darkR = Math.max(0, Math.floor(r * 0.35)).toString(16).padStart(2, '0');
-  const darkG = Math.max(0, Math.floor(g * 0.35)).toString(16).padStart(2, '0');
-  const darkB = Math.max(0, Math.floor(b * 0.35)).toString(16).padStart(2, '0');
-  const brandDark = `#${darkR}${darkG}${darkB}`;
+  // 1. Primary
+  const primary = cleanHex;
+  // 2. Dark Neutral (typography)
+  const darkNeutral = '#0f172a';
+  // 3. Brand Tint Surface (light background)
+  const tintSurface = '#f8fafc';
+  // 4. Secondary Accent (subtle shade of primary)
+  const secondary = `#${Math.max(0, r - 30).toString(16).padStart(2, '0')}${Math.max(0, g - 30).toString(16).padStart(2, '0')}${Math.max(0, b - 30).toString(16).padStart(2, '0')}`;
 
-  // Soft pastel surface tint of the primary brand color
-  const lightR = Math.min(255, Math.floor(r + (255 - r) * 0.9)).toString(16).padStart(2, '0');
-  const lightG = Math.min(255, Math.floor(g + (255 - g) * 0.9)).toString(16).padStart(2, '0');
-  const lightB = Math.min(255, Math.floor(b + (255 - b) * 0.9)).toString(16).padStart(2, '0');
-  const brandTint = `#${lightR}${lightG}${lightB}`;
-
-  // Medium tone of primary brand color
-  const midR = Math.min(255, Math.floor(r * 0.8 + 25)).toString(16).padStart(2, '0');
-  const midG = Math.min(255, Math.floor(g * 0.8 + 25)).toString(16).padStart(2, '0');
-  const midB = Math.min(255, Math.floor(b * 0.8 + 25)).toString(16).padStart(2, '0');
-  const brandMid = `#${midR}${midG}${midB}`;
-
-  return [
-    cleanHex,             // 1. Primary Brand Color
-    `#18181b`,            // 2. High-Contrast Dark Typography
-    brandDark,            // 3. Deep Brand Shade
-    brandTint,            // 4. Subtle Pastel Brand Tint
-    `#f4f4f5`,            // 5. Clean Neutral Surface
-    brandMid              // 6. Harmonious Brand Accent
-  ];
+  return [primary, secondary, darkNeutral, tintSurface];
 }
 
 // Strip HTML tags and clean whitespace
@@ -591,7 +564,7 @@ export async function extractBrandFromDomain(rawDomain: string, targetMarket: st
   // 4. Construct Authentic Brand Palette (Direct from Website)
   const sitePrimaryHex = (scrapedPalette.length > 0) ? scrapedPalette[0] : primaryThemeColor;
   const finalPrimaryHex = sitePrimaryHex || intelligence.primaryHex || '#2563EB';
-  const brandPalette = (scrapedPalette.length >= 4)
+  const brandPalette = (scrapedPalette.length >= 2)
     ? scrapedPalette
     : generateBrandPalette(finalPrimaryHex);
 

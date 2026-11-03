@@ -410,41 +410,66 @@ export function DashboardOverview({ project, user, onNavigateTab }: DashboardOve
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-left text-xs min-w-[600px]">
             <thead>
               <tr className="border-b border-slate-100 text-[#6f5a4c] uppercase tracking-wider text-[10px]">
-                <th className="py-2.5 font-bold">Competitor</th>
-                <th className="py-2.5 font-bold">Positioning</th>
-                <th className="py-2.5 font-bold">Strengths</th>
-                <th className="py-2.5 font-bold text-right">Share of Voice</th>
+                <th className="py-2.5 px-3 font-bold w-[34%]">Competitor & Website</th>
+                <th className="py-2.5 px-3 font-bold w-[30%]">Positioning</th>
+                <th className="py-2.5 px-3 font-bold w-[22%]">Strengths</th>
+                <th className="py-2.5 px-3 font-bold text-right w-[14%]">Share of Voice</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {competitorsList.map((comp: any, idx: number) => {
-                const domainName = typeof comp === 'string' ? comp : (comp.domain || comp.name);
-                const initial = domainName.replace(/^(https?:\/\/)?(www\.)?/, '').charAt(0).toUpperCase();
+                const cName = typeof comp === 'string' ? comp : (comp.name || comp.domain);
+                const rawDomain = (typeof comp === 'object' && (comp.domain || comp.website))
+                  ? (comp.domain || comp.website)
+                  : (cName && cName.includes('.') ? cName : `${(cName || 'competitor').toLowerCase().replace(/[^a-z0-9]/g, '')}.com`);
+                const compDomain = rawDomain.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '');
+                const compUrl = `https://${compDomain}`;
+                const faviconUrl = `https://www.google.com/s2/favicons?domain=${compDomain}&sz=64`;
+
                 return (
-                  <tr key={idx} className="hover:bg-[#f8f3ec]/50 transition-colors">
-                    <td className="py-3 font-bold text-[#2b1b12]">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-lg bg-[#f1e8dc] text-[#7a5242] border border-[#d8c09e] flex items-center justify-center font-bold text-xs">
-                          {initial}
+                  <tr key={idx} className="hover:bg-[#f8f3ec]/50 transition-colors group">
+                    <td className="py-3 px-3 font-bold text-[#2b1b12]">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-xl bg-[#f8f3ec] border border-[#e4d6c6] flex items-center justify-center shrink-0 overflow-hidden shadow-xs">
+                          <img
+                            src={faviconUrl}
+                            alt={cName}
+                            className="w-4 h-4 object-contain"
+                            onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                          />
                         </div>
-                        <span>{domainName}</span>
+                        <div className="min-w-0">
+                          <span className="font-bold text-xs sm:text-sm text-[#2b1b12] block truncate">
+                            {cName}
+                          </span>
+                          <a
+                            href={compUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[11px] font-mono text-[#7a5242] hover:text-[#2b1b12] hover:underline flex items-center gap-1 mt-0.5"
+                            title={`Visit https://${compDomain}`}
+                          >
+                            <span className="truncate max-w-[160px]">{compDomain}</span>
+                            <ExternalLink className="w-2.5 h-2.5 shrink-0 opacity-70 group-hover:opacity-100" />
+                          </a>
+                        </div>
                       </div>
                     </td>
-                    <td className="py-3 text-[#6f5a4c] max-w-xs truncate font-medium">
-                      {comp.positioning || 'Enterprise Industry Leader'}
+                    <td className="py-3 px-3 text-[#2b1b12] font-medium">
+                      <p className="line-clamp-2">{comp.positioning || 'Enterprise Industry Leader'}</p>
                     </td>
-                    <td className="py-3 text-[#6f5a4c] max-w-xs truncate font-medium">
-                      {comp.strengths || 'Established brand reach & domain authority'}
+                    <td className="py-3 px-3 text-[#6f5a4c] font-medium">
+                      <p className="line-clamp-2">{comp.strengths || 'Established brand reach & domain authority'}</p>
                     </td>
-                    <td className="py-3 text-right">
-                      <div className="flex items-center justify-end gap-3">
+                    <td className="py-3 px-3 text-right">
+                      <div className="flex items-center justify-end gap-2.5">
                         <span className="font-bold text-[#2b1b12]">{comp.share || 25}%</span>
-                        <div className="w-20 h-1.5 bg-[#f1e8dc] rounded-full overflow-hidden">
+                        <div className="w-16 h-1.5 bg-[#f1e8dc] rounded-full overflow-hidden shrink-0">
                           <div
-                            className="h-full bg-[#c5a059] rounded-full"
+                            className="h-full bg-gradient-to-r from-[#c5a059] to-[#8a5b13] rounded-full"
                             style={{ width: `${comp.share || 25}%` }}
                           />
                         </div>

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
+import { DomainCrawlerProgress } from './DomainCrawlerProgress';
 
 interface ConnectDomainModalProps {
   isOpen: boolean;
@@ -215,15 +216,10 @@ export function ConnectDomainModal({ isOpen, initialDomain, onClose, onSuccess }
             </div>
 
             {loading ? (
-              <div className="p-4 bg-[#f8f3ec] border border-[#e4d6c6] rounded-2xl text-center space-y-2">
-                <div className="w-6 h-6 border-2 border-[#c5a059] border-t-transparent rounded-full animate-spin mx-auto" />
-                <div className="text-xs font-bold text-[#2b1b12] animate-pulse">
-                  {stepText || 'Analyzing website...'}
-                </div>
-                <div className="text-[10px] text-[#6f5a4c]">
-                  Please wait while we crawl DOM tags, logos, colors and AEO scores.
-                </div>
-              </div>
+              <DomainCrawlerProgress
+                domain={domainInput}
+                market="Pan India"
+              />
             ) : (
               <button
                 type="submit"

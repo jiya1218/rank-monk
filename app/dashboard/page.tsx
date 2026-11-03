@@ -11,6 +11,7 @@ import { SeoAuditWorkspace } from '@/components/dashboard/SeoAuditWorkspace';
 import { ComingSoonWorkspace } from '@/components/dashboard/ComingSoonWorkspace';
 import { SocialStudio } from '@/components/dashboard/SocialStudio';
 import { IntegrationsWorkspace } from '@/components/dashboard/IntegrationsWorkspace';
+import { DomainCrawlerProgress } from '@/components/domain/DomainCrawlerProgress';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -584,15 +585,10 @@ export default function DashboardPage() {
               </div>
 
               {analyzingDomain ? (
-                <div className="p-5 bg-[#f8f3ec] border border-[#e4d6c6] rounded-2xl text-center space-y-2.5">
-                  <div className="w-6 h-6 border-2 border-[#c5a059] border-t-transparent rounded-full animate-spin mx-auto" />
-                  <div className="text-xs font-bold text-[#2b1b12] animate-pulse">
-                    {analysisStep || 'Crawling website & extracting branding...'}
-                  </div>
-                  <div className="text-[10px] text-[#6f5a4c]">
-                    Crawling DOM elements, logo, color palette, competitor authority, and AEO metrics.
-                  </div>
-                </div>
+                <DomainCrawlerProgress
+                  domain={onboardingDomain}
+                  market={onboardingMarket}
+                />
               ) : (
                 <button
                   type="submit"
