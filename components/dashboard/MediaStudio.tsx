@@ -72,15 +72,67 @@ export function MediaStudio({
 
   const brandName = project?.name || 'Rank Monk';
   const brandDomain = project?.domain || 'rankmonk.in';
+  const industry = project?.industry || '';
+
+  // Universal Dynamic Quick Prompts (Adapts to ANY Industry)
+  const indLower = (industry || '').toLowerCase();
+
+  const getUniversalPrompts = () => {
+    if (indLower.includes('clean') || indLower.includes('maid') || indLower.includes('chore') || indLower.includes('home service')) {
+      return [
+        { topic: 'Launch', prompt: `Instagram launch post: On-demand verified domestic help & deep cleaning with ${brandName}` },
+        { topic: 'Special Offer', prompt: `Special offer: 20% off whole house deep cleaning, sanitization and kitchen care` },
+        { topic: 'Customer Trust', prompt: `Why busy working professionals and families consistently trust ${brandName}` },
+        { topic: 'Service Spotlight', prompt: `Spotless living rooms, sparkling kitchens and organized spaces delivered with ease` },
+        { topic: 'Lifestyle Hook', prompt: `Tired after a long workday? Book your trusted doorstep helper with ${brandName} in seconds` }
+      ];
+    }
+    if (indLower.includes('food') || indLower.includes('restaurant') || indLower.includes('dining')) {
+      return [
+        { topic: 'Launch', prompt: `Introducing signature culinary experiences delivered straight to your door by ${brandName}` },
+        { topic: 'Special Offer', prompt: `Exclusive weekend offer: Free delivery and special savings on your favorite meals` },
+        { topic: 'Customer Trust', prompt: `Rated 4.9 stars: Why food lovers across our city consistently choose ${brandName}` },
+        { topic: 'Product Spotlight', prompt: `Fresh ingredients, handcrafted recipes and lightning-fast delivery with ${brandName}` },
+        { topic: 'Lifestyle Hook', prompt: `Skip the kitchen chores tonight and enjoy restaurant-grade dining at home with ${brandName}` }
+      ];
+    }
+    if (indLower.includes('fitness') || indLower.includes('gym') || indLower.includes('sport')) {
+      return [
+        { topic: 'Launch', prompt: `Transform your physical strength and energy with ${brandName}` },
+        { topic: 'Special Offer', prompt: `Claim your first personalized training consultation with ${brandName}` },
+        { topic: 'Customer Trust', prompt: `Over 5,000+ member transformations: Real results backed by science and coaching` },
+        { topic: 'Spotlight', prompt: `World-class training facilities, dedicated coaches, and guaranteed progress` },
+        { topic: 'Motivation', prompt: `Stop waiting for next Monday: Your breakthrough begins today with ${brandName}` }
+      ];
+    }
+    if (indLower.includes('real estate') || indLower.includes('property') || indLower.includes('housing')) {
+      return [
+        { topic: 'Launch', prompt: `Discover prime residential and commercial properties curated by ${brandName}` },
+        { topic: 'Special Offer', prompt: `Exclusive preview: VIP access to newly released luxury apartment listings` },
+        { topic: 'Trust & Proof', prompt: `Why discerning homebuyers and property investors trust ${brandName}` },
+        { topic: 'Spotlight', prompt: `Architectural elegance, prime connectivity, and panoramic views with ${brandName}` },
+        { topic: 'Lifestyle Hook', prompt: `Find a space designed for living, working, and growing with ${brandName}` }
+      ];
+    }
+    return [
+      { topic: 'Launch', prompt: `Brand campaign announcing verified excellence and premium customer solutions for ${brandName}` },
+      { topic: 'Special Offer', prompt: `Exclusive limited access: Special privileges and instant fulfillment with ${brandName}` },
+      { topic: 'Trust & Proof', prompt: `Why modern consumers and ambitious professionals consistently choose ${brandName}` },
+      { topic: 'Spotlight', prompt: `Transforming everyday experience with speed, transparency, and superior quality` },
+      { topic: 'Case Study', prompt: `From 0 to 4.8x growth: How high-velocity customers achieve seamless results with ${brandName}` }
+    ];
+  };
+
+  const activeQuickPrompts = getUniversalPrompts();
 
   // AI Prompt Enhancer
   const handleEnhancePrompt = () => {
     if (!prompt.trim()) {
-      setPrompt(`High-impact Instagram company marketing campaign for ${brandName} (${brandDomain}) in ${project?.industry || 'technology'}: cinematic studio composition, modern editorial typography, clean negative space, prominent ${brandName} logo integration, verified growth statistics badge, and compelling call-to-action.`);
+      setPrompt(`High-impact Instagram company marketing campaign for ${brandName} (${brandDomain}) in ${industry || 'modern services'}: cinematic studio composition, modern editorial visual, clean negative space, prominent ${brandName} brand aesthetic, and compelling call-to-action.`);
       return;
     }
 
-    const enhanced = `High-end professional B2B marketing creative for ${prompt.trim()}. Brand identity: ${brandName} (${brandDomain}). Visual direction: elegant editorial layout, sharp typography, premium brand colors, natural contrast, clear visual hierarchy, verified authority badge, and clean call-to-action button.`;
+    const enhanced = `${prompt.trim()}. Brand identity: ${brandName} (${brandDomain}). Visual direction: elegant commercial photography, sharp focus, natural warm contrast, clear visual hierarchy, 8k resolution, award-winning composition, and engaging marketing call-to-action.`;
     setPrompt(enhanced);
   };
 
@@ -291,7 +343,7 @@ export function MediaStudio({
                         className="bg-[#f8f3ec] border border-[#e4d6c6] rounded-lg py-1 px-2 text-xs font-bold text-[#2b1b12] focus:outline-none cursor-pointer max-w-[220px] truncate"
                       >
                         <option value="">Select a prompt...</option>
-                        {AEO_QUICK_PROMPTS.map((p, idx) => (
+                        {activeQuickPrompts.map((p, idx) => (
                           <option key={idx} value={p.prompt}>
                             [{p.topic}] {p.prompt}
                           </option>
@@ -583,24 +635,37 @@ export function MediaStudio({
                 </div>
 
                 {/* Primary Output Actions */}
-                <div className="grid grid-cols-2 gap-2.5 pt-1">
+                <div className="space-y-2 pt-1">
                   <button
                     type="button"
                     onClick={() => onPushToSocialQueue(activeAsset)}
                     className="w-full py-2.5 bg-[#2b1b12] hover:bg-[#3b2519] text-[#fffcf7] rounded-xl text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <Share2 className="w-3.5 h-3.5 text-[#c5a059]" />
-                    <span>Push to Social Queue</span>
+                    <span>Push to Social Queue (Auto-Publish)</span>
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={handleCopyCaption}
-                    className="w-full py-2.5 bg-[#f8f3ec] hover:bg-[#ebdcc8] text-[#2b1b12] border border-[#d8c09e] rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    <Copy className="w-3.5 h-3.5" />
-                    <span>Copy Caption</span>
-                  </button>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={handleCopyCaption}
+                      className="py-2.5 bg-[#f8f3ec] hover:bg-[#ebdcc8] text-[#2b1b12] border border-[#d8c09e] rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copy Caption</span>
+                    </button>
+
+                    <a
+                      href={activeAsset.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      download={`instagram_${Date.now()}.jpg`}
+                      className="py-2.5 bg-white hover:bg-[#f8f3ec] text-[#2b1b12] border border-[#e4d6c6] rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 text-center cursor-pointer"
+                    >
+                      <Download className="w-3.5 h-3.5 text-[#5d7a4f]" />
+                      <span>Download HD Image</span>
+                    </a>
+                  </div>
                 </div>
               </div>
             ) : (

@@ -99,6 +99,22 @@ export function generateBrandPalette(primaryHex: string): string[] {
 
 // Comprehensive Verified Knowledge Base for 70+ Major Global and Indian Platforms
 const VERIFIED_BRANDS: Record<string, Partial<ExtractedBrand>> = {
+  'snabbit.com': {
+    name: 'Snabbit',
+    industry: 'Home Services & Domestic Help',
+    businessCategory: '10-Minute On-Demand Maid Service, Deep Cleaning & Daily House Help App',
+    targetAudience: 'Busy urban households, working couples & apartment residents across Bangalore seeking instant, verified domestic help',
+    brandPositioning: 'Instant house help at your doorstep in 10 minutes — affordable hourly chores by 100% background-verified professionals',
+    palette: ['#F70F79', '#1E293B', '#FF66A6', '#64748B', '#FFF0F6', '#8AD935'],
+    competitors: [
+      { name: 'Urban Company', domain: 'urbancompany.com', positioning: 'India’s largest multi-category home service & maintenance marketplace', strengths: 'Pan-India brand recognition and expansive service breadth', share: 54 },
+      { name: 'Housejoy', domain: 'housejoy.in', positioning: 'Home construction, maintenance and deep cleaning aggregator', strengths: 'Specialized deep cleaning and appliance repair services', share: 22 },
+      { name: 'BookMyBai', domain: 'bookmybai.com', positioning: 'Permanent and full-time domestic maid hiring platform', strengths: 'Long-term maid contracts and live-in maid placements', share: 14 },
+      { name: 'Bro4u', domain: 'bro4u.com', positioning: 'Bangalore-focused hyperlocal home service provider', strengths: 'Local Bangalore vendor network and flexible pricing', share: 10 }
+    ],
+    voiceSliders: { professionalCasual: 80, friendlyFormal: 15, boldSubtle: 20, premiumAccessible: 85, simpleComplex: 15 },
+    voiceTags: ['Dependable', 'Lightning-Fast', 'Trustworthy', 'Affordable', 'Friendly', 'Background-Verified']
+  },
   'swiggy.com': {
     name: 'Swiggy',
     industry: 'Food Delivery & Quick Commerce',
@@ -367,7 +383,140 @@ function classifyDomainIntelligence(cleanDomainStr: string, textCorpus: string) 
     };
   }
 
-  // 6. SaaS, Cloud, Developer Tools & AI
+  // 6. Home Services, Domestic Assistance, Cleaning & Maintenance
+  if (d.includes('clean') || d.includes('maid') || d.includes('house') || d.includes('home') || d.includes('chore') || d.includes('repair') || d.includes('plumb') || c.includes('cleaning') || c.includes('house help') || c.includes('maid') || c.includes('domestic') || c.includes('chores') || c.includes('cook') || c.includes('plumber') || c.includes('dishwashing') || c.includes('home service') || c.includes('handyman')) {
+    return {
+      industry: 'Home Services & Domestic Help',
+      businessCategory: 'On-Demand Domestic Chores, Home Cleaning & Maintenance Platform',
+      targetAudience: 'Busy urban households, working couples, apartment residents, and families seeking instant, verified domestic help',
+      brandPositioning: 'Instant, background-verified domestic help and professional home care delivered to your doorstep in minutes',
+      primaryHex: '#F70F79',
+      competitors: [
+        { name: 'Urban Company', domain: 'urbancompany.com', positioning: 'Leading multi-category home service & maintenance marketplace', strengths: 'High brand trust and multi-city verified network', share: 52 },
+        { name: 'Housejoy', domain: 'housejoy.in', positioning: 'Home construction, maintenance and deep cleaning portal', strengths: 'Specialized deep cleaning and appliance maintenance footprint', share: 22 },
+        { name: 'TaskRabbit', domain: 'taskrabbit.com', positioning: 'Global on-demand freelance handyman and chore marketplace', strengths: 'Global community trust and versatile service task catalog', share: 16 },
+        { name: 'Handy', domain: 'handy.com', positioning: 'Residential cleaning and handyman booking platform', strengths: 'Seamless recurring booking subscriptions', share: 10 }
+      ],
+      voiceSliders: { professionalCasual: 80, friendlyFormal: 15, boldSubtle: 20, premiumAccessible: 85, simpleComplex: 15 },
+      voiceTags: ['Dependable', 'Fast', 'Trustworthy', 'Affordable', 'Friendly', 'Background-Verified']
+    };
+  }
+
+  // 7. Real Estate, Housing, Property & Construction
+  if (d.includes('estate') || d.includes('realty') || d.includes('prop') || d.includes('home') || d.includes('house') || d.includes('build') || c.includes('real estate') || c.includes('apartment') || c.includes('property') || c.includes('mortgage') || c.includes('rent') || c.includes('builder')) {
+    return {
+      industry: 'Real Estate & Property Development',
+      businessCategory: 'Residential & Commercial Real Estate Advisory and Property Marketplace',
+      targetAudience: 'Homebuyers, commercial investors, property seekers, and modern urban residents',
+      brandPositioning: 'Unlocking prime residential and commercial spaces with verified listings and seamless property acquisition',
+      primaryHex: '#0284C7',
+      competitors: [
+        { name: 'Zillow', domain: 'zillow.com', positioning: 'Global online real estate marketplace and valuation network', strengths: 'Massive consumer listing traffic and automated property valuations', share: 45 },
+        { name: '99acres', domain: '99acres.com', positioning: 'Leading regional property search and verified broker network', strengths: 'Deep builder project inventory and local agent reach', share: 28 },
+        { name: 'MagicBricks', domain: 'magicbricks.com', positioning: 'Full-stack property portal with home loan integration', strengths: 'Extensive consumer trust and commercial property breadth', share: 18 },
+        { name: 'Redfin', domain: 'redfin.com', positioning: 'Technology-powered residential real estate brokerage', strengths: 'Low listing fees and integrated agent experience', share: 9 }
+      ],
+      voiceSliders: { professionalCasual: 40, friendlyFormal: 30, boldSubtle: 20, premiumAccessible: 60, simpleComplex: 40 },
+      voiceTags: ['Authoritative', 'Prime', 'Trustworthy', 'Transparent', 'Consultative']
+    };
+  }
+
+  // 8. Education, EdTech, Tutoring & Online Learning
+  if (d.includes('learn') || d.includes('edu') || d.includes('course') || d.includes('school') || d.includes('academy') || d.includes('tutor') || c.includes('education') || c.includes('student') || c.includes('course') || c.includes('certification') || c.includes('learning')) {
+    return {
+      industry: 'Education & EdTech',
+      businessCategory: 'Online Learning Platform, Skill Certification & Interactive Tutoring',
+      targetAudience: 'Students, upskilling professionals, educators, and lifelong learners',
+      brandPositioning: 'Empowering futures through accessible, industry-certified education and interactive mastery',
+      primaryHex: '#7C3AED',
+      competitors: [
+        { name: 'Coursera', domain: 'coursera.com', positioning: 'Leading global university degree and career certification portal', strengths: 'Ivy league university partnerships and recognized certificates', share: 44 },
+        { name: 'Udemy', domain: 'udemy.com', positioning: 'Massive open marketplace for practical technical and lifestyle skills', strengths: 'Vast course inventory and accessible pricing', share: 28 },
+        { name: 'Duolingo', domain: 'duolingo.com', positioning: 'Gamified language learning and bite-sized skill acquisition', strengths: 'Hyper-engaging mobile UI and viral consumer habit loops', share: 18 },
+        { name: 'Khan Academy', domain: 'khanacademy.org', positioning: 'Free non-profit personalized mastery learning platform', strengths: 'Universal accessibility and foundational K-12 curriculum', share: 10 }
+      ],
+      voiceSliders: { professionalCasual: 65, friendlyFormal: 20, boldSubtle: 25, premiumAccessible: 85, simpleComplex: 25 },
+      voiceTags: ['Empowering', 'Engaging', 'Clear', 'Inspiring', 'Accessible']
+    };
+  }
+
+  // 9. Fitness, Gym, Sports & Nutrition
+  if (d.includes('fit') || d.includes('gym') || d.includes('sport') || d.includes('workout') || d.includes('train') || c.includes('fitness') || c.includes('workout') || c.includes('gym') || c.includes('trainer') || c.includes('yoga') || c.includes('protein')) {
+    return {
+      industry: 'Fitness, Wellness & Sports',
+      businessCategory: 'Holistic Fitness Studios, Strength Training & Nutritional Wellness',
+      targetAudience: 'Fitness enthusiasts, athletes, busy professionals, and wellness seekers',
+      brandPositioning: 'Unleashing peak human physical performance with science-backed training and community energy',
+      primaryHex: '#EA580C',
+      competitors: [
+        { name: 'Cult.fit', domain: 'cult.fit', positioning: 'India’s prominent holistic group fitness and wellness ecosystem', strengths: 'Cultpass studio network and gamified group class energy', share: 42 },
+        { name: 'Planet Fitness', domain: 'planetfitness.com', positioning: 'High-volume, judgment-free accessible fitness club chain', strengths: 'Affordable low-barrier membership model and wide suburban footprint', share: 30 },
+        { name: 'Equinox', domain: 'equinox.com', positioning: 'Luxury fitness, high-performance spa and executive lifestyle club', strengths: 'Ultra-premium brand prestige and bespoke coaching', share: 16 },
+        { name: 'Peloton', domain: 'onepeloton.com', positioning: 'Connected at-home fitness hardware and interactive streaming', strengths: 'Loyal subscriber community and elite instructor brand equity', share: 12 }
+      ],
+      voiceSliders: { professionalCasual: 75, friendlyFormal: 10, boldSubtle: 35, premiumAccessible: 75, simpleComplex: 15 },
+      voiceTags: ['Energetic', 'Motivating', 'Unapologetic', 'Empowering', 'Community-Driven']
+    };
+  }
+
+  // 10. Automotive, Vehicles, EV & Mobility
+  if (d.includes('auto') || d.includes('car') || d.includes('motor') || d.includes('drive') || d.includes('bike') || d.includes('ride') || c.includes('automobile') || c.includes('vehicle') || c.includes('car rental') || c.includes('dealership') || c.includes('mechanic')) {
+    return {
+      industry: 'Automotive & Smart Mobility',
+      businessCategory: 'Connected Mobility, Automotive Retail & Vehicle Lifecycle Solutions',
+      targetAudience: 'Vehicle owners, urban commuters, automotive enthusiasts, and fleet operators',
+      brandPositioning: 'Redefining personal and commercial transit with precision engineering and dependable mobility',
+      primaryHex: '#DC2626',
+      competitors: [
+        { name: 'CarDekho', domain: 'cardekho.com', positioning: 'Leading new and used car discovery and financing ecosystem', strengths: 'Comprehensive automotive research tools and dealer tie-ups', share: 40 },
+        { name: 'AutoTrader', domain: 'autotrader.com', positioning: 'Global digital automotive marketplace for new and certified used cars', strengths: 'High buyer purchase intent and broad dealership inventory', share: 32 },
+        { name: 'Uber', domain: 'uber.com', positioning: 'Global on-demand ridesharing and autonomous fleet mobility network', strengths: 'Ubiquitous worldwide consumer network and algorithmic dispatch', share: 18 },
+        { name: 'Carvana', domain: 'carvana.com', positioning: 'Direct online e-commerce used vehicle buying with home delivery', strengths: 'Frictionless contactless vehicle delivery and 7-day moneyback guarantee', share: 10 }
+      ],
+      voiceSliders: { professionalCasual: 45, friendlyFormal: 25, boldSubtle: 30, premiumAccessible: 60, simpleComplex: 40 },
+      voiceTags: ['Dynamic', 'High-Velocity', 'Engineered', 'Reliable', 'Performance-Oriented']
+    };
+  }
+
+  // 11. Marketing Agency, Design, PR & SEO
+  if (d.includes('agency') || d.includes('market') || d.includes('media') || d.includes('creative') || d.includes('studio') || c.includes('marketing agency') || c.includes('digital marketing') || c.includes('seo') || c.includes('branding') || c.includes('public relations')) {
+    return {
+      industry: 'Digital Marketing & Creative Agency',
+      businessCategory: 'Full-Funnel Performance Marketing, Brand Design & Growth Engineering',
+      targetAudience: 'Founders, CMOs, marketing directors, and ambitious enterprise brands',
+      brandPositioning: 'Accelerating category dominance and customer acquisition with performance-driven creative strategy',
+      primaryHex: '#4F46E5',
+      competitors: [
+        { name: 'HubSpot', domain: 'hubspot.com', positioning: 'Inbound marketing, CRM and omnichannel customer platform', strengths: 'Industry-standard marketing methodology and content leadership', share: 44 },
+        { name: 'Ogilvy', domain: 'ogilvy.com', positioning: 'Global legacy creative advertising and strategic brand network', strengths: 'Decades of global brand storytelling and enterprise prestige', share: 28 },
+        { name: 'Sprout Social', domain: 'sproutsocial.com', positioning: 'Enterprise social media management, listening and intelligence', strengths: 'Deep social analytics and corporate team collaboration tooling', share: 16 },
+        { name: 'Semrush', domain: 'semrush.com', positioning: 'Comprehensive SEO, keyword intelligence and competitor analytics suite', strengths: 'Deep search index data and technical auditor capabilities', share: 12 }
+      ],
+      voiceSliders: { professionalCasual: 55, friendlyFormal: 25, boldSubtle: 30, premiumAccessible: 65, simpleComplex: 35 },
+      voiceTags: ['Creative', 'Strategic', 'Data-Driven', 'Impactful', 'High-Converting']
+    };
+  }
+
+  // 12. Logistics, Shipping, Courier & Freight
+  if (d.includes('ship') || d.includes('post') || d.includes('cargo') || d.includes('express') || d.includes('logistics') || c.includes('logistics') || c.includes('courier') || c.includes('shipping') || c.includes('freight') || c.includes('warehouse')) {
+    return {
+      industry: 'Logistics & Supply Chain Solutions',
+      businessCategory: 'Hyperlocal Logistics, B2B Freight & Express Parcel Fulfillment Network',
+      targetAudience: 'E-commerce merchants, enterprise shippers, manufacturers, and modern consumers',
+      brandPositioning: 'Connecting global commerce with resilient, technology-optimized logistics and real-time tracking',
+      primaryHex: '#047857',
+      competitors: [
+        { name: 'Delhivery', domain: 'delhivery.com', positioning: 'India’s largest fully integrated logistics and parcel fulfillment giant', strengths: 'Nationwide automated express hub infrastructure and high D2C volume', share: 42 },
+        { name: 'Blue Dart', domain: 'bluedart.com', positioning: 'Premium express air courier and guaranteed delivery provider', strengths: 'Aviation fleet control and reliable enterprise B2B delivery SLAs', share: 28 },
+        { name: 'FedEx', domain: 'fedex.com', positioning: 'Global priority freight and worldwide cross-border shipping leader', strengths: 'Unrivaled worldwide customs clearance and international air transport', share: 20 },
+        { name: 'Shiprocket', domain: 'shiprocket.in', positioning: 'Aggregated e-commerce shipping and multi-carrier merchant software', strengths: 'Deep Shopify/WooCommerce integration and automated courier allocation', share: 10 }
+      ],
+      voiceSliders: { professionalCasual: 30, friendlyFormal: 35, boldSubtle: 20, premiumAccessible: 65, simpleComplex: 45 },
+      voiceTags: ['Dependable', 'Precision-Timed', 'Networked', 'Secure', 'Resilient']
+    };
+  }
+
+  // 13. SaaS, Cloud, Developer Tools & AI
   if (d.includes('ai') || d.includes('io') || d.includes('dev') || d.includes('tech') || d.includes('cloud') || d.includes('app') || c.includes('software') || c.includes('developer') || c.includes('api') || c.includes('automation')) {
     return {
       industry: 'Software & Cloud Infrastructure',
@@ -376,33 +525,46 @@ function classifyDomainIntelligence(cleanDomainStr: string, textCorpus: string) 
       brandPositioning: 'Accelerating digital velocity and autonomous scale with next-generation software architecture',
       primaryHex: '#6366F1',
       competitors: [
-        { name: 'Vercel', domain: 'vercel.com', strengths: 'Frontend cloud deployment and Next.js leadership', share: 35 },
-        { name: 'Supabase', domain: 'supabase.com', strengths: 'Open source Firebase alternative with PostgreSQL power', share: 28 },
-        { name: 'Stripe', domain: 'stripe.com', strengths: 'Developer documentation benchmark and financial APIs', share: 24 },
-        { name: 'Datadog', domain: 'datadoghq.com', strengths: 'Enterprise observability and monitoring ecosystem', share: 18 }
+        { name: 'Vercel', domain: 'vercel.com', positioning: 'Frontend cloud platform & Next.js leader', strengths: 'Frontend cloud deployment and Next.js leadership', share: 35 },
+        { name: 'Supabase', domain: 'supabase.com', positioning: 'Open-source backend & database platform', strengths: 'Open source Firebase alternative with PostgreSQL power', share: 28 },
+        { name: 'Stripe', domain: 'stripe.com', positioning: 'Global economic payment infrastructure', strengths: 'Developer documentation benchmark and financial APIs', share: 24 },
+        { name: 'Datadog', domain: 'datadoghq.com', positioning: 'Cloud observability & monitoring suite', strengths: 'Enterprise observability and monitoring ecosystem', share: 18 }
       ],
       voiceSliders: { professionalCasual: 35, friendlyFormal: 25, boldSubtle: 25, premiumAccessible: 45, simpleComplex: 70 },
       voiceTags: ['Innovative', 'Developer-First', 'Engineered', 'Precise', 'High-Velocity']
     };
   }
 
-  // 7. General Enterprise / Business Default
+  // 14. Universal Dynamic Intelligent Fallback (Extracted from Title & Meta Description)
   const cleanParts = cleanDomainStr.split('.')[0].split(/[-_]/);
   const derivedBrandName = cleanParts.map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
 
+  let inferredIndustry = 'Consumer & Enterprise Operations';
+  let inferredCategory = 'Modern Performance-Driven Digital Platform';
+  if (c.includes('service') || c.includes('help') || c.includes('booking')) {
+    inferredIndustry = 'Consumer Services & On-Demand Booking';
+    inferredCategory = 'On-Demand Service Fulfillment Platform';
+  } else if (c.includes('platform') || c.includes('solution') || c.includes('manage')) {
+    inferredIndustry = 'Enterprise Technology & Operations';
+    inferredCategory = 'Digital Workflow & Operations Management Platform';
+  } else if (c.includes('product') || c.includes('buy') || c.includes('store')) {
+    inferredIndustry = 'Specialty Retail & Consumer Goods';
+    inferredCategory = 'Direct Consumer Brand & Product Store';
+  }
+
   return {
-    industry: 'Technology & Digital Innovation',
-    businessCategory: 'Modern Digital Platform & Performance Solutions Provider',
-    targetAudience: 'Commercial operators, enterprise decision-makers, and modern digital consumers',
-    brandPositioning: `${derivedBrandName} provides modern, performance-calibrated solutions engineered for organic search excellence and market leadership`,
-    primaryHex: '#2563EB',
+    industry: inferredIndustry,
+    businessCategory: inferredCategory,
+    targetAudience: 'Active digital consumers, forward-looking business operators, and modern households',
+    brandPositioning: `${derivedBrandName} delivers high-reliability solutions engineered for speed, convenience, and superior customer satisfaction`,
+    primaryHex: '#0F766E',
     competitors: [
-      { name: 'Industry Leader A', domain: `${cleanParts[0]}group.com`, strengths: 'Established brand awareness and enterprise footprint', share: 38 },
-      { name: 'Market Challenger B', domain: `${cleanParts[0]}digital.com`, strengths: 'Modern digital acquisition and rapid customer adoption', share: 32 },
-      { name: 'Global Standard C', domain: `${cleanParts[0]}global.com`, strengths: 'Global distribution channels and deep capital scale', share: 24 }
+      { name: `${derivedBrandName} Direct Peer`, domain: `${cleanParts[0]}market.com`, positioning: 'Direct category benchmark provider', strengths: 'Established brand footprint and distribution channel', share: 44 },
+      { name: `${derivedBrandName} Digital Hub`, domain: `${cleanParts[0]}online.com`, positioning: 'Digital-first alternative provider', strengths: 'Modern customer mobile acquisition agility', share: 32 },
+      { name: 'National Industry Leader', domain: `${cleanParts[0]}national.com`, positioning: 'Regional standard and enterprise network', strengths: 'Comprehensive legacy customer footprint', share: 24 }
     ],
-    voiceSliders: { professionalCasual: 40, friendlyFormal: 30, boldSubtle: 20, premiumAccessible: 50, simpleComplex: 50 },
-    voiceTags: ['Authoritative', 'Reliable', 'Solution-Oriented', 'Strategic', 'Data-Backed']
+    voiceSliders: { professionalCasual: 60, friendlyFormal: 25, boldSubtle: 20, premiumAccessible: 75, simpleComplex: 25 },
+    voiceTags: ['Authoritative', 'Reliable', 'Solution-Oriented', 'Customer-Centric', 'Data-Backed']
   };
 }
 
@@ -473,16 +635,24 @@ export async function extractBrandFromDomain(rawDomain: string): Promise<Extract
         primaryThemeColor = themeColorMatch[1].trim();
       }
 
-      // Real Logo from og:image or apple-touch-icon
-      const ogImgMatch = html.match(/<meta\s+property=["']og:image["']\s+content=["']([^"']+)["']/i);
-      if (ogImgMatch && ogImgMatch[1].trim() && !ogImgMatch[1].includes('favicon')) {
-        scrapedLogo = ogImgMatch[1].trim();
+      // Real Logo: Prioritize dedicated logo img, apple-touch-icon, or high-res icon (avoid marketing hero photos from og:image)
+      const logoImgMatch = html.match(/<img[^>]+(?:class|id|alt)=["'][^"']*(?:logo|brand)[^"']*["'][^>]+src=["']([^"']+)["']/i) ||
+                           html.match(/<img[^>]+src=["']([^"']+)["'][^>]+(?:class|id|alt)=["'][^"']*(?:logo|brand)[^"']*["']/i);
+      if (logoImgMatch && logoImgMatch[1].trim()) {
+        scrapedLogo = logoImgMatch[1].trim().startsWith('http')
+          ? logoImgMatch[1].trim()
+          : `https://${domain}/${logoImgMatch[1].trim().replace(/^\//, '')}`;
       } else {
         const appleIconMatch = html.match(/<link\s+rel=["']apple-touch-icon["']\s+href=["']([^"']+)["']/i);
         if (appleIconMatch && appleIconMatch[1].trim()) {
           scrapedLogo = appleIconMatch[1].trim().startsWith('http')
             ? appleIconMatch[1].trim()
             : `https://${domain}/${appleIconMatch[1].trim().replace(/^\//, '')}`;
+        } else {
+          const ogImgMatch = html.match(/<meta\s+property=["']og:image["']\s+content=["']([^"']+)["']/i);
+          if (ogImgMatch && ogImgMatch[1].trim() && (ogImgMatch[1].toLowerCase().includes('logo') || ogImgMatch[1].toLowerCase().includes('icon'))) {
+            scrapedLogo = ogImgMatch[1].trim();
+          }
         }
       }
     }
@@ -512,8 +682,8 @@ export async function extractBrandFromDomain(rawDomain: string): Promise<Extract
     : generateBrandPalette(finalPrimaryHex);
 
   // 4. Guaranteed High-Resolution Logo & Favicon
-  const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
-  const logoUrl = scrapedLogo || `https://img.logo.dev/${domain}?token=pk_anonymous&size=200`;
+  const faviconUrl = verified?.faviconUrl || `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+  const logoUrl = verified?.logoUrl || scrapedLogo || `https://www.google.com/s2/favicons?domain=${domain}&sz=256`;
 
   const currentDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 

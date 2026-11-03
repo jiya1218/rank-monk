@@ -527,7 +527,7 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
                           </div>
                         </td>
                         <td className="py-3 text-[#6f5a4c] max-w-xs truncate font-medium">
-                          {comp.positioning || 'Enterprise Energy Player'}
+                          {comp.positioning || `${cName} Market Segment`}
                         </td>
                         <td className="py-3 text-[#6f5a4c] max-w-xs truncate font-medium">
                           {comp.strengths || 'Established global market footprint'}
