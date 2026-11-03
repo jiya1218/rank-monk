@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import { semanticSortPalette, getSemanticColorRole } from '@/lib/brandExtractor';
 import {
   Sparkles,
   Edit2,
@@ -90,7 +91,7 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
 
   const palette: string[] = useMemo(() => {
     if (project?.palette && Array.isArray(project.palette) && project.palette.length > 0) {
-      return project.palette.slice(0, 4);
+      return semanticSortPalette(project.palette.slice(0, 4));
     }
     return ['#FF2E74', '#0F172A', '#F8FAFC', '#E2E8F0'];
   }, [project?.palette]);
@@ -409,8 +410,8 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
                 </div>
                 <div className={`grid ${palette.length <= 3 ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-4'} gap-2`}>
                   {palette.map((hex: string, i: number) => {
-                    const roles = ['Primary Brand', 'Secondary Accent', 'Dark Neutral', 'Light Surface'];
-                    const role = roles[i] || `Brand Color ${i + 1}`;
+                    const role = getSemanticColorRole(hex, i, i === 0);
+
                     return (
                       <div key={i} className="text-center group bg-[#f8f3ec] p-2 rounded-xl border border-[#e4d6c6]">
                         <div
@@ -425,7 +426,7 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
                         <span className="text-[10px] font-mono font-bold text-[#2b1b12] block mt-1 truncate">
                           {hex}
                         </span>
-                        <span className="text-[9px] font-medium text-[#6f5a4c] block truncate">
+                        <span className="text-[9px] font-bold text-[#6f5a4c] block truncate">
                           {role}
                         </span>
                       </div>

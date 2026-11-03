@@ -101,6 +101,88 @@ export function getColorSaturation(hex: string): number {
   return max === 0 ? 0 : (max - min) / max;
 }
 
+// Helper: Categorize color role based on actual color physics (luminance & saturation)
+export function getSemanticColorRole(hex: string, index: number = 0, isPrimary: boolean = false): string {
+  const norm = normalizeHexColor(hex);
+  if (!norm) return 'Brand Tone';
+  const lum = getColorLuminance(norm);
+  const sat = getColorSaturation(norm);
+
+  if (isPrimary || index === 0) {
+    if (lum <= 0.15) return 'Dark Primary';
+    return 'Primary Brand';
+  }
+  if (lum <= 0.22) return 'Dark Base / Canvas';
+  if (sat >= 0.25 && lum >= 0.40) return 'Electric Accent';
+  if (lum >= 0.82) return 'Light Surface';
+  if (sat <= 0.22) return 'Muted Slate';
+  return 'Secondary Accent';
+}
+
+// Semantically sort ANY palette into canonical order: [Primary Brand, Vibrant/Electric Accent, Dark Base, Light Surface]
+export function semanticSortPalette(palette: string[]): string[] {
+  if (!palette || !Array.isArray(palette) || palette.length === 0) {
+    return ['#2563EB', '#0F172A', '#F8FAFC', '#E2E8F0'];
+  }
+  const validHexes = palette
+    .map(normalizeHexColor)
+    .filter((h): h is string => Boolean(h));
+
+  if (validHexes.length === 0) {
+    return ['#2563EB', '#0F172A', '#F8FAFC', '#E2E8F0'];
+  }
+
+  // Saturated candidates (vibrant brand / accent candidate - must have sufficient luminance to not be dark canvas)
+  const saturated = validHexes.filter(h => getColorSaturation(h) > 0.22 && getColorLuminance(h) >= 0.18 && getColorLuminance(h) < 0.95);
+  // Dark Neutrals / Canvas (anything dark under 0.22 luminance)
+  const darks = validHexes.filter(h => getColorLuminance(h) < 0.22);
+  // Light Surfaces
+  const lights = validHexes.filter(h => getColorLuminance(h) >= 0.82);
+  // Mid Neutrals / Slate
+  const mids = validHexes.filter(h => getColorLuminance(h) > 0.22 && getColorLuminance(h) < 0.82 && getColorSaturation(h) <= 0.22);
+
+  const result: string[] = [];
+  const add = (h: string | undefined) => {
+    if (h && !result.includes(h) && !result.some(c => isColorTooClose(c, h))) {
+      result.push(h);
+    }
+  };
+
+  // 1. Primary Brand (most prominent saturated color)
+  if (saturated.length > 0) {
+    add(saturated[0]);
+  } else if (validHexes.length > 0) {
+    add(validHexes[0]);
+  }
+
+  // 2. Secondary Vibrant / Electric Accent (e.g. lime green #d3fdb1)
+  if (saturated.length > 1) {
+    add(saturated[1]);
+  } else if (lights.length > 0 && !result.includes(lights[0])) {
+    add(lights[0]);
+  }
+
+  // 3. Dark Base / Canvas / Typography (e.g. dark charcoal/black #0c0d0f)
+  if (darks.length > 0) {
+    add(darks[0]);
+  }
+
+  // 4. Light Surface / Muted Slate (e.g. slate #9a9a9a or clean card surface)
+  if (lights.length > 0) {
+    add(lights[0]);
+  } else if (mids.length > 0) {
+    add(mids[0]);
+  }
+
+  // Append any other unique colors if slots are empty
+  for (const h of validHexes) {
+    if (result.length >= 4) break;
+    add(h);
+  }
+
+  return result.slice(0, 4);
+}
+
 // Distance between two hex colors (to prevent almost identical duplicate swatches like #181818 and #191919)
 export function isColorTooClose(hex1: string, hex2: string): boolean {
   const r1 = parseInt(hex1.slice(1, 3), 16) || 0;
@@ -254,40 +336,58 @@ async function analyzeWithAI(domain: string, title: string, metaDesc: string, h1
     const isIndia = targetMarket.toLowerCase().includes('india') || targetMarket.toLowerCase() === 'in';
     const regionDirective = isIndia
       ? `TARGET GEOGRAPHIC REGION: PAN INDIA / INDIA (MANDATORY REQUIREMENT)
-The user has specifically selected their target market as INDIA / PAN INDIA.
-You MUST strictly return REAL DIRECT COMPETITORS OPERATING LOCALLY IN INDIA (for example, for on-demand home cleaning / maid / maintenance services in India, return real Indian companies like: Urban Company (urbancompany.com), Housejoy (housejoy.in), Broomberg (broomberg.in), NoBroker Home Services (nobroker.in), Helpr (helpr.in), Hicare (hicare.in)).
-NEVER return USA, UK, or global overseas companies like TaskRabbit or Handy when India is selected!`
+The user has specifically configured their business target market as INDIA / PAN INDIA.
+You MUST strictly return REAL DIRECT COMPETITORS THAT ACTIVELY OPERATE IN INDIA.`
       : `TARGET GEOGRAPHIC REGION: ${targetMarket}
-You MUST strictly return real competitors that actively operate in ${targetMarket}.`;
+You MUST strictly return REAL DIRECT COMPETITORS that actively operate in ${targetMarket}.`;
 
-    const prompt = `You are a world-class market research analyst.
-A user added the domain: "${domain}" to their SEO & Growth Engine.
+    const prompt = `You are an elite enterprise market research analyst and competitor intelligence auditor.
+A company has entered their domain: "${domain}" into their SEO & Competitive Strategy engine.
 Configured Target Market: "${targetMarket}"
 
 ${regionDirective}
 
-Here is the real data scraped from their website:
-- Title: "${title}"
+Live web content scraped directly from their official domain:
+- Page Title: "${title}"
 - Meta Description: "${metaDesc}"
 - Main Heading: "${h1}"
-- Content Snippet: "${pageText.slice(0, 1800)}"
+- Content Body Excerpt: "${pageText.slice(0, 2400)}"
 
-Analyze what this specific company actually does from their website content and return a raw JSON object (no markdown, no backticks, only JSON):
+CRITICAL COMPETITOR ACCURACY DIRECTIVE (ZERO TOLERANCE FOR MISALIGNMENT):
+1. CLASSIFY THE EXACT BUSINESS & VALUE DELIVERY MODEL FIRST:
+   Analyze the scraped content to identify how this company actually delivers value:
+   - Is it a B2B CUSTOM SERVICE / AGENCY / ENGINEERING CONSULTANCY? (e.g. custom AI automations, custom software development, digital marketing, website building, cybersecurity, dedicated client squads, bespoke engineering).
+     -> MANDATORY RULE: Competitors MUST be other real B2B software engineering, custom automation, or agency firms operating in ${targetMarket} (e.g. Simform, Appinventiv, Markovate, Wits Innovation Lab, Mobiloitte).
+     -> STRICTLY FORBIDDEN: Do NOT return platform product vendors, enterprise IVR banking chatbots (like Kore.ai, Avaamo, Haptik), or big tech platforms (like OpenAI, Google Cloud). An enterprise looking to hire a custom development agency would NEVER buy an IVR telecom bot license instead!
+   - Is it an ON-DEMAND LOCAL SERVICE / HOME SERVICE MARKETPLACE? (e.g. home cleaning, deep cleaning, maids, pest control, repairs).
+     -> MANDATORY RULE: Competitors MUST be rival on-demand local home/field service providers operating in ${targetMarket} (e.g. in India: Urban Company, Housejoy, Broomberg, NoBroker Home Services).
+     -> STRICTLY FORBIDDEN: Do NOT return cleaning chemical brands (Tide, Dettol) or appliance makers (Dyson).
+   - Is it a B2B SAAS / SOFTWARE PRODUCT? (selling subscriptions to an app/tool).
+     -> Competitors MUST be direct competing software tools solving the exact same operational task.
+   - Is it a DIRECT-TO-CONSUMER (D2C) / E-COMMERCE BRAND? (selling physical products like apparel, cosmetics, food).
+     -> Competitors MUST be rival consumer brands in the same product line and price tier.
+   - Is it a HEALTHCARE CLINIC / SPECIALTY PRACTICE? (e.g. dental chain, medical clinic, wellness studio).
+     -> Competitors MUST be rival clinical practices in that region.
+
+2. REAL ENTITIES ONLY:
+   - Return 4 REAL, WELL-KNOWN, VERIFIABLE companies with their actual production domains (e.g. "simform.com", "appinventiv.com", "urbancompany.com"). Never invent fake domains.
+
+Return strictly a valid raw JSON object (no markdown, no backticks, only JSON):
 {
   "name": "Official Brand Name",
-  "industry": "Specific Industry name",
-  "businessCategory": "Specific Business Category (8-14 words)",
+  "industry": "Specific Industry name (e.g. Artificial Intelligence & Custom Software Engineering)",
+  "businessCategory": "Specific Business Category (e.g. Enterprise AI Automation, Custom Software & Growth Systems)",
   "targetAudience": "Target Audience (10-18 words)",
   "brandPositioning": "1-2 sentence core value proposition based on their site",
-  "primaryHex": "#Hex color appropriate for their brand",
+  "primaryHex": "#Hex color from site",
   "competitors": [
-    { "name": "Real Competitor 1 in ${targetMarket}", "domain": "realcompetitor1.com", "positioning": "their market positioning in ${targetMarket}", "strengths": "key competitive strength", "share": 40 },
-    { "name": "Real Competitor 2 in ${targetMarket}", "domain": "realcompetitor2.com", "positioning": "their market positioning in ${targetMarket}", "strengths": "key competitive strength", "share": 30 },
-    { "name": "Real Competitor 3 in ${targetMarket}", "domain": "realcompetitor3.com", "positioning": "their market positioning in ${targetMarket}", "strengths": "key competitive strength", "share": 18 },
-    { "name": "Real Competitor 4 in ${targetMarket}", "domain": "realcompetitor4.com", "positioning": "their market positioning in ${targetMarket}", "strengths": "key competitive strength", "share": 12 }
+    { "name": "Real Verified Competitor 1", "domain": "realcompetitor1.com", "positioning": "their market positioning in ${targetMarket}", "strengths": "key competitive strength", "share": 40 },
+    { "name": "Real Verified Competitor 2", "domain": "realcompetitor2.com", "positioning": "their market positioning in ${targetMarket}", "strengths": "key competitive strength", "share": 30 },
+    { "name": "Real Verified Competitor 3", "domain": "realcompetitor3.com", "positioning": "their market positioning in ${targetMarket}", "strengths": "key competitive strength", "share": 18 },
+    { "name": "Real Verified Competitor 4", "domain": "realcompetitor4.com", "positioning": "their market positioning in ${targetMarket}", "strengths": "key competitive strength", "share": 12 }
   ],
   "voiceSliders": { "professionalCasual": 70, "friendlyFormal": 20, "boldSubtle": 25, "premiumAccessible": 80, "simpleComplex": 20 },
-  "voiceTags": ["VoiceTag1", "VoiceTag2", "VoiceTag3", "VoiceTag4"]
+  "voiceTags": ["Innovative", "Authoritative", "Results-Driven", "Engineering-Led"]
 }`;
 
     let rawText: string | undefined;
@@ -337,7 +437,7 @@ Analyze what this specific company actually does from their website content and 
   }
 }
 
-// Pure Dynamic Semantic Parser (Fallback if AI network is unavailable)
+// Pure Dynamic Semantic Parser (Guaranteed High-Fidelity Industry Matrix Fallback)
 function dynamicSemanticParser(domain: string, title: string, metaDesc: string, h1: string, pageText: string, targetMarket: string = 'Pan India') {
   const parts = domain.split('.')[0].split(/[-_]/);
   const derivedBrandName = parts.map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
@@ -352,69 +452,150 @@ function dynamicSemanticParser(domain: string, title: string, metaDesc: string, 
   }
 
   const combined = `${domain} ${title} ${metaDesc} ${h1} ${pageText}`.toLowerCase();
+  const isIndia = targetMarket.toLowerCase().includes('india') || targetMarket.toLowerCase() === 'in';
 
   // Dynamically determine industry & category from real scraped terminology
   let industry = 'Specialized Commercial Services';
   let category = 'Modern Direct-to-Consumer & Business Service Platform';
   let primaryHex = '#2563EB';
+  let regionalCompetitors: { name: string; domain: string; positioning: string; strengths: string; share: number }[] = [];
 
-  if (combined.includes('clean') || combined.includes('maid') || combined.includes('chore') || combined.includes('home service') || combined.includes('plumb') || combined.includes('repair')) {
+  if (combined.includes('clean') || combined.includes('maid') || combined.includes('chore') || combined.includes('home service') || combined.includes('plumb') || combined.includes('repair') || combined.includes('snabbit') || combined.includes('laundry')) {
     industry = 'Home Services & Domestic Assistance';
     category = 'On-Demand Domestic Chores, Home Cleaning & Maintenance Platform';
     primaryHex = '#F70F79';
-  } else if (combined.includes('food') || combined.includes('restaurant') || combined.includes('kitchen') || combined.includes('dining') || combined.includes('grocery')) {
+    regionalCompetitors = isIndia ? [
+      { name: 'Urban Company', domain: 'urbancompany.com', positioning: 'Leading Indian on-demand home cleaning, repairs and beauty services marketplace', strengths: 'Pan-India metro footprint with verified trained professionals', share: 45 },
+      { name: 'Housejoy', domain: 'housejoy.in', positioning: 'Full-suite residential deep cleaning, maintenance and facility operations', strengths: 'Deep presence in Bangalore, Delhi NCR and Mumbai', share: 28 },
+      { name: 'Broomberg', domain: 'broomberg.in', positioning: 'Specialized residential deep cleaning, sofa sanitization and kitchen care', strengths: 'Commercial equipment and certified eco-friendly solutions', share: 15 },
+      { name: 'NoBroker Home Services', domain: 'nobroker.in', positioning: 'Integrated home cleaning, painting and moving for urban homeowners', strengths: 'Enormous active tenant and residential ecosystem', share: 12 }
+    ] : [
+      { name: 'TaskRabbit', domain: 'taskrabbit.com', positioning: 'Global marketplace for trusted local everyday services and chores', strengths: 'Extensive on-demand local labor network', share: 42 },
+      { name: 'Handy', domain: 'handy.com', positioning: 'Top-rated home cleaning and handyman booking platform', strengths: 'Streamlined online scheduling and recurring booking', share: 30 },
+      { name: 'Molly Maid', domain: 'mollymaid.com', positioning: 'Established professional residential housekeeping and sanitization franchise', strengths: 'High customer trust and nationwide coverage', share: 18 },
+      { name: 'Merry Maids', domain: 'merrymaids.com', positioning: 'Customized domestic and commercial cleaning services', strengths: 'Insured, bonded, and vetted service teams', share: 10 }
+    ];
+  } else if (combined.includes('ai') || combined.includes('automation') || combined.includes('software') || combined.includes('growth') || combined.includes('agent') || combined.includes('engineering') || combined.includes('modernization') || combined.includes('cyber')) {
+    industry = 'Artificial Intelligence & Custom Software Engineering';
+    category = 'Enterprise AI Automation, Custom Software Development & Autonomous Growth Systems';
+    primaryHex = '#473BFD';
+    regionalCompetitors = isIndia ? [
+      { name: 'Simform', domain: 'simform.com', positioning: 'Digital product engineering, enterprise AI & cloud solutions', strengths: 'Agile enterprise delivery & modern tech stack', share: 40 },
+      { name: 'Appinventiv', domain: 'appinventiv.com', positioning: 'Enterprise digital transformation, AI applications & custom software', strengths: 'Large engineering footprint & Fortune 500 client base', share: 30 },
+      { name: 'Markovate', domain: 'markovate.com', positioning: 'AI workflow automation, agent squads & digital product design', strengths: 'Bespoke automation pipelines & rapid execution', share: 18 },
+      { name: 'Wits Innovation Lab', domain: 'witslab.com', positioning: 'Custom AI engineering, cloud modernization & intelligent workflows', strengths: 'Enterprise middleware & automation squads', share: 12 }
+    ] : [
+      { name: 'EPAM Systems', domain: 'epam.com', positioning: 'Global digital engineering, AI systems and transformation services', strengths: 'Deep enterprise scale and global engineering delivery', share: 42 },
+      { name: 'Thoughtworks', domain: 'thoughtworks.com', positioning: 'Pioneering custom software consultancy and enterprise AI architecture', strengths: 'Elite technical prestige and agile engineering practices', share: 32 },
+      { name: 'Slalom', domain: 'slalom.com', positioning: 'Modern strategy and custom cloud/AI solution architecture', strengths: 'High client-touch delivery and strategic alignment', share: 16 },
+      { name: 'Endava', domain: 'endava.com', positioning: 'Agile software engineering and digital acceleration provider', strengths: 'Rapid multi-market technical deployment', share: 10 }
+    ];
+  } else if (combined.includes('marketing') || combined.includes('seo') || combined.includes('growth') || combined.includes('ad agency') || combined.includes('social media')) {
+    industry = 'Digital Marketing & Growth Engine';
+    category = 'Performance Marketing, Search Optimization & Autonomous Brand Growth';
+    primaryHex = '#2563EB';
+    regionalCompetitors = isIndia ? [
+      { name: 'Schbang', domain: 'schbang.com', positioning: 'Integrated solutions agency blending creative, media and tech', strengths: '360-degree digital campaigns and large brand roster', share: 38 },
+      { name: 'Dentsu Webchutney', domain: 'webchutney.com', positioning: 'Award-winning creative and digital advertising powerhouse', strengths: 'High cultural resonance and elite brand recognition', share: 32 },
+      { name: 'Social Panga', domain: 'socialpanga.com', positioning: 'Creative growth agency driving performance and brand marketing', strengths: 'Fast execution and strong social engagement', share: 18 },
+      { name: 'WATConsult', domain: 'watconsult.com', positioning: 'Digital and social media agency with data-driven insights', strengths: 'Comprehensive market presence and analytics depth', share: 12 }
+    ] : [
+      { name: 'Single Grain', domain: 'singlegrain.com', positioning: 'ROI-driven digital marketing, SEO, and paid acquisition agency', strengths: 'Deep technical SEO and modern conversion funnels', share: 38 },
+      { name: 'Brainlabs', domain: 'brainlabsdigital.com', positioning: 'Global digital media and high-performance marketing agency', strengths: 'Scientific experimentation and programmatic scale', share: 32 },
+      { name: 'Impression', domain: 'impressiondigital.com', positioning: 'Multi-award winning search and digital performance agency', strengths: 'Search visibility dominance and enterprise auditing', share: 18 },
+      { name: 'Disruptive Advertising', domain: 'disruptiveadvertising.com', positioning: 'Full-service lifecycle marketing and paid ad optimization', strengths: 'Account management rigor and transparent reporting', share: 12 }
+    ];
+  } else if (combined.includes('dental') || combined.includes('teeth') || combined.includes('dentist') || combined.includes('orthodont')) {
+    industry = 'Dental Healthcare & Clinical Care';
+    category = 'Multispecialty Dental Care, Cosmetic Dentistry & Oral Health Services';
+    primaryHex = '#0D9488';
+    regionalCompetitors = isIndia ? [
+      { name: 'Clove Dental', domain: 'clovedental.in', positioning: 'Largest dental clinic network in India with 400+ branches', strengths: 'Standardized sterilisation protocols and nationwide scale', share: 45 },
+      { name: 'Sabka Dentist', domain: 'sabkadentist.com', positioning: 'Affordable, accessible dental clinic chain across major Indian cities', strengths: 'Transparent fixed pricing and extensive metro coverage', share: 28 },
+      { name: 'Apollo White Dental', domain: 'apollowhitedental.com', positioning: 'Premium dental hospital chain backed by Apollo Hospitals', strengths: 'Hospital-grade specialty dental infrastructure', share: 16 },
+      { name: 'Partha Dental', domain: 'parthadental.com', positioning: 'Leading dental care and implantology clinic network in South India', strengths: 'Deep regional foothold and advanced cosmetic treatments', share: 11 }
+    ] : [
+      { name: 'Aspen Dental', domain: 'aspendental.com', positioning: 'Nationwide network of accessible, comprehensive dental care centers', strengths: 'Massive geographic footprint and transparent financing', share: 44 },
+      { name: 'Heartland Dental', domain: 'heartland.com', positioning: 'Premier dental support organization supporting thousands of clinicians', strengths: 'Practice management excellence and modern technology', share: 30 },
+      { name: 'Pacific Dental Services', domain: 'pacificdentalservices.com', positioning: 'Integrated medical-dental healthcare support provider', strengths: 'Advanced CAD/CAM dentistry and holistic patient care', share: 26 }
+    ];
+  } else if (combined.includes('health') || combined.includes('medical') || combined.includes('doctor') || combined.includes('clinic')) {
+    industry = 'Healthcare & Life Sciences';
+    category = 'Digital Healthcare, Diagnostic Consultations & Patient Wellness';
+    primaryHex = '#0D9488';
+    regionalCompetitors = isIndia ? [
+      { name: 'Practo', domain: 'practo.com', positioning: 'India’s leading integrated digital healthcare and doctor consultation platform', strengths: 'Huge patient base and verified provider directory', share: 45 },
+      { name: 'Apollo 24|7', domain: 'apollo247.com', positioning: 'Comprehensive telehealth, pharmacy delivery and diagnostic booking', strengths: 'Backed by Apollo Hospitals’ prestigious healthcare ecosystem', share: 30 },
+      { name: 'Tata 1mg', domain: '1mg.com', positioning: 'Trusted digital healthcare platform for e-pharmacy and lab tests', strengths: 'High brand credibility and pan-India fulfillment', share: 15 },
+      { name: 'PharmEasy', domain: 'pharmeasy.in', positioning: 'Consumer healthcare super-app for medicines, tests and consultations', strengths: 'Aggressive pricing and rapid delivery logistics', share: 10 }
+    ] : [
+      { name: 'Teladoc Health', domain: 'teladoc.com', positioning: 'Global leader in whole-person virtual care and telehealth services', strengths: 'Enterprise health plan integration and global scale', share: 44 },
+      { name: 'Amwell', domain: 'amwell.com', positioning: 'Digital care delivery platform connecting patients with top providers', strengths: 'Hospital system integration and robust clinical workflows', share: 32 },
+      { name: 'Zocdoc', domain: 'zocdoc.com', positioning: 'Patient-centric doctor appointment scheduling and healthcare marketplace', strengths: 'Seamless booking UX and transparent patient reviews', share: 24 }
+    ];
+  } else if (combined.includes('shop') || combined.includes('store') || combined.includes('apparel') || combined.includes('fashion') || combined.includes('clothing') || combined.includes('wear') || combined.includes('snitch') || combined.includes('outfit')) {
+    industry = 'E-Commerce & Consumer Lifestyle';
+    category = 'Direct-to-Consumer Lifestyle, Apparel & Retail Merchandising';
+    primaryHex = '#E11D48';
+    regionalCompetitors = isIndia ? [
+      { name: 'The Souled Store', domain: 'thesouledstore.com', positioning: 'India’s biggest pop culture merchandise and casual streetwear brand', strengths: 'Massive loyal community and exclusive pop-culture licenses', share: 40 },
+      { name: 'Snitch', domain: 'snitch.co.in', positioning: 'Fast-fashion direct-to-consumer men’s apparel disruptor', strengths: 'Rapid design drops and viral Gen Z social acquisition', share: 30 },
+      { name: 'Rare Rabbit', domain: 'thehouseofrare.com', positioning: 'Premium contemporary men’s designer fashion and lifestyle label', strengths: 'High-end aesthetic positioning and strong retail presence', share: 18 },
+      { name: 'Bewakoof', domain: 'bewakoof.com', positioning: 'Affordable youth fashion, everyday apparel and creative basics', strengths: 'High volume and competitive price-to-value ratio', share: 12 }
+    ] : [
+      { name: 'ASOS', domain: 'asos.com', positioning: 'Global online fashion and cosmetic retailer catering to 20-somethings', strengths: 'Vast product catalog and seamless cross-border shipping', share: 42 },
+      { name: 'Gymshark', domain: 'gymshark.com', positioning: 'Pioneering fitness apparel and athletic accessories brand', strengths: 'World-class influencer community and cult brand loyalty', share: 32 },
+      { name: 'Everlane', domain: 'everlane.com', positioning: 'Modern apparel brand focused on radical transparency and sustainability', strengths: 'Ethical consumer appeal and minimalist timeless design', share: 26 }
+    ];
+  } else if (combined.includes('food') || combined.includes('restaurant') || combined.includes('kitchen') || combined.includes('dining') || combined.includes('culinary')) {
     industry = 'Food & Beverage / Culinary Delivery';
     category = 'On-Demand Dining, Food Discovery & Culinary Delivery Platform';
     primaryHex = '#FC8019';
-  } else if (combined.includes('shop') || combined.includes('store') || combined.includes('apparel') || combined.includes('fashion') || combined.includes('shoes') || combined.includes('wear')) {
-    industry = 'E-Commerce & Consumer Lifestyle';
-    category = 'Direct-to-Consumer Lifestyle & Retail Merchandising';
-    primaryHex = '#E11D48';
-  } else if (combined.includes('health') || combined.includes('care') || combined.includes('dental') || combined.includes('doctor') || combined.includes('clinic') || combined.includes('medical')) {
-    industry = 'Healthcare & Life Sciences';
-    category = 'Digital Healthcare, Patient Care & Medical Consultations';
-    primaryHex = '#0D9488';
-  } else if (combined.includes('pay') || combined.includes('bank') || combined.includes('fin') || combined.includes('fund') || combined.includes('invest') || combined.includes('card')) {
+    regionalCompetitors = isIndia ? [
+      { name: 'Swiggy', domain: 'swiggy.com', positioning: 'Leading Indian on-demand convenience and food ordering ecosystem', strengths: 'Dense hyperlocal delivery fleet and Swiggy Instamart synergy', share: 45 },
+      { name: 'Zomato', domain: 'zomato.com', positioning: 'Pioneering restaurant discovery and high-velocity food delivery superapp', strengths: 'Deep culinary restaurant reviews and Zomato Gold network', share: 42 },
+      { name: 'Rebel Foods', domain: 'rebelfoods.com', positioning: 'World’s largest internet restaurant and multi-brand cloud kitchen company', strengths: 'Faasos, Behrouz Biryani and Oven Story cloud kitchen dominance', share: 8 },
+      { name: 'Curefoods', domain: 'curefoods.in', positioning: 'Multi-brand cloud kitchen operator serving healthy, delicious meals', strengths: 'EatFit brand equity and rapid culinary innovation', share: 5 }
+    ] : [
+      { name: 'DoorDash', domain: 'doordash.com', positioning: 'Market-leading on-demand local logistics and restaurant delivery platform', strengths: 'Dominant North American suburban and metro footprint', share: 48 },
+      { name: 'Uber Eats', domain: 'ubereats.com', positioning: 'Global food delivery platform powered by the Uber rideshare ecosystem', strengths: 'Global driver density and frictionless cross-service app', share: 36 },
+      { name: 'Deliveroo', domain: 'deliveroo.com', positioning: 'High-end culinary delivery and editions cloud kitchens across Europe', strengths: 'Premium restaurant partnerships and rapid urban delivery', share: 16 }
+    ];
+  } else if (combined.includes('pay') || combined.includes('bank') || combined.includes('fin') || combined.includes('invest') || combined.includes('loan')) {
     industry = 'Financial Services & FinTech';
-    category = 'Digital Payments, Neobanking & Financial Solutions';
+    category = 'Digital Payments, Neobanking & Autonomous Financial Infrastructure';
     primaryHex = '#0284C7';
-  } else if (combined.includes('travel') || combined.includes('hotel') || combined.includes('flight') || combined.includes('tour') || combined.includes('stay')) {
-    industry = 'Travel, Hospitality & Tourism';
-    category = 'Curated Booking, Stays & Travel Management Platform';
-    primaryHex = '#EA580C';
-  } else if (combined.includes('fitness') || combined.includes('gym') || combined.includes('workout') || combined.includes('training')) {
-    industry = 'Fitness, Sports & Wellness';
-    category = 'Athletic Training, Studio Workouts & Health Coaching';
-    primaryHex = '#F97316';
-  } else if (combined.includes('real estate') || combined.includes('property') || combined.includes('housing') || combined.includes('apartment') || combined.includes('builder')) {
-    industry = 'Real Estate & Property Development';
-    category = 'Residential & Commercial Property Advisory and Marketplace';
-    primaryHex = '#0369A1';
-  } else if (combined.includes('software') || combined.includes('saas') || combined.includes('api') || combined.includes('cloud') || combined.includes('developer')) {
-    industry = 'Software & Cloud Infrastructure';
-    category = 'B2B Software-as-a-Service (SaaS) & Cloud Solutions';
-    primaryHex = '#6366F1';
+    regionalCompetitors = isIndia ? [
+      { name: 'Razorpay', domain: 'razorpay.com', positioning: 'India’s premier full-stack payments and neo-banking platform for businesses', strengths: 'Flawless developer APIs and high payment success rates', share: 45 },
+      { name: 'Cashfree', domain: 'cashfree.com', positioning: 'Payments and API banking solutions for high-growth Indian enterprises', strengths: 'Bulk payouts and instant vendor disbursal infrastructure', share: 28 },
+      { name: 'Pine Labs', domain: 'pinelabs.com', positioning: 'Omnichannel merchant commerce, smart POS and merchant financing platform', strengths: 'Dominant offline retail merchant penetration', share: 16 },
+      { name: 'PayU India', domain: 'payu.in', positioning: 'Leading digital payment gateway and credit provider for e-commerce', strengths: 'High-volume transaction processing and checkout trust', share: 11 }
+    ] : [
+      { name: 'Stripe', domain: 'stripe.com', positioning: 'Financial infrastructure for the internet, powering millions of businesses', strengths: 'Gold standard developer documentation and global coverage', share: 46 },
+      { name: 'Adyen', domain: 'adyen.com', positioning: 'End-to-end unified payments platform built for global enterprise scale', strengths: 'Direct omnichannel acquiring and robust fraud protection', share: 32 },
+      { name: 'Square', domain: 'squareup.com', positioning: 'Connected commerce and point-of-sale ecosystem for independent sellers', strengths: 'Sleek hardware and integrated merchant software suite', share: 22 }
+    ];
+  } else {
+    // Default high-grade professional B2B services
+    industry = 'Specialized Commercial Services';
+    category = 'Modern Direct-to-Consumer & Business Service Platform';
+    primaryHex = '#2563EB';
+    regionalCompetitors = isIndia ? [
+      { name: 'Simform', domain: 'simform.com', positioning: 'Digital product engineering, enterprise AI & cloud systems', strengths: 'Agile enterprise delivery & modern tech stack', share: 40 },
+      { name: 'Appinventiv', domain: 'appinventiv.com', positioning: 'Enterprise digital transformation, AI applications & custom software', strengths: 'Large engineering footprint & Fortune 500 client base', share: 30 },
+      { name: 'Markovate', domain: 'markovate.com', positioning: 'AI workflow automation, agent squads & digital product design', strengths: 'Bespoke automation pipelines & rapid execution', share: 18 },
+      { name: 'Wits Innovation Lab', domain: 'witslab.com', positioning: 'Custom AI engineering, cloud modernization & intelligent workflows', strengths: 'Enterprise middleware & automation squads', share: 12 }
+    ] : [
+      { name: 'EPAM Systems', domain: 'epam.com', positioning: 'Global digital engineering, AI systems and transformation services', strengths: 'Deep enterprise scale and global engineering delivery', share: 42 },
+      { name: 'Thoughtworks', domain: 'thoughtworks.com', positioning: 'Pioneering custom software consultancy and enterprise AI architecture', strengths: 'Elite technical prestige and agile engineering practices', share: 32 },
+      { name: 'Slalom', domain: 'slalom.com', positioning: 'Modern strategy and custom cloud/AI solution architecture', strengths: 'High client-touch delivery and strategic alignment', share: 16 },
+      { name: 'Endava', domain: 'endava.com', positioning: 'Agile software engineering and digital acceleration provider', strengths: 'Rapid multi-market technical deployment', share: 10 }
+    ];
   }
 
   const positioning = metaDesc.length > 20
     ? metaDesc
     : `${brandName} delivers verified, high-performance solutions engineered for speed, convenience, and superior customer trust.`;
-
-  const isIndia = targetMarket.toLowerCase().includes('india') || targetMarket.toLowerCase() === 'in';
-  let regionalCompetitors = [
-    { name: `${brandName} Direct Sector Peer`, domain: `${parts[0]}hub.com`, positioning: 'Direct market peer provider', strengths: 'Established regional distribution', share: 44 },
-    { name: `${brandName} Digital Alternative`, domain: `${parts[0]}digital.com`, positioning: 'Digital-first alternative provider', strengths: 'Modern mobile customer acquisition', share: 32 },
-    { name: 'National Industry Benchmark', domain: `${parts[0]}national.com`, positioning: 'Broad multi-region operator', strengths: 'Comprehensive legacy customer footprint', share: 24 }
-  ];
-
-  if (isIndia && (combined.includes('clean') || combined.includes('maid') || combined.includes('home service') || combined.includes('chore') || combined.includes('repair'))) {
-    regionalCompetitors = [
-      { name: 'Urban Company', domain: 'urbancompany.com', positioning: 'Leading Indian on-demand home cleaning and salon services marketplace', strengths: 'Pan-India presence and verified trained service professionals', share: 45 },
-      { name: 'Housejoy', domain: 'housejoy.in', positioning: 'Full-suite home deep cleaning, repairs and maintenance across Indian metros', strengths: 'Established presence across Bangalore, Delhi and Mumbai', share: 28 },
-      { name: 'Broomberg', domain: 'broomberg.in', positioning: 'Premium specialized deep cleaning, sofa and kitchen sanitization in India', strengths: 'Commercial-grade equipment and specialized chemicals', share: 15 },
-      { name: 'NoBroker Home Services', domain: 'nobroker.in', positioning: 'On-demand house cleaning, painting and moving services across major Indian cities', strengths: 'Huge active Indian tenant and homeowner ecosystem', share: 12 }
-    ];
-  }
 
   return {
     name: brandName,
@@ -561,11 +742,11 @@ export async function extractBrandFromDomain(rawDomain: string, targetMarket: st
     intelligence = dynamicSemanticParser(domain, title, metaDesc, h1, pageTextSnippet, targetMarket);
   }
 
-  // 4. Construct Authentic Brand Palette (Direct from Website)
+  // 4. Construct Authentic Brand Palette (Direct from Website, Sorted Semantically)
   const sitePrimaryHex = (scrapedPalette.length > 0) ? scrapedPalette[0] : primaryThemeColor;
   const finalPrimaryHex = sitePrimaryHex || intelligence.primaryHex || '#2563EB';
   const brandPalette = (scrapedPalette.length >= 2)
-    ? scrapedPalette
+    ? semanticSortPalette(scrapedPalette)
     : generateBrandPalette(finalPrimaryHex);
 
   // 5. Guaranteed High-Resolution Logo & Favicon

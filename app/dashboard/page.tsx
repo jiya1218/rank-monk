@@ -12,6 +12,7 @@ import { ComingSoonWorkspace } from '@/components/dashboard/ComingSoonWorkspace'
 import { SocialStudio } from '@/components/dashboard/SocialStudio';
 import { IntegrationsWorkspace } from '@/components/dashboard/IntegrationsWorkspace';
 import { DomainCrawlerProgress } from '@/components/domain/DomainCrawlerProgress';
+import { semanticSortPalette } from '@/lib/brandExtractor';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -73,12 +74,53 @@ export default function DashboardPage() {
       const savedGeminiKey = localStorage.getItem('rankmonk_gemini_key');
       if (savedGeminiKey) setGeminiApiKey(savedGeminiKey);
 
+      // Auto-heal legacy project data if competitor is misaligned or palette order is inverted
+      const healProjectIfNeeded = (proj: any) => {
+        if (!proj) return { project: proj, updated: false };
+        let updated = false;
+        const p = { ...proj };
+
+        // If Scalezix has legacy chatbot IVR bots (kore.ai / avaamo.ai / haptik), replace with genuine B2B AI & software engineering competitors
+        if (p.domain && p.domain.toLowerCase().includes('scalezix')) {
+          const hasLegacyBots = p.competitors?.some((c: any) =>
+            c.domain?.includes('kore.ai') || c.domain?.includes('avaamo') || c.domain?.includes('haptik') || c.name?.includes('Kore.ai')
+          );
+          if (hasLegacyBots || !p.competitors || p.competitors.length === 0) {
+            p.competitors = [
+              { name: 'Simform', domain: 'simform.com', positioning: 'Digital product engineering, enterprise AI & cloud systems', strengths: 'Agile enterprise delivery & modern tech stack', share: 40 },
+              { name: 'Appinventiv', domain: 'appinventiv.com', positioning: 'Enterprise digital transformation, AI applications & custom software', strengths: 'Large engineering footprint & Fortune 500 client base', share: 30 },
+              { name: 'Markovate', domain: 'markovate.com', positioning: 'AI workflow automation, agent squads & digital product design', strengths: 'Bespoke automation pipelines & rapid execution', share: 18 },
+              { name: 'Wits Innovation Lab', domain: 'witslab.com', positioning: 'Custom AI engineering, cloud modernization & intelligent workflows', strengths: 'Enterprise middleware & automation squads', share: 12 }
+            ];
+            p.industry = 'Artificial Intelligence & Custom Software Engineering';
+            p.businessCategory = 'Enterprise AI Automation, Custom Software & Autonomous Growth Systems';
+            p.palette = ['#473bfd', '#d3fdb1', '#0c0d0f', '#9a9a9a'];
+            updated = true;
+          }
+        }
+
+        // Canonical semantic sorting for brand palette
+        if (p.palette && Array.isArray(p.palette) && p.palette.length > 0) {
+          const sorted = semanticSortPalette(p.palette);
+          if (JSON.stringify(sorted) !== JSON.stringify(p.palette)) {
+            p.palette = sorted;
+            updated = true;
+          }
+        }
+
+        return { project: p, updated };
+      };
+
       // 2. Multi-Domain Workspace for jiyapatel181224@gmail.com vs Single Domain for Production
       if (u.email?.toLowerCase() === 'jiyapatel181224@gmail.com') {
         const savedMulti = localStorage.getItem('rankmonk_multi_projects_jiyapatel');
         let list: any[] = [];
         if (savedMulti) {
-          try { list = JSON.parse(savedMulti); } catch (e) {}
+          try {
+            const rawList = JSON.parse(savedMulti);
+            list = rawList.map((item: any) => healProjectIfNeeded(item).project);
+            localStorage.setItem('rankmonk_multi_projects_jiyapatel', JSON.stringify(list));
+          } catch (e) {}
         }
         setAdminDomainList(list);
 
@@ -86,22 +128,28 @@ export default function DashboardPage() {
         if (activeSaved) {
           try {
             const parsed = JSON.parse(activeSaved);
-            setProject(parsed);
-            if (parsed.mediaAssets) setGeneratedMediaList(parsed.mediaAssets);
+            const { project: healed, updated } = healProjectIfNeeded(parsed);
+            setProject(healed);
+            if (updated) localStorage.setItem('rankmonk_active_project', JSON.stringify(healed));
+            if (healed.mediaAssets) setGeneratedMediaList(healed.mediaAssets);
           } catch (e) {}
         } else if (list.length > 0) {
-          setProject(list[0]);
-          if (list[0].mediaAssets) setGeneratedMediaList(list[0].mediaAssets);
+          const { project: healed, updated } = healProjectIfNeeded(list[0]);
+          setProject(healed);
+          if (updated) localStorage.setItem('rankmonk_active_project', JSON.stringify(healed));
+          if (healed.mediaAssets) setGeneratedMediaList(healed.mediaAssets);
         } else if (u.domain) {
           const userProjectKey = `rankmonk_project_${u.email.toLowerCase()}`;
           const rawProject = localStorage.getItem(userProjectKey);
           if (rawProject) {
             try {
               const p = JSON.parse(rawProject);
-              setProject(p);
-              const initialList = [p];
+              const { project: healed } = healProjectIfNeeded(p);
+              setProject(healed);
+              const initialList = [healed];
               setAdminDomainList(initialList);
               localStorage.setItem('rankmonk_multi_projects_jiyapatel', JSON.stringify(initialList));
+              localStorage.setItem('rankmonk_active_project', JSON.stringify(healed));
             } catch (e) {}
           }
         }
@@ -116,8 +164,13 @@ export default function DashboardPage() {
           if (rawProject) {
             const p = JSON.parse(rawProject);
             if (p.domain === u.domain) {
-              setProject(p);
-              if (p.mediaAssets) setGeneratedMediaList(p.mediaAssets);
+              const { project: healed, updated } = healProjectIfNeeded(p);
+              setProject(healed);
+              if (updated) {
+                localStorage.setItem(userProjectKey, JSON.stringify(healed));
+                localStorage.setItem('rankmonk_active_project', JSON.stringify(healed));
+              }
+              if (healed.mediaAssets) setGeneratedMediaList(healed.mediaAssets);
             } else {
               setProject(null);
               localStorage.removeItem('rankmonk_active_project');
@@ -266,6 +319,9 @@ export default function DashboardPage() {
     const multi = JSON.parse(localStorage.getItem('rankmonk_multi_projects_jiyapatel') || '[]');
     const found = multi.find((p: any) => p.domain?.toLowerCase() === targetDomain.toLowerCase());
     if (found) {
+      if (found.palette && Array.isArray(found.palette)) {
+        found.palette = semanticSortPalette(found.palette);
+      }
       setProject(found);
       localStorage.setItem('rankmonk_active_project', JSON.stringify(found));
       if (user) {
