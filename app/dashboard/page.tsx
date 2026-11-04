@@ -114,6 +114,16 @@ export default function DashboardPage() {
           p.logoUrl = 'https://solospider.ai/assets/solospider-logo.png';
           p.faviconUrl = 'https://solospider.ai/favicon.ico?2bdf02b23e50a3f9';
           updated = true;
+        } else if (p.domain && p.domain.toLowerCase().includes('giva.co') && (!p.logoUrl || p.logoUrl.includes('Frame_1171278262') || p.logoUrl.toLowerCase().includes('under1000') || p.logoUrl === p.faviconUrl)) {
+          p.logoUrl = 'https://www.giva.co/cdn/shop/files/logo__3.png';
+          p.faviconUrl = 'https://www.giva.co/cdn/shop/files/logo_1.png?crop=center&height=32&v=1753859223&width=32';
+          updated = true;
+        }
+
+        // Universal bad logo check (reject promo banners, price tags like Under 1000, etc.)
+        if (p.logoUrl && (p.logoUrl.includes('Frame_1171278262') || p.logoUrl.toLowerCase().includes('under1000') || p.logoUrl.toLowerCase().includes('under-1000') || p.logoUrl.toLowerCase().includes('grandchild-pill'))) {
+          p.logoUrl = p.domain && p.domain.toLowerCase().includes('giva.co') ? 'https://www.giva.co/cdn/shop/files/logo__3.png' : '';
+          updated = true;
         }
 
         // Generic fallback auto-heal for all domains if fields are missing
@@ -977,11 +987,11 @@ export default function DashboardPage() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="text-xs font-bold text-[#2b1b12] truncate flex items-center justify-between">
-                    <span>https://{project.domain?.replace(/^https?:\/\//i, '').replace(/\/$/, '')}</span>
-                    {isSuperAdminTester && <span className="text-[10px] text-[#c5a059]">▼</span>}
+                    <span className="truncate">{project.name || project.domain?.replace(/^https?:\/\//i, '').replace(/\/$/, '')}</span>
+                    {isSuperAdminTester && <span className="text-[10px] text-[#c5a059] shrink-0 ml-1">▼</span>}
                   </div>
-                  <div className="text-[10px] text-purple-700 font-bold bg-purple-50 px-2 py-0.5 rounded-md inline-block mt-0.5 border border-purple-200">
-                    {user?.plan || 'Scale'} Plan {isSuperAdminTester ? '• Multi-Domain Dev' : ''}
+                  <div className="text-[11px] text-[#8c7464] font-medium truncate">
+                    {project.domain?.replace(/^https?:\/\//i, '').replace(/\/$/, '')}
                   </div>
                 </div>
               </div>

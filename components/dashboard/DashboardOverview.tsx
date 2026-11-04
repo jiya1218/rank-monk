@@ -134,8 +134,9 @@ export function DashboardOverview({ project, user, onNavigateTab }: DashboardOve
           onClick={() => !gscConnected && setGscModalOpen(true)}
           className="bg-white rounded-2xl p-5 border border-[#e4d6c6] shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[160px] cursor-pointer hover:border-[#c5a059] transition-all group"
         >
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2 relative z-20">
             <h3 className="text-[#6f5a4c] font-black text-[11px] uppercase tracking-wider">Organic Traffic</h3>
+            <span className="text-[9px] font-bold text-amber-800 bg-amber-50 border border-amber-200/70 rounded px-1.5 py-0.5">GSC</span>
           </div>
           {gscConnected ? (
             <div className="mt-2">
@@ -152,13 +153,16 @@ export function DashboardOverview({ project, user, onNavigateTab }: DashboardOve
                 <div className="text-2xl font-black text-slate-800">8,210</div>
                 <div className="h-6 w-full bg-gradient-to-r from-emerald-100 to-emerald-200 rounded" />
               </div>
-              {/* Overlay Glass Badge */}
-              <div className="absolute inset-0 bg-[#fffcf7]/70 backdrop-blur-[2px] flex flex-col items-center justify-center p-3 text-center">
-                <span className="px-2.5 py-0.5 bg-[#f1e8dc] text-[#7a5242] border border-[#d8c09e] rounded-md text-[10px] font-black tracking-wider uppercase mb-1">
-                  GSC Required
+              {/* Overlay Glass Badge with clear heading */}
+              <div className="absolute inset-x-0 top-[46px] bottom-0 z-10 bg-[#fffcf7]/85 backdrop-blur-[2px] rounded-b-2xl flex flex-col items-center justify-center p-3 text-center">
+                <span className="px-2 py-0.5 bg-[#f1e8dc] text-[#7a5242] border border-[#d8c09e] rounded-md text-[9px] font-black tracking-wider uppercase mb-1">
+                  Google Search Console Required
                 </span>
-                <span className="text-[11px] font-bold text-[#2b1b12] group-hover:underline">
-                  Connect to unlock metric
+                <span className="text-xs font-bold text-[#2b1b12]">
+                  Organic Traffic Clicks
+                </span>
+                <span className="text-[10px] text-[#6f5a4c] group-hover:underline mt-0.5 font-medium">
+                  Connect GSC to view data →
                 </span>
               </div>
             </>
@@ -170,8 +174,9 @@ export function DashboardOverview({ project, user, onNavigateTab }: DashboardOve
           onClick={() => !gscConnected && setGscModalOpen(true)}
           className="bg-white rounded-2xl p-5 border border-[#e4d6c6] shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[160px] cursor-pointer hover:border-[#c5a059] transition-all group"
         >
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2 relative z-20">
             <h3 className="text-[#6f5a4c] font-black text-[11px] uppercase tracking-wider">Total Impressions</h3>
+            <span className="text-[9px] font-bold text-amber-800 bg-amber-50 border border-amber-200/70 rounded px-1.5 py-0.5">GSC</span>
           </div>
           {gscConnected ? (
             <div className="mt-2">
@@ -187,12 +192,15 @@ export function DashboardOverview({ project, user, onNavigateTab }: DashboardOve
                 <div className="text-2xl font-black text-slate-800">42.5K</div>
                 <div className="h-6 w-full bg-gradient-to-r from-purple-100 to-purple-200 rounded" />
               </div>
-              <div className="absolute inset-0 bg-[#fffcf7]/70 backdrop-blur-[2px] flex flex-col items-center justify-center p-3 text-center">
-                <span className="px-2.5 py-0.5 bg-[#f1e8dc] text-[#7a5242] border border-[#d8c09e] rounded-md text-[10px] font-black tracking-wider uppercase mb-1">
-                  GSC Required
+              <div className="absolute inset-x-0 top-[46px] bottom-0 z-10 bg-[#fffcf7]/85 backdrop-blur-[2px] rounded-b-2xl flex flex-col items-center justify-center p-3 text-center">
+                <span className="px-2 py-0.5 bg-[#f1e8dc] text-[#7a5242] border border-[#d8c09e] rounded-md text-[9px] font-black tracking-wider uppercase mb-1">
+                  Google Search Console Required
                 </span>
-                <span className="text-[11px] font-bold text-[#2b1b12] group-hover:underline">
-                  Connect to unlock metric
+                <span className="text-xs font-bold text-[#2b1b12]">
+                  SERP Impressions Volume
+                </span>
+                <span className="text-[10px] text-[#6f5a4c] group-hover:underline mt-0.5 font-medium">
+                  Connect GSC to view data →
                 </span>
               </div>
             </>
@@ -204,8 +212,9 @@ export function DashboardOverview({ project, user, onNavigateTab }: DashboardOve
           onClick={() => !gscConnected && setGscModalOpen(true)}
           className="bg-white rounded-2xl p-5 border border-[#e4d6c6] shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[160px] cursor-pointer hover:border-[#c5a059] transition-all group"
         >
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2 relative z-20">
             <h3 className="text-[#6f5a4c] font-black text-[11px] uppercase tracking-wider">Backlinks</h3>
+            <span className="text-[9px] font-bold text-amber-800 bg-amber-50 border border-amber-200/70 rounded px-1.5 py-0.5">GSC</span>
           </div>
           {gscConnected ? (
             <div className="mt-2">
@@ -221,12 +230,15 @@ export function DashboardOverview({ project, user, onNavigateTab }: DashboardOve
                 <div className="text-2xl font-black text-slate-800">320</div>
                 <div className="h-6 w-full bg-gradient-to-r from-blue-100 to-blue-200 rounded" />
               </div>
-              <div className="absolute inset-0 bg-[#fffcf7]/70 backdrop-blur-[2px] flex flex-col items-center justify-center p-3 text-center">
-                <span className="px-2.5 py-0.5 bg-[#f1e8dc] text-[#7a5242] border border-[#d8c09e] rounded-md text-[10px] font-black tracking-wider uppercase mb-1">
-                  GSC Required
+              <div className="absolute inset-x-0 top-[46px] bottom-0 z-10 bg-[#fffcf7]/85 backdrop-blur-[2px] rounded-b-2xl flex flex-col items-center justify-center p-3 text-center">
+                <span className="px-2 py-0.5 bg-[#f1e8dc] text-[#7a5242] border border-[#d8c09e] rounded-md text-[9px] font-black tracking-wider uppercase mb-1">
+                  Google Search Console Required
                 </span>
-                <span className="text-[11px] font-bold text-[#2b1b12] group-hover:underline">
-                  Connect to unlock metric
+                <span className="text-xs font-bold text-[#2b1b12]">
+                  Verified Backlinks
+                </span>
+                <span className="text-[10px] text-[#6f5a4c] group-hover:underline mt-0.5 font-medium">
+                  Connect GSC to view data →
                 </span>
               </div>
             </>
@@ -347,14 +359,17 @@ export function DashboardOverview({ project, user, onNavigateTab }: DashboardOve
           {/* Central Overlay Box for GSC Connection */}
           <div className="absolute inset-x-6 top-16 bottom-6 bg-[#fffcf7]/95 border border-[#e4d6c6] rounded-2xl p-5 flex flex-col items-center justify-center text-center shadow-lg">
             <span className="px-3 py-1 bg-[#f1e8dc] text-[#7a5242] border border-[#d8c09e] rounded-full text-[10px] font-black uppercase tracking-wider mb-2">
-              GSC Required
+              Google Search Console Required
             </span>
+            <h4 className="font-bold text-sm text-[#2b1b12] mb-1">
+              Organic Search & Impression Trends
+            </h4>
             <p className="text-xs text-[#6f5a4c] max-w-sm mb-4 leading-relaxed">
-              Google Search Console connection is required to show real-time organic search traffic trends and keyword positions.
+              Connect Google Search Console to stream real-time daily organic clicks, impressions, and keyword SERP positions{project?.domain ? ` for ${project.domain}` : ''}.
             </p>
             <button
               onClick={() => setGscModalOpen(true)}
-              className="px-5 py-2.5 bg-[#2b1b12] hover:bg-[#3b2519] text-[#fffcf7] rounded-xl text-xs font-bold shadow-sm transition-all cursor-pointer"
+              className="px-5 py-2.5 bg-[#2b1b12] hover:bg-[#3b2519] text-[#fffcf7] rounded-xl text-xs font-bold shadow-sm transition-all cursor-pointer hover:shadow-md"
             >
               Connect Google Search Console
             </button>

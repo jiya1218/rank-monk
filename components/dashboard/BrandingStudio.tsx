@@ -779,9 +779,15 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
                   <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Logo</span>
                   <div className="h-16 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center p-2 overflow-hidden shadow-xs">
                     {(() => {
-                      const displayLogo = (!logoFailed && project?.logoUrl && project.logoUrl !== project?.faviconUrl && !project.logoUrl.includes('google.com/s2/favicons'))
+                      const isBadPromo = project?.logoUrl && (
+                        project.logoUrl.includes('Frame_1171278262') ||
+                        project.logoUrl.toLowerCase().includes('under1000') ||
+                        project.logoUrl.toLowerCase().includes('under-1000') ||
+                        project.logoUrl.toLowerCase().includes('grandchild-pill')
+                      );
+                      const displayLogo = (!logoFailed && project?.logoUrl && !isBadPromo && project.logoUrl !== project?.faviconUrl && !project.logoUrl.includes('google.com/s2/favicons'))
                         ? project.logoUrl
-                        : null;
+                        : (cleanDomain.includes('giva.co') ? 'https://www.giva.co/cdn/shop/files/logo__3.png' : null);
 
                       return displayLogo ? (
                         <img

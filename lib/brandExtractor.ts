@@ -1067,19 +1067,51 @@ export function isFaviconAsset(url: string): boolean {
   );
 }
 
+export function isPromoOrBannerAsset(url: string, alt: string = '', text: string = ''): boolean {
+  const combined = `${url} ${alt} ${text}`.toLowerCase();
+  const badPatterns = [
+    'under-1', 'under 1', 'under-2', 'under 2', 'under-3', 'under 3', 'under-5', 'under 5',
+    'under1000', 'under2000', 'under3000', 'under5000',
+    'banner', 'promo', 'discount', 'sale', 'offer', 'deal', 'bogo', 'buy 1 get 1',
+    'grandchild-pill', 'product', 'collection', 'category', 'payment', 'checkout',
+    'cart', 'shipping', 'delivery', 'guarantee', 'rating', 'review', 'star',
+    'instagram', 'facebook', 'twitter', 'youtube', 'linkedin', 'tiktok',
+    'badge', 'award', 'flag', 'arrow', 'chevron', 'close', 'hamburger', 'logout',
+    'placeholder', 'dummy'
+  ];
+  return badPatterns.some(p => combined.includes(p));
+}
+
+export function isTrueRootHref(href: string, domain: string): boolean {
+  if (!href) return false;
+  const h = href.trim();
+  if (h === '/' || h === './' || h === '') return true;
+  const cleanD = domain.replace(/^https?:\/\//i, '').replace(/^www\./i, '').replace(/\/.*$/, '').toLowerCase();
+  const regex = new RegExp(`^https?:\\/\\/(?:www\\.)?${cleanD.replace(/\\./g, '\\.')}\\/?(?:[?#][^"']*)?$`, 'i');
+  return regex.test(h);
+}
+
 export function extractDynamicLogo(html: string, domain: string, brandName: string = ''): string | null {
   if (!html) return null;
 
-  const candidateScores: { url: string; score: number; reason: string }[] = [];
+  const candidateScores: { url: string; score: number; reason: string; alt?: string }[] = [];
+  const cleanD = domain.replace(/^https?:\/\//i, '').replace(/^www\./i, '').replace(/\/.*$/, '').toLowerCase();
+  const brandSlug = (brandName || cleanD.split('.')[0]).toLowerCase().replace(/[^a-z0-9]/g, '');
 
-  const addCandidate = (rawUrl: string, score: number, reason: string, htmlContext: string = '') => {
+  const addCandidate = (rawUrl: string, score: number, reason: string, htmlContext: string = '', altText: string = '') => {
     const fullUrl = cleanAndAbsoluteAssetUrl(rawUrl, domain);
     if (!fullUrl) return;
     if (isFaviconAsset(fullUrl) && score < 100) return;
 
+    // Strict Promo / Category / Price Banner Reject
+    if (isPromoOrBannerAsset(fullUrl, altText, htmlContext)) {
+      return;
+    }
+
     let finalScore = score;
     const lUrl = fullUrl.toLowerCase();
     const lCtx = htmlContext.toLowerCase();
+    const lAlt = altText.toLowerCase();
 
     // Prefer dark/standard variants for crisp visibility on light cards
     if (lUrl.includes('dark') || lCtx.includes('dark:hidden')) {
@@ -1094,63 +1126,17 @@ export function extractDynamicLogo(html: string, domain: string, brandName: stri
     if (lUrl.endsWith('.svg') || lUrl.includes('.svg?')) finalScore += 15;
     if (lUrl.includes('transparent')) finalScore += 10;
 
-    candidateScores.push({ url: fullUrl, score: finalScore, reason });
+    // Boost if brand name slug is present in alt, url, or context
+    if (brandSlug && brandSlug.length >= 3) {
+      if (lAlt.includes(brandSlug)) finalScore += 35;
+      if (lUrl.includes(brandSlug)) finalScore += 25;
+      if (lCtx.includes(brandSlug)) finalScore += 15;
+    }
+
+    candidateScores.push({ url: fullUrl, score: finalScore, reason, alt: altText });
   };
 
-  // 1. Inspect <header> or <nav> elements (Primary location for all website logos)
-  const navHeaderMatches = html.match(/<(?:header|nav)[^>]*>([\s\S]*?)<\/(?:header|nav)>/gi) || [];
-  for (const block of navHeaderMatches) {
-    // 1a. Look for root link <a href="/">...</a> inside header/nav
-    const rootLinkMatches = block.match(/<a\b[^>]*href=["'](?:\/|https?:\/\/(?:www\.)?[^"']+\/?)["'][^>]*>([\s\S]*?)<\/a>/gi) || [];
-    for (const rootLink of rootLinkMatches) {
-      const imgMatches = rootLink.match(/<img\b[^>]+>/gi) || [];
-      for (const img of imgMatches) {
-        const srcMatch = img.match(/\bsrc=["']([^"']+)["']/i);
-        if (srcMatch && srcMatch[1]) {
-          addCandidate(srcMatch[1], 120, 'Header/Nav Root Link <img>', img);
-        }
-        const srcsetMatch = img.match(/\bsrcSet=["']([^"']+)["']/i);
-        if (srcsetMatch && srcsetMatch[1]) {
-          const firstSrc = srcsetMatch[1].split(',')[0].trim().split(/\s+/)[0];
-          if (firstSrc) addCandidate(firstSrc, 115, 'Header/Nav Root Link <img srcset>', img);
-        }
-      }
-
-      if (imgMatches.length === 0) {
-        const svgMatch = rootLink.match(/<svg\b[^>]*>[\s\S]*?<\/svg>/i);
-        if (svgMatch && svgMatch[0] && svgMatch[0].length < 8000) {
-          const svgClean = svgMatch[0].replace(/[\r\n\t]+/g, ' ').trim();
-          const svgDataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(svgClean)}`;
-          candidateScores.push({ url: svgDataUrl, score: 110, reason: 'Header/Nav Root Link Inline <svg>' });
-        }
-      }
-    }
-
-    // 1b. Any <img> with alt or class containing logo inside header/nav
-    const headerImgs = block.match(/<img\b[^>]+>/gi) || [];
-    for (const img of headerImgs) {
-      const srcMatch = img.match(/\bsrc=["']([^"']+)["']/i);
-      if (!srcMatch || !srcMatch[1]) continue;
-      const lowerImg = img.toLowerCase();
-      if (lowerImg.includes('logo') || lowerImg.includes('brand')) {
-        addCandidate(srcMatch[1], 95, 'Header/Nav <img> with logo class/alt', img);
-      }
-    }
-  }
-
-  // 2. Preload image links with "logo" (e.g. SoloSpider: <link rel="preload" as="image" href="/assets/solospider-logo.png"/>)
-  const preloadMatches = html.match(/<link\b[^>]+rel=["']preload["'][^>]+as=["']image["'][^>]*>/gi) || [];
-  for (const link of preloadMatches) {
-    const hrefMatch = link.match(/href=["']([^"']+)["']/i);
-    if (hrefMatch && hrefMatch[1]) {
-      const href = hrefMatch[1];
-      if (href.toLowerCase().includes('logo') || href.toLowerCase().includes('brand')) {
-        addCandidate(href, 90, 'Preload Logo Image Link', link);
-      }
-    }
-  }
-
-  // 3. Schema.org Structured Data
+  // 1. Schema.org Structured Data (Highest authority: explicit developer machine-readable declaration)
   const jsonLdMatches = Array.from(html.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi));
   for (const match of jsonLdMatches) {
     try {
@@ -1159,36 +1145,141 @@ export function extractDynamicLogo(html: string, domain: string, brandName: stri
       for (const item of items) {
         if (item && (item['@type'] === 'Organization' || item['@type'] === 'Corporation' || item['@type'] === 'Brand' || item['@type'] === 'WebSite') && item.logo) {
           const logoVal = typeof item.logo === 'string' ? item.logo : (item.logo.url || null);
-          if (logoVal && !isFaviconAsset(logoVal)) {
-            addCandidate(logoVal, 85, 'Schema.org Organization.logo');
+          if (logoVal && !isFaviconAsset(logoVal) && !isPromoOrBannerAsset(logoVal)) {
+            addCandidate(logoVal, 150, 'Schema.org Organization.logo', '', item.name || '');
           }
         }
       }
     } catch {}
   }
 
-  // 4. OpenGraph og:logo or itemprop="logo"
+  // 2. Specialized CMS & Shopify Brand Heading Blocks (e.g. class="header__heading", class="site-header__logo", data-cta-name="giva_logo")
+  const brandHeadingMatches = Array.from(html.matchAll(/<[a-z0-9_-]+[^>]*(?:class|id|data-cta-name)=["'][^"']*(?:header__heading|site-header__logo|brand-logo|navbar-brand|custom-logo|header-logo)[^"']*["'][^>]*>([\s\S]*?)<\/[a-z0-9_-]+>/gi));
+  for (const bm of brandHeadingMatches) {
+    const block = bm[0];
+    const imgMatches = block.match(/<img\b[^>]+>/gi) || [];
+    for (const img of imgMatches) {
+      const srcMatch = img.match(/\bsrc=["']([^"']+)["']/i);
+      const altMatch = img.match(/\balt=["']([^"']*)["']/i);
+      const alt = altMatch ? altMatch[1] : '';
+      if (srcMatch && srcMatch[1]) {
+        addCandidate(srcMatch[1], 140, 'Brand Heading Container <img>', img, alt);
+      }
+      const srcsetMatch = img.match(/\bsrcset=["']([^"']+)["']/i);
+      if (srcsetMatch && srcsetMatch[1]) {
+        const firstSrc = srcsetMatch[1].split(',')[0].trim().split(/\s+/)[0];
+        if (firstSrc) addCandidate(firstSrc, 135, 'Brand Heading Container <img srcset>', img, alt);
+      }
+    }
+  }
+
+  // 3. Anchor Tags with Explicit Logo Classes or data-cta-name pointing to True Root
+  const logoAnchorMatches = Array.from(html.matchAll(/<a\b[^>]*(?:class|id|data-cta-name)=["'][^"']*(?:logo|brand|header__heading)[^"']*["'][^>]*>([\s\S]*?)<\/a>/gi));
+  for (const am of logoAnchorMatches) {
+    const block = am[0];
+    const hrefMatch = block.match(/\bhref=["']([^"']*)["']/i);
+    const href = hrefMatch ? hrefMatch[1] : '';
+    if (isTrueRootHref(href, domain)) {
+      const imgMatches = block.match(/<img\b[^>]+>/gi) || [];
+      for (const img of imgMatches) {
+        const srcMatch = img.match(/\bsrc=["']([^"']+)["']/i);
+        const altMatch = img.match(/\balt=["']([^"']*)["']/i);
+        const alt = altMatch ? altMatch[1] : '';
+        if (srcMatch && srcMatch[1]) {
+          addCandidate(srcMatch[1], 135, 'Root Logo Anchor <img>', img, alt);
+        }
+      }
+    }
+  }
+
+  // 4. Header & Nav Blocks (Direct Tag Parsing without Nested Regex Overlap)
+  const headerBlocks = Array.from(html.matchAll(/<header\b[^>]*>([\s\S]*?)<\/header>/gi)).map(m => m[0]);
+  const navBlocks = Array.from(html.matchAll(/<nav\b[^>]*>([\s\S]*?)<\/nav>/gi)).map(m => m[0]);
+  const allContainers = [...headerBlocks, ...navBlocks];
+
+  for (const block of allContainers) {
+    const aTags = Array.from(block.matchAll(/<a\b[^>]*href=["']([^"']*)["'][^>]*>([\s\S]*?)<\/a>/gi));
+    for (const at of aTags) {
+      const href = at[1];
+      if (!isTrueRootHref(href, domain)) continue; // Must be true root, skip /collections/ or /products/
+
+      const inner = at[2];
+      const imgMatches = inner.match(/<img\b[^>]+>/gi) || [];
+      for (const img of imgMatches) {
+        const srcMatch = img.match(/\bsrc=["']([^"']+)["']/i);
+        const altMatch = img.match(/\balt=["']([^"']*)["']/i);
+        const alt = altMatch ? altMatch[1] : '';
+        if (srcMatch && srcMatch[1]) {
+          addCandidate(srcMatch[1], 125, 'Header/Nav Root Link <img>', img, alt);
+        }
+      }
+
+      if (imgMatches.length === 0) {
+        const svgMatch = inner.match(/<svg\b[^>]*>[\s\S]*?<\/svg>/i);
+        if (svgMatch && svgMatch[0] && svgMatch[0].length < 8000) {
+          const svgClean = svgMatch[0].replace(/[\r\n\t]+/g, ' ').trim();
+          const svgDataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(svgClean)}`;
+          candidateScores.push({ url: svgDataUrl, score: 120, reason: 'Header/Nav Root Link Inline <svg>', alt: '' });
+        }
+      }
+    }
+  }
+
+  // 5. Preload image links with "logo" (e.g. SoloSpider: <link rel="preload" as="image" href="/assets/solospider-logo.png"/>)
+  const preloadMatches = html.match(/<link\b[^>]+rel=["']preload["'][^>]+as=["']image["'][^>]*>/gi) || [];
+  for (const link of preloadMatches) {
+    const hrefMatch = link.match(/href=["']([^"']+)["']/i);
+    if (hrefMatch && hrefMatch[1]) {
+      const href = hrefMatch[1];
+      if (href.toLowerCase().includes('logo') || href.toLowerCase().includes('brand')) {
+        addCandidate(href, 105, 'Preload Logo Image Link', link);
+      }
+    }
+  }
+
+  // 6. OpenGraph og:logo, itemprop="logo", or og:image / twitter:image matching logo/brand
   const ogLogoMatch = html.match(/<meta\s+property=["']og:logo["']\s+content=["']([^"']+)["']/i) ||
                       html.match(/<meta\s+content=["']([^"']+)["']\s+property=["']og:logo["']/i);
   if (ogLogoMatch && ogLogoMatch[1]) {
-    addCandidate(ogLogoMatch[1], 80, 'og:logo');
+    addCandidate(ogLogoMatch[1], 100, 'og:logo');
   }
 
   const itempropMatch = html.match(/<[^>]+itemprop=["']logo["'][^>]+content=["']([^"']+)["']/i) ||
                         html.match(/<img[^>]+itemprop=["']logo["'][^>]+src=["']([^"']+)["']/i);
   if (itempropMatch && itempropMatch[1]) {
-    addCandidate(itempropMatch[1], 80, 'itemprop="logo"');
+    addCandidate(itempropMatch[1], 100, 'itemprop="logo"');
   }
 
-  // 5. Global <img> tags with class/id/alt="logo" or src containing "logo"
+  const ogImgMatch = html.match(/<meta\s+(?:property=["']og:image["']|name=["']twitter:image["'])\s+content=["']([^"']+)["']/gi);
+  if (ogImgMatch) {
+    for (const tag of ogImgMatch) {
+      const cMatch = tag.match(/content=["']([^"']+)["']/i);
+      if (cMatch && cMatch[1]) {
+        const u = cMatch[1].toLowerCase();
+        if (u.includes('logo') || u.includes('brand')) {
+          addCandidate(cMatch[1], 90, 'og:image/twitter:image with logo in url');
+        }
+      }
+    }
+  }
+
+  // 7. Global <img> tags with class/id/alt="logo" or src/srcset/data-src containing "logo" (Handles lazy loaders & Next.js Image)
   const allImgs = html.match(/<img\b[^>]+>/gi) || [];
-  for (const img of allImgs.slice(0, 30)) {
-    const srcMatch = img.match(/\bsrc=["']([^"']+)["']/i);
-    if (!srcMatch || !srcMatch[1]) continue;
-    const src = srcMatch[1];
+  for (const img of allImgs.slice(0, 60)) {
+    const srcMatch = img.match(/\b(?:src|data-src|data-lazy-src)=["']([^"']+)["']/i);
+    const srcsetMatch = img.match(/\b(?:srcset|data-srcset)=["']([^"']+)["']/i);
+    const altMatch = img.match(/\balt=["']([^"']*)["']/i);
+    const alt = altMatch ? altMatch[1] : '';
+
+    let candidateSrc = srcMatch ? srcMatch[1] : null;
+    if ((!candidateSrc || candidateSrc.startsWith('data:image/gif') || candidateSrc.startsWith('data:image/svg')) && srcsetMatch) {
+      candidateSrc = srcsetMatch[1].split(',')[0].trim().split(/\s+/)[0];
+    }
+    if (!candidateSrc) continue;
+
     const lower = img.toLowerCase();
     if (lower.includes('logo') || lower.includes('brand')) {
-      addCandidate(src, 60, 'Global <img> matching logo attribute', img);
+      addCandidate(candidateSrc, 75, 'Global <img> matching logo attribute', img, alt);
     }
   }
 
@@ -1250,8 +1341,26 @@ export async function extractBrandFromDomain(rawDomain: string, targetMarket: st
     });
     clearTimeout(timeout);
 
+    let html = '';
     if (res.ok) {
-      const html = await res.text();
+      html = await res.text();
+    } else {
+      // Fallback: try alternate www / non-www variant
+      const altDomain = domain.startsWith('www.') ? domain.replace(/^www\./, '') : `www.${domain}`;
+      try {
+        const altRes = await fetch(`https://${altDomain}`, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+          }
+        });
+        if (altRes.ok) {
+          html = await altRes.text();
+        }
+      } catch (e) {}
+    }
+
+    if (html) {
 
       // OpenGraph Site Name
       const ogSiteName = html.match(/<meta\s+property=["']og:site_name["']\s+content=["']([^"']+)["']/i);
