@@ -1368,7 +1368,7 @@ export default function DashboardPage() {
                     <h3 className="font-editorial text-lg font-bold text-[#2b1b12] flex items-center gap-2">
                       <span>Action Center</span>
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
-                        Sitefire GEO Protocol
+                        Rank Monk GEO Protocol
                       </span>
                     </h3>
                     <p className="text-xs text-[#6f5a4c]">

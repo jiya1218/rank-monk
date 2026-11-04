@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { auditPageForGeo, GeoTestResult } from '@/lib/brandExtractor';
 import {
   Globe,
   RefreshCw,
@@ -39,7 +38,7 @@ interface SeoAuditWorkspaceProps {
 export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceProps) {
   const [crawlLimit, setCrawlLimit] = useState<'30' | '50' | '100' | '200' | '500'>('50');
   const [isReRunningAudit, setIsReRunningAudit] = useState(false);
-  const [activeSubTab, setActiveSubTab] = useState<'issues' | 'pages' | 'geo'>('issues');
+  const [activeSubTab, setActiveSubTab] = useState<'issues' | 'pages'>('issues');
   const [issueFilter, setIssueFilter] = useState<'all' | 'critical' | 'important' | 'minor' | 'passed'>('all');
   const [pageFilter, setPageFilter] = useState('all');
   const [issuesSearchQuery, setIssuesSearchQuery] = useState('');
@@ -48,7 +47,6 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [auditData, setAuditData] = useState<any>(null);
-  const [selectedGeoUrl, setSelectedGeoUrl] = useState<string>('');
 
   // Live crawler progress simulation state
   const [crawlerProgress, setCrawlerProgress] = useState(15);
@@ -639,7 +637,7 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
               { phase: 2, title: 'Sitemap & Links', desc: 'Discovering internal routes' },
               { phase: 3, title: 'Meta & Robots', desc: 'Title, description & canonical' },
               { phase: 4, title: 'Headings & Alt', desc: 'H1 tags & image accessibility' },
-              { phase: 5, title: 'Schema & GEO', desc: '11 Sitefire AI Search tests' }
+              { phase: 5, title: 'Schema & Structure', desc: 'JSON-LD, microdata & semantic schema' }
             ].map((p) => {
               const isDone = crawlerActivePhase > p.phase;
               const isCurrent = crawlerActivePhase === p.phase;
@@ -779,7 +777,7 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
         </div>
       </div>
 
-      {/* 5. Sub-Tabs Bar: SEO Issues vs Audited Pages vs Sitefire GEO Audit */}
+      {/* 5. Sub-Tabs Bar: SEO Issues vs Audited Pages */}
       <div className="bg-white rounded-2xl border border-[#e4d6c6] shadow-sm overflow-hidden">
         <div className="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-100 px-6 pt-4 bg-[#f8f3ec]/30 gap-3">
           <div className="flex flex-wrap gap-4 sm:gap-6">
@@ -788,7 +786,7 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
               onClick={() => setActiveSubTab('issues')}
               className={`pb-4 text-xs sm:text-sm font-black transition-all border-b-2 cursor-pointer ${
                 activeSubTab === 'issues'
-                  ? 'border-purple-600 text-purple-700'
+                  ? 'border-[#2b1b12] text-[#2b1b12]'
                   : 'border-transparent text-[#6f5a4c] hover:text-[#2b1b12]'
               }`}
             >
@@ -799,30 +797,11 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
               onClick={() => setActiveSubTab('pages')}
               className={`pb-4 text-xs sm:text-sm font-black transition-all border-b-2 cursor-pointer ${
                 activeSubTab === 'pages'
-                  ? 'border-purple-600 text-purple-700'
+                  ? 'border-[#2b1b12] text-[#2b1b12]'
                   : 'border-transparent text-[#6f5a4c] hover:text-[#2b1b12]'
               }`}
             >
               Audited Pages ({pagesList.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveSubTab('geo');
-                if (!selectedGeoUrl && pagesList.length > 0) {
-                  setSelectedGeoUrl(pagesList[0].url);
-                }
-              }}
-              className={`pb-4 text-xs sm:text-sm font-black transition-all border-b-2 cursor-pointer flex items-center gap-1.5 ${
-                activeSubTab === 'geo'
-                  ? 'border-purple-600 text-purple-700'
-                  : 'border-transparent text-[#6f5a4c] hover:text-[#2b1b12]'
-              }`}
-            >
-              <span>⚡ Sitefire GEO Audit (11 Tests)</span>
-              <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase bg-purple-100 text-purple-800 border border-purple-200">
-                AEO
-              </span>
             </button>
           </div>
 
@@ -1085,20 +1064,11 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
                     <th className="p-3.5">Title</th>
                     <th className="p-3.5">Meta Description</th>
                     <th className="p-3.5">Words</th>
-                    <th className="p-3.5 text-right">Inspect</th>
+                    <th className="p-3.5 text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#e4d6c6]">
                   {filteredPages.map((page: any) => {
-                    const geoAudit = auditPageForGeo(
-                      page.url,
-                      page.title,
-                      page.metaDesc || '',
-                      page.h1 || '',
-                      page.wordCount || 1000,
-                      page.schemaTypes || []
-                    );
-
                     return (
                       <tr key={page.id} className="hover:bg-[#f8f3ec]/40 transition-colors">
                         <td className="p-3.5 font-medium text-slate-800 max-w-[220px]">
@@ -1118,7 +1088,7 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
                           </span>
                         </td>
 
-                        {/* Canonical Badge (Screenshot 1 Match) */}
+                        {/* Canonical Badge */}
                         <td className="p-3.5">
                           {page.isCanonicalised ? (
                             <span
@@ -1134,7 +1104,7 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
                           )}
                         </td>
 
-                        {/* Robots Tag Badge (Screenshot 1 Match) */}
+                        {/* Robots Tag Badge */}
                         <td className="p-3.5">
                           {page.isNoIndex ? (
                             <span className="px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 font-extrabold text-[10px]">
@@ -1162,16 +1132,14 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
                         </td>
 
                         <td className="p-3.5 text-right">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedGeoUrl(page.url);
-                              setActiveSubTab('geo');
-                            }}
-                            className="px-2.5 py-1 text-xs font-bold border border-[#e4d6c6] rounded-lg bg-white hover:bg-[#f8f3ec] text-[#2b1b12] transition-colors cursor-pointer"
+                          <a
+                            href={page.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold border border-[#e4d6c6] rounded-lg bg-white hover:bg-[#f8f3ec] text-[#2b1b12] transition-colors cursor-pointer"
                           >
-                            GEO Audit
-                          </button>
+                            <ExternalLink className="w-3 h-3" /> Visit
+                          </a>
                         </td>
                       </tr>
                     );
@@ -1179,119 +1147,6 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
                 </tbody>
               </table>
             </div>
-          </div>
-        )}
-
-        {/* SUB-TAB 3: SITEFIRE GEO AUDIT (11 TESTS) */}
-        {activeSubTab === 'geo' && (
-          <div className="p-5 sm:p-6 space-y-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl p-3.5">
-              <div className="flex items-center gap-2 text-xs">
-                <span className="font-bold text-[#6f5a4c] uppercase text-[10px] tracking-wider">Inspect Page:</span>
-                <select
-                  value={selectedGeoUrl || (pagesList[0]?.url || '')}
-                  onChange={(e) => setSelectedGeoUrl(e.target.value)}
-                  className="bg-white border border-[#e4d6c6] rounded-lg px-2.5 py-1 text-xs font-mono font-bold text-[#2b1b12] cursor-pointer"
-                >
-                  {pagesList.map((p: any) => (
-                    <option key={p.url} value={p.url}>
-                      {p.url}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="text-xs font-semibold text-[#6f5a4c]">
-                AEO & LLM Citation Diagnostics (Sitefire Audit Engine)
-              </div>
-            </div>
-
-            {/* Run GEO Audit for Selected Page */}
-            {(() => {
-              const activePage = pagesList.find((p: any) => p.url === selectedGeoUrl) || pagesList[0];
-              const geoAudit = auditPageForGeo(
-                activePage.url,
-                activePage.title,
-                activePage.metaDesc || '',
-                activePage.h1 || '',
-                activePage.wordCount || 1000,
-                activePage.schemaTypes || []
-              );
-
-              return (
-                <div className="space-y-4">
-                  {/* Score Summary Box */}
-                  <div className="p-5 bg-gradient-to-r from-purple-50 via-white to-purple-50 border border-purple-200 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <Zap className="w-5 h-5 text-purple-600" />
-                        <h4 className="font-bold text-base text-purple-950">
-                          Sitefire GEO Visibility Score: {geoAudit.geoScore}/100
-                        </h4>
-                      </div>
-                      <p className="text-xs text-purple-800 mt-1">
-                        11 weighted algorithmic tests measuring factual authority, readability and semantic structure.
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <span className="px-3 py-1 bg-purple-600 text-white rounded-xl text-xs font-black">
-                        {geoAudit.geoScore >= 80 ? 'Optimal Citation Tier' : 'Needs Optimization'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* 11 Tests Matrix */}
-                  <div className="border border-[#e4d6c6] rounded-2xl overflow-hidden divide-y divide-[#e4d6c6]">
-                    <div className="grid grid-cols-12 p-3.5 bg-[#f8f3ec]/60 text-[10px] font-black uppercase tracking-wider text-[#6f5a4c]">
-                      <div className="col-span-4">Audit Test</div>
-                      <div className="col-span-2">Category & Tier</div>
-                      <div className="col-span-2">Score</div>
-                      <div className="col-span-4">Diagnostic & Recommended Fix</div>
-                    </div>
-
-                    {geoAudit.geoTests.map((t: any, idx: number) => (
-                      <div key={idx} className="grid grid-cols-12 p-4 items-center gap-2 text-xs hover:bg-[#f8f3ec]/30 transition-colors">
-                        <div className="col-span-4">
-                          <div className="font-bold text-[#2b1b12] flex items-center gap-1.5">
-                            {t.status === 'Passed' ? (
-                              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                            ) : (
-                              <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
-                            )}
-                            <span>{t.name}</span>
-                          </div>
-                        </div>
-
-                        <div className="col-span-2 flex items-center gap-1.5">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#f8f3ec] border border-[#e4d6c6] text-[#6f5a4c]">
-                            {t.category}
-                          </span>
-                          <span className="text-[10px] font-mono font-bold text-[#c5a059]">
-                            {t.tier}
-                          </span>
-                        </div>
-
-                        <div className="col-span-2">
-                          <span className="font-mono font-bold text-sm text-[#2b1b12]">
-                            {t.score}/10
-                          </span>
-                        </div>
-
-                        <div className="col-span-4 space-y-0.5">
-                          <p className="text-[11px] text-[#6f5a4c]">{t.diagnostic}</p>
-                          {t.fix && (
-                            <p className="text-[11px] text-purple-700 font-semibold">
-                              Fix: {t.fix}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })()}
           </div>
         )}
       </div>

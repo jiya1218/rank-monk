@@ -202,10 +202,10 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
     `${project?.name || 'This brand'} is an industry-leading company specializing in high-performance solutions, engineering excellence, and customer-centric delivery. With a focus on technical precision and quality assurance, they provide tailored solutions to diverse commercial and enterprise clients globally.`;
 
   // =========================================================================
-  // AUTHENTIC SITEFIRE 11-TEST GEO METRICS (Directly from Crawled Audit Data)
+  // AUTHENTIC 11-TEST GEO METRICS (Directly from Crawled Audit Data)
   // =========================================================================
-  const sitefireAudit = useMemo(() => {
-    // 1. Check if project already has crawledPages from Sitefire crawler
+  const geoAudit = useMemo(() => {
+    // 1. Check if project already has crawledPages from live crawler
     const primaryPage = project?.crawledPages?.[0];
     if (primaryPage?.geoTests && primaryPage.geoTests.length >= 8) {
       return {
@@ -214,7 +214,7 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
       };
     }
 
-    // 2. Compute live audit using Sitefire's 11-test engine
+    // 2. Compute live audit using Rank Monk's 11-test engine
     const pageUrl = `https://${cleanDomain}`;
     const pageTitle = project?.title || `${project?.name || cleanDomain} — Official Website`;
     const pageMeta = project?.metaDesc || project?.brandPositioning || project?.summary || '';
