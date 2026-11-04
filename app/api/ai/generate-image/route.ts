@@ -31,81 +31,69 @@ async function generateMarketingWithBedrock(params: {
     process.env.AWS_BEARER_TOKEN_BEDROCK = token;
     const client = new BedrockRuntimeClient({ region: 'us-east-1' });
 
-    const isB2BTech = /software|ai|automation|cyber|tech|saas|agency|cloud|digital marketing|development|b2b/i.test(`${params.brandName} ${params.industry} ${params.prompt}`);
-    const isMultiService = /services|ai automation|digital marketing|website building|cyber security|all in one|suite|platform|solutions/i.test(params.prompt);
+    const isMultiService = /service|services|promotion|marketing|capabilities|agency|solutions|turn ideas|intelligent solutions/i.test(`${params.prompt} ${params.industry}`);
 
-    const visualGuidance = isB2BTech
-      ? `VISUAL STYLE REQUIREMENT (MANDATORY FOR B2B TECH / SOFTWARE / AGENCY):
-This is an elite B2B Software / AI / Tech company (like Scalezix or TangentCore).
-Modern B2B tech companies DO NOT post stock photos of office workers.
-You MUST specify a stunning 3D conceptual visual metaphor tailored to their exact prompt on an ultra-clean, minimalist white or light cream reflective studio surface with soft studio lighting and clean negative space:
-- If prompt is about MULTIPLE SERVICES (AI automation, marketing, web dev, cyber security): Specify a breathtaking 3D isometric platform of glowing modular glass and sapphire service cubes interconnected by soft light beams on an ultra-clean white reflective studio surface, soft ambient studio lighting.
-- If prompt is about AI Automation / Workflows: 3D glowing blue acrylic domino chain reaction, or floating 3D workflow nodes with glowing connectors.
-- If prompt is about Strategy / Outsmarting Competition: 3D translucent glowing sapphire blue glass chess king standing tall over defeated metallic silver pawns.
-- If prompt is about Cybersecurity / Defense: 3D glowing sapphire cryptographic data shield with hexagonal lock plates protecting data crystals.
-- If prompt is about Website Building / Dev: 3D floating glass wireframe cards and modular UI components assembling into an ultra-modern site.
-- If prompt is about Digital Marketing / Growth: 3D ascending neon analytics podium or golden ROI compass.
-- If prompt is about other tech topics: Craft a custom, sleek 3D conceptual metaphor matching their exact topic with soft ambient studio lighting.
-DO NOT describe stock photos of humans sitting in conference rooms or offices.`
-      : `VISUAL STYLE REQUIREMENT (SERVICES / HOME / CONSUMER / COMMERCE):
-Specify a breathtaking, ultra-premium commercial advertising hero scene representing their service or product in a pristine, sunlit, modern luxury environment with natural contrast, 8k resolution, razor-sharp focus.
-- If prompt is about Cleaning / Home Services: A sunlit, spotless modern luxury living room and kitchen, gleaming marble countertops, sparkling clean surfaces, architectural digest photography, 8k resolution, razor-sharp focus.
-- If prompt is about other businesses: Tailor a high-end commercial advertising hero photograph representing the service or product with sharp focus and cinematic lighting.`;
-
-    const systemPrompt = `You are a world-class advertising creative director at an elite digital agency.
-A client needs an Instagram commercial marketing post for:
+    const systemPrompt = `You are an elite creative director and commercial advertising designer at a top-tier creative studio.
+A client needs a high-converting, publication-grade commercial Instagram promotional poster for:
 - Brand Name: "${params.brandName}"
 - Domain: "${params.domain}"
 - Industry: "${params.industry}"
-- Client's Prompt & Requirements: "${params.prompt}"
+- Client's Prompt / Campaign Brief: "${params.prompt}"
 ${params.websiteContext ? `- Real Scraped Site Context: "${params.websiteContext}"` : ''}
 ${params.palette && params.palette.length > 0 ? `- Brand Palette: ${params.palette.join(', ')}` : ''}
 ${params.voiceTags && params.voiceTags.length > 0 ? `- Brand Voice Tags: ${params.voiceTags.join(', ')}` : ''}
-${params.referenceImage ? `- NOTE: The user has attached a brand styling reference image. Study its visual mood, color tones, layout, and composition style, and adopt this visual aesthetic.` : ''}
+${params.referenceImage ? `- NOTE: The user has attached a brand styling reference image. Study its visual mood, lighting, color tones, layout, and composition style, and reflect this visual aesthetic.` : ''}
 
-${visualGuidance}
+POSTER LAYOUT SELECTION:
+${isMultiService ? `- This is a COMPANY SERVICES / AGENCY MARKETING PROMOTION.
+  Set "postStyle": "agency_showcase".
+  Provide:
+  - "headline": "Turn Ideas into Intelligent Solutions" (or punchy 4-6 word equivalent tailored to the brand)
+  - "subheadline": "Your Partner in AI-Powered Innovation & Digital Growth" (or 1-line client pitch)
+  - "motto": "Innovate • Build • Grow" (or 3-word motto)
+  - "cta": "Build with ${params.brandName} →"
+  - "services": Provide 6 distinct service items tailored to the company, each with title and icon, e.g.:
+    [
+      { "title": "Agentic AI Development", "icon": "🧠" },
+      { "title": "AI & Machine Learning", "icon": "⚙️" },
+      { "title": "Data Science & AI", "icon": "📊" },
+      { "title": "Cyber Security & AI", "icon": "🛡️" },
+      { "title": "Full Stack Dev & AI", "icon": "💻" },
+      { "title": "Digital Marketing", "icon": "📢" }
+    ]
+  - "featureNodes": ["Scale Smarter", "Automate Better", "Grow Faster"] (3 floating tags)
+  - "trustBadges": ["Cutting-Edge Tech", "Expert Team", "Client-Centric", "Proven Impact"] (4 trust cards)
+  - "visualPrompt": A sleek 3D modern silver open laptop displaying glowing interface elements on a minimalist reflective desk in a high-tech studio with soft ambient purple and blue lighting, 8k resolution, razor-sharp focus, clean negative space, no text.` : `- This is a SINGLE PRODUCT / SERVICE / CAMPAIGN.
+  Set "postStyle": "poster_studio".`}
 
-LAYOUT SELECTION RULE:
-- If the user's prompt is about MULTIPLE SERVICES (e.g. AI automation, digital marketing, website building, cyber security, or offers a breakdown of capabilities):
-  Set "postStyle": "services_grid".
-  Provide exactly 4 distinct structured services in "services": [
-    { "title": "AI Automation", "desc": "Custom workflows, LLM agents & autonomous pipelines.", "icon": "⚡" },
-    { "title": "Digital Marketing", "desc": "Predictive ROI campaigns & multi-channel ads.", "icon": "📈" },
-    { "title": "Website Building", "desc": "Lightning-fast Next.js apps & converting landing pages.", "icon": "🌐" },
-    { "title": "Cyber Security", "desc": "Zero-trust architecture & enterprise-grade defense.", "icon": "🛡️" }
-  ]
-- If the user's prompt is about a SINGLE STRATEGIC METAPHOR, single service, or philosophy (e.g. "turn complexity into strategic advantage", "from chaos to clarity", or home cleaning):
-  Set "postStyle": "hero_metaphor".
-  Provide 3 short benefit pills in "featureNodes".
-
-CRITICAL RULE FOR "visualPrompt":
-The visual prompt will be sent directly to an AI image diffusion model to generate the central hero visual ONLY.
-Our graphic design layout engine will automatically overlay all typography, headlines, logo, pill badges, and footer.
-THEREFORE:
-- "visualPrompt" MUST describe ONLY the central visual or photographic subject.
+CREATIVE & VISUAL DIRECTION FOR "visualPrompt":
+- Describe a stunning, single photographic or 3D visual subject matching the client's topic.
 - DO NOT mention text, typography, letters, words, font names, or writing.
 - DO NOT mention logos, brand names, or watermarks.
 - DO NOT mention split-screen, grid, collage, multiple panels, or 4-box layout.
-- DO NOT mention rating stars, banners, buttons, or UI wireframes.
 - Ensure the prompt requests: "single seamless composition, razor-sharp focus, 8k resolution, cinematic lighting, no text, no watermarks, no split screen, no collage".
 
 Return a raw JSON object (strictly valid JSON, no markdown, no backticks):
 {
-  "headline": "A punchy, catchy 3-6 word marketing headline tailored directly to their prompt (e.g. Build a System That Moves or Turn Complexity into Strategic Advantage)",
-  "subheadline": "A clear 1-2 sentence value proposition tailored to their prompt",
-  "badge": "A 2-4 word promotional pill badge (e.g. AI INFRASTRUCTURE FOR MODERN BUSINESS, AI AGENTS • BUILT FOR BUSINESS, ZERO-TRUST DEFENSE)",
-  "cta": "Engaging call to action with emoji (e.g. Book Consult ↗)",
-  "visualPrompt": "A single coherent visual hero scene strictly adhering to the CRITICAL RULE above, 8k resolution, razor-sharp focus, no text, no split screens",
-  "featureNodes": ["3 short 2-3 word benefit nodes tailored to the prompt"],
+  "headline": "A punchy, bold 3-6 word marketing headline",
+  "subheadline": "A clear, compelling 1-2 sentence value proposition",
+  "badge": "A 2-4 word promotional pill badge",
+  "motto": "Innovate • Build • Grow",
+  "cta": "Actionable call to action with arrow",
+  "visualPrompt": "A single coherent visual hero scene strictly adhering to the CRITICAL RULE above",
+  "featureNodes": ["3 short benefit nodes"],
   "services": [
-    { "title": "Service 1", "desc": "Short 1-line description", "icon": "⚡" },
-    { "title": "Service 2", "desc": "Short 1-line description", "icon": "📈" },
-    { "title": "Service 3", "desc": "Short 1-line description", "icon": "🌐" },
-    { "title": "Service 4", "desc": "Short 1-line description", "icon": "🛡️" }
+    { "title": "Service 1", "icon": "🧠" },
+    { "title": "Service 2", "icon": "⚙️" },
+    { "title": "Service 3", "icon": "📊" },
+    { "title": "Service 4", "icon": "🛡️" },
+    { "title": "Service 5", "icon": "💻" },
+    { "title": "Service 6", "icon": "📢" }
   ],
-  "caption": "Full engaging Instagram marketing caption tailored to their prompt with emojis and call to action",
+  "trustBadges": ["Cutting-Edge Tech", "Expert Team", "Client-Centric", "Proven Impact"],
+  "caption": "Full engaging Instagram marketing caption tailored to their prompt with emojis, problem-solution hook, benefits, and call to action",
   "hashtags": ["#Tag1", "#Tag2", "#Tag3", "#Tag4", "#Tag5"],
-  "postStyle": "${isMultiService ? 'services_grid' : 'hero_metaphor'}"
+  "postStyle": "${isMultiService ? 'agency_showcase' : 'poster_studio'}"
 }`;
 
     const contentParts: any[] = [];
@@ -181,11 +169,14 @@ async function composeMarketingPoster(params: {
   subheadline: string;
   badge: string;
   featureNodes?: string[];
-  services?: Array<{ title: string; desc: string; icon?: string }>;
+  services?: Array<{ title: string; desc?: string; icon?: string }>;
   postStyle?: string;
   palette?: string[];
   cta?: string;
   industry?: string;
+  ratio?: string;
+  motto?: string;
+  trustBadges?: string[];
 }): Promise<string | null> {
   try {
     const sharp = (await import('sharp')).default;
@@ -216,174 +207,325 @@ async function composeMarketingPoster(params: {
     const cleanCta = escapeXml(params.cta?.replace(/[^\w\s-↗]/g, '') || 'BOOK CONSULT ↗').toUpperCase();
     const footerText = `${cleanDomain.toUpperCase()}  |  ${cleanCta}`;
 
+    // Layout Selection: Agency Showcase (Image 2 style) vs Studio Poster vs Full-Bleed Editorial
+    const isEditorial = params.postStyle === 'poster_editorial';
+    const isShowcase = params.postStyle === 'agency_showcase' || (Boolean(params.services && params.services.length >= 4) && !isEditorial);
+    const isPortrait = params.ratio === '4:5' || params.ratio === 'portrait';
+    const cWidth = 1080;
+    const cHeight = isPortrait ? 1350 : 1080;
+
+    const nodes = (params.featureNodes && params.featureNodes.length >= 3)
+      ? params.featureNodes.map(escapeXml)
+      : ['Scale Smarter', 'Automate Better', 'Grow Faster'].map(escapeXml);
+
+    const accentColor = (params.palette && params.palette.length > 1 && params.palette[1].startsWith('#'))
+      ? params.palette[1]
+      : '#ec4899';
+
+    // Smart Dynamic Headline Sizing & Stacking
+    const totalHeadlineLen = cleanPart1.length + cleanPart2.length;
+    const isMultiLineHeadline = totalHeadlineLen > 24;
+    const headlineFontSize = totalHeadlineLen > 36 ? 36 : (totalHeadlineLen > 24 ? 40 : 46);
+    const heroTopOffset = isMultiLineHeadline ? 295 : 275;
+    const heroH = isPortrait ? (isMultiLineHeadline ? 710 : 730) : (isMultiLineHeadline ? 510 : 530);
+
     let svg = '';
 
-    // Layout A: 4-Service Grid Showcase (When services are provided or postStyle is services_grid)
-    if (params.postStyle === 'services_grid' || (params.services && params.services.length >= 3)) {
+    if (isShowcase) {
+      // 100% Matching Enterprise Agency Showcase Poster (Exact layout of Image 2)
       const defaultServices = [
-        { title: 'AI Automation', desc: 'Custom workflows, LLM agents & autonomous pipelines.', icon: '⚡' },
-        { title: 'Digital Marketing', desc: 'Predictive ROI campaigns & multi-channel ads.', icon: '📈' },
-        { title: 'Website Building', desc: 'Lightning-fast Next.js apps & converting landing pages.', icon: '🌐' },
-        { title: 'Cyber Security', desc: 'Zero-trust architecture & enterprise-grade defense.', icon: '🛡️' }
+        { title: 'Agentic AI Development', icon: '🧠' },
+        { title: 'AI & Machine Learning', icon: '⚙️' },
+        { title: 'Data Science & AI', icon: '📊' },
+        { title: 'Cyber Security & AI', icon: '🛡️' },
+        { title: 'Full Stack Dev & AI', icon: '💻' },
+        { title: 'Digital Marketing', icon: '📢' }
       ];
+      const servicesList = (params.services && params.services.length >= 4)
+        ? params.services.slice(0, 6)
+        : defaultServices;
 
-      const rawServices = (params.services && params.services.length >= 4) ? params.services.slice(0, 4) : defaultServices;
-      const s = rawServices.map(item => ({
-        title: escapeXml(item.title || 'Solution'),
-        desc: escapeXml(item.desc || 'High performance capability'),
-        icon: escapeXml(item.icon || '✦')
-      }));
+      const trustList = (params.trustBadges && params.trustBadges.length >= 4)
+        ? params.trustBadges.slice(0, 4)
+        : ['Cutting-Edge Tech', 'Expert Team', 'Client-Centric', 'Proven Impact'];
+      const trustIcons = ['🚀', '👥', '🤝', '🏆'];
 
-      svg = `<svg width="1080" height="1080" viewBox="0 0 1080 1080" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="1080" height="1080" fill="#ffffff" />
-        <circle cx="950" cy="150" r="300" fill="${primaryColor}" opacity="0.04" />
-        <circle cx="150" cy="900" r="350" fill="${primaryColor}" opacity="0.03" />
+      const brandPurple = cleanBrand.toLowerCase().includes('scalezix') ? '#7c3aed' : primaryColor;
+      const mottoText = escapeXml(params.motto || 'Innovate • Build • Grow');
+      const showcaseCardH = isPortrait ? 530 : 425;
+      const trustY = isPortrait ? 885 : 715;
+      const footerY = isPortrait ? 985 : 810;
 
-        <!-- Header: Logo & Badge -->
-        <g transform="translate(80, 70)">
-          <text font-family="'Inter', -apple-system, sans-serif" font-weight="900" font-size="28" fill="${darkColor}" letter-spacing="-0.5">${cleanBrand}<tspan fill="${primaryColor}">.</tspan></text>
-          <text x="70" y="-8" font-family="'Inter', sans-serif" font-weight="700" font-size="10" fill="${primaryColor}" letter-spacing="1.5">™</text>
+      svg = `<svg width="${cWidth}" height="${cHeight}" viewBox="0 0 ${cWidth} ${cHeight}" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="card_shadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+            <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#0f172a" flood-opacity="0.08" />
+          </filter>
+          <filter id="pill_shadow" x="-8%" y="-15%" width="116%" height="135%" filterUnits="userSpaceOnUse">
+            <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0f172a" flood-opacity="0.08" />
+          </filter>
+          <clipPath id="hero_clip_agency">
+            <rect width="525" height="${showcaseCardH}" rx="26" />
+          </clipPath>
+        </defs>
+
+        <!-- Light Theme Background Canvas with soft gradient curves -->
+        <rect width="${cWidth}" height="${cHeight}" fill="#f8f9ff" />
+        <path d="M0,0 C400,120 750,50 ${cWidth},260 L${cWidth},0 Z" fill="#ede9fe" opacity="0.45" />
+        <circle cx="950" cy="420" r="320" fill="${brandPurple}" opacity="0.06" />
+        <circle cx="150" cy="${cHeight - 150}" r="320" fill="${accentColor}" opacity="0.04" />
+
+        <!-- 1. Header: Brand Identity & Motto -->
+        <g transform="translate(70, 50)">
+          <!-- Brand Logo Icon -->
+          <rect width="44" height="44" rx="13" fill="${brandPurple}" />
+          <text x="22" y="29" font-family="'Inter', sans-serif" font-weight="900" font-size="22" fill="#ffffff" text-anchor="middle">${cleanBrand.charAt(0)}</text>
+          
+          <!-- Brand Name -->
+          <text x="56" y="22" font-family="'Inter', sans-serif" font-weight="900" font-size="20" fill="#0f172a">${cleanBrand}</text>
+          <text x="56" y="38" font-family="'Inter', sans-serif" font-weight="700" font-size="11" fill="#64748b" letter-spacing="1">Ventures LLP</text>
         </g>
 
-        <g transform="translate(640, 68)">
-          <rect width="360" height="38" rx="10" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.2" />
-          <text x="180" y="24" font-family="'Inter', sans-serif" font-weight="800" font-size="10.5" fill="#64748b" text-anchor="middle" letter-spacing="1.5">${badgeText}</text>
+        <!-- Right Motto -->
+        <g transform="translate(1010, 72)">
+          <text font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#64748b" text-anchor="end" letter-spacing="1.5">${mottoText}</text>
         </g>
 
-        <!-- Headline & Subheadline -->
-        <g transform="translate(80, 165)">
-          <text font-family="'Inter', sans-serif" font-weight="900" font-size="48" fill="${darkColor}" letter-spacing="-1.5">
-            ${cleanPart1} <tspan fill="${primaryColor}">${cleanPart2}</tspan>
+        <!-- 2. Main Title & Subtitle -->
+        <g transform="translate(70, 138)">
+          <text font-family="'Inter', -apple-system, sans-serif" font-weight="900" font-size="44" fill="#0f172a" letter-spacing="-1">${cleanPart1}</text>
+          <text y="50" font-family="'Inter', -apple-system, sans-serif" font-weight="900" font-size="44" fill="${brandPurple}" letter-spacing="-1">${cleanPart2}</text>
+          <text y="88" font-family="'Inter', sans-serif" font-weight="600" font-size="15" fill="#64748b" letter-spacing="-0.2">${cleanSub.slice(0, 80)}</text>
+        </g>
+
+        <!-- 3. Left Column: 6 Services List -->
+        <g transform="translate(70, 255)">
+          ${servicesList.map((svc, i) => `
+          <g transform="translate(0, ${i * 72})">
+            <rect width="380" height="64" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.2" filter="url(#pill_shadow)" />
+            <rect x="12" y="12" width="40" height="40" rx="10" fill="#f5f3ff" />
+            <text x="32" y="37" font-size="18" text-anchor="middle">${svc.icon || '✦'}</text>
+            <text x="64" y="37" font-family="'Inter', sans-serif" font-weight="800" font-size="13.5" fill="#0f172a">${escapeXml(svc.title)}</text>
+          </g>`).join('')}
+        </g>
+
+        <!-- 4. Right Column: 3D Laptop / Tech Visual Card with 3 Floating Tags -->
+        <g transform="translate(485, 255)">
+          <rect width="525" height="${showcaseCardH}" rx="26" fill="#0f172a" filter="url(#card_shadow)" />
+          <g clip-path="url(#hero_clip_agency)">
+            <image href="data:image/jpeg;base64,${params.base64Image}" x="0" y="0" width="525" height="${showcaseCardH}" preserveAspectRatio="xMidYMid slice" />
+          </g>
+          <rect width="525" height="${showcaseCardH}" rx="26" fill="none" stroke="#e2e8f0" stroke-width="1.5" />
+
+          <!-- Floating Badge 1: Top Right -->
+          <g transform="translate(330, -18)" filter="url(#pill_shadow)">
+            <rect width="180" height="42" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.2" />
+            <text x="90" y="26" font-family="'Inter', sans-serif" font-weight="800" font-size="12" fill="${brandPurple}" text-anchor="middle">📈 ${nodes[0] || 'Scale Smarter'}</text>
+          </g>
+
+          <!-- Floating Badge 2: Mid Left -->
+          <g transform="translate(-25, ${showcaseCardH * 0.45})" filter="url(#pill_shadow)">
+            <rect width="175" height="42" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.2" />
+            <text x="87" y="26" font-family="'Inter', sans-serif" font-weight="800" font-size="12" fill="#0f172a" text-anchor="middle">✦ ${nodes[1] || 'Automate Better'}</text>
+          </g>
+
+          <!-- Floating Badge 3: Bottom Right -->
+          <g transform="translate(355, ${showcaseCardH * 0.85})" filter="url(#pill_shadow)">
+            <rect width="160" height="42" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.2" />
+            <text x="80" y="26" font-family="'Inter', sans-serif" font-weight="800" font-size="12" fill="#10b981" text-anchor="middle">⚡ ${nodes[2] || 'Grow Faster'}</text>
+          </g>
+        </g>
+
+        <!-- 5. Bottom Trust Grid (4 Columns) -->
+        <g transform="translate(70, ${trustY})">
+          ${trustList.map((badge, i) => `
+          <g transform="translate(${i * 242}, 0)">
+            <rect width="230" height="64" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.2" filter="url(#pill_shadow)" />
+            <text x="32" y="37" font-size="17" text-anchor="middle">${trustIcons[i] || '✦'}</text>
+            <text x="56" y="37" font-family="'Inter', sans-serif" font-weight="800" font-size="12" fill="#0f172a">${escapeXml(badge)}</text>
+          </g>`).join('')}
+        </g>
+
+        <!-- 6. Bottom Footer Bar -->
+        <g transform="translate(70, ${footerY})">
+          <!-- Left CTA Pill Button -->
+          <rect width="260" height="52" rx="26" fill="#0f172a" filter="url(#pill_shadow)" />
+          <text x="130" y="32" font-family="'Inter', sans-serif" font-weight="800" font-size="13.5" fill="#ffffff" text-anchor="middle">${cleanCta || `Build with ${cleanBrand} →`}</text>
+
+          <!-- Right Contact Links -->
+          <text x="940" y="32" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#64748b" text-anchor="end">www.${cleanDomain}   |   contact@${cleanDomain}</text>
+        </g>
+      </svg>`;
+    } else if (isEditorial) {
+      // Full-Bleed Editorial Commercial Poster (Square or Portrait with dark gradient scrim)
+      const scrimY = isPortrait ? 580 : 420;
+      const scrimH = isPortrait ? 770 : 660;
+      const contentY = isPortrait ? 870 : 710;
+      const chipsY = isPortrait ? 1050 : 890;
+      const footerY = isPortrait ? 1220 : 990;
+
+      svg = `<svg width="${cWidth}" height="${cHeight}" viewBox="0 0 ${cWidth} ${cHeight}" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="scrim_bottom" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0f172a" stop-opacity="0" />
+            <stop offset="45%" stop-color="#0f172a" stop-opacity="0.65" />
+            <stop offset="100%" stop-color="#0f172a" stop-opacity="0.96" />
+          </linearGradient>
+          <linearGradient id="scrim_top" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#000000" stop-opacity="0.6" />
+            <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+          </linearGradient>
+        </defs>
+
+        <!-- Full-Bleed Background Image -->
+        <image href="data:image/jpeg;base64,${params.base64Image}" x="0" y="0" width="${cWidth}" height="${cHeight}" preserveAspectRatio="xMidYMid slice" />
+
+        <!-- Scrim Overlays -->
+        <rect width="${cWidth}" height="240" fill="url(#scrim_top)" />
+        <rect y="${scrimY}" width="${cWidth}" height="${scrimH}" fill="url(#scrim_bottom)" />
+
+        <!-- Top Header: Brand Mark & Category Tag -->
+        <g transform="translate(70, 60)">
+          <rect width="180" height="46" rx="14" fill="rgba(255, 255, 255, 0.92)" />
+          <circle cx="28" cy="23" r="6" fill="${primaryColor}" />
+          <text x="44" y="29" font-family="'Inter', sans-serif" font-weight="900" font-size="18" fill="#0f172a">${cleanBrand}</text>
+        </g>
+
+        <g transform="translate(680, 60)">
+          <rect width="330" height="46" rx="14" fill="rgba(15, 23, 42, 0.65)" stroke="rgba(255, 255, 255, 0.2)" stroke-width="1.2" />
+          <text x="165" y="28" font-family="'Inter', sans-serif" font-weight="800" font-size="11" fill="#ffffff" text-anchor="middle" letter-spacing="1.5">${badgeText}</text>
+        </g>
+
+        <!-- Bottom Content Area -->
+        <g transform="translate(70, ${contentY})">
+          <!-- Headline -->
+          <text font-family="'Inter', sans-serif" font-weight="900" font-size="${headlineFontSize}" fill="#ffffff" letter-spacing="-1">
+            ${isMultiLineHeadline
+              ? `${cleanPart1}<tspan x="0" dy="48" fill="${accentColor}">${cleanPart2}</tspan>`
+              : `${cleanPart1} <tspan fill="${accentColor}">${cleanPart2}</tspan>`}
           </text>
-          <text y="42" font-family="'Inter', sans-serif" font-weight="500" font-size="16" fill="#64748b" letter-spacing="-0.2">
+          
+          <!-- Subheadline -->
+          <text y="${isMultiLineHeadline ? 95 : 48}" font-family="'Inter', sans-serif" font-weight="500" font-size="17" fill="#cbd5e1" letter-spacing="-0.2">
             ${cleanSub.slice(0, 95)}
           </text>
+          ${cleanSub.length > 95 ? `<text y="${isMultiLineHeadline ? 120 : 72}" font-family="'Inter', sans-serif" font-weight="500" font-size="17" fill="#cbd5e1">${cleanSub.slice(95, 180)}</text>` : ''}
         </g>
 
-        <!-- 4 Structured Service Cards Grid (2x2) -->
-        <g transform="translate(80, 260)">
-          <!-- Card 1 -->
-          <g transform="translate(0, 0)">
-            <rect width="445" height="135" rx="18" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5" />
-            <rect x="22" y="22" width="38" height="38" rx="10" fill="#eff6ff" />
-            <text x="41" y="46" font-family="'Inter', sans-serif" font-weight="900" font-size="18" fill="${primaryColor}" text-anchor="middle">${s[0].icon}</text>
-            <text x="72" y="47" font-family="'Inter', sans-serif" font-weight="800" font-size="17" fill="${darkColor}">${s[0].title}</text>
-            <text x="24" y="85" font-family="'Inter', sans-serif" font-weight="500" font-size="12.5" fill="#64748b">${s[0].desc}</text>
-          </g>
-
-          <!-- Card 2 -->
-          <g transform="translate(475, 0)">
-            <rect width="445" height="135" rx="18" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5" />
-            <rect x="22" y="22" width="38" height="38" rx="10" fill="#fdf2f8" />
-            <text x="41" y="46" font-family="'Inter', sans-serif" font-weight="900" font-size="18" fill="#ec4899" text-anchor="middle">${s[1].icon}</text>
-            <text x="72" y="47" font-family="'Inter', sans-serif" font-weight="800" font-size="17" fill="${darkColor}">${s[1].title}</text>
-            <text x="24" y="85" font-family="'Inter', sans-serif" font-weight="500" font-size="12.5" fill="#64748b">${s[1].desc}</text>
-          </g>
-
-          <!-- Card 3 -->
-          <g transform="translate(0, 155)">
-            <rect width="445" height="135" rx="18" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5" />
-            <rect x="22" y="22" width="38" height="38" rx="10" fill="#f0fdf4" />
-            <text x="41" y="46" font-family="'Inter', sans-serif" font-weight="900" font-size="18" fill="#10b981" text-anchor="middle">${s[2].icon}</text>
-            <text x="72" y="47" font-family="'Inter', sans-serif" font-weight="800" font-size="17" fill="${darkColor}">${s[2].title}</text>
-            <text x="24" y="85" font-family="'Inter', sans-serif" font-weight="500" font-size="12.5" fill="#64748b">${s[2].desc}</text>
-          </g>
-
-          <!-- Card 4 -->
-          <g transform="translate(475, 155)">
-            <rect width="445" height="135" rx="18" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5" />
-            <rect x="22" y="22" width="38" height="38" rx="10" fill="#fef2f2" />
-            <text x="41" y="46" font-family="'Inter', sans-serif" font-weight="900" font-size="18" fill="#ef4444" text-anchor="middle">${s[3].icon}</text>
-            <text x="72" y="47" font-family="'Inter', sans-serif" font-weight="800" font-size="17" fill="${darkColor}">${s[3].title}</text>
-            <text x="24" y="85" font-family="'Inter', sans-serif" font-weight="500" font-size="12.5" fill="#64748b">${s[3].desc}</text>
-          </g>
+        <!-- 3 Feature Chips -->
+        <g transform="translate(70, ${chipsY})">
+          <rect width="280" height="48" rx="14" fill="rgba(255, 255, 255, 0.15)" stroke="rgba(255, 255, 255, 0.3)" stroke-width="1" />
+          <circle cx="24" cy="24" r="5" fill="#10b981" />
+          <text x="42" y="30" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#ffffff">${nodes[0]}</text>
         </g>
 
-        <!-- Center Hero Visual (3D Render / Photography) -->
-        <g transform="translate(80, 580)">
-          <rect width="920" height="360" rx="22" fill="#0f172a" />
-          <clipPath id="hero_clip_services">
-            <rect width="920" height="360" rx="22" />
-          </clipPath>
-          <image href="data:image/jpeg;base64,${params.base64Image}" x="0" y="-120" width="920" height="600" clip-path="url(#hero_clip_services)" preserveAspectRatio="xMidYMid slice" />
+        <g transform="translate(370, ${chipsY})">
+          <rect width="280" height="48" rx="14" fill="rgba(255, 255, 255, 0.15)" stroke="rgba(255, 255, 255, 0.3)" stroke-width="1" />
+          <circle cx="24" cy="24" r="5" fill="${accentColor}" />
+          <text x="42" y="30" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#ffffff">${nodes[1]}</text>
         </g>
 
-        <!-- Footer Bar -->
-        <g transform="translate(0, 985)">
-          <rect width="1080" height="95" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" />
-          <text x="80" y="55" font-family="'Inter', sans-serif" font-weight="800" font-size="15" fill="#64748b" letter-spacing="2">${cleanDomain.toUpperCase()}</text>
-          <g transform="translate(800, 26)">
-            <rect width="200" height="42" rx="10" fill="${primaryColor}" />
-            <text x="100" y="27" font-family="'Inter', sans-serif" font-weight="800" font-size="12" fill="#ffffff" text-anchor="middle" letter-spacing="1">${cleanCta}</text>
-          </g>
+        <g transform="translate(670, ${chipsY})">
+          <rect width="340" height="48" rx="14" fill="rgba(255, 255, 255, 0.15)" stroke="rgba(255, 255, 255, 0.3)" stroke-width="1" />
+          <circle cx="24" cy="24" r="5" fill="${primaryColor}" />
+          <text x="42" y="30" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="#ffffff">${nodes[2]}</text>
+        </g>
+
+        <!-- Bottom Footer Bar -->
+        <g transform="translate(70, ${footerY})">
+          <line x1="0" y1="0" x2="940" y2="0" stroke="rgba(255, 255, 255, 0.2)" stroke-width="1" />
+          <text x="470" y="44" font-family="'Inter', sans-serif" font-weight="800" font-size="14" fill="#cbd5e1" text-anchor="middle" letter-spacing="3.5">${footerText}</text>
         </g>
       </svg>`;
     } else {
-      // Layout B: Hero Metaphor / Editorial Focus (Chess king, dominoes, single service, home services)
-      const nodes = (params.featureNodes && params.featureNodes.length >= 3)
-        ? params.featureNodes.map(escapeXml)
-        : ['Automate Operations', 'Integrate Your Tools', 'Drive Growth'].map(escapeXml);
+      // Signature Studio Poster (Exact Snabbit Award-Winning High-Converting Layout)
+      const pillsY = isPortrait ? (heroTopOffset + heroH - 35) : 775;
+      const footerY = isPortrait ? 1235 : 970;
 
-      svg = `<svg width="1080" height="1080" viewBox="0 0 1080 1080" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="1080" height="1080" fill="#fcfcfc" />
-        <circle cx="540" cy="680" r="480" fill="${primaryColor}" opacity="0.08" />
-
-        <!-- Brand Logo / Badge Top Left -->
-        <g transform="translate(80, 70)">
-          <text font-family="'Inter', -apple-system, sans-serif" font-weight="900" font-size="28" fill="${darkColor}" letter-spacing="-0.5">${cleanBrand}<tspan fill="${primaryColor}">.</tspan></text>
-          <text x="70" y="-8" font-family="'Inter', sans-serif" font-weight="700" font-size="10" fill="${primaryColor}" letter-spacing="1.5">™</text>
-        </g>
-
-        <!-- Pill Badge Top Right -->
-        <g transform="translate(680, 68)">
-          <rect width="320" height="38" rx="10" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.2" />
-          <text x="160" y="24" font-family="'Inter', sans-serif" font-weight="800" font-size="10.5" fill="${primaryColor}" text-anchor="middle" letter-spacing="1.5">${badgeText}</text>
-        </g>
-
-        <!-- Editorial Typography Headline -->
-        <g transform="translate(80, 160)">
-          <text font-family="'Inter', sans-serif" font-weight="800" font-size="13" fill="#64748b" letter-spacing="2.5">${categoryTag}</text>
-          <text y="50" font-family="'Inter', sans-serif" font-weight="900" font-size="48" fill="${darkColor}" letter-spacing="-1.5">${cleanPart1} <tspan fill="${primaryColor}">${cleanPart2}</tspan></text>
-        </g>
-
-        <!-- Subheadline -->
-        <g transform="translate(80, 260)">
-          <text font-family="'Inter', sans-serif" font-weight="500" font-size="17" fill="#475569">${cleanSub.slice(0, 85)}</text>
-          ${cleanSub.length > 85 ? `<text y="24" font-family="'Inter', sans-serif" font-weight="500" font-size="17" fill="#475569">${cleanSub.slice(85, 170)}</text>` : ''}
-        </g>
-
-        <!-- Center Hero Visual Render with clean rounded card mask -->
-        <g transform="translate(80, 320)">
-          <rect width="920" height="510" rx="24" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="1" />
-          <clipPath id="hero_clip_metaphor">
-            <rect width="920" height="510" rx="24" />
+      svg = `<svg width="${cWidth}" height="${cHeight}" viewBox="0 0 ${cWidth} ${cHeight}" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="card_shadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+            <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#0f172a" flood-opacity="0.08" />
+          </filter>
+          <filter id="pill_shadow" x="-8%" y="-15%" width="116%" height="135%" filterUnits="userSpaceOnUse">
+            <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0f172a" flood-opacity="0.07" />
+          </filter>
+          <clipPath id="hero_clip">
+            <rect width="940" height="${heroH}" rx="30" />
           </clipPath>
-          <image href="data:image/jpeg;base64,${params.base64Image}" x="0" y="0" width="920" height="510" clip-path="url(#hero_clip_metaphor)" preserveAspectRatio="xMidYMid slice" />
+        </defs>
+
+        <!-- Clean Background Canvas with subtle ambient color glow -->
+        <rect width="${cWidth}" height="${cHeight}" fill="#ffffff" />
+        <circle cx="960" cy="120" r="340" fill="${primaryColor}" opacity="0.04" />
+        <circle cx="120" cy="${cHeight - 100}" r="360" fill="${accentColor}" opacity="0.03" />
+
+        <!-- 1. Top Header: Brand Badge & Category Tag -->
+        <g transform="translate(70, 58)">
+          <!-- Left Brand Pill (Filled with Brand Color / Dark Base) -->
+          <rect width="170" height="46" rx="14" fill="${primaryColor}" />
+          <text x="85" y="29" font-family="'Inter', sans-serif" font-weight="900" font-size="19" fill="#ffffff" text-anchor="middle" letter-spacing="-0.3">${cleanBrand}</text>
+          <!-- Status dot -->
+          <circle cx="195" cy="23" r="6" fill="#10b981" />
         </g>
 
-        <!-- 3 Feature Benefit Node Pills -->
-        <g transform="translate(80, 860)">
-          <rect width="285" height="50" rx="14" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.2" />
-          <circle cx="28" cy="25" r="7" fill="${primaryColor}" />
-          <text x="48" y="31" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="${darkColor}">${nodes[0]}</text>
+        <g transform="translate(670, 58)">
+          <!-- Right Category Pill -->
+          <rect width="340" height="46" rx="14" fill="#fdf2f8" stroke="#fbcfe8" stroke-width="1.2" />
+          <text x="170" y="28" font-family="'Inter', sans-serif" font-weight="800" font-size="11" fill="${accentColor}" text-anchor="middle" letter-spacing="1.5">${badgeText}</text>
         </g>
 
-        <g transform="translate(395, 860)">
-          <rect width="285" height="50" rx="14" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.2" />
-          <circle cx="28" cy="25" r="7" fill="${primaryColor}" />
-          <text x="48" y="31" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="${darkColor}">${nodes[1]}</text>
+        <!-- 2. Typography: Headline & Subheadline -->
+        <g transform="translate(70, 160)">
+          <text font-family="'Inter', -apple-system, sans-serif" font-weight="900" font-size="${headlineFontSize}" fill="${darkColor}" letter-spacing="-1.2">
+            ${isMultiLineHeadline
+              ? `${cleanPart1}<tspan x="0" dy="48" fill="${accentColor}">${cleanPart2}</tspan>`
+              : `${cleanPart1} <tspan fill="${accentColor}">${cleanPart2}</tspan>`}
+          </text>
+          
+          <text y="${isMultiLineHeadline ? 95 : 46}" font-family="'Inter', -apple-system, sans-serif" font-weight="500" font-size="16.5" fill="#475569" letter-spacing="-0.2">
+            ${cleanSub.slice(0, 105)}
+          </text>
+          ${cleanSub.length > 105 ? `<text y="${isMultiLineHeadline ? 119 : 70}" font-family="'Inter', sans-serif" font-weight="500" font-size="16.5" fill="#475569">${cleanSub.slice(105, 195)}</text>` : ''}
         </g>
 
-        <g transform="translate(715, 860)">
-          <rect width="285" height="50" rx="14" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.2" />
-          <circle cx="28" cy="25" r="7" fill="#10b981" />
-          <text x="48" y="31" font-family="'Inter', sans-serif" font-weight="700" font-size="13" fill="${darkColor}">${nodes[2]}</text>
+        <!-- 3. Center Hero Visual Card (940x${heroH}, rx=30) -->
+        <g transform="translate(70, ${heroTopOffset})" filter="url(#card_shadow)">
+          <rect width="940" height="${heroH}" rx="30" fill="#f1f5f9" />
+          <g clip-path="url(#hero_clip)">
+            <image href="data:image/jpeg;base64,${params.base64Image}" x="0" y="0" width="940" height="${heroH}" preserveAspectRatio="xMidYMid slice" />
+          </g>
+          <rect width="940" height="${heroH}" rx="30" fill="none" stroke="#e2e8f0" stroke-width="1.5" />
         </g>
 
-        <!-- Footer Bar -->
-        <g transform="translate(0, 985)">
-          <rect width="1080" height="95" fill="#ffffff" stroke="#e2e8f0" stroke-width="1" />
-          <text x="540" y="55" font-family="'Inter', sans-serif" font-weight="800" font-size="14.5" fill="#64748b" text-anchor="middle" letter-spacing="3">${escapeXml(footerText)}</text>
+        <!-- 4. Three Floating Feature Pills (Overlapping the Bottom Edge of Hero Card) -->
+        <g transform="translate(70, ${pillsY})" filter="url(#pill_shadow)">
+          <!-- Feature Pill 1 -->
+          <g transform="translate(0, 0)">
+            <rect width="296" height="54" rx="18" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5" />
+            <circle cx="30" cy="27" r="7" fill="${accentColor}" />
+            <text x="50" y="33" font-family="'Inter', sans-serif" font-weight="700" font-size="14" fill="${darkColor}">${nodes[0]}</text>
+          </g>
+
+          <!-- Feature Pill 2 -->
+          <g transform="translate(322, 0)">
+            <rect width="296" height="54" rx="18" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5" />
+            <circle cx="30" cy="27" r="7" fill="${primaryColor}" />
+            <text x="50" y="33" font-family="'Inter', sans-serif" font-weight="700" font-size="14" fill="${darkColor}">${nodes[1]}</text>
+          </g>
+
+          <!-- Feature Pill 3 -->
+          <g transform="translate(644, 0)">
+            <rect width="296" height="54" rx="18" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5" />
+            <circle cx="30" cy="27" r="7" fill="#10b981" />
+            <text x="50" y="33" font-family="'Inter', sans-serif" font-weight="700" font-size="14" fill="${darkColor}">${nodes[2]}</text>
+          </g>
+        </g>
+
+        <!-- 5. Footer Divider & Domain Tag -->
+        <g transform="translate(70, ${footerY})">
+          <line x1="0" y1="0" x2="940" y2="0" stroke="#f1f5f9" stroke-width="1.5" />
+          <text x="470" y="52" font-family="'Inter', sans-serif" font-weight="800" font-size="13.5" fill="#64748b" text-anchor="middle" letter-spacing="3.5">${footerText}</text>
         </g>
       </svg>`;
     }
@@ -469,36 +611,60 @@ async function generateImageWithBedrock(visualPrompt: string, ratio: string): Pr
 // Generate Universal Industry-Calibrated Marketing Post Copy (Dynamic from User Prompt)
 function synthesizeMarketingPost(prompt: string, brandName: string, industry: string, domain: string) {
   const cleanPrompt = prompt.trim();
-  const cleanBrand = brandName.replace(/[^\w]/g, '');
-  const isMultiService = /services|ai automation|digital marketing|website building|cyber security|all in one|suite|platform|solutions/i.test(prompt);
+  const cleanBrand = brandName.replace(/[^\w\s]/g, '').trim() || 'Brand';
+  const lower = `${cleanPrompt} ${industry} ${cleanBrand}`.toLowerCase();
 
-  const headline = isMultiService ? 'Build a System That Moves.' : 'Turn Complexity into Strategic Advantage';
-  const subheadline = isMultiService
-    ? 'Connect the work behind your business — from first enquiry to autonomous scale.'
-    : `Experience premium, autonomous ${industry || 'solutions'} with ${brandName}.`;
-  const badge = isMultiService ? 'AI INFRASTRUCTURE FOR MODERN BUSINESS' : 'AI AGENTS • BUILT FOR BUSINESS';
-  const cta = isMultiService ? 'Book Consult ↗' : `Explore with ${brandName} ↗`;
+  const isJewelry = /jewel|gold|diamond|silver|ring|necklace|earring|gem|luxury/i.test(lower);
+  const isCleaning = /clean|home service|maid|wash|sanitiz|housekeeping/i.test(lower);
+  const isTech = /ai|software|automation|cloud|cyber|tech|saas|developer|code|api/i.test(lower);
 
-  const defaultServices = [
-    { title: 'AI Automation', desc: 'Custom workflows, LLM agents & autonomous pipelines.', icon: '⚡' },
-    { title: 'Digital Marketing', desc: 'Predictive ROI campaigns & multi-channel ads.', icon: '📈' },
-    { title: 'Website Building', desc: 'Lightning-fast Next.js apps & converting landing pages.', icon: '🌐' },
-    { title: 'Cyber Security', desc: 'Zero-trust architecture & enterprise-grade defense.', icon: '🛡️' }
-  ];
+  let headline = `Spotless Living Made Effortless`;
+  let subheadline = `Experience verified quality and high-velocity fulfillment with ${cleanBrand}.`;
+  let badge = 'VERIFIED ENTERPRISE QUALITY';
+  let cta = `Visit ${domain.replace(/^https?:\/\//i, '').replace(/\/$/, '')} ↗`;
+  let visualPrompt = `Award-winning commercial advertising photography representing ${cleanPrompt}, sharp focus, natural contrast, 8k resolution, cinematic lighting, no text`;
+  let featureNodes = ['Verified Quality', 'Fast Execution', '24/7 Support'];
+
+  if (isJewelry) {
+    headline = 'Pure Brilliance Handcrafted Excellence';
+    subheadline = `Explore certified fine gold and lab-grown diamonds crafted with timeless distinction.`;
+    badge = 'FINE JEWELLERY & LAB DIAMONDS';
+    cta = 'Shop Collection ↗';
+    visualPrompt = 'Exquisite macro commercial product photography of handcrafted gold jewelry and diamond rings resting on polished dark marble, shimmering reflections, soft dramatic spotlighting, razor-sharp focus, 8k resolution, no text, no watermarks';
+    featureNodes = ['Certified Gold', 'Lab Diamonds', 'Lifetime Exchange'];
+  } else if (isCleaning) {
+    headline = 'Spotless Living Made Effortless';
+    subheadline = 'Professional on-demand cleaning services delivered to your doorstep in minutes.';
+    badge = 'ON-DEMAND HOME CLEANING';
+    cta = 'Book on App ↗';
+    visualPrompt = 'A sunlit, spotless modern luxury living room and kitchen, gleaming marble countertops, sparkling clean surfaces, architectural digest photography, 8k resolution, razor-sharp focus, no text';
+    featureNodes = ['Deep Sanitization', 'Kitchen & Bath', 'Same-Day Arrival'];
+  } else if (isTech) {
+    headline = 'Autonomous Growth at Scale';
+    subheadline = `Connecting the intelligence behind your business — from first inquiry to autonomous scale.`;
+    badge = 'AI AGENTS • BUILT FOR BUSINESS';
+    cta = 'Book Consult ↗';
+    visualPrompt = 'An ultra-modern minimalist high-tech visual depicting luminous holographic workflows and interconnected glowing crystal nodes on a sleek reflective studio surface, ambient studio lighting, razor-sharp focus, 8k resolution, no text';
+    featureNodes = ['Verified SLAs', 'Autonomous Workflows', 'Zero-Trust Defense'];
+  } else {
+    headline = `${cleanBrand} Precision Delivered`;
+    subheadline = `Delivering exceptional standards, verified quality, and seamless experiences.`;
+    badge = `${(industry || 'PREMIUM EXCELLENCE').toUpperCase().slice(0, 32)}`;
+    cta = `Explore ${cleanBrand} ↗`;
+    visualPrompt = `Award-winning commercial advertising photography representing ${cleanPrompt}, cinematic lighting, sharp focus, natural contrast, 8k resolution, no text, no watermarks`;
+    featureNodes = ['Verified Quality', 'Fast Delivery', 'Guaranteed Care'];
+  }
 
   return {
     headline,
     subheadline,
     badge,
     cta,
-    visualPrompt: isMultiService
-      ? 'A stunning 3D isometric platform of glowing modular glass and sapphire service cubes interconnected by light beams on an ultra-clean white reflective studio surface, soft ambient studio lighting, 8k resolution, razor-sharp focus, no text'
-      : 'A breathtaking 3D translucent glowing sapphire blue glass chess king standing tall on a reflective studio surface surrounded by softly fallen metallic silver pawns, studio lighting, depth of field, 8k, no text',
-    caption: `✨ ${cleanPrompt}\n\nWhy modern teams scale with ${brandName}:\n⚡ AI Automation & autonomous agent workflows\n📈 Predictive ROI digital marketing campaigns\n🌐 High-speed modern web applications\n🛡️ Enterprise zero-trust cybersecurity\n\n📲 Tap the link in bio to book your strategic consult today! 👇`,
-    hashtags: [`#${cleanBrand}`, '#AIAutomation', '#DigitalMarketing', '#WebDevelopment', '#CyberSecurity', '#EnterpriseAI'],
-    postStyle: isMultiService ? 'services_grid' : 'hero_metaphor',
-    services: isMultiService ? defaultServices : undefined,
-    featureNodes: ['Automate Operations', 'Integrate Your Tools', 'Drive Growth']
+    visualPrompt,
+    caption: `✨ ${cleanPrompt}\n\nWhy clients choose ${cleanBrand}:\n✓ ${featureNodes[0]}\n✓ ${featureNodes[1]}\n✓ ${featureNodes[2]}\n\n📲 Tap the link in bio or visit ${domain} to get started today! 👇`,
+    hashtags: [`#${cleanBrand.replace(/\s+/g, '')}`, '#QualityFirst', '#ModernExcellence', '#Innovation', '#Verified'],
+    postStyle: 'poster_studio',
+    featureNodes
   };
 }
 
@@ -581,9 +747,10 @@ export async function POST(req: Request) {
       try {
         const parsed = new URL(extractedUrl);
         resolvedDomain = parsed.hostname.replace(/^www\./, '');
-        if (resolvedBrand === 'Rank Monk' || resolvedBrand === 'Scalezix') {
-          const rawName = resolvedDomain.split('.')[0];
-          resolvedBrand = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+        const rawName = resolvedDomain.split('.')[0];
+        resolvedBrand = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+        if (resolvedDomain.toLowerCase().includes('scalezix')) {
+          resolvedBrand = 'Scalezix';
         }
 
         const siteRes = await fetch(extractedUrl, {
@@ -615,7 +782,9 @@ export async function POST(req: Request) {
       hashtags: string[];
       visualPrompt?: string;
       featureNodes?: string[];
-      services?: Array<{ title: string; desc: string; icon?: string }>;
+      services?: Array<{ title: string; desc?: string; icon?: string }>;
+      trustBadges?: string[];
+      motto?: string;
       postStyle?: string;
     };
 
@@ -646,10 +815,10 @@ export async function POST(req: Request) {
       postData = synthesizeMarketingPost(prompt, resolvedBrand, industry, resolvedDomain);
     }
 
-    if (style === 'services_grid') {
-      postData.postStyle = 'services_grid';
-    } else if (style === 'hero_metaphor') {
-      postData.postStyle = 'hero_metaphor';
+    if (style === 'editorial' || style === 'full_bleed' || style === 'poster_editorial') {
+      postData.postStyle = 'poster_editorial';
+    } else {
+      postData.postStyle = postData.postStyle || 'poster_studio';
     }
 
     // 3. Determine Dimensions Based on Ratio
@@ -681,8 +850,9 @@ export async function POST(req: Request) {
       finalImageUrl = bedrockImg.url;
       engineUsed = bedrockImg.engine;
 
-      // Universal Publication-Ready Instagram Marketing Poster Composer
-      if (bedrockImg.base64 && (ratio === '1:1' || !ratio)) {
+      // Universal Publication-Ready Instagram Marketing Poster Composer (Supports Square 1:1 and Portrait 4:5)
+      const isPosterEligible = ratio === '1:1' || ratio === '4:5' || ratio === 'portrait' || !ratio;
+      if (bedrockImg.base64 && isPosterEligible) {
         try {
           const posterUrl = await composeMarketingPoster({
             base64Image: bedrockImg.base64,
@@ -696,7 +866,10 @@ export async function POST(req: Request) {
             postStyle: postData.postStyle,
             palette,
             cta: postData.cta,
-            industry
+            industry,
+            ratio,
+            motto: postData.motto,
+            trustBadges: postData.trustBadges
           });
           if (posterUrl) {
             finalImageUrl = posterUrl;
@@ -760,7 +933,10 @@ export async function POST(req: Request) {
             postStyle: postData.postStyle,
             palette,
             cta: postData.cta,
-            industry
+            industry,
+            ratio,
+            motto: postData.motto,
+            trustBadges: postData.trustBadges
           });
           if (posterUrl) {
             finalImageUrl = posterUrl;

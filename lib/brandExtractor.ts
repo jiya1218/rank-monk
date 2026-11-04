@@ -77,6 +77,14 @@ export interface ExtractedBrand {
     statusCode: number;
     schemaTypes: string[];
     crawledAt: string;
+    canonical?: string;
+    isCanonicalised?: boolean;
+    robotsTag?: string;
+    isNoIndex?: boolean;
+    missingAltCount?: number;
+    missingAltImages?: string[];
+    loadTimeMs?: number;
+    issuesCount?: number;
     geoScore?: number;
     geoTests?: GeoTestResult[];
   }[];
@@ -1487,6 +1495,14 @@ export async function extractBrandFromDomain(rawDomain: string, targetMarket: st
         statusCode: p.status,
         schemaTypes: p.schemaTypes,
         crawledAt: new Date().toISOString(),
+        canonical: p.canonical,
+        isCanonicalised: p.isCanonicalised,
+        robotsTag: p.robotsTag,
+        isNoIndex: p.isNoIndex,
+        missingAltCount: p.missingAltCount,
+        missingAltImages: p.missingAltImages,
+        loadTimeMs: p.loadTimeMs,
+        issuesCount: p.issuesCount,
         geoScore: p.geoScore,
         geoTests: p.geoTests
       }))
@@ -1500,6 +1516,14 @@ export async function extractBrandFromDomain(rawDomain: string, targetMarket: st
           statusCode: 200,
           schemaTypes: ['Organization', 'WebSite'],
           crawledAt: new Date().toISOString(),
+          canonical: `https://${domain}`,
+          isCanonicalised: false,
+          robotsTag: 'index, follow',
+          isNoIndex: false,
+          missingAltCount: 0,
+          missingAltImages: [],
+          loadTimeMs: 240,
+          issuesCount: 0,
           geoScore: 88,
           geoTests: []
         }

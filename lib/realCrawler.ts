@@ -209,22 +209,27 @@ export async function crawlDomainPages(
         const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
         const title = titleMatch ? titleMatch[1].replace(/\s+/g, ' ').trim() : '';
 
-        // Meta Description
-        const metaMatch = html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)["']/i) ||
-                          html.match(/<meta[^>]+content=["']([^"']*)["'][^>]+name=["']description["']/i);
+        // Meta Description (search name="description", name="Description", or og:description)
+        const metaMatch = html.match(/<meta\s+[^>]*name=["']description["'][^>]*content=["']([^"']*)["']/i) ||
+                          html.match(/<meta\s+[^>]*content=["']([^"']*)["'][^>]*name=["']description["']/i) ||
+                          html.match(/<meta\s+[^>]*property=["']og:description["'][^>]*content=["']([^"']*)["']/i) ||
+                          html.match(/<meta\s+[^>]*content=["']([^"']*)["'][^>]*property=["']og:description["']/i);
         const metaDesc = metaMatch ? metaMatch[1].replace(/\s+/g, ' ').trim() : '';
 
         // Canonical
-        const canonicalMatch = html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']*)["']/i);
+        const canonicalMatch = html.match(/<link\s+[^>]*rel=["']canonical["'][^>]*href=["']([^"']*)["']/i) ||
+                               html.match(/<link\s+[^>]*href=["']([^"']*)["'][^>]*rel=["']canonical["']/i);
         let canonical = canonicalMatch ? canonicalMatch[1].trim() : '';
         if (canonical) {
           const normCanonical = normalizeUrl(canonical, domain);
           if (normCanonical) canonical = normCanonical;
         }
+        const hasCanonical = Boolean(canonical);
         const isCanonicalised = Boolean(canonical && canonical !== pageUrl && canonical !== `${pageUrl}/`);
 
-        // Robots meta tag (checking for noindex)
-        const robotsMatch = html.match(/<meta[^>]+name=["']robots["'][^>]+content=["']([^"']*)["']/i);
+        // Robots meta tag (checking for noindex / nofollow)
+        const robotsMatch = html.match(/<meta\s+[^>]*name=["']robots["'][^>]*content=["']([^"']*)["']/i) ||
+                            html.match(/<meta\s+[^>]*content=["']([^"']*)["'][^>]*name=["']robots["']/i);
         const robotsTag = robotsMatch ? robotsMatch[1].trim().toLowerCase() : '';
         const isNoIndex = robotsTag.includes('noindex');
 
@@ -245,14 +250,20 @@ export async function crawlDomainPages(
           .trim();
         const wordCount = cleanBody ? cleanBody.split(/\s+/).length : 0;
 
-        // Missing Alt tags on <img>
+        // Missing Alt tags on content <img> (Exclude tracking pixels, SVGs, base64 1x1, decorative icons)
         const imgMatches = html.match(/<img\b[^>]*>/gi) || [];
         const missingAltImages: string[] = [];
         for (const img of imgMatches) {
+          // Skip tracking pixels, tiny spacers, or hidden beacons
+          if (img.includes('width="1"') || img.includes("width='1'") || img.includes('aria-hidden="true"')) continue;
           const altAttr = img.match(/\balt=["']([^"']*)["']/i);
           if (!altAttr || !altAttr[1].trim()) {
             const srcAttr = img.match(/\bsrc=["']([^"']+)["']/i);
-            missingAltImages.push(srcAttr ? srcAttr[1] : 'unnamed-asset');
+            const src = srcAttr ? srcAttr[1] : '';
+            // Filter out 1x1 data gifs, analytics beacons, spacer images
+            if (src && !src.startsWith('data:image/gif') && !src.includes('pixel') && !src.includes('beacon') && !src.includes('spacer')) {
+              missingAltImages.push(src);
+            }
           }
         }
 
@@ -394,8 +405,8 @@ export async function crawlDomainPages(
     });
   }
 
-  // Issue 3: Missing Meta Description (EXACTLY MATCHING USER SCREENSHOT)
-  const missingMetaPages = crawledPages.filter(p => !p.metaDesc || p.metaChars === 0);
+  // Issue 3: Missing Meta Description (Evaluated on live 200 OK indexable pages)
+  const missingMetaPages = crawledPages.filter(p => p.status === 200 && !p.isNoIndex && (!p.metaDesc || p.metaChars === 0));
   if (missingMetaPages.length > 0) {
     issues.push({
       id: 'missing-meta-desc',
@@ -412,8 +423,26 @@ export async function crawlDomainPages(
     });
   }
 
-  // Issue 4: Title Tag Too Long (> 65 Chars) (EXACTLY MATCHING USER SCREENSHOT)
-  const longTitlePages = crawledPages.filter(p => p.titleChars > 65);
+  // Issue 3b: Meta Description Too Long (> 160 Chars)
+  const longMetaPages = crawledPages.filter(p => p.status === 200 && p.metaChars > 160);
+  if (longMetaPages.length > 0) {
+    issues.push({
+      id: 'meta-desc-too-long',
+      title: `${longMetaPages.length} page${longMetaPages.length > 1 ? 's have' : ' has'} meta descriptions over 160 characters`,
+      desc: 'Meta descriptions exceeding 160 characters are truncated by search engines with ellipses in search snippets.',
+      impact: 'Minor',
+      impactBadge: 'bg-slate-100 text-slate-700 border-slate-200',
+      howToFix: 'Shorten meta description to 120-155 characters to ensure complete visibility in search results.',
+      difficulty: 'EASY',
+      impactLevel: 'LOW',
+      whatIsThis: 'Search engine snippet displays truncate descriptions beyond approximately 960 pixels (roughly 155-160 characters).',
+      howDoIFix: `Edit the <meta name="description"> tag to convey the core value proposition in 120-155 characters.`,
+      failedPages: longMetaPages.map(p => ({ id: p.id, url: p.url, detail: `${p.metaChars} characters (exceeds 160 max)` }))
+    });
+  }
+
+  // Issue 4: Title Tag Too Long (> 65 Chars)
+  const longTitlePages = crawledPages.filter(p => p.status === 200 && p.titleChars > 65);
   if (longTitlePages.length > 0) {
     issues.push({
       id: 'title-too-long',
@@ -431,7 +460,7 @@ export async function crawlDomainPages(
   }
 
   // Issue 5: Title Tag Too Short (< 30 Chars)
-  const shortTitlePages = crawledPages.filter(p => p.titleChars > 0 && p.titleChars < 30);
+  const shortTitlePages = crawledPages.filter(p => p.status === 200 && p.titleChars > 0 && p.titleChars < 30);
   if (shortTitlePages.length > 0) {
     issues.push({
       id: 'title-too-short',
@@ -553,6 +582,104 @@ export async function crawlDomainPages(
       whatIsThis: 'Structured data in JSON-LD format gives search algorithms explicit semantic meaning about your company, products, and services.',
       howDoIFix: `Add a <script type="application/ld+json"> tag into the <head> defining Organization or Service schema.`,
       failedPages: missingSchemaPages.map(p => ({ id: p.id, url: p.url, detail: 'No explicit Organization or Service JSON-LD found' }))
+    });
+  }
+
+  // Issue 11: Duplicate Page Titles Across URLs
+  const titleGroups = new Map<string, typeof crawledPages>();
+  for (const p of crawledPages) {
+    if (p.status === 200 && p.title && p.titleChars > 0) {
+      const norm = p.title.toLowerCase().trim();
+      if (!titleGroups.has(norm)) titleGroups.set(norm, []);
+      titleGroups.get(norm)!.push(p);
+    }
+  }
+  const duplicateTitlePages: { id: string; url: string; detail: string }[] = [];
+  titleGroups.forEach((pages, t) => {
+    if (pages.length > 1) {
+      pages.forEach(p => duplicateTitlePages.push({ id: p.id, url: p.url, detail: `Shared title across ${pages.length} URLs: "${p.title.slice(0, 45)}..."` }));
+    }
+  });
+  if (duplicateTitlePages.length > 0) {
+    issues.push({
+      id: 'duplicate-titles',
+      title: `${duplicateTitlePages.length} page${duplicateTitlePages.length > 1 ? 's have' : ' has'} duplicate title tags`,
+      desc: 'Duplicate title tags cause search engines to cannibalize keywords between identical pages rather than ranking them individually.',
+      impact: 'Important',
+      impactBadge: 'bg-amber-50 text-amber-700 border-amber-200',
+      howToFix: 'Assign distinct, descriptive title tags to each page reflecting its specific purpose.',
+      difficulty: 'EASY',
+      impactLevel: 'HIGH',
+      whatIsThis: 'Every indexable page should represent a unique intent. Duplicate titles confuse search crawlers and dilute topical relevance.',
+      howDoIFix: 'Customize the <title> tag on each URL listed below to ensure 100% unique title copy.',
+      failedPages: duplicateTitlePages
+    });
+  }
+
+  // Issue 12: Duplicate Meta Descriptions
+  const descGroups = new Map<string, typeof crawledPages>();
+  for (const p of crawledPages) {
+    if (p.status === 200 && p.metaDesc && p.metaChars > 25) {
+      const norm = p.metaDesc.toLowerCase().trim();
+      if (!descGroups.has(norm)) descGroups.set(norm, []);
+      descGroups.get(norm)!.push(p);
+    }
+  }
+  const duplicateDescPages: { id: string; url: string; detail: string }[] = [];
+  descGroups.forEach((pages) => {
+    if (pages.length > 1) {
+      pages.forEach(p => duplicateDescPages.push({ id: p.id, url: p.url, detail: `Shared description across ${pages.length} URLs` }));
+    }
+  });
+  if (duplicateDescPages.length > 0) {
+    issues.push({
+      id: 'duplicate-meta-desc',
+      title: `${duplicateDescPages.length} page${duplicateDescPages.length > 1 ? 's have' : ' has'} duplicate meta descriptions`,
+      desc: 'Duplicate meta descriptions reduce SERP CTR because searchers cannot distinguish the unique value of each page.',
+      impact: 'Minor',
+      impactBadge: 'bg-slate-100 text-slate-700 border-slate-200',
+      howToFix: 'Craft unique meta descriptions tailored to the specific content and call to action of each page.',
+      difficulty: 'EASY',
+      impactLevel: 'MEDIUM',
+      whatIsThis: 'When search engines encounter identical meta descriptions across multiple URLs, they frequently ignore the tag and dynamically generate snippets instead.',
+      howDoIFix: 'Write distinct 130-155 character descriptions for each affected URL.',
+      failedPages: duplicateDescPages
+    });
+  }
+
+  // Issue 13: Missing Canonical Tag Entirely
+  const missingCanonicalPages = crawledPages.filter(p => p.status === 200 && !p.canonical);
+  if (missingCanonicalPages.length > 0) {
+    issues.push({
+      id: 'missing-canonical',
+      title: `${missingCanonicalPages.length} page${missingCanonicalPages.length > 1 ? 's lack' : ' lacks'} a canonical tag`,
+      desc: 'Pages without a rel="canonical" tag risk duplicate content penalties if accessible via multiple URL variations.',
+      impact: 'Important',
+      impactBadge: 'bg-amber-50 text-amber-700 border-amber-200',
+      howToFix: 'Add a self-referential <link rel="canonical" href="..."> tag to every indexable page.',
+      difficulty: 'EASY',
+      impactLevel: 'HIGH',
+      whatIsThis: 'A self-referencing canonical tag protects your page from URL parameter duplication, trailing slash conflicts, and protocol splits (http/https).',
+      howDoIFix: 'Insert <link rel="canonical" href="https://yourdomain.com/exact-path"> into the <head> of the listed pages.',
+      failedPages: missingCanonicalPages.map(p => ({ id: p.id, url: p.url, detail: 'No canonical link found in HTML' }))
+    });
+  }
+
+  // Issue 14: Slow Server Response Time (> 2000ms)
+  const slowPages = crawledPages.filter(p => p.loadTimeMs > 2000);
+  if (slowPages.length > 0) {
+    issues.push({
+      id: 'slow-response',
+      title: `${slowPages.length} page${slowPages.length > 1 ? 's have' : ' has'} slow server response times (> 2.0s)`,
+      desc: 'High Time-to-First-Byte (TTFB) degrades Core Web Vitals, increases bounce rates, and lowers crawler efficiency.',
+      impact: 'Minor',
+      impactBadge: 'bg-amber-50 text-amber-700 border-amber-200',
+      howToFix: 'Optimize server-side caching, enable CDN edge delivery (Cloudflare/CloudFront), and minimize database query latency.',
+      difficulty: 'MEDIUM',
+      impactLevel: 'HIGH',
+      whatIsThis: 'TTFB measures the duration from crawler connection initiation to the first byte of response data. Google recommends TTFB under 800ms.',
+      howDoIFix: 'Implement edge page caching and optimize server infrastructure.',
+      failedPages: slowPages.map(p => ({ id: p.id, url: p.url, detail: `Server response time: ${p.loadTimeMs}ms` }))
     });
   }
 

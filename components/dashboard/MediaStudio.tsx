@@ -20,7 +20,10 @@ import {
   MessageCircle,
   Bookmark,
   Send,
-  Camera
+  Camera,
+  ExternalLink,
+  Eye,
+  Maximize2
 } from 'lucide-react';
 
 interface MediaStudioProps {
@@ -80,6 +83,7 @@ export function MediaStudio({
   const [customBadge, setCustomBadge] = useState('');
   const [customServices, setCustomServices] = useState<any[]>([]);
   const [isEditingInline, setIsEditingInline] = useState(false);
+  const [previewMode, setPreviewMode] = useState<'full_poster' | 'instagram_feed'>('full_poster');
 
   React.useEffect(() => {
     if (activeAsset) {
@@ -636,15 +640,57 @@ export function MediaStudio({
         {/* Right Column (5 cols): Live Instagram Post Preview & Social Queue Sync */}
         <div className="lg:col-span-5 space-y-6">
           <div className="bg-white rounded-2xl border border-[#e4d6c6] shadow-sm p-5 space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h3 className="font-bold text-sm text-[#2b1b12] flex items-center gap-2">
-                <Camera className="w-4 h-4 text-pink-600" />
-                Instagram Campaign Preview
-              </h3>
+            {/* Preview Header & View Mode Switcher */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-3 border-b border-slate-100 gap-2.5">
+              <div className="flex items-center gap-1.5 p-1 bg-[#f8f3ec] rounded-xl border border-[#e4d6c6]">
+                <button
+                  type="button"
+                  onClick={() => setPreviewMode('full_poster')}
+                  className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${
+                    previewMode === 'full_poster'
+                      ? 'bg-[#2b1b12] text-[#fffcf7] shadow-xs'
+                      : 'text-[#6f5a4c] hover:bg-white/80'
+                  }`}
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                  <span>Full Poster (HD)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPreviewMode('instagram_feed')}
+                  className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${
+                    previewMode === 'instagram_feed'
+                      ? 'bg-[#2b1b12] text-[#fffcf7] shadow-xs'
+                      : 'text-[#6f5a4c] hover:bg-white/80'
+                  }`}
+                >
+                  <Camera className="w-3.5 h-3.5" />
+                  <span>Instagram Feed</span>
+                </button>
+              </div>
+
               {activeAsset && (
-                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
-                  Campaign Ready
-                </span>
+                <div className="flex items-center gap-2">
+                  <a
+                    href={activeAsset.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-2.5 py-1.5 bg-white hover:bg-[#f8f3ec] text-[#2b1b12] border border-[#e4d6c6] rounded-lg text-xs font-bold transition-all flex items-center gap-1 shadow-2xs cursor-pointer"
+                    title="Open Full Resolution in New Tab"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Open ↗</span>
+                  </a>
+                  <a
+                    href={activeAsset.url}
+                    download={`poster_${Date.now()}.png`}
+                    className="px-3.5 py-1.5 bg-[#5d7a4f] hover:bg-[#4a633e] text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
+                    title="Download High-Resolution PNG Poster"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Download PNG</span>
+                  </a>
+                </div>
               )}
             </div>
 
@@ -656,7 +702,90 @@ export function MediaStudio({
             )}
 
             {activeAsset ? (
-              <div className="space-y-4">
+              previewMode === 'full_poster' ? (
+                /* Mode A: Clean Full-Resolution Master Poster View (Uncropped, High Definition with Download) */
+                <div className="space-y-4 animate-fade-in">
+                  <div className="bg-[#faf8f5] border border-[#e4d6c6] rounded-2xl p-3 shadow-xs">
+                    <div className="relative group rounded-xl overflow-hidden bg-slate-900 border border-slate-200">
+                      <img
+                        src={activeAsset.url}
+                        alt={activeAsset.prompt}
+                        className="w-full h-auto max-h-[640px] object-contain mx-auto transition-transform duration-300"
+                      />
+                      <div className="absolute top-3 right-3 flex items-center gap-2 opacity-90 group-hover:opacity-100 transition-opacity">
+                        <a
+                          href={activeAsset.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1.5 bg-black/80 hover:bg-black text-white text-xs font-bold rounded-lg backdrop-blur-md flex items-center gap-1.5 shadow-md"
+                        >
+                          <Maximize2 className="w-3.5 h-3.5" />
+                          <span>Full Size</span>
+                        </a>
+                        <a
+                          href={activeAsset.url}
+                          download={`poster_${Date.now()}.png`}
+                          className="px-3.5 py-1.5 bg-[#5d7a4f] hover:bg-[#4a633e] text-white text-xs font-bold rounded-lg shadow-md flex items-center gap-1.5"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          <span>Download PNG</span>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Primary Output Actions Toolbar */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <a
+                      href={activeAsset.url}
+                      download={`poster_${Date.now()}.png`}
+                      className="py-2.5 bg-[#2b1b12] hover:bg-[#3b2519] text-[#fffcf7] rounded-xl text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-1.5 text-center cursor-pointer"
+                    >
+                      <Download className="w-3.5 h-3.5 text-[#c5a059]" />
+                      <span>Download HD (PNG)</span>
+                    </a>
+                    <button
+                      type="button"
+                      onClick={handleCopyCaption}
+                      className="py-2.5 bg-[#f8f3ec] hover:bg-[#ebdcc8] text-[#2b1b12] border border-[#d8c09e] rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copy Caption</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onPushToSocialQueue(activeAsset)}
+                      className="py-2.5 bg-white hover:bg-[#f8f3ec] text-[#2b1b12] border border-[#e4d6c6] rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+                    >
+                      <Share2 className="w-3.5 h-3.5 text-blue-600" />
+                      <span>Push to Social</span>
+                    </button>
+                  </div>
+
+                  {/* Copy & Campaign Context Card */}
+                  <div className="p-4 rounded-xl bg-[#fffcf7] border border-[#e4d6c6] space-y-2.5 text-xs">
+                    {(customHeadline || activeAsset.headline) && (
+                      <h4 className="font-black text-sm text-[#2b1b12]">
+                        {customHeadline || activeAsset.headline}
+                      </h4>
+                    )}
+                    <p className="text-[#6f5a4c] text-xs leading-relaxed whitespace-pre-line font-medium">
+                      {activeAsset.caption || activeAsset.prompt}
+                    </p>
+                    {activeAsset.hashtags && activeAsset.hashtags.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 pt-1 border-t border-[#f1e8dc]">
+                        {activeAsset.hashtags.map((tag: string, i: number) => (
+                          <span key={i} className="text-[11px] font-semibold text-blue-600 bg-blue-50/60 px-2 py-0.5 rounded-md">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                /* Mode B: Instagram Feed Mockup */
+                <div className="space-y-4 animate-fade-in">
                 {/* Canva-Style Template Switcher & Inline Edit Toolbar */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between bg-[#f8f3ec] p-1.5 rounded-xl border border-[#e4d6c6] gap-2">
                   <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
@@ -1046,7 +1175,8 @@ export function MediaStudio({
                   </div>
                 </div>
               </div>
-            ) : (
+            )
+          ) : (
               <div className="p-10 text-center border-2 border-dashed border-[#e4d6c6] rounded-2xl bg-[#f8f3ec]/40 space-y-2">
                 <ImageIcon className="w-8 h-8 text-slate-300 mx-auto" />
                 <p className="text-xs font-bold text-[#2b1b12]">No Media Asset Selected</p>

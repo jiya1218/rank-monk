@@ -185,20 +185,23 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
       return project.crawledPages.map((p: any, idx: number) => ({
         id: `p_init_${idx}`,
         url: p.url,
-        status: p.statusCode || 200,
+        status: p.statusCode || p.status || 200,
         title: p.title || `${brandName} — Official Platform`,
         titleChars: (p.title || '').length,
         metaDesc: p.metaDesc || '',
         metaChars: (p.metaDesc || '').length,
         h1: p.h1 || brandName,
+        h1Count: p.h1Count !== undefined ? p.h1Count : (p.h1 ? 1 : 0),
         wordCount: p.wordCount || 1200,
-        canonical: p.url,
-        isCanonicalised: false,
-        robotsTag: 'index, follow',
-        isNoIndex: false,
-        missingAltCount: 0,
-        missingAltImages: [],
-        issuesCount: 0,
+        canonical: p.canonical || p.url,
+        isCanonicalised: p.isCanonicalised !== undefined ? p.isCanonicalised : Boolean(p.canonical && p.canonical !== p.url && p.canonical !== `${p.url}/`),
+        robotsTag: p.robotsTag || (p.isNoIndex ? 'noindex' : 'index, follow'),
+        isNoIndex: p.isNoIndex !== undefined ? p.isNoIndex : Boolean(p.robotsTag?.includes('noindex')),
+        missingAltCount: p.missingAltCount || 0,
+        missingAltImages: p.missingAltImages || [],
+        issuesCount: p.issuesCount || 0,
+        loadTimeMs: p.loadTimeMs || 250,
+        schemaTypes: p.schemaTypes || ['WebPage'],
         geoScore: p.geoScore || 85,
         geoTests: p.geoTests || []
       }));
@@ -234,7 +237,42 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
     }
     // If auditData not loaded yet, compile issues on the fly from pagesList
     const realIssues: any[] = [];
-    const missingDesc = pagesList.filter((p: any) => !p.metaDesc);
+
+    const broken = pagesList.filter((p: any) => p.status >= 400);
+    if (broken.length > 0) {
+      realIssues.push({
+        id: 'broken-pages',
+        title: `${broken.length} page${broken.length > 1 ? 's are' : ' is'} returning HTTP error status codes`,
+        desc: 'Broken pages return 404 or server error responses, disrupting user navigation and depleting search crawl budget.',
+        impact: 'Critical',
+        impactBadge: 'bg-red-50 text-red-700 border-red-200',
+        howToFix: 'Repair broken URLs or set up permanent 301 redirects to active, relevant pages.',
+        difficulty: 'EASY',
+        impactLevel: 'HIGH',
+        whatIsThis: 'Search engine crawlers allocate a finite crawl budget. Broken links disrupt crawler discovery.',
+        howDoIFix: 'Inspect the failed URLs below. Return a 301 redirect or remove dead internal links.',
+        failedPages: broken.map((p: any) => ({ id: p.id, url: p.url, detail: `HTTP Status: ${p.status}` }))
+      });
+    }
+
+    const noIndex = pagesList.filter((p: any) => p.isNoIndex);
+    if (noIndex.length > 0) {
+      realIssues.push({
+        id: 'noindex-blocking',
+        title: `${noIndex.length} page${noIndex.length > 1 ? 's have' : ' has'} a 'noindex' directive blocking search engines`,
+        desc: 'The robots meta tag explicitly instructs Google, Bing, and AI crawlers not to index these pages.',
+        impact: 'Critical',
+        impactBadge: 'bg-red-50 text-red-700 border-red-200',
+        howToFix: 'Remove the "noindex" attribute from <meta name="robots"> if these pages should rank publicly.',
+        difficulty: 'EASY',
+        impactLevel: 'HIGH',
+        whatIsThis: 'A <meta name="robots" content="noindex"> tag guarantees that search engines will purge the URL from their index.',
+        howDoIFix: 'Change content="noindex" to content="index, follow" on pages meant to rank in search results.',
+        failedPages: noIndex.map((p: any) => ({ id: p.id, url: p.url, detail: `Robots tag: ${p.robotsTag || 'noindex'}` }))
+      });
+    }
+
+    const missingDesc = pagesList.filter((p: any) => p.status === 200 && !p.isNoIndex && !p.metaDesc);
     if (missingDesc.length > 0) {
       realIssues.push({
         id: 'missing-meta-desc',
