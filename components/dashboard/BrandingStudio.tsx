@@ -206,6 +206,7 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
 
   const [customPalette, setCustomPalette] = useState<string[]>(palette);
   const [customLogoUrl, setCustomLogoUrl] = useState<string>(project?.logoUrl || '');
+  const [customLogoWordmarkUrl, setCustomLogoWordmarkUrl] = useState<string>(project?.logoWordmarkUrl || '');
   const [customFaviconUrl, setCustomFaviconUrl] = useState<string>(project?.faviconUrl || '');
 
   React.useEffect(() => {
@@ -214,8 +215,9 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
 
   React.useEffect(() => {
     setCustomLogoUrl(project?.logoUrl || '');
+    setCustomLogoWordmarkUrl(project?.logoWordmarkUrl || '');
     setCustomFaviconUrl(project?.faviconUrl || '');
-  }, [project?.logoUrl, project?.faviconUrl]);
+  }, [project?.logoUrl, project?.logoWordmarkUrl, project?.faviconUrl]);
 
   const voiceTags = (project?.voiceTags && Array.isArray(project.voiceTags) && project.voiceTags.length > 0)
     ? project.voiceTags
@@ -883,37 +885,53 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
                         : (cleanDomain.includes('giva.co') ? 'https://www.giva.co/cdn/shop/files/logo__3.png' : null);
 
                       return displayLogo ? (
-                        <img
-                          src={displayLogo}
-                          alt={project?.name || 'Logo'}
-                          className="max-h-14 max-w-full object-contain filter drop-shadow-xs"
-                          onError={() => setLogoFailed(true)}
-                          onLoad={(e) => {
-                            try {
-                              const img = e.currentTarget;
-                              const canvas = document.createElement('canvas');
-                              canvas.width = Math.min(img.naturalWidth || 64, 64);
-                              canvas.height = Math.min(img.naturalHeight || 64, 64);
-                              const ctx = canvas.getContext('2d');
-                              if (ctx) {
-                                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                                const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-                                let whitePixels = 0;
-                                let opaquePixels = 0;
-                                for (let i = 0; i < data.length; i += 4) {
-                                  if (data[i + 3] > 30) {
-                                    opaquePixels++;
-                                    const brightness = (data[i] * 299 + data[i+1] * 587 + data[i+2] * 114) / 1000;
-                                    if (brightness > 210) whitePixels++;
+                        project?.logoWordmarkUrl ? (
+                          <div className="flex items-center justify-center gap-2 max-h-14 max-w-full px-1">
+                            <img
+                              src={displayLogo}
+                              alt={project?.name || 'Logo Mark'}
+                              className="max-h-12 w-auto object-contain filter drop-shadow-xs shrink-0"
+                              onError={() => setLogoFailed(true)}
+                            />
+                            <img
+                              src={project.logoWordmarkUrl}
+                              alt="Brand Wordmark"
+                              className="max-h-8 w-auto object-contain filter drop-shadow-xs shrink-0"
+                            />
+                          </div>
+                        ) : (
+                          <img
+                            src={displayLogo}
+                            alt={project?.name || 'Logo'}
+                            className="max-h-14 max-w-full object-contain filter drop-shadow-xs"
+                            onError={() => setLogoFailed(true)}
+                            onLoad={(e) => {
+                              try {
+                                const img = e.currentTarget;
+                                const canvas = document.createElement('canvas');
+                                canvas.width = Math.min(img.naturalWidth || 64, 64);
+                                canvas.height = Math.min(img.naturalHeight || 64, 64);
+                                const ctx = canvas.getContext('2d');
+                                if (ctx) {
+                                  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                                  const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+                                  let whitePixels = 0;
+                                  let opaquePixels = 0;
+                                  for (let i = 0; i < data.length; i += 4) {
+                                    if (data[i + 3] > 30) {
+                                      opaquePixels++;
+                                      const brightness = (data[i] * 299 + data[i+1] * 587 + data[i+2] * 114) / 1000;
+                                      if (brightness > 210) whitePixels++;
+                                    }
+                                  }
+                                  if (opaquePixels > 0 && (whitePixels / opaquePixels) > 0.3) {
+                                    setLogoCanvasBg('dark');
                                   }
                                 }
-                                if (opaquePixels > 0 && (whitePixels / opaquePixels) > 0.3) {
-                                  setLogoCanvasBg('dark');
-                                }
-                              }
-                            } catch (_) {}
-                          }}
-                        />
+                              } catch (_) {}
+                            }}
+                          />
+                        )
                       ) : (
                         <div className="flex items-center justify-center">
                           <img
@@ -1704,11 +1722,11 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
               Customize your brand visual identity: update your direct Logo and Favicon links, or refine the extracted color palette.
             </p>
 
-            {/* Logo and Favicon Asset URLs */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Logo, Wordmark and Favicon Asset URLs */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="p-3 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl space-y-1">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-[#6f5a4c] block">
-                  Custom Logo URL (PNG / SVG / WebP)
+                  Logo / Mark URL (PNG / SVG)
                 </span>
                 <input
                   type="text"
@@ -1720,7 +1738,19 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
               </div>
               <div className="p-3 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl space-y-1">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-[#6f5a4c] block">
-                  Custom Favicon URL (.ico / .png)
+                  Wordmark URL (Optional)
+                </span>
+                <input
+                  type="text"
+                  placeholder="https://example.com/name.png"
+                  value={customLogoWordmarkUrl}
+                  onChange={(e) => setCustomLogoWordmarkUrl(e.target.value)}
+                  className="w-full p-2 bg-[#fffcf7] border border-[#e4d6c6] rounded-lg text-xs font-mono text-[#2b1b12] focus:outline-none focus:border-[#c5a059]"
+                />
+              </div>
+              <div className="p-3 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#6f5a4c] block">
+                  Favicon URL (.ico / .png)
                 </span>
                 <input
                   type="text"
@@ -1798,6 +1828,7 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
                         ...project,
                         palette: customPalette,
                         logoUrl: customLogoUrl.trim() || project.logoUrl,
+                        logoWordmarkUrl: customLogoWordmarkUrl.trim() || project.logoWordmarkUrl || '',
                         faviconUrl: customFaviconUrl.trim() || project.faviconUrl
                       };
                       localStorage.setItem('rankmonk_active_project', JSON.stringify(updated));

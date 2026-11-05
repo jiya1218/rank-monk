@@ -57,6 +57,7 @@ export interface ExtractedBrand {
   name: string;
   website: string;
   logoUrl: string;
+  logoWordmarkUrl?: string;
   faviconUrl: string;
   palette: string[];
   fonts?: string[];
@@ -1429,10 +1430,16 @@ export function isTrueRootHref(href: string, domain: string): boolean {
   return regex.test(h);
 }
 
-export function extractDynamicLogo(html: string, domain: string, brandName: string = ''): string | null {
-  if (!html) return null;
+export interface DynamicLogoResult {
+  logoUrl: string | null;
+  logoWordmarkUrl: string | null;
+}
+
+export function extractDynamicLogo(html: string, domain: string, brandName: string = ''): DynamicLogoResult {
+  if (!html) return { logoUrl: null, logoWordmarkUrl: null };
 
   const candidateScores: { url: string; score: number; reason: string; alt?: string }[] = [];
+  let detectedCompound: { markUrl: string; wordmarkUrl: string } | null = null;
   const cleanD = domain.replace(/^https?:\/\//i, '').replace(/^www\./i, '').replace(/\/.*$/, '').toLowerCase();
   const brandSlug = (brandName || cleanD.split('.')[0]).toLowerCase().replace(/[^a-z0-9]/g, '');
 
@@ -1494,6 +1501,50 @@ export function extractDynamicLogo(html: string, domain: string, brandName: stri
 
       const inner = at[1];
       const imgMatches = inner.match(/<img\b[^>]+>/gi) || [];
+
+      // Check for compound logo lockup inside root brand anchor (e.g. OfficeX shield mark + name wordmark)
+      if (imgMatches.length >= 2 && !detectedCompound) {
+        const candidateItems: { src: string; alt: string; tag: string; isMark: boolean; isWordmark: boolean }[] = [];
+        for (const img of imgMatches.slice(0, 3)) {
+          const srcM = img.match(/\b(?:src|data-src|data-lazy-src)=["']([^"']+)["']/i);
+          const srcsetM = img.match(/\b(?:srcset|data-srcset)=["']([^"']+)["']/i);
+          const altM = img.match(/\balt=["']([^"']*)["']/i);
+          const alt = altM ? altM[1] : '';
+          let cSrc = srcM ? srcM[1] : null;
+          if ((!cSrc || cSrc.startsWith('data:image/gif') || cSrc.startsWith('data:image/svg')) && srcsetM) {
+            cSrc = srcsetM[1].split(',')[0].trim().split(/\s+/)[0];
+          }
+          if (cSrc) {
+            const fullU = cleanAndAbsoluteAssetUrl(cSrc, domain);
+            if (fullU) {
+              const lowerU = fullU.toLowerCase();
+              const lowerAlt = alt.toLowerCase();
+              const widthM = img.match(/\bwidth=["']?(\d+)/i);
+              const heightM = img.match(/\bheight=["']?(\d+)/i);
+              const w = widthM ? parseInt(widthM[1], 10) : 0;
+              const h = heightM ? parseInt(heightM[1], 10) : 0;
+              const ratio = (w && h) ? w / h : 1;
+
+              const isMark = /logo|mark|icon|shield|symbol/i.test(lowerU) || /logo|mark|icon|shield|symbol/i.test(lowerAlt) || (ratio >= 0.7 && ratio <= 1.4);
+              const isWordmark = /name|wordmark|text|brand/i.test(lowerU) || (brandSlug && lowerAlt.includes(brandSlug) && !isMark) || ratio >= 1.7;
+
+              candidateItems.push({ src: fullU, alt, tag: img, isMark, isWordmark });
+            }
+          }
+        }
+
+        if (candidateItems.length >= 2) {
+          const markCand = candidateItems.find(c => c.isMark) || candidateItems[0];
+          const wordmarkCand = candidateItems.find(c => c !== markCand && (c.isWordmark || !c.isMark)) || candidateItems[1];
+          if (markCand && wordmarkCand && markCand.src !== wordmarkCand.src) {
+            detectedCompound = {
+              markUrl: markCand.src,
+              wordmarkUrl: wordmarkCand.src
+            };
+          }
+        }
+      }
+
       for (const img of imgMatches) {
         const srcMatch = img.match(/\b(?:src|data-src|data-lazy-src)=["']([^"']+)["']/i);
         const srcsetMatch = img.match(/\b(?:srcset|data-srcset)=["']([^"']+)["']/i);
@@ -1630,10 +1681,20 @@ export function extractDynamicLogo(html: string, domain: string, brandName: stri
     }
   }
 
-  if (candidateScores.length === 0) return null;
+  if (detectedCompound) {
+    return {
+      logoUrl: detectedCompound.markUrl,
+      logoWordmarkUrl: detectedCompound.wordmarkUrl
+    };
+  }
+
+  if (candidateScores.length === 0) return { logoUrl: null, logoWordmarkUrl: null };
 
   candidateScores.sort((a, b) => b.score - a.score);
-  return candidateScores[0].url;
+  return {
+    logoUrl: candidateScores[0].url,
+    logoWordmarkUrl: null
+  };
 }
 
 export function extractDynamicFavicon(html: string, domain: string): string {
@@ -1671,6 +1732,7 @@ export async function extractBrandFromDomain(
   let h1 = brandName;
   let primaryThemeColor: string | null = null;
   let scrapedLogo: string | null = null;
+  let scrapedWordmark: string | null = null;
   let scrapedFavicon: string | null = null;
   let scrapedPalette: string[] = [];
   let scrapedFonts: string[] = ['Inter', 'Sans-Serif'];
@@ -1767,7 +1829,9 @@ export async function extractBrandFromDomain(
       scrapedDesignStyle = fontInfo.designStyle;
 
       // Dynamic Extraction of Authentic Logo & Favicon Directly from Live HTML
-      scrapedLogo = extractDynamicLogo(html, domain, brandName);
+      const logoRes = extractDynamicLogo(html, domain, brandName);
+      scrapedLogo = logoRes.logoUrl;
+      scrapedWordmark = logoRes.logoWordmarkUrl;
       scrapedFavicon = extractDynamicFavicon(html, domain);
     }
   } catch (err) {
@@ -1792,6 +1856,7 @@ export async function extractBrandFromDomain(
   // 5. Guaranteed Distinct High-Resolution Logo & Favicon (Zero Fake Fallbacks)
   const faviconUrl = scrapedFavicon || `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
   const logoUrl = scrapedLogo || '';
+  const logoWordmarkUrl = scrapedWordmark || '';
 
   const finalBrandName = intelligence.name || brandName;
   const currentDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -1960,6 +2025,7 @@ export async function extractBrandFromDomain(
     name: finalBrandName,
     website: `https://${domain}`,
     logoUrl,
+    logoWordmarkUrl,
     faviconUrl,
     palette: brandPalette,
     fonts: scrapedFonts,

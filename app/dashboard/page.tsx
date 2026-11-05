@@ -113,6 +113,11 @@ export default function DashboardPage() {
           p.logoUrl = 'https://scalezix.com/scalezix-logo-transparent-dark.png';
           p.faviconUrl = 'https://scalezix.com/icon.svg?icon.0drmnn7_x9d8y.svg';
           updated = true;
+        } else if (p.domain && p.domain.toLowerCase().includes('officex') && !p.logoWordmarkUrl) {
+          p.logoUrl = 'https://www.officex.pro/_next/image?url=%2Flogo-removebg-preview.png&w=96&q=75';
+          p.logoWordmarkUrl = 'https://www.officex.pro/_next/image?url=%2Fname-removebg-preview.png&w=384&q=75';
+          p.faviconUrl = 'https://www.officex.pro/favicon.ico?favicon.3ui899go8o5d2.ico';
+          updated = true;
         } else if (p.domain && p.domain.toLowerCase().includes('solospider') && (!p.logoUrl || p.logoUrl === p.faviconUrl || p.logoUrl.includes('google.com/s2/favicons'))) {
           p.logoUrl = 'https://solospider.ai/assets/solospider-logo.png';
           p.faviconUrl = 'https://solospider.ai/favicon.ico?2bdf02b23e50a3f9';
@@ -347,6 +352,7 @@ export default function DashboardPage() {
         targetMarket: onboardingMarket,
         summary: brand.summary,
         logoUrl: brand.logoUrl,
+        logoWordmarkUrl: brand.logoWordmarkUrl || '',
         faviconUrl: brand.faviconUrl,
         palette: brand.palette,
         competitors: brand.competitors,
@@ -419,6 +425,7 @@ export default function DashboardPage() {
           brandPositioning: brand.brandPositioning || brand.summary,
           summary: brand.summary,
           logoUrl: brand.logoUrl,
+          logoWordmarkUrl: brand.logoWordmarkUrl || '',
           faviconUrl: brand.faviconUrl,
           palette: brand.palette,
           fonts: brand.fonts || ['Inter', 'Sans-Serif'],
@@ -503,6 +510,7 @@ export default function DashboardPage() {
         targetMarket: brand.targetMarket || targetMkt,
         summary: brand.summary,
         logoUrl: brand.logoUrl,
+        logoWordmarkUrl: brand.logoWordmarkUrl || '',
         faviconUrl: brand.faviconUrl,
         palette: brand.palette,
         competitors: brand.competitors,
