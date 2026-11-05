@@ -16,6 +16,7 @@ export function ConnectDomainModal({ isOpen, initialDomain, onClose, onSuccess }
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [domainInput, setDomainInput] = useState(initialDomain || '');
+  const [marketInput, setMarketInput] = useState('Pan India');
   const [loading, setLoading] = useState(false);
   const [stepText, setStepText] = useState('');
   const [error, setError] = useState('');
@@ -55,7 +56,7 @@ export function ConnectDomainModal({ isOpen, initialDomain, onClose, onSuccess }
       const res = await fetch('/api/brand/extract', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ domain: clean })
+        body: JSON.stringify({ domain: clean, targetMarket: marketInput })
       });
 
       const json = await res.json();
@@ -77,6 +78,7 @@ export function ConnectDomainModal({ isOpen, initialDomain, onClose, onSuccess }
         industry: brand.industry,
         businessCategory: brand.businessCategory,
         targetAudience: brand.targetAudience,
+        targetMarket: marketInput,
         summary: brand.summary,
         logoUrl: brand.logoUrl,
         faviconUrl: brand.faviconUrl,
@@ -215,10 +217,25 @@ export function ConnectDomainModal({ isOpen, initialDomain, onClose, onSuccess }
               </p>
             </div>
 
+            <div>
+              <label className="block text-xs font-bold text-[#2b1b12] uppercase tracking-wider mb-2">
+                Target Market Focus
+              </label>
+              <select
+                value={marketInput}
+                onChange={(e) => setMarketInput(e.target.value)}
+                disabled={loading}
+                className="w-full p-3 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] font-semibold focus:outline-none focus:border-[#c5a059]"
+              >
+                <option value="Pan India">🇮🇳 Pan India</option>
+                <option value="Global">🌐 Global</option>
+              </select>
+            </div>
+
             {loading ? (
               <DomainCrawlerProgress
                 domain={domainInput}
-                market="Pan India"
+                market={marketInput}
               />
             ) : (
               <button

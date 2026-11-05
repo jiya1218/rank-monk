@@ -400,7 +400,7 @@ export default function DashboardPage() {
       const res = await fetch('/api/brand/extract', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ domain: project.domain, targetMarket: currentMarket })
+        body: JSON.stringify({ domain: project.domain, targetMarket: currentMarket, skipCrawl: true })
       });
       const json = await res.json();
       if (res.ok && json.success) {
@@ -419,7 +419,7 @@ export default function DashboardPage() {
           faviconUrl: brand.faviconUrl,
           palette: brand.palette,
           fonts: brand.fonts || ['Inter', 'Sans-Serif'],
-          designStyle: brand.designStyle || 'Dark Minimalist Tech',
+          designStyle: brand.designStyle || 'Modern Minimalist',
           competitors: brand.competitors,
           aeoScore: brand.aeoScore,
           seoScore: brand.seoScore,
@@ -428,7 +428,7 @@ export default function DashboardPage() {
           promptClusters: brand.promptClusters,
           actionCenter: brand.actionCenter,
           botAnalytics: brand.botAnalytics,
-          crawledPages: brand.crawledPages,
+          crawledPages: (brand.crawledPages && brand.crawledPages.length > 0) ? brand.crawledPages : project.crawledPages,
           articles: brand.articles,
         };
         setProject(updatedProject);
@@ -436,6 +436,15 @@ export default function DashboardPage() {
         if (user?.email) {
           localStorage.setItem(`rankmonk_project_${user.email.toLowerCase()}`, JSON.stringify(updatedProject));
         }
+        try {
+          const multi = JSON.parse(localStorage.getItem('rankmonk_multi_projects_jiyapatel') || '[]');
+          const idx = multi.findIndex((p: any) => p.domain?.toLowerCase() === project.domain.toLowerCase());
+          if (idx !== -1) {
+            multi[idx] = updatedProject;
+            localStorage.setItem('rankmonk_multi_projects_jiyapatel', JSON.stringify(multi));
+            setAdminDomainList(multi);
+          }
+        } catch (e) {}
       }
     } catch (e) {
       console.error('Failed to refresh brand:', e);
@@ -762,12 +771,10 @@ export default function DashboardPage() {
                   value={onboardingMarket}
                   onChange={(e) => setOnboardingMarket(e.target.value)}
                   disabled={analyzingDomain}
-                  className="w-full p-3 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] focus:outline-none focus:border-[#c5a059]"
+                  className="w-full p-3 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] font-semibold focus:outline-none focus:border-[#c5a059]"
                 >
-                  <option value="Global">Global (US / Worldwide)</option>
-                  <option value="India">India (Pan-India & Regional)</option>
-                  <option value="US">United States (Domestic)</option>
-                  <option value="UK">United Kingdom & Europe</option>
+                  <option value="Pan India">🇮🇳 Pan India</option>
+                  <option value="Global">🌐 Global</option>
                 </select>
               </div>
 
@@ -1685,11 +1692,8 @@ export default function DashboardPage() {
                   onChange={(e) => setAdminTargetMarket(e.target.value)}
                   className="w-full p-3 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] font-semibold focus:outline-none focus:border-[#c5a059]"
                 >
-                  <option value="Pan India">🇮🇳 Pan India (Indian Competitors & Search Engines)</option>
-                  <option value="United States">🇺🇸 United States</option>
-                  <option value="United Arab Emirates">🇦🇪 United Arab Emirates</option>
-                  <option value="United Kingdom">🇬🇧 United Kingdom</option>
-                  <option value="Global">🌐 Global Worldwide</option>
+                  <option value="Pan India">🇮🇳 Pan India</option>
+                  <option value="Global">🌐 Global</option>
                 </select>
               </div>
 

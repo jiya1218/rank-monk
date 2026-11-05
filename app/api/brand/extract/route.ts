@@ -4,7 +4,7 @@ import { extractBrandFromDomain } from '@/lib/brandExtractor';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { domain, targetMarket = 'Pan India' } = body || {};
+    const { domain, targetMarket = 'Pan India', skipCrawl = false } = body || {};
 
     if (!domain) {
       return NextResponse.json(
@@ -13,7 +13,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const brand = await extractBrandFromDomain(domain, targetMarket);
+    const brand = await extractBrandFromDomain(domain, targetMarket, skipCrawl);
     return NextResponse.json({
       success: true,
       data: brand

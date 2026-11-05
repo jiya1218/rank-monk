@@ -45,6 +45,7 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
   const [expandedCompIdx, setExpandedCompIdx] = useState<number | null>(null);
   const [editingModal, setEditingModal] = useState<'profile' | 'visual' | 'voice' | null>(null);
   const [logoFailed, setLogoFailed] = useState(false);
+  const [logoCanvasBg, setLogoCanvasBg] = useState<'light' | 'dark' | 'grid'>('light');
   const [activeScoreTooltip, setActiveScoreTooltip] = useState<'health' | 'tone' | 'audience' | 'visual' | null>(null);
 
   React.useEffect(() => {
@@ -190,9 +191,17 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
   }, [project?.palette]);
 
   const [customPalette, setCustomPalette] = useState<string[]>(palette);
+  const [customLogoUrl, setCustomLogoUrl] = useState<string>(project?.logoUrl || '');
+  const [customFaviconUrl, setCustomFaviconUrl] = useState<string>(project?.faviconUrl || '');
+
   React.useEffect(() => {
     setCustomPalette(palette);
   }, [palette]);
+
+  React.useEffect(() => {
+    setCustomLogoUrl(project?.logoUrl || '');
+    setCustomFaviconUrl(project?.faviconUrl || '');
+  }, [project?.logoUrl, project?.faviconUrl]);
 
   const voiceTags = (project?.voiceTags && Array.isArray(project.voiceTags) && project.voiceTags.length > 0)
     ? project.voiceTags
@@ -718,7 +727,7 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
                 </div>
                 <div className="w-2/3 font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-md px-2.5 py-0.5 inline-flex items-center gap-1.5 w-fit">
                   <span>{project?.targetMarket?.toLowerCase()?.includes('india') ? '🇮🇳' : '🌐'}</span>
-                  <span>{project?.targetMarket || 'Pan India'}</span>
+                  <span>{project?.targetMarket?.toLowerCase()?.includes('india') ? 'Pan India' : 'Global'}</span>
                 </div>
               </div>
 
@@ -772,12 +781,64 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
               </div>
             </div>
 
-            {/* Logo and Favicon Previews */}
+            {/* Logo and Favicon Previews with SoloSpider-style Canvas Background Switcher */}
             <div className="space-y-4 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                  Brand Assets
+                </span>
+                {/* SoloSpider Style Canvas Background Switcher */}
+                <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+                  <span className="text-[9px] font-bold text-slate-400 px-1 uppercase tracking-tight">Canvas:</span>
+                  <button
+                    type="button"
+                    onClick={() => setLogoCanvasBg('light')}
+                    className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
+                      logoCanvasBg === 'light'
+                        ? 'bg-white text-slate-900 shadow-xs border border-slate-200'
+                        : 'text-slate-500 hover:text-slate-900'
+                    }`}
+                    title="Light background (standard)"
+                  >
+                    ☀️ Light
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLogoCanvasBg('dark')}
+                    className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
+                      logoCanvasBg === 'dark'
+                        ? 'bg-slate-950 text-white shadow-xs'
+                        : 'text-slate-500 hover:text-slate-900'
+                    }`}
+                    title="Dark background (reveals white & transparent logos)"
+                  >
+                    🌙 Dark
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLogoCanvasBg('grid')}
+                    className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
+                      logoCanvasBg === 'grid'
+                        ? 'bg-white text-slate-900 shadow-xs border border-slate-200'
+                        : 'text-slate-500 hover:text-slate-900'
+                    }`}
+                    title="Transparent grid canvas"
+                  >
+                    🏁 Grid
+                  </button>
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Logo</span>
-                  <div className="h-16 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center p-2 overflow-hidden shadow-xs">
+                  <div className={`h-16 rounded-xl flex items-center justify-center p-2 overflow-hidden shadow-xs transition-colors border ${
+                    logoCanvasBg === 'dark'
+                      ? 'bg-slate-950 border-slate-800'
+                      : logoCanvasBg === 'grid'
+                      ? 'bg-[repeating-conic-gradient(#e2e8f0_0%_25%,#ffffff_0%_50%)] bg-[length:14px_14px] border-slate-200'
+                      : 'bg-slate-50 border-slate-200'
+                  }`}>
                     {(() => {
                       const isBadPromo = project?.logoUrl && (
                         project.logoUrl.includes('Frame_1171278262') ||
@@ -785,8 +846,10 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
                         project.logoUrl.toLowerCase().includes('under-1000') ||
                         project.logoUrl.toLowerCase().includes('grandchild-pill')
                       );
-                      const displayLogo = (!logoFailed && project?.logoUrl && !isBadPromo && project.logoUrl !== project?.faviconUrl && !project.logoUrl.includes('google.com/s2/favicons'))
+                      const displayLogo = (!logoFailed && project?.logoUrl && !isBadPromo && !project.logoUrl.includes('google.com/s2/favicons'))
                         ? project.logoUrl
+                        : (!logoFailed && project?.faviconUrl && !project.faviconUrl.includes('google.com/s2/favicons'))
+                        ? project.faviconUrl
                         : (cleanDomain.includes('giva.co') ? 'https://www.giva.co/cdn/shop/files/logo__3.png' : null);
 
                       return displayLogo ? (
@@ -797,16 +860,13 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
                           onError={() => setLogoFailed(true)}
                         />
                       ) : (
-                        <div className="flex items-center gap-2 px-1">
+                        <div className="flex items-center justify-center">
                           <img
                             src={project?.faviconUrl || `https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128`}
-                            alt="Brand Icon"
-                            className="w-7 h-7 object-contain rounded-md"
+                            alt="Brand Mark"
+                            className="max-h-9 max-w-full object-contain rounded-md"
                             onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
                           />
-                          <span className="font-bold text-xs text-slate-900 truncate max-w-[80px]">
-                            {project?.name || cleanDomain}
-                          </span>
                         </div>
                       );
                     })()}
@@ -815,7 +875,13 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
 
                 <div>
                   <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Favicon</span>
-                  <div className="h-16 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center p-2 shadow-xs">
+                  <div className={`h-16 rounded-xl flex items-center justify-center p-2 shadow-xs transition-colors border ${
+                    logoCanvasBg === 'dark'
+                      ? 'bg-slate-950 border-slate-800'
+                      : logoCanvasBg === 'grid'
+                      ? 'bg-[repeating-conic-gradient(#e2e8f0_0%_25%,#ffffff_0%_50%)] bg-[length:14px_14px] border-slate-200'
+                      : 'bg-slate-50 border-slate-200'
+                  }`}>
                     <img
                       src={project?.faviconUrl || `https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128`}
                       alt="Favicon"
@@ -838,24 +904,19 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
                 </div>
                 <div className={`grid ${palette.length <= 3 ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-4'} gap-2`}>
                   {palette.map((hex: string, i: number) => {
-                    const role = getSemanticColorRole(hex, i, i === 0);
-
                     return (
-                      <div key={i} className="text-center group bg-white p-2 rounded-xl border border-slate-200 shadow-xs hover:border-slate-300 transition-colors relative z-10">
+                      <div key={i} className="text-center group bg-white p-2.5 rounded-xl border border-slate-200 shadow-xs hover:border-slate-300 transition-colors relative z-10">
                         <div
                           onClick={() => {
                             navigator.clipboard?.writeText(hex);
                             showToast(`✓ Copied ${hex} to clipboard!`);
                           }}
-                          className="h-9 rounded-lg border border-black/10 shadow-xs cursor-pointer hover:scale-105 transition-transform !opacity-100"
+                          className="h-10 rounded-lg border border-black/10 shadow-xs cursor-pointer hover:scale-105 transition-transform !opacity-100"
                           style={{ backgroundColor: hex, opacity: 1, filter: 'none' }}
                           title={`Click to copy: ${hex}`}
                         />
-                        <span className="text-[11px] font-mono font-bold text-slate-900 block mt-1.5 truncate">
+                        <span className="text-[11px] font-mono font-bold text-slate-900 block mt-2 truncate">
                           {hex}
-                        </span>
-                        <span className="text-[10px] font-bold text-slate-600 block truncate">
-                          {role}
                         </span>
                       </div>
                     );
@@ -1106,7 +1167,7 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
                   Competitor Snapshot
                 </h3>
                 <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                  {project?.targetMarket?.toLowerCase()?.includes('india') ? '🇮🇳 Pan India' : `🌐 ${project?.targetMarket || 'Global'}`}
+                  {project?.targetMarket?.toLowerCase()?.includes('india') ? '🇮🇳 Pan India' : '🌐 Global'}
                 </span>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">
@@ -1299,13 +1360,14 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
                 <label className="block text-[11px] font-bold text-[#6f5a4c] uppercase tracking-wider mb-1.5">
                   Target Market Scope
                 </label>
-                <input
-                  type="text"
+                <select
                   value={editProfile.targetMarket}
                   onChange={(e) => setEditProfile({ ...editProfile, targetMarket: e.target.value })}
-                  placeholder="e.g. Pan India, Global, North America"
                   className="w-full p-2.5 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl text-xs font-semibold text-[#2b1b12] focus:outline-none focus:border-[#c5a059]"
-                />
+                >
+                  <option value="Pan India">🇮🇳 Pan India</option>
+                  <option value="Global">🌐 Global</option>
+                </select>
               </div>
 
               <div>
@@ -1573,24 +1635,45 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
             </div>
 
             <p className="text-xs text-[#6f5a4c] leading-relaxed">
-              These 6 hex colors are extracted directly from your website HTML and stylesheets to power consistent graphics, buttons, and media assets.
+              Customize your brand visual identity: update your direct Logo and Favicon links, or refine the extracted color palette.
             </p>
+
+            {/* Logo and Favicon Asset URLs */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="p-3 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#6f5a4c] block">
+                  Custom Logo URL (PNG / SVG / WebP)
+                </span>
+                <input
+                  type="text"
+                  placeholder="https://example.com/logo.png"
+                  value={customLogoUrl}
+                  onChange={(e) => setCustomLogoUrl(e.target.value)}
+                  className="w-full p-2 bg-[#fffcf7] border border-[#e4d6c6] rounded-lg text-xs font-mono text-[#2b1b12] focus:outline-none focus:border-[#c5a059]"
+                />
+              </div>
+              <div className="p-3 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#6f5a4c] block">
+                  Custom Favicon URL (.ico / .png)
+                </span>
+                <input
+                  type="text"
+                  placeholder="https://example.com/favicon.ico"
+                  value={customFaviconUrl}
+                  onChange={(e) => setCustomFaviconUrl(e.target.value)}
+                  className="w-full p-2 bg-[#fffcf7] border border-[#e4d6c6] rounded-lg text-xs font-mono text-[#2b1b12] focus:outline-none focus:border-[#c5a059]"
+                />
+              </div>
+            </div>
 
             {/* 6 Palette Slots */}
             <div className="grid grid-cols-2 gap-3">
-              {[
-                'Primary Brand Color',
-                'Dark Typography',
-                'Brand Shade / Tint',
-                'Surface Background',
-                'Neutral Border',
-                'Accent Highlight'
-              ].map((label, idx) => {
+              {['Color 1', 'Color 2', 'Color 3', 'Color 4', 'Color 5', 'Color 6'].map((label, idx) => {
                 const hexVal = customPalette[idx] || '#2563eb';
                 return (
                   <div key={idx} className="p-3 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl space-y-1.5">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-[#6f5a4c] block">
-                      {idx + 1}. {label}
+                      {label}
                     </span>
                     <div className="flex items-center gap-2">
                       <input
@@ -1645,7 +1728,12 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
                   type="button"
                   onClick={() => {
                     if (project) {
-                      const updated = { ...project, palette: customPalette };
+                      const updated = {
+                        ...project,
+                        palette: customPalette,
+                        logoUrl: customLogoUrl.trim() || project.logoUrl,
+                        faviconUrl: customFaviconUrl.trim() || project.faviconUrl
+                      };
                       localStorage.setItem('rankmonk_active_project', JSON.stringify(updated));
                       try {
                         const rawU = localStorage.getItem('rankmonk_user');
@@ -1656,14 +1744,14 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
                           }
                         }
                       } catch (e) {}
-                      showToast('✓ Brand color palette updated successfully!');
+                      showToast('✓ Brand visual identity updated successfully!');
                       setEditingModal(null);
                       window.location.reload();
                     }
                   }}
                   className="px-5 py-2 bg-[#2b1b12] hover:bg-[#3b2519] text-[#fffcf7] rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm"
                 >
-                  Save Palette ✓
+                  Save Visual Identity ✓
                 </button>
               </div>
             </div>

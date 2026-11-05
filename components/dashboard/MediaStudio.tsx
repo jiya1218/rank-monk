@@ -23,7 +23,11 @@ import {
   Camera,
   ExternalLink,
   Eye,
-  Maximize2
+  Maximize2,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
+  X
 } from 'lucide-react';
 
 interface MediaStudioProps {
@@ -84,6 +88,27 @@ export function MediaStudio({
   const [customServices, setCustomServices] = useState<any[]>([]);
   const [isEditingInline, setIsEditingInline] = useState(false);
   const [previewMode, setPreviewMode] = useState<'full_poster' | 'instagram_feed'>('full_poster');
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1);
+
+  // Sync activeAsset if mediaAssets updates and activeAsset is null
+  React.useEffect(() => {
+    if (!activeAsset && mediaAssets && mediaAssets.length > 0) {
+      setActiveAsset(mediaAssets[0]);
+    }
+  }, [mediaAssets, activeAsset]);
+
+  // Escape key handler for fullscreen lightbox
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isLightboxOpen) {
+        setIsLightboxOpen(false);
+        setZoomLevel(1);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isLightboxOpen]);
 
   React.useEffect(() => {
     if (activeAsset) {
@@ -343,9 +368,9 @@ export function MediaStudio({
       </div>
 
       {/* 3. Main Studio Grid (2 Columns: Generator Form & Live Instagram Post Preview) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column (8 cols): Form & Tabs */}
-        <div className="lg:col-span-7 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Column: Generator Form & Campaign Settings */}
+        <div className="lg:col-span-5 xl:col-span-5 space-y-6">
           <div className="bg-white rounded-2xl border border-[#e4d6c6] shadow-sm overflow-hidden">
             {/* Tabs Headers */}
             <div className="flex border-b border-slate-100 bg-[#f8f3ec]/40">
@@ -637,8 +662,8 @@ export function MediaStudio({
           </div>
         </div>
 
-        {/* Right Column (5 cols): Live Instagram Post Preview & Social Queue Sync */}
-        <div className="lg:col-span-5 space-y-6">
+        {/* Right Column (7 cols): High-Definition Studio Preview & Export */}
+        <div className="lg:col-span-7 xl:col-span-7 space-y-6">
           <div className="bg-white rounded-2xl border border-[#e4d6c6] shadow-sm p-5 space-y-4">
             {/* Preview Header & View Mode Switcher */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-3 border-b border-slate-100 gap-2.5">
@@ -701,36 +726,46 @@ export function MediaStudio({
               </div>
             )}
 
-            {activeAsset ? (
+            {generating ? (
+              /* Generating Shimmer State */
+              <div className="py-16 px-6 flex flex-col items-center justify-center text-center space-y-4 rounded-xl bg-gradient-to-br from-[#fbf8f3] via-white to-amber-50/40 border border-amber-200/80 animate-pulse">
+                <div className="w-16 h-16 rounded-2xl bg-[#2b1b12] text-[#c5a059] flex items-center justify-center shadow-md">
+                  <Sparkles className="w-8 h-8 animate-spin" />
+                </div>
+                <div className="space-y-1.5 max-w-sm">
+                  <h4 className="font-black text-base text-[#2b1b12]">Synthesizing High-Resolution Campaign</h4>
+                  <p className="text-xs text-[#6f5a4c] font-medium leading-relaxed">
+                    Calibrating brand typography, composing 3D visual, and rendering trust matrix...
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 text-[11px] font-mono text-[#7a5242] bg-[#f8f3ec] px-3.5 py-1.5 rounded-full border border-[#e4d6c6]">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-600" />
+                  <span>AWS Bedrock Ultra + Universal Studio Compositor</span>
+                </div>
+              </div>
+            ) : activeAsset ? (
               previewMode === 'full_poster' ? (
                 /* Mode A: Clean Full-Resolution Master Poster View (Uncropped, High Definition with Download) */
                 <div className="space-y-4 animate-fade-in">
-                  <div className="bg-[#faf8f5] border border-[#e4d6c6] rounded-2xl p-3 shadow-xs">
-                    <div className="relative group rounded-xl overflow-hidden bg-slate-900 border border-slate-200">
-                      <img
-                        src={activeAsset.url}
-                        alt={activeAsset.prompt}
-                        className="w-full h-auto max-h-[640px] object-contain mx-auto transition-transform duration-300"
-                      />
-                      <div className="absolute top-3 right-3 flex items-center gap-2 opacity-90 group-hover:opacity-100 transition-opacity">
-                        <a
-                          href={activeAsset.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-3 py-1.5 bg-black/80 hover:bg-black text-white text-xs font-bold rounded-lg backdrop-blur-md flex items-center gap-1.5 shadow-md"
-                        >
-                          <Maximize2 className="w-3.5 h-3.5" />
-                          <span>Full Size</span>
-                        </a>
-                        <a
-                          href={activeAsset.url}
-                          download={`poster_${Date.now()}.png`}
-                          className="px-3.5 py-1.5 bg-[#5d7a4f] hover:bg-[#4a633e] text-white text-xs font-bold rounded-lg shadow-md flex items-center gap-1.5"
-                        >
-                          <Download className="w-3.5 h-3.5" />
-                          <span>Download PNG</span>
-                        </a>
-                      </div>
+                  {/* Clean Studio Poster Canvas (No dark letterboxing, full zoom-in click) */}
+                  <div
+                    onClick={() => {
+                      setZoomLevel(1);
+                      setIsLightboxOpen(true);
+                    }}
+                    className="relative group rounded-2xl overflow-hidden bg-[#faf8f5] border border-[#e4d6c6] p-3 sm:p-5 flex items-center justify-center cursor-zoom-in hover:border-[#c5a059] transition-all shadow-xs"
+                    title="Click anywhere to inspect in full-screen zoom"
+                  >
+                    <img
+                      src={activeAsset.url}
+                      alt={activeAsset.prompt}
+                      className="w-full h-auto max-h-[700px] object-contain rounded-xl shadow-md transition-transform duration-300 group-hover:scale-[1.01]"
+                    />
+
+                    {/* Subtle Centered Pill on Hover */}
+                    <div className="absolute bottom-5 left-1/2 -translate-x-1/2 px-4 py-2 bg-black/80 hover:bg-black text-white text-xs font-bold rounded-full backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all flex items-center gap-2 shadow-lg pointer-events-none">
+                      <Maximize2 className="w-3.5 h-3.5 text-amber-300" />
+                      <span>Click to Zoom &amp; Inspect (Full HD)</span>
                     </div>
                   </div>
 
@@ -785,127 +820,9 @@ export function MediaStudio({
                 </div>
               ) : (
                 /* Mode B: Instagram Feed Mockup */
-                <div className="space-y-4 animate-fade-in">
-                {/* Canva-Style Template Switcher & Inline Edit Toolbar */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between bg-[#f8f3ec] p-1.5 rounded-xl border border-[#e4d6c6] gap-2">
-                  <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
-                    {[
-                      { id: 'services_grid', label: '⚡ 4-Service Grid' },
-                      { id: 'hero_metaphor', label: '♟️ Strategic Metaphor' },
-                      { id: 'luxury_editorial', label: '👑 Luxury Editorial' },
-                      { id: 'poster', label: '🎨 Master Poster' },
-                      { id: 'raw', label: '🖼️ Raw Visual' }
-                    ].map((tpl) => (
-                      <button
-                        key={tpl.id}
-                        type="button"
-                        onClick={() => setActiveTemplate(tpl.id as any)}
-                        className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition-all shrink-0 cursor-pointer ${
-                          activeTemplate === tpl.id
-                            ? 'bg-[#2b1b12] text-[#fffcf7] shadow-xs'
-                            : 'text-[#6f5a4c] hover:bg-white/70'
-                        }`}
-                      >
-                        {tpl.label}
-                      </button>
-                    ))}
-                  </div>
+                <div className="space-y-4 animate-fade-in max-w-md mx-auto">
 
-                  <button
-                    type="button"
-                    onClick={() => setIsEditingInline(!isEditingInline)}
-                    className={`px-3 py-1 text-[11px] font-bold rounded-lg border transition-all cursor-pointer shrink-0 text-center ${
-                      isEditingInline
-                        ? 'bg-amber-100 border-amber-300 text-amber-900 shadow-xs'
-                        : 'bg-white border-[#e4d6c6] text-[#2b1b12] hover:bg-[#f1e8dc]'
-                    }`}
-                  >
-                    {isEditingInline ? 'Done Editing ✓' : '✎ Edit Text'}
-                  </button>
-                </div>
-
-                {/* Inline Text Customizer Drawer */}
-                {isEditingInline && (
-                  <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200/80 space-y-3 animate-fade-in text-xs">
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-amber-950 uppercase text-[10px] tracking-wider">
-                        Live Text Customizer (Instant Preview)
-                      </span>
-                      <span className="text-[10px] text-amber-700">Edits reflect live on the card below</span>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                      <div>
-                        <label className="text-[10px] font-bold text-amber-900 block mb-0.5">Headline</label>
-                        <input
-                          type="text"
-                          value={customHeadline}
-                          onChange={(e) => setCustomHeadline(e.target.value)}
-                          placeholder="Headline"
-                          className="w-full bg-white border border-amber-200 rounded-lg p-2 text-xs font-bold text-[#0f172a] focus:outline-none focus:ring-1 focus:ring-amber-400"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-[10px] font-bold text-amber-900 block mb-0.5">Badge Tag</label>
-                        <input
-                          type="text"
-                          value={customBadge}
-                          onChange={(e) => setCustomBadge(e.target.value)}
-                          placeholder="Promotional Badge"
-                          className="w-full bg-white border border-amber-200 rounded-lg p-2 text-xs font-bold text-[#0f172a] focus:outline-none focus:ring-1 focus:ring-amber-400"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="text-[10px] font-bold text-amber-900 block mb-0.5">Subheadline Value Prop</label>
-                      <input
-                        type="text"
-                        value={customSubheadline}
-                        onChange={(e) => setCustomSubheadline(e.target.value)}
-                        placeholder="Subheadline"
-                        className="w-full bg-white border border-amber-200 rounded-lg p-2 text-xs font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-400"
-                      />
-                    </div>
-
-                    {activeTemplate === 'services_grid' && customServices.length >= 4 && (
-                      <div className="space-y-1.5 pt-1">
-                        <label className="text-[10px] font-bold text-amber-900 block">4 Feature Service Cards</label>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          {customServices.slice(0, 4).map((svc, idx) => (
-                            <div key={idx} className="bg-white p-2 rounded-lg border border-amber-200 space-y-1">
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-sm">{svc.icon || '⚡'}</span>
-                                <input
-                                  type="text"
-                                  value={svc.title}
-                                  onChange={(e) => {
-                                    const next = [...customServices];
-                                    next[idx] = { ...next[idx], title: e.target.value };
-                                    setCustomServices(next);
-                                  }}
-                                  className="font-bold text-[11px] text-[#0f172a] bg-transparent border-b border-transparent hover:border-amber-300 focus:border-amber-500 focus:outline-none w-full"
-                                />
-                              </div>
-                              <input
-                                type="text"
-                                value={svc.desc}
-                                onChange={(e) => {
-                                  const next = [...customServices];
-                                  next[idx] = { ...next[idx], desc: e.target.value };
-                                  setCustomServices(next);
-                                }}
-                                className="text-[10px] text-slate-600 bg-transparent border-b border-transparent hover:border-amber-300 focus:border-amber-500 focus:outline-none w-full"
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Instagram Mock Card */}
+                  {/* Instagram Mock Card */}
                 <div className="bg-white border border-[#e4d6c6] rounded-2xl overflow-hidden shadow-sm">
                   {/* IG Top Profile Bar */}
                   <div className="p-3 flex items-center justify-between border-b border-slate-100 bg-[#fffcf7]">
@@ -924,187 +841,26 @@ export function MediaStudio({
                     <span className="text-xs font-bold text-slate-400">•••</span>
                   </div>
 
-                  {/* Graphic Visual Asset Container */}
-                  <div className="w-full bg-slate-900 flex items-center justify-center overflow-hidden">
-                    {/* View 1: 4-Service Grid Showcase */}
-                    {activeTemplate === 'services_grid' && (
-                      <div className="w-full aspect-square bg-white p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden select-none border-b border-slate-100">
-                        {/* Ambient Glow */}
-                        <div
-                          className="absolute -top-16 -right-16 w-72 h-72 rounded-full blur-3xl opacity-15 pointer-events-none"
-                          style={{ backgroundColor: (project?.palette?.[0]?.startsWith('#') ? project.palette[0] : '#2563eb') }}
-                        />
-
-                        {/* Header */}
-                        <div className="flex items-center justify-between z-10">
-                          <div className="flex items-baseline gap-1">
-                            <span className="font-black text-xl text-[#0f172a] tracking-tight">{brandName}</span>
-                            <span className="font-bold text-xs text-blue-600">.™</span>
-                          </div>
-                          <span className="px-2.5 py-0.5 rounded-full text-[9.5px] font-black tracking-wider uppercase border border-slate-200 bg-slate-50 text-slate-600">
-                            {customBadge || activeAsset.badge || 'AI INFRASTRUCTURE FOR MODERN BUSINESS'}
-                          </span>
-                        </div>
-
-                        {/* Headline */}
-                        <div className="space-y-1 z-10 my-1">
-                          <h3 className="font-black text-lg sm:text-2xl text-[#0f172a] leading-tight tracking-tight">
-                            {customHeadline || activeAsset.headline || 'Build a System That Moves.'}
-                          </h3>
-                          <p className="text-[11px] sm:text-xs text-slate-500 font-medium leading-relaxed line-clamp-2">
-                            {customSubheadline || activeAsset.subheadline || 'Connect the work behind your business — from first enquiry to autonomous scale.'}
-                          </p>
-                        </div>
-
-                        {/* 4 Cards Matrix */}
-                        <div className="grid grid-cols-2 gap-2 z-10 my-1">
-                          {(customServices.length >= 4 ? customServices.slice(0, 4) : [
-                            { title: 'AI Automation', desc: 'Custom workflows & autonomous pipelines.', icon: '⚡' },
-                            { title: 'Digital Marketing', desc: 'Predictive ROI campaigns & multi-channel ads.', icon: '📈' },
-                            { title: 'Website Building', desc: 'Lightning-fast Next.js apps & landing pages.', icon: '🌐' },
-                            { title: 'Cyber Security', desc: 'Zero-trust architecture & enterprise defense.', icon: '🛡️' }
-                          ]).map((svc, i) => (
-                            <div key={i} className="p-2 sm:p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 shadow-xs flex flex-col justify-between">
-                              <div className="flex items-center gap-1.5 mb-0.5">
-                                <span className="text-sm">{svc.icon || '✦'}</span>
-                                <span className="font-bold text-[11px] sm:text-xs text-[#0f172a] truncate">{svc.title}</span>
-                              </div>
-                              <p className="text-[9.5px] sm:text-[10px] text-slate-500 line-clamp-2 font-medium leading-snug">{svc.desc}</p>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* 3D Hero Visual Render */}
-                        <div className="w-full h-24 sm:h-28 rounded-xl overflow-hidden bg-slate-950 border border-slate-200 relative z-10 shrink-0 shadow-sm">
-                          <img
-                            src={activeAsset.rawImageUrl || activeAsset.url}
-                            alt="Hero Visual"
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-
-                        {/* Footer Bar */}
-                        <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] sm:text-[11px] font-bold z-10 text-slate-500">
-                          <span className="tracking-wider uppercase">{brandDomain}</span>
-                          <span className="px-3 py-1 rounded-lg text-white font-black text-[9.5px] sm:text-[10px] tracking-wide bg-blue-600">
-                            BOOK CONSULT ↗
-                          </span>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* View 2: Strategic Metaphor Layout */}
-                    {activeTemplate === 'hero_metaphor' && (
-                      <div className="w-full aspect-square bg-[#fcfcfc] p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden select-none border-b border-slate-100">
-                        {/* Header */}
-                        <div className="flex items-center justify-between z-10">
-                          <div className="flex items-baseline gap-1">
-                            <span className="font-black text-xl text-[#0f172a] tracking-tight">{brandName}</span>
-                            <span className="font-bold text-xs text-blue-600">.™</span>
-                          </div>
-                          <span className="px-2.5 py-0.5 rounded-full text-[9.5px] font-black tracking-wider uppercase border border-slate-200 bg-slate-50 text-slate-600">
-                            {customBadge || activeAsset.badge || 'AI AGENTS • BUILT FOR BUSINESS'}
-                          </span>
-                        </div>
-
-                        {/* Headline */}
-                        <div className="space-y-1 z-10 my-1">
-                          <h3 className="font-black text-lg sm:text-2xl text-[#0f172a] leading-tight tracking-tight">
-                            {customHeadline || activeAsset.headline || 'Turn Complexity into Strategic Advantage'}
-                          </h3>
-                          <p className="text-[11px] sm:text-xs text-slate-500 font-medium leading-relaxed line-clamp-2">
-                            {customSubheadline || activeAsset.subheadline || 'Our AI-powered solutions simplify operations and keep you ahead of the competition.'}
-                          </p>
-                        </div>
-
-                        {/* Large 3D Visual Render */}
-                        <div className="w-full flex-1 my-2 rounded-2xl overflow-hidden bg-slate-950 border border-slate-200 relative z-10 shadow-sm min-h-[140px]">
-                          <img
-                            src={activeAsset.rawImageUrl || activeAsset.url}
-                            alt="3D Metaphor"
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-
-                        {/* 3 Benefit Pills */}
-                        <div className="grid grid-cols-3 gap-1.5 z-10 mb-1">
-                          {(activeAsset.featureNodes && activeAsset.featureNodes.length >= 3
-                            ? activeAsset.featureNodes.slice(0, 3)
-                            : ['Automate Operations', 'Integrate Tools', 'Drive Growth']
-                          ).map((node: string, i: number) => (
-                            <div key={i} className="p-1.5 rounded-xl bg-white border border-slate-200 shadow-xs flex items-center justify-center gap-1 text-center">
-                              <span className="w-1.5 h-1.5 rounded-full bg-blue-600 shrink-0" />
-                              <span className="text-[9.5px] sm:text-[10px] font-bold text-[#0f172a] truncate">{node}</span>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Footer Bar */}
-                        <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] sm:text-[11px] font-bold z-10 text-slate-500">
-                          <span className="tracking-wider uppercase">{brandDomain}</span>
-                          <span className="px-3 py-1 rounded-lg text-white font-black text-[9.5px] sm:text-[10px] tracking-wide bg-blue-600">
-                            EXPLORE AI AGENTS ↗
-                          </span>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* View 3: TangentCore Luxury Editorial */}
-                    {activeTemplate === 'luxury_editorial' && (
-                      <div className="w-full aspect-square bg-[#faf7f2] p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden select-none border-b border-[#e4d6c6]">
-                        {/* Header */}
-                        <div className="flex items-center justify-between z-10">
-                          <span className="font-serif italic font-bold text-lg text-[#2b1b12]">{brandName}</span>
-                          <span className="px-2 py-0.5 rounded-md text-[9px] font-mono uppercase tracking-widest text-[#7a5242] border border-[#d8c09e] bg-[#f1e8dc]/60">
-                            {customBadge || activeAsset.badge || 'EDITORIAL SPOTLIGHT'}
-                          </span>
-                        </div>
-
-                        {/* Headline */}
-                        <div className="space-y-1.5 z-10 my-2">
-                          <h3 className="font-serif text-xl sm:text-2xl text-[#2b1b12] leading-tight font-medium">
-                            {customHeadline || activeAsset.headline || 'Search Has Changed. Have You?'}
-                          </h3>
-                          <div className="w-10 h-0.5 bg-[#c5a059]" />
-                          <p className="text-[11px] sm:text-xs text-[#6f5a4c] font-medium leading-relaxed line-clamp-2">
-                            {customSubheadline || activeAsset.subheadline || 'Find the gaps between what your audience needs and what your business actually delivers.'}
-                          </p>
-                        </div>
-
-                        {/* 3D Visual Render on Luxury Tone */}
-                        <div className="w-full flex-1 my-2 rounded-xl overflow-hidden bg-[#2b1b12] border border-[#e4d6c6] shadow-sm min-h-[140px]">
-                          <img
-                            src={activeAsset.rawImageUrl || activeAsset.url}
-                            alt="Luxury Hero"
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-
-                        {/* Luxury Footer */}
-                        <div className="pt-2 border-t border-[#e4d6c6] flex items-center justify-between text-[10px] sm:text-[11px] text-[#6f5a4c] z-10">
-                          <span className="font-mono">{brandDomain}</span>
-                          <span className="text-[11px] font-serif italic text-[#c5a059] font-bold">Discover Excellence →</span>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* View 4: Master Server-Composed Poster */}
-                    {activeTemplate === 'poster' && (
-                      <img
-                        src={activeAsset.url}
-                        alt={activeAsset.prompt}
-                        className="w-full h-auto object-cover max-h-[460px]"
-                      />
-                    )}
-
-                    {/* View 5: Pure Raw Visual Asset */}
-                    {activeTemplate === 'raw' && (
-                      <img
-                        src={activeAsset.rawImageUrl || activeAsset.url}
-                        alt={activeAsset.prompt}
-                        className="w-full h-auto object-cover max-h-[460px]"
-                      />
-                    )}
+                  {/* Master Poster in Feed Frame */}
+                  <div
+                    onClick={() => {
+                      setZoomLevel(1);
+                      setIsLightboxOpen(true);
+                    }}
+                    className="w-full bg-[#f8f6f0] flex items-center justify-center cursor-zoom-in group relative"
+                    title="Click to view in full-screen zoom"
+                  >
+                    <img
+                      src={activeAsset.url}
+                      alt={activeAsset.prompt}
+                      className="w-full h-auto object-contain"
+                    />
+                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <span className="px-3.5 py-1.5 bg-black/80 text-white text-xs font-bold rounded-lg backdrop-blur-sm flex items-center gap-1.5 shadow-md">
+                        <Maximize2 className="w-3.5 h-3.5 text-amber-300" />
+                        <span>Click to Zoom</span>
+                      </span>
+                    </div>
                   </div>
 
                   {/* IG Action Icons */}
@@ -1141,42 +897,29 @@ export function MediaStudio({
                   </div>
                 </div>
 
-                {/* Primary Output Actions */}
-                <div className="space-y-2 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => onPushToSocialQueue(activeAsset)}
-                    className="w-full py-2.5 bg-[#2b1b12] hover:bg-[#3b2519] text-[#fffcf7] rounded-xl text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    <Share2 className="w-3.5 h-3.5 text-[#c5a059]" />
-                    <span>Push to Social Queue (Auto-Publish)</span>
-                  </button>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={handleCopyCaption}
-                      className="py-2.5 bg-[#f8f3ec] hover:bg-[#ebdcc8] text-[#2b1b12] border border-[#d8c09e] rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                    >
-                      <Copy className="w-3.5 h-3.5" />
-                      <span>Copy Caption</span>
-                    </button>
-
+                  {/* Primary Actions under IG Feed */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 max-w-md mx-auto">
                     <a
                       href={activeAsset.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      download={`instagram_${Date.now()}.png`}
-                      className="py-2.5 bg-white hover:bg-[#f8f3ec] text-[#2b1b12] border border-[#e4d6c6] rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 text-center cursor-pointer shadow-xs"
+                      download={`poster_${Date.now()}.png`}
+                      className="py-2.5 bg-[#2b1b12] hover:bg-[#3b2519] text-[#fffcf7] rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 text-center cursor-pointer shadow-sm"
                     >
-                      <Download className="w-3.5 h-3.5 text-[#5d7a4f]" />
-                      <span>Download HD Image</span>
+                      <Download className="w-3.5 h-3.5 text-[#c5a059]" />
+                      <span>Download Poster (PNG)</span>
                     </a>
+                    <button
+                      type="button"
+                      onClick={() => onPushToSocialQueue(activeAsset)}
+                      className="py-2.5 bg-white hover:bg-[#f8f3ec] text-[#2b1b12] border border-[#e4d6c6] rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                    >
+                      <Share2 className="w-3.5 h-3.5 text-blue-600" />
+                      <span>Push to Social</span>
+                    </button>
                   </div>
                 </div>
-              </div>
-            )
-          ) : (
+              )
+            ) : (
+              /* Friendly Empty State */
               <div className="p-10 text-center border-2 border-dashed border-[#e4d6c6] rounded-2xl bg-[#f8f3ec]/40 space-y-2">
                 <ImageIcon className="w-8 h-8 text-slate-300 mx-auto" />
                 <p className="text-xs font-bold text-[#2b1b12]">No Media Asset Selected</p>
@@ -1188,21 +931,24 @@ export function MediaStudio({
           </div>
 
           {/* Past Generated Assets Library */}
-          {mediaAssets.length > 1 && (
+          {mediaAssets && mediaAssets.length > 1 && (
             <div className="bg-white rounded-2xl border border-[#e4d6c6] p-5 shadow-sm space-y-3">
-              <h4 className="font-bold text-xs uppercase tracking-wider text-[#6f5a4c]">
-                Generated Asset Library ({mediaAssets.length})
-              </h4>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="flex items-center justify-between">
+                <h4 className="font-bold text-xs uppercase tracking-wider text-[#6f5a4c]">
+                  Generated Asset Library ({mediaAssets.length})
+                </h4>
+                <span className="text-[11px] text-[#7a5242]">Click any asset to preview</span>
+              </div>
+              <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                 {mediaAssets.map((asset, idx) => (
                   <button
                     key={asset.id || idx}
                     type="button"
                     onClick={() => setActiveAsset(asset)}
-                    className={`rounded-xl border overflow-hidden aspect-square bg-slate-900 cursor-pointer transition-all ${
+                    className={`rounded-xl border overflow-hidden aspect-square bg-[#f8f6f0] cursor-pointer transition-all ${
                       activeAsset?.id === asset.id
-                        ? 'ring-2 ring-[#c5a059] border-transparent'
-                        : 'border-[#e4d6c6] opacity-70 hover:opacity-100'
+                        ? 'ring-2 ring-[#c5a059] border-transparent scale-[1.03] shadow-xs'
+                        : 'border-[#e4d6c6] opacity-70 hover:opacity-100 hover:scale-[1.02]'
                     }`}
                   >
                     <img
@@ -1217,6 +963,119 @@ export function MediaStudio({
           )}
         </div>
       </div>
+
+      {/* 4. Fullscreen Interactive Lightbox Modal */}
+      {isLightboxOpen && activeAsset && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col justify-between animate-fade-in p-4 sm:p-6 select-none">
+          {/* Lightbox Top Bar */}
+          <div className="flex items-center justify-between text-white pb-3 border-b border-white/10 shrink-0">
+            <div className="flex items-center gap-3">
+              <h3 className="font-bold text-sm sm:text-base text-white truncate max-w-xs sm:max-w-md">
+                {activeAsset.headline || activeAsset.prompt || 'Generated Media Poster'}
+              </h3>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-white/10 text-white/80 border border-white/20">
+                {activeAsset.ratio === '4:5' ? '1080 × 1350 • Portrait' : '1080 × 1080 • Square'} HD
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {/* Zoom Controls */}
+              <div className="flex items-center gap-1 bg-white/10 rounded-lg p-1 border border-white/15">
+                <button
+                  type="button"
+                  onClick={() => setZoomLevel(prev => Math.max(0.5, prev - 0.25))}
+                  className="p-1.5 hover:bg-white/20 rounded text-white transition-colors cursor-pointer"
+                  title="Zoom Out"
+                >
+                  <ZoomOut className="w-4 h-4" />
+                </button>
+                <span className="text-xs font-mono px-1.5 text-white/90 min-w-[45px] text-center">
+                  {Math.round(zoomLevel * 100)}%
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setZoomLevel(prev => Math.min(3, prev + 0.25))}
+                  className="p-1.5 hover:bg-white/20 rounded text-white transition-colors cursor-pointer"
+                  title="Zoom In"
+                >
+                  <ZoomIn className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setZoomLevel(1)}
+                  className="p-1.5 hover:bg-white/20 rounded text-white transition-colors cursor-pointer"
+                  title="Reset Zoom"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Download Button */}
+              <a
+                href={activeAsset.url}
+                download={`rankmonk_poster_${Date.now()}.png`}
+                className="px-4 py-2 bg-[#5d7a4f] hover:bg-[#4a633e] text-white rounded-lg text-xs font-bold transition-all flex items-center gap-2 shadow-md cursor-pointer"
+              >
+                <Download className="w-4 h-4" />
+                <span>Download PNG (HD)</span>
+              </a>
+
+              {/* Close Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsLightboxOpen(false);
+                  setZoomLevel(1);
+                }}
+                className="p-2 hover:bg-white/20 rounded-lg text-white/80 hover:text-white transition-colors cursor-pointer"
+                title="Close (Esc)"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Lightbox Canvas Area */}
+          <div
+            className="flex-1 flex items-center justify-center overflow-auto p-4 my-2 relative"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setIsLightboxOpen(false);
+                setZoomLevel(1);
+              }
+            }}
+          >
+            <div
+              className="transition-transform duration-200 ease-out origin-center flex items-center justify-center max-w-full max-h-full"
+              style={{ transform: `scale(${zoomLevel})` }}
+            >
+              <img
+                src={activeAsset.url}
+                alt={activeAsset.prompt}
+                className="max-h-[82vh] max-w-[85vw] object-contain rounded-xl shadow-2xl ring-1 ring-white/10"
+              />
+            </div>
+          </div>
+
+          {/* Lightbox Footer Bar */}
+          <div className="flex items-center justify-between text-xs text-white/70 pt-2 border-t border-white/10 shrink-0">
+            <div className="flex items-center gap-2">
+              <span>Engine: <strong className="text-white">{activeAsset.engine || 'AWS Bedrock Ultra + Studio Poster Engine'}</strong></span>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleCopyCaption}
+                className="px-3 py-1 bg-white/10 hover:bg-white/20 text-white rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer"
+              >
+                <Copy className="w-3.5 h-3.5" />
+                <span>Copy Caption</span>
+              </button>
+              <span className="text-[11px] text-white/50">Press Esc to close</span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

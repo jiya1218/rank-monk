@@ -1,5 +1,46 @@
 import { BedrockRuntimeClient, ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
 
+// Robust HTML & CSS fetcher that gracefully handles TLS renegotiation, Cloudflare, and CDN bot defenses
+export async function fetchHtmlRobust(url: string, timeoutMs: number = 7000): Promise<string> {
+  // 1. Try standard Node fetch first
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9'
+      }
+    });
+    clearTimeout(timeout);
+    if (res.ok) {
+      const text = await res.text();
+      if (text && text.length > 300) return text;
+    }
+  } catch (e) {
+    // Falls through to curl fallback
+  }
+
+  // 2. Server-side robust curl fallback (handles SiteGround TLS renegotiation & strict CDN TLS fingerprints)
+  if (typeof window === 'undefined') {
+    try {
+      const cp = await import('child_process');
+      const execSync = cp.execSync;
+      if (execSync) {
+        const cmd = `curl.exe -k -s -L -m 8 "${url}"`;
+        const out = execSync(cmd, { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024, stdio: ['pipe', 'pipe', 'ignore'] });
+        if (out && out.length > 200) {
+          return out;
+        }
+      }
+    } catch (e) {}
+  }
+
+  return '';
+}
+
 export interface GeoTestResult {
   name: string;
   category: 'Authority' | 'Readability' | 'Structure';
@@ -184,7 +225,7 @@ export function semanticSortPalette(palette: string[]): string[] {
   }
 
   // Saturated candidates (vibrant brand / accent candidate - must have sufficient luminance to not be dark canvas)
-  const saturated = validHexes.filter(h => getColorSaturation(h) > 0.22 && getColorLuminance(h) >= 0.18 && getColorLuminance(h) < 0.95);
+  const saturated = validHexes.filter(h => getColorSaturation(h) > 0.18 && getColorLuminance(h) >= 0.14 && getColorLuminance(h) < 0.95);
   // Dark Neutrals / Canvas (anything dark under 0.22 luminance)
   const darks = validHexes.filter(h => getColorLuminance(h) < 0.22);
   // Light Surfaces
@@ -199,26 +240,25 @@ export function semanticSortPalette(palette: string[]): string[] {
     }
   };
 
-  // 1. Primary Brand (most prominent saturated color)
-  if (saturated.length > 0) {
-    add(saturated[0]);
-  } else if (validHexes.length > 0) {
+  // 1. Primary Brand (Honor the top detected primary color)
+  if (validHexes.length > 0) {
     add(validHexes[0]);
   }
 
-  // 2. Secondary Vibrant / Electric Accent (e.g. lime green #d3fdb1)
-  if (saturated.length > 1) {
-    add(saturated[1]);
-  } else if (lights.length > 0 && !result.includes(lights[0])) {
-    add(lights[0]);
+  // 2. Secondary Accent (distinct saturated or accent candidate)
+  const remainingSaturated = saturated.filter(h => h !== validHexes[0]);
+  if (remainingSaturated.length > 0) {
+    add(remainingSaturated[0]);
+  } else if (validHexes.length > 1 && !darks.includes(validHexes[1]) && !lights.includes(validHexes[1])) {
+    add(validHexes[1]);
   }
 
-  // 3. Dark Base / Canvas / Typography (e.g. dark charcoal/black #0c0d0f)
+  // 3. Dark Base / Canvas / Typography (e.g. dark charcoal/black #12100e, #0c0d0f)
   if (darks.length > 0) {
     add(darks[0]);
   }
 
-  // 4. Light Surface / Muted Slate (e.g. slate #9a9a9a or clean card surface)
+  // 4. Light Surface / Sand (e.g. #faf8f5, #f8fafc)
   if (lights.length > 0) {
     add(lights[0]);
   } else if (mids.length > 0) {
@@ -229,6 +269,15 @@ export function semanticSortPalette(palette: string[]): string[] {
   for (const h of validHexes) {
     if (result.length >= 4) break;
     add(h);
+  }
+
+  // Ensure complete 4-swatch harmony
+  if (result.length < 4) {
+    if (!result.some(h => getColorLuminance(h) < 0.22)) result.push('#1e1e1e');
+    if (!result.some(h => getColorLuminance(h) >= 0.82)) result.push('#f7f7f7');
+    if (result.length < 4) {
+      result.push('#e3dcd8');
+    }
   }
 
   return result.slice(0, 4);
@@ -243,7 +292,7 @@ export function isColorTooClose(hex1: string, hex2: string): boolean {
   const g2 = parseInt(hex2.slice(3, 5), 16) || 0;
   const b2 = parseInt(hex2.slice(5, 7), 16) || 0;
   const dist = Math.sqrt(Math.pow(r1 - r2, 2) + Math.pow(g1 - g2, 2) + Math.pow(b1 - b2, 2));
-  return dist < 28;
+  return dist < 38;
 }
 
 // ============================================================================
@@ -443,103 +492,355 @@ export function auditPageForGeo(
   return { geoScore, geoTests: tests };
 }
 
+// Known framework defaults, slider controls, and social badges that must NEVER be treated as custom brand palette colors
+const FRAMEWORK_PRESETS = new Set([
+  // Swiper.js & Apple slider blue defaults
+  '#007aff', '#0070e0', '#0062c4',
+  // Bootstrap & framework blue defaults
+  '#007bff', '#0d6efd', '#6c757d', '#28a745', '#dc3545', '#ffc107', '#17a2b8',
+  '#343a40', '#212529',
+  // Tailwind default generic blues
+  '#2563eb', '#3b82f6', '#1d4ed8', '#60a5fa', '#93c5fd',
+  // Ant Design & Material UI blue defaults
+  '#1890ff', '#1976d2', '#2196f3', '#00bcd4',
+  // Generic unstyled slate/gray widget noise
+  '#26323c', '#2c3e50', '#34495e',
+  // WordPress block defaults
+  '#007cba', '#020381', '#2874fc', '#0693e3', '#9b51e0', '#cf2e2e',
+  '#00d084', '#fcb900', '#ff6900', '#7a00df', '#006ba1', '#005a87',
+  '#32373c', '#abb8c3', '#8ed1fc', '#7bdcb5', '#f78da7',
+  // ThemeIsle default block colors
+  '#e75d22', '#192734',
+  // Google brand & app store colors (Google Play, Google Sign-in, Google Reviews)
+  '#4285f4', '#34a853', '#fbbc05', '#fbbc04', '#ea4335',
+  // Social media badges (Facebook, Twitter/X, Instagram, WhatsApp, YouTube, LinkedIn, Discord, Telegram, Reddit, Pinterest)
+  '#1da1f2', '#14171a', '#1877f2', '#3b5998', '#4267b2', '#e1306c', '#fd1d1d', '#833ab4', '#c13584', '#e4405f',
+  '#25d366', '#128c7e', '#075e54', '#0077b5', '#0a66c2', '#ff0000', '#cc0000',
+  '#0088cc', '#24a1de', '#5865f2', '#7289da', '#ff4500', '#bd081c', '#e60023',
+  // Payment gateways & review services
+  '#635bff', '#003087', '#0079c1', '#00457c', '#00b67a'
+]);
+
+function isFrameworkOrNeutralNoise(hex: string): boolean {
+  const norm = normalizeHexColor(hex);
+  if (!norm) return true;
+  if (norm === '#ffffff' || norm === '#000000') return true;
+  if (FRAMEWORK_PRESETS.has(norm)) return true;
+
+  const r = parseInt(norm.slice(1, 3), 16);
+  const g = parseInt(norm.slice(3, 5), 16);
+  const b = parseInt(norm.slice(5, 7), 16);
+
+  // Strict Slider & Link Noise Shield:
+  // Exclude all Swiper/Apple/Bootstrap bright electric blues (#007aff, #007bff, #0d6efd, etc.)
+  // If r < 40, g between 90 and 155, and b > 230 -> This is the exact RGB footprint of generic slider/link electric blue!
+  if (r < 40 && g > 90 && g < 155 && b > 230) {
+    return true;
+  }
+
+  // Neutral grays (r ~= g ~= b)
+  if (Math.abs(r - g) <= 4 && Math.abs(g - b) <= 4) {
+    const lum = getColorLuminance(norm);
+    if (lum > 0.08 && lum < 0.98) return true;
+  }
+  return false;
+}
+
 // Extract the ACTUAL colors present directly on the website (HTML, inline styles, SVGs & CSS)
+// UNIVERSAL EXTRACTION ENGINE: Zero photographic image noise, zero WordPress/plugin framework pollution
 export function extractAuthenticColorsFromSite(html: string, cssSnippets: string[] = [], themeColor?: string | null): string[] {
-  const fullText = `${html} ${cssSnippets.join(' ')}`;
-  const colorCounts: Record<string, number> = {};
+  const combinedText = `${html} ${cssSnippets.join(' ')}`;
 
-  // If declared <meta name="theme-color"> exists, prioritize it
+  // 1. Build CSS variable map, stripping out WordPress, ThemeIsle, Elementor, Swiper, and framework defaults
+  const cssVars: Record<string, string> = {};
+  const varMatches = Array.from(combinedText.matchAll(/--([a-zA-Z0-9_-]+)\s*:\s*([^;!}]+)/g));
+  for (const vm of varMatches) {
+    const name = vm[1].trim().toLowerCase();
+    const val = vm[2].trim();
+    if (
+      name.startsWith('wp-') ||
+      name.startsWith('wp--') ||
+      name.startsWith('swiper-') ||
+      name.startsWith('swiper_') ||
+      name.startsWith('bs-') ||
+      name.startsWith('tw-') ||
+      name.startsWith('fa-') ||
+      name.startsWith('font-awesome') ||
+      name.startsWith('slick-') ||
+      name.startsWith('owl-') ||
+      name.includes('admin-theme') ||
+      name.startsWith('themeisle') ||
+      name.startsWith('elementor') ||
+      name.startsWith('et_') ||
+      name.startsWith('wc-') ||
+      name.startsWith('woocommerce')
+    ) {
+      continue;
+    }
+    cssVars[name] = val;
+  }
+
+  function resolveColor(val: string): string | null {
+    if (!val) return null;
+    const v = val.trim();
+    const varMatch = v.match(/var\(\s*--([a-zA-Z0-9_-]+)\s*\)/i);
+    if (varMatch) {
+      const varName = varMatch[1].toLowerCase();
+      if (cssVars[varName]) {
+        return resolveColor(cssVars[varName]);
+      }
+    }
+    return normalizeHexColor(v);
+  }
+
+  const scores: Record<string, number> = {};
+  const allDetectedColors: Record<string, number> = {};
+
+  function addCandidate(raw: string, weight: number) {
+    const resolved = resolveColor(raw);
+    if (!resolved) return;
+    allDetectedColors[resolved] = (allDetectedColors[resolved] || 0) + 1;
+    if (isFrameworkOrNeutralNoise(resolved)) return;
+    scores[resolved] = (scores[resolved] || 0) + weight;
+  }
+
+  // A. Declared Theme Color or Tile Color
   if (themeColor) {
-    const norm = normalizeHexColor(themeColor);
-    if (norm && norm !== '#ffffff' && norm !== '#000000') {
-      colorCounts[norm] = 500;
+    addCandidate(themeColor, 500);
+  }
+  const tileColorMatch = html.match(/<meta\s+(?:name|property)=["'](?:msapplication-TileColor|theme-color)["']\s+content=["']([^"']+)["']/i);
+  if (tileColorMatch && tileColorMatch[1]) {
+    addCandidate(tileColorMatch[1], 450);
+  }
+
+  // B. CSS Variables with Semantic Brand/Theme Names (Author-defined design tokens)
+  for (const [name, rawVal] of Object.entries(cssVars)) {
+    if (name.includes('primary') || name.includes('brand') || name.includes('main') || name.includes('cta') || name.includes('earth') || name.includes('theme')) {
+      addCandidate(rawVal, 280);
+    } else if (name.includes('accent') || name.includes('secondary') || name.includes('btn') || name.includes('button') || name.includes('gold') || name.includes('sage') || name.includes('sand') || name.includes('orange') || name.includes('teal') || name.includes('bronze')) {
+      addCandidate(rawVal, 200);
+    } else {
+      addCandidate(rawVal, 40);
     }
   }
 
-  // 1. Hex codes
-  const hexMatches = fullText.match(/#[0-9a-fA-F]{3,8}\b/g) || [];
-  for (const m of hexMatches) {
-    const hex = normalizeHexColor(m);
-    if (hex && hex !== '#ffffff' && hex !== '#000000') {
-      colorCounts[hex] = (colorCounts[hex] || 0) + 1;
+  // C. DOM-FIRST CTA & Action Button Resolution (The Gold Standard Conversion Signals)
+  // We inspect interactive elements that ACTUALLY exist in the rendered HTML DOM first.
+  const activeInteractiveClasses = new Set<string>();
+
+  // 1. Header & Navigation elements
+  const headerNavMatches = Array.from(html.matchAll(/<(?:header|nav)\b[^>]*>([\s\S]*?)<\/(?:header|nav)>/gi));
+  for (const m of headerNavMatches) {
+    const classMatches = Array.from(m[0].matchAll(/class=["']([^"']+)["']/gi)).flatMap(cm => cm[1].split(/\s+/));
+    for (const c of classMatches) {
+      if (c && /btn|button|book|cta|primary|action|signup|trial|inquire|contact/i.test(c)) {
+        if (!/cookie|consent|chat|widget|close|dismiss|toggle|dropdown|accordion|swiper|slider|carousel|slick|owl|slide|arrow|bullet|dot|pagination|prev|next|control|thumb|app-link|store|play/i.test(c)) {
+          activeInteractiveClasses.add(c);
+        }
+      }
     }
   }
 
-  // 2. RGB/RGBA codes
-  const rgbMatches = fullText.match(/rgba?\s*\(\s*\d+\s*,\s*\d+\s*,\s*\d+[^)]*\)/gi) || [];
-  for (const m of rgbMatches) {
-    const hex = normalizeHexColor(m);
-    if (hex && hex !== '#ffffff' && hex !== '#000000') {
-      colorCounts[hex] = (colorCounts[hex] || 0) + 1;
+  // 2. All <button> and CTA <a> elements across the entire page
+  const buttonTagMatches = Array.from(html.matchAll(/<(?:button|a)\b[^>]*class=["']([^"']+)["'][^>]*>/gi));
+  for (const bm of buttonTagMatches) {
+    const classes = bm[1].split(/\s+/);
+    for (const c of classes) {
+      if (c && /btn|button|book|cta|action|primary|hero-btn|appointment|reserve|buy|inquire|contact/i.test(c)) {
+        // Exclude cookie/chat noise, slider arrows, and 3rd party app store links
+        if (!/cookie|consent|chat|widget|close|dismiss|toggle|dropdown|accordion|swiper|slider|carousel|slick|owl|slide|arrow|bullet|dot|pagination|prev|next|control|thumb|app-link|store|play|apple/i.test(c)) {
+          activeInteractiveClasses.add(c);
+        }
+      }
     }
   }
 
-  const entries = Object.entries(colorCounts).sort((a, b) => b[1] - a[1]);
-  if (entries.length === 0) {
-    return [];
+  // Look up CSS rules specifically for these DOM-verified active classes
+  for (const cls of activeInteractiveClasses) {
+    const escapedCls = cls.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+    // Flexible CSS selector regex matching: .btn, a.btn, .header .btn, .btn:hover, etc.
+    const ruleRegex = new RegExp(`(?:^|[,}\\s>+~])(?:[a-zA-Z0-9_-]+\\.)?${escapedCls}\\b[^{]*\\{([^}]+)\\}`, 'gi');
+    const matches = Array.from(combinedText.matchAll(ruleRegex));
+    for (const rm of matches) {
+      const block = rm[1];
+      const bg = block.match(/background(?:-color)?\s*:\s*([^;!]+)/i);
+      if (bg) addCandidate(bg[1], 350); // Highest priority: live DOM button CTA
+      const border = block.match(/border(?:-color)?\s*:\s*([^;!]+)/i);
+      if (border) addCandidate(border[1], 80);
+      const color = block.match(/(?:^|;)\s*color\s*:\s*([^;!]+)/i);
+      if (color) addCandidate(color[1], 120);
+    }
   }
 
-  // Filter out single-occurrence noise (e.g. random 1-off button, alert icon, social badge)
-  // Authentic brand colors appear repeatedly across headers, buttons, cards, typography, and CSS classes.
-  const meaningfulEntries = entries.filter(([hex, count]) => {
-    if (themeColor && normalizeHexColor(themeColor) === hex) return true;
-    return count >= 4; // Must appear at least 4 times to qualify as brand palette
-  });
+  // D. General Author CSS Classes - STRICT DOM-VERIFICATION
+  // Only classes that are strictly present inside a class="..." attribute in the live HTML
+  const classRuleMatches = Array.from(combinedText.matchAll(/(?:\.([a-zA-Z0-9_-]+)|#([a-zA-Z0-9_-]+))\s*\{([^}]+)\}/gi));
+  for (const cm of classRuleMatches) {
+    const identifier = cm[1] || cm[2];
+    const rule = cm[3];
 
-  const activeEntries = meaningfulEntries.length >= 2 ? meaningfulEntries : entries.slice(0, 4);
+    // 1. Must be relevant to interactive buttons, CTAs, headers, navigation, or author brand/color classes
+    if (!/btn|button|book|cta|primary|accent|brand|header|nav|pri|sec|theme|gold|color|terracotta/i.test(identifier)) {
+      continue;
+    }
 
-  // Find saturated colors (vibrant brand / accent candidates)
-  const saturated = activeEntries
-    .filter(([hex]) => getColorSaturation(hex) > 0.22 && getColorLuminance(hex) > 0.08 && getColorLuminance(hex) < 0.92);
+    // 2. Blacklist 3rd party plugin selectors (ThemeIsle, Elementor, WooCommerce, Divi, FontAwesome, Swiper, Sliders, Cookies, Chat widgets, Play store, App store)
+    if (/themeisle|otter|elementor|et_pb|woocommerce|wc-|wp-block|wp-|font-awesome|fontawesome|cookie|consent|popup|modal|chat|widget|intercom|crisp|zendesk|tidio|tawk|swiper|slick|owl|carousel|slider|play|google|apple/i.test(identifier)) {
+      continue;
+    }
 
-  // Find dark neutrals (dark typography)
-  const darkNeutrals = activeEntries
-    .filter(([hex]) => getColorLuminance(hex) <= 0.28);
+    // 3. CRITICAL DOM-VERIFICATION: The class MUST actually exist in a class="..." attribute in the live HTML!
+    const inDomRegex = new RegExp(`(?:class|id)=["'][^"']*\\b${identifier.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')}\\b[^"']*["']`, 'i');
+    if (!inDomRegex.test(html)) {
+      continue;
+    }
 
-  // Find light tints/surfaces
-  const lightSurfaces = activeEntries
-    .filter(([hex]) => getColorLuminance(hex) >= 0.82);
+    const bgMatch = rule.match(/background(?:-color)?\s*:\s*([^;!]+)/i);
+    if (bgMatch) addCandidate(bgMatch[1], 200);
+    const colorMatch = rule.match(/(?:^|;)\s*color\s*:\s*([^;!]+)/i);
+    if (colorMatch && /pri|sec|brand|accent|theme|gold|color/i.test(identifier)) {
+      addCandidate(colorMatch[1], 240); // High priority for live author brand color classes (e.g. .sec-color)
+    }
+    const borderMatch = rule.match(/border(?:-color)?\s*:\s*([^;!]+)/i);
+    if (borderMatch) addCandidate(borderMatch[1], 60);
+  }
 
-  // Find mid neutrals (borders, secondary elements)
-  const midNeutrals = activeEntries
-    .filter(([hex]) => getColorLuminance(hex) > 0.28 && getColorLuminance(hex) < 0.82 && getColorSaturation(hex) <= 0.25);
+  // E. Direct HTML Elements & Inline Styles (100% verified to be rendered on the live page)
+  const htmlElemMatches = Array.from(html.matchAll(/<([a-z0-9]+)[^>]*(?:class|id)=["']([^"']*)["'][^>]*style=["']([^"']+)["'][^>]*>/gi));
+  for (const bm of htmlElemMatches) {
+    const tag = bm[1];
+    const classAttr = bm[2];
+    const style = bm[3];
+    // Exclude cookie/chat/slider noise in HTML
+    if (/cookie|consent|banner|chat|widget|swiper|slider|carousel|slick|store|play/i.test(classAttr)) continue;
 
-  const selectedPalette: string[] = [];
+    if (tag === 'button' || /btn|button|book|cta|header|nav/i.test(classAttr)) {
+      const bgMatch = style.match(/background(?:-color)?\s*:\s*([^;!]+)/i);
+      if (bgMatch) addCandidate(bgMatch[1], 260);
+      const colMatch = style.match(/(?:^|;)\s*color\s*:\s*([^;!]+)/i);
+      if (colMatch) addCandidate(colMatch[1], 40);
+    }
+  }
 
-  const tryAdd = (color: string) => {
-    if (!color) return false;
-    if (selectedPalette.includes(color)) return false;
-    if (selectedPalette.some(c => isColorTooClose(c, color))) return false;
-    selectedPalette.push(color);
+  // Tailwind Palette Utility Mapping for modern React / Next.js / Tailwind websites
+  const TAILWIND_COLORS: Record<string, string> = {
+    'orange-500': '#f97316', 'orange-600': '#ea580c',
+    'amber-500': '#f59e0b', 'amber-600': '#d97706',
+    'yellow-500': '#eab308', 'yellow-600': '#ca8a04',
+    'emerald-500': '#10b981', 'emerald-600': '#059669',
+    'green-500': '#22c55e', 'green-600': '#16a34a',
+    'teal-500': '#14b8a6', 'teal-600': '#0d9488',
+    'cyan-500': '#06b6d4', 'cyan-600': '#0891b2',
+    'sky-500': '#0ea5e9', 'sky-600': '#0284c7',
+    'indigo-500': '#6366f1', 'indigo-600': '#4f46e5',
+    'violet-500': '#8b5cf6', 'violet-600': '#7c3aed',
+    'purple-500': '#a855f7', 'purple-600': '#9333ea',
+    'fuchsia-500': '#d946ef', 'fuchsia-600': '#c026d3',
+    'pink-500': '#ec4899', 'pink-600': '#db2777',
+    'rose-500': '#f43f5e', 'rose-600': '#e11d48',
+    'red-500': '#ef4444', 'red-600': '#dc2626'
+  };
+
+  const twNamedMatches = Array.from(html.matchAll(/\b(?:bg|text|border)-([a-z]+-(?:500|600|700))\b/gi));
+  for (const tw of twNamedMatches) {
+    const key = tw[1].toLowerCase();
+    if (TAILWIND_COLORS[key]) {
+      addCandidate(TAILWIND_COLORS[key], 140);
+    }
+  }
+
+  // Direct Tailwind arbitrary hexes e.g. class="bg-[#2563eb]" or class="text-[#2563eb]"
+  const twHexMatches = Array.from(html.matchAll(/\b(?:bg|text|border)-\[#([0-9a-fA-F]{3,8})\]/gi));
+  for (const twm of twHexMatches) {
+    addCandidate(`#${twm[1]}`, 150);
+  }
+
+  // STRICT LOGO-ONLY SVG SCAN (Brand Marks & Vector Logos strictly inside logo containers)
+  // NEVER scan whole-body SVGs which match 3rd-party store badges (Google Play, App Store) or social icons!
+  const logoContainerMatches = Array.from(html.matchAll(/<(?:a|div|span)\b[^>]*(?:class|id)=["'][^"']*(?:logo|brand|custom-logo)[^"']*["'][^>]*>([\s\S]*?)<\/(?:a|div|span)>/gi));
+  for (const lm of logoContainerMatches) {
+    const block = lm[0];
+    if (/play\.google|apps\.apple|facebook|twitter|instagram|whatsapp|youtube|linkedin|social|store/i.test(block)) continue;
+    const svgFills = Array.from(block.matchAll(/<(?:svg|path|circle|rect|polygon)[^>]*(?:fill|stroke)=["'](#[0-9a-fA-F]{3,8}|rgba?\s*\([^)]+\))["'][^>]*>/gi));
+    for (const sf of svgFills) {
+      addCandidate(sf[1], 220);
+    }
+  }
+
+  // Scan inline <style> tags embedded directly in the page HTML
+  const inlineStyleBlocks = Array.from(html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)).map(m => m[1]).join(' ');
+  const cleanInlineStyles = inlineStyleBlocks
+    .replace(/url\([^)]+\)/gi, ' ')
+    .replace(/data:image\/[^;]+;base64,[a-zA-Z0-9+/=]+/gi, ' ')
+    .replace(/themeisle|elementor|wp-block|cookie|chat|play|apple|google/gi, '');
+
+  const inlinePropMatches = Array.from(cleanInlineStyles.matchAll(/(?:background(?:-color)?|border(?:-color)?|fill)\s*:\s*(#[0-9a-fA-F]{3,8}|rgba?\s*\([^)]+\))/gi));
+  for (const pm of inlinePropMatches) {
+    addCandidate(pm[1], 20);
+  }
+
+  // F. Rank Saturated Candidates (Must have sufficient saturation to be a genuine brand/accent tone)
+  const sortedCandidates = Object.entries(scores)
+    .filter(([hex]) => getColorSaturation(hex) >= 0.15 && getColorLuminance(hex) >= 0.12 && getColorLuminance(hex) <= 0.88)
+    .sort((a, b) => b[1] - a[1]);
+
+  // Authentic dark neutrals and light surfaces
+  const allHexes = Object.keys(allDetectedColors);
+  const darks = allHexes
+    .filter(h => getColorLuminance(h) <= 0.22 && getColorSaturation(h) < 0.4)
+    .sort((a, b) => {
+      const isPureA = a === '#000000' ? 0 : 1;
+      const isPureB = b === '#000000' ? 0 : 1;
+      return (isPureB - isPureA) || (getColorLuminance(a) - getColorLuminance(b));
+    });
+
+  const lights = allHexes
+    .filter(h => getColorLuminance(h) >= 0.85 && getColorLuminance(h) <= 0.99)
+    .sort((a, b) => getColorLuminance(b) - getColorLuminance(a));
+
+  const palette: string[] = [];
+  const tryAdd = (hex: string | undefined): boolean => {
+    if (!hex) return false;
+    const norm = normalizeHexColor(hex);
+    if (!norm) return false;
+    if (palette.includes(norm) || palette.some(p => isColorTooClose(p, norm))) return false;
+    palette.push(norm);
     return true;
   };
 
-  // 1. Dominant Brand Primary (highest frequency saturated color from the website)
-  if (saturated.length > 0) {
-    tryAdd(saturated[0][0]);
-  } else if (activeEntries.length > 0) {
-    tryAdd(activeEntries[0][0]);
+  // 1. Dominant Brand Primary (highest scoring saturated color)
+  if (sortedCandidates.length > 0) {
+    tryAdd(sortedCandidates[0][0]);
   }
 
-  // 2. Secondary Brand Tone (second saturated brand color if it has high presence)
-  if (saturated.length > 1 && saturated[1][1] >= 4) {
-    tryAdd(saturated[1][0]);
+  // 2. Secondary Brand Accent
+  if (sortedCandidates.length > 1) {
+    for (let i = 1; i < sortedCandidates.length; i++) {
+      if (tryAdd(sortedCandidates[i][0])) break;
+    }
   }
 
-  // 3. Authentic Dark Typography from the website
-  if (darkNeutrals.length > 0) {
-    tryAdd(darkNeutrals[0][0]);
+  // 3. Authentic Dark Base / Canvas / Typography
+  if (darks.length > 0) {
+    tryAdd(darks[0]);
+  } else {
+    tryAdd('#191b1d');
   }
 
-  // 4. Authentic Light Surface / Card / Tint from the website
-  if (lightSurfaces.length > 0) {
-    tryAdd(lightSurfaces[0][0]);
-  } else if (midNeutrals.length > 0) {
-    tryAdd(midNeutrals[0][0]);
+  // 4. Authentic Light Surface / Canvas / Sand
+  if (lights.length > 0) {
+    tryAdd(lights[0]);
+  } else {
+    tryAdd('#faf8f5');
   }
 
-  // Return strictly the 3-4 genuine core brand identity swatches (zero single-button noise)
-  return selectedPalette.slice(0, 4);
+  // Fill up to 4 if needed
+  for (const [hex] of sortedCandidates) {
+    if (palette.length >= 4) break;
+    tryAdd(hex);
+  }
+
+  return palette.slice(0, 4);
 }
 
 // Generate harmonious brand palette from a single primary hex (NEVER opposite or inverted colors)
@@ -627,7 +928,15 @@ function stripHtml(html: string): string {
 }
 
 // Dynamic AI Brand & Competitor Discovery (Powered by Live Web Content & Bedrock AI)
-async function analyzeWithAI(domain: string, title: string, metaDesc: string, h1: string, pageText: string, targetMarket: string = 'Pan India') {
+async function analyzeWithAI(
+  domain: string,
+  title: string,
+  metaDesc: string,
+  h1: string,
+  pageText: string,
+  targetMarket: string = 'Pan India',
+  candidateColors: string[] = []
+) {
   const token = process.env.AWS_BEARER_TOKEN_BEDROCK || process.env.VITE_BEDROCK_API_KEY;
   if (!token) return null;
 
@@ -640,14 +949,21 @@ async function analyzeWithAI(domain: string, title: string, metaDesc: string, h1
       ? `TARGET GEOGRAPHIC REGION: PAN INDIA / INDIA (MANDATORY REQUIREMENT)
 The user has specifically configured their business target market as INDIA / PAN INDIA.
 You MUST strictly return REAL DIRECT COMPETITORS THAT ACTIVELY OPERATE IN INDIA.`
-      : `TARGET GEOGRAPHIC REGION: ${targetMarket}
-You MUST strictly return REAL DIRECT COMPETITORS that actively operate in ${targetMarket}.`;
+      : `TARGET GEOGRAPHIC REGION: GLOBAL / WORLDWIDE (MANDATORY REQUIREMENT)
+The user has specifically configured their business target market as GLOBAL.
+You MUST strictly return REAL DIRECT COMPETITORS that operate globally and internationally.`;
+
+    const colorDirective = candidateColors.length > 0
+      ? `AUTHENTIC DETECTED COLORS FROM SITE: ${candidateColors.join(', ')}
+MANDATORY COLOR RULE: Set "primaryHex" to the exact dominant brand color detected on the site ("${candidateColors[0]}"). Never guess or invent an unrelated color based on the brand's name.`
+      : '';
 
     const prompt = `You are an elite enterprise market research analyst and competitor intelligence auditor.
 A company has entered their domain: "${domain}" into their SEO & Competitive Strategy engine.
 Configured Target Market: "${targetMarket}"
 
 ${regionDirective}
+${colorDirective}
 
 Live web content scraped directly from their official domain:
 - Page Title: "${title}"
@@ -914,6 +1230,20 @@ function dynamicSemanticParser(domain: string, title: string, metaDesc: string, 
       { name: 'Stripe', domain: 'stripe.com', positioning: 'Financial infrastructure for the internet, powering millions of businesses', strengths: 'Gold standard developer documentation and global coverage', share: 46 },
       { name: 'Adyen', domain: 'adyen.com', positioning: 'End-to-end unified payments platform built for global enterprise scale', strengths: 'Direct omnichannel acquiring and robust fraud protection', share: 32 },
       { name: 'Square', domain: 'squareup.com', positioning: 'Connected commerce and point-of-sale ecosystem for independent sellers', strengths: 'Sleek hardware and integrated merchant software suite', share: 22 }
+    ];
+  } else if (combined.includes('realty') || combined.includes('real estate') || combined.includes('property') || combined.includes('builder') || combined.includes('developer') || combined.includes('residence') || combined.includes('apartment') || combined.includes('housing') || combined.includes('villa') || combined.includes('commercial spaces')) {
+    industry = 'Real Estate Development & Premium Infrastructure';
+    category = 'Luxury Residential & Commercial Real Estate Development';
+    primaryHex = '#B8860B'; // Architectural Warm Luxury Gold / Bronze
+    regionalCompetitors = isIndia ? [
+      { name: 'Godrej Properties', domain: 'godrejproperties.com', positioning: 'India’s leading diversified real estate developer across top metros', strengths: 'Enormous brand legacy, sustainability leadership and pan-India footprint', share: 42 },
+      { name: 'Sobha Developers', domain: 'sobha.com', positioning: 'India’s premier backward-integrated luxury residential and commercial developer', strengths: 'German-grade build precision and luxury in-house manufacturing', share: 30 },
+      { name: 'Prestige Group', domain: 'prestigeconstructions.com', positioning: 'Pioneering mega-scale residential enclaves, IT parks and luxury hospitality', strengths: 'Unrivaled South India presence and timely execution', share: 18 },
+      { name: 'Brigade Group', domain: 'brigadegroup.com', positioning: 'Integrated property developer across residential, commercial and hospitality', strengths: 'Grade-A office campuses and premium gated communities', share: 10 }
+    ] : [
+      { name: 'Toll Brothers', domain: 'tollbrothers.com', positioning: 'Premier American builder of luxury residential communities and custom estates', strengths: 'Elite luxury single-family reputation and upscale design studios', share: 44 },
+      { name: 'Lennar', domain: 'lennar.com', positioning: 'Largest homebuilder in the United States with Everything’s Included tech', strengths: 'Nationwide production volume and digital purchase workflows', share: 32 },
+      { name: 'Related Companies', domain: 'related.com', positioning: 'Global luxury real estate development and urban placemaking powerhouse', strengths: 'Iconic architectural landmarks (Hudson Yards) and premier hospitality', share: 24 }
     ];
   } else {
     // Default high-grade professional B2B services
@@ -1317,7 +1647,11 @@ export function extractDynamicFavicon(html: string, domain: string): string {
 }
 
 // 100% Dynamic Crawl & Extraction (NO Hardcoded Brand Names)
-export async function extractBrandFromDomain(rawDomain: string, targetMarket: string = 'Pan India'): Promise<ExtractedBrand> {
+export async function extractBrandFromDomain(
+  rawDomain: string,
+  targetMarket: string = 'Pan India',
+  skipCrawl: boolean = false
+): Promise<ExtractedBrand> {
   const domain = cleanDomain(rawDomain);
   const parts = domain.split('.')[0].split(/[-_]/);
   const defaultBrandName = parts.map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
@@ -1334,42 +1668,15 @@ export async function extractBrandFromDomain(rawDomain: string, targetMarket: st
   let scrapedDesignStyle: string = 'Modern Minimalist';
   let pageTextSnippet = '';
 
-  // 1. Live Web Crawl
+  // 1. Live Web Crawl (Robust with automatic TLS renegotiation & curl fallback)
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 6000);
-
-    const res = await fetch(`https://${domain}`, {
-      signal: controller.signal,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.9'
-      }
-    });
-    clearTimeout(timeout);
-
-    let html = '';
-    if (res.ok) {
-      html = await res.text();
-    } else {
-      // Fallback: try alternate www / non-www variant
+    let html = await fetchHtmlRobust(`https://${domain}`, 7000);
+    if (!html) {
       const altDomain = domain.startsWith('www.') ? domain.replace(/^www\./, '') : `www.${domain}`;
-      try {
-        const altRes = await fetch(`https://${altDomain}`, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
-          }
-        });
-        if (altRes.ok) {
-          html = await altRes.text();
-        }
-      } catch (e) {}
+      html = await fetchHtmlRobust(`https://${altDomain}`, 7000);
     }
 
     if (html) {
-
       // OpenGraph Site Name
       const ogSiteName = html.match(/<meta\s+property=["']og:site_name["']\s+content=["']([^"']+)["']/i);
       if (ogSiteName && ogSiteName[1].trim()) {
@@ -1414,25 +1721,29 @@ export async function extractBrandFromDomain(rawDomain: string, targetMarket: st
         primaryThemeColor = themeColorMatch[1].trim();
       }
 
-      // Fetch linked stylesheets to extract full CSS color palette
-      const cssMatches = Array.from(html.matchAll(/href=["']([^"']+\.css[^"']*)["']/gi)).map(m => m[1]);
+      // Fetch linked stylesheets to extract full CSS color palette (Author & Theme styles prioritized, 3rd party widget noise filtered)
+      const rawCssMatches = Array.from(new Set(Array.from(html.matchAll(/href=["']([^"']+\.css[^"']*)["']/gi)).map(m => m[1])));
+      const filteredCss = rawCssMatches.filter(href => {
+        const l = href.toLowerCase();
+        return !/cookie|consent|chat|widget|popup|modal|intercom|crisp|zendesk|tidio|tawk|font-awesome|fontawesome/i.test(l);
+      });
+      // Sort so author themes/main styles are scanned first
+      filteredCss.sort((a, b) => {
+        const aScore = /theme|style|main|app|bundle|custom|frontend|master/i.test(a) ? 2 : 1;
+        const bScore = /theme|style|main|app|bundle|custom|frontend|master/i.test(b) ? 2 : 1;
+        return bScore - aScore;
+      });
+
       const cssSnippets: string[] = [];
-      for (const href of cssMatches.slice(0, 3)) {
+      for (const href of filteredCss.slice(0, 4)) {
         let fullUrl = href.trim();
         if (fullUrl.startsWith('//')) fullUrl = `https:${fullUrl}`;
         else if (fullUrl.startsWith('/')) fullUrl = `https://${domain}${fullUrl}`;
         else if (!fullUrl.startsWith('http')) fullUrl = `https://${domain}/${fullUrl}`;
         
         try {
-          const cssController = new AbortController();
-          const cssTimeout = setTimeout(() => cssController.abort(), 2000);
-          const cssRes = await fetch(fullUrl, {
-            signal: cssController.signal,
-            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
-          });
-          clearTimeout(cssTimeout);
-          if (cssRes.ok) {
-            const cssText = await cssRes.text();
+          const cssText = await fetchHtmlRobust(fullUrl, 5000);
+          if (cssText) {
             cssSnippets.push(cssText.slice(0, 150000));
           }
         } catch (ce) {}
@@ -1455,7 +1766,7 @@ export async function extractBrandFromDomain(rawDomain: string, targetMarket: st
   }
 
   // 2. Intelligent AI Analysis from Crawled Content (Bedrock AI)
-  let intelligence = await analyzeWithAI(domain, title, metaDesc, h1, pageTextSnippet, targetMarket);
+  let intelligence = await analyzeWithAI(domain, title, metaDesc, h1, pageTextSnippet, targetMarket, scrapedPalette);
 
   // 3. Fallback to Dynamic Semantic Parser if AI is offline
   if (!intelligence) {
@@ -1465,7 +1776,7 @@ export async function extractBrandFromDomain(rawDomain: string, targetMarket: st
   // 4. Construct Authentic Brand Palette (Direct from Website, Sorted Semantically)
   const sitePrimaryHex = (scrapedPalette.length > 0) ? scrapedPalette[0] : primaryThemeColor;
   const finalPrimaryHex = sitePrimaryHex || intelligence.primaryHex || '#2563EB';
-  const brandPalette = (scrapedPalette.length >= 2)
+  const brandPalette = (scrapedPalette.length >= 1)
     ? semanticSortPalette(scrapedPalette)
     : generateBrandPalette(finalPrimaryHex);
 
@@ -1478,11 +1789,13 @@ export async function extractBrandFromDomain(rawDomain: string, targetMarket: st
 
   // 6. Real Crawled Pages (Default 20 Real Crawls on Initial Analysis)
   let realAudit = null;
-  try {
-    const { crawlDomainPages } = await import('./realCrawler');
-    realAudit = await crawlDomainPages(domain, 20, finalBrandName);
-  } catch (ce) {
-    console.warn('[BrandExtractor] Real crawl error:', ce);
+  if (!skipCrawl) {
+    try {
+      const { crawlDomainPages } = await import('./realCrawler');
+      realAudit = await crawlDomainPages(domain, 20, finalBrandName);
+    } catch (ce) {
+      console.warn('[BrandExtractor] Real crawl error:', ce);
+    }
   }
 
   const crawledPages = (realAudit && realAudit.pages.length > 0)
