@@ -39,6 +39,10 @@ interface BrandingStudioProps {
 }
 
 export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: BrandingStudioProps) {
+  const domain = project?.domain || 'company.com';
+  const cleanDomain = domain.replace(/^(https?:\/\/)+/gi, '').replace(/^www\./i, '').replace(/\/$/, '');
+  const websiteUrl = `https://${cleanDomain}`;
+
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isRegeneratingSummary, setIsRegeneratingSummary] = useState(false);
@@ -47,6 +51,20 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
   const [logoFailed, setLogoFailed] = useState(false);
   const [logoCanvasBg, setLogoCanvasBg] = useState<'light' | 'dark' | 'grid'>('light');
   const [activeScoreTooltip, setActiveScoreTooltip] = useState<'health' | 'tone' | 'audience' | 'visual' | null>(null);
+
+  // Auto-detect white logos or dark brand identity to show on dark canvas automatically
+  useEffect(() => {
+    const isDarkLogoBrand =
+      cleanDomain.includes('zenup') ||
+      project?.logoDarkBg ||
+      (project?.palette && Array.isArray(project.palette) && project.palette.some((c: string) =>
+        ['#111111', '#000000', '#0a0a0a', '#18181b', '#0f172a', '#1e293b'].includes(c.toLowerCase())
+      ));
+
+    if (isDarkLogoBrand) {
+      setLogoCanvasBg('dark');
+    }
+  }, [cleanDomain, project?.palette, project?.logoDarkBg]);
 
   React.useEffect(() => {
     setLogoFailed(false);
@@ -169,10 +187,6 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
   const handleSyncModules = () => {
     showToast('✓ Brand identity and tone synchronized across Blogs, SEO, Social & Media Studio!');
   };
-
-  const domain = project?.domain || 'company.com';
-  const cleanDomain = domain.replace(/^(https?:\/\/)+/gi, '').replace(/^www\./i, '').replace(/\/$/, '');
-  const websiteUrl = `https://${cleanDomain}`;
 
   const competitorsList = (project?.competitors && project.competitors.length > 0)
     ? project.competitors
@@ -403,28 +417,28 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
         </div>
       )}
 
-      {/* 2. Top 4 Brand Scores Row (Computed Dynamically from Crawled Assets) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* 2. Top 4 Brand Scores Row: 2 in line 1, 2 in line 2 on mobile (< lg), 4 in line on desktop */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         {/* Card 1: Brand Health Score */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between hover:border-slate-300 transition-all relative">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600">
-                <Zap className="w-4 h-4" />
+        <div className="bg-white rounded-2xl border border-slate-200 p-3 sm:p-5 shadow-xs sm:shadow-sm flex flex-col justify-between hover:border-slate-300 transition-all relative">
+          <div className="flex items-center justify-between mb-2 sm:mb-3">
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+              <div className="p-1 sm:p-1.5 rounded-lg bg-emerald-50 text-emerald-600 shrink-0">
+                <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </div>
-              <h3 className="font-bold text-sm text-slate-900">
-                Brand Health Score
+              <h3 className="font-bold text-xs sm:text-sm text-slate-900 truncate">
+                Brand Health
               </h3>
             </div>
             {/* Popover Toggle */}
-            <div className="relative">
+            <div className="relative shrink-0">
               <button
                 type="button"
                 onClick={() => setActiveScoreTooltip(activeScoreTooltip === 'health' ? null : 'health')}
                 className="p-1 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
                 title="View mathematical audit breakdown"
               >
-                <Info className="w-3.5 h-3.5" />
+                <Info className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               </button>
               {activeScoreTooltip === 'health' && (
                 <div className="absolute right-0 top-6 z-30 w-72 p-3.5 bg-slate-900 text-white rounded-xl shadow-xl text-xs space-y-2.5 border border-slate-700 animate-fade-in">
@@ -447,46 +461,46 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
               )}
             </div>
           </div>
-          <div className="flex items-baseline gap-1 mb-2">
-            <span className="text-3xl sm:text-4xl font-black text-emerald-600">{brandHealthData.score}</span>
-            <span className="text-xs font-semibold text-slate-400">/100</span>
+          <div className="flex items-baseline gap-1 mb-1.5 sm:mb-2">
+            <span className="text-2xl sm:text-4xl font-black text-emerald-600">{brandHealthData.score}</span>
+            <span className="text-[10px] sm:text-xs font-semibold text-slate-400">/100</span>
           </div>
-          <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mb-3">
+          <div className="w-full h-1 sm:h-1.5 bg-slate-100 rounded-full overflow-hidden mb-2 sm:mb-3">
             <div
               className={`h-full ${getScoreStatus(brandHealthData.score).barBg} rounded-full transition-all duration-500`}
               style={{ width: `${brandHealthData.score}%` }}
             />
           </div>
-          <div className="flex items-center justify-between text-[11px] font-semibold">
-            <span className="flex items-center gap-1.5 text-slate-700">
-              <span className={`w-2 h-2 rounded-full ${getScoreStatus(brandHealthData.score).dot}`} />
+          <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-semibold">
+            <span className="flex items-center gap-1 text-slate-700 truncate">
+              <span className={`w-1.5 h-1.5 rounded-full ${getScoreStatus(brandHealthData.score).dot}`} />
               {getScoreStatus(brandHealthData.score).label}
             </span>
-            <span className={`${getScoreStatus(brandHealthData.score).color} font-bold`}>
+            <span className={`${getScoreStatus(brandHealthData.score).color} font-bold text-[9.5px] sm:text-[11px]`}>
               {getScoreStatus(brandHealthData.score).trend}
             </span>
           </div>
         </div>
 
         {/* Card 2: Tone of Voice */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between hover:border-slate-300 transition-all relative">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-purple-50 text-purple-600">
-                <Radio className="w-4 h-4" />
+        <div className="bg-white rounded-2xl border border-slate-200 p-3 sm:p-5 shadow-xs sm:shadow-sm flex flex-col justify-between hover:border-slate-300 transition-all relative">
+          <div className="flex items-center justify-between mb-2 sm:mb-3">
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+              <div className="p-1 sm:p-1.5 rounded-lg bg-purple-50 text-purple-600 shrink-0">
+                <Radio className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </div>
-              <h3 className="font-bold text-sm text-slate-900">
+              <h3 className="font-bold text-xs sm:text-sm text-slate-900 truncate">
                 Tone of Voice
               </h3>
             </div>
-            <div className="relative">
+            <div className="relative shrink-0">
               <button
                 type="button"
                 onClick={() => setActiveScoreTooltip(activeScoreTooltip === 'tone' ? null : 'tone')}
                 className="p-1 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
                 title="View mathematical audit breakdown"
               >
-                <Info className="w-3.5 h-3.5" />
+                <Info className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               </button>
               {activeScoreTooltip === 'tone' && (
                 <div className="absolute right-0 top-6 z-30 w-72 p-3.5 bg-slate-900 text-white rounded-xl shadow-xl text-xs space-y-2.5 border border-slate-700 animate-fade-in">
@@ -509,46 +523,46 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
               )}
             </div>
           </div>
-          <div className="flex items-baseline gap-1 mb-2">
-            <span className="text-3xl sm:text-4xl font-black text-purple-600">{toneOfVoiceData.score}</span>
-            <span className="text-xs font-semibold text-slate-400">/100</span>
+          <div className="flex items-baseline gap-1 mb-1.5 sm:mb-2">
+            <span className="text-2xl sm:text-4xl font-black text-purple-600">{toneOfVoiceData.score}</span>
+            <span className="text-[10px] sm:text-xs font-semibold text-slate-400">/100</span>
           </div>
-          <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mb-3">
+          <div className="w-full h-1 sm:h-1.5 bg-slate-100 rounded-full overflow-hidden mb-2 sm:mb-3">
             <div
               className={`h-full ${getScoreStatus(toneOfVoiceData.score).barBg} rounded-full transition-all duration-500`}
               style={{ width: `${toneOfVoiceData.score}%` }}
             />
           </div>
-          <div className="flex items-center justify-between text-[11px] font-semibold">
-            <span className="flex items-center gap-1.5 text-slate-700">
-              <span className={`w-2 h-2 rounded-full ${getScoreStatus(toneOfVoiceData.score).dot}`} />
+          <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-semibold">
+            <span className="flex items-center gap-1 text-slate-700 truncate">
+              <span className={`w-1.5 h-1.5 rounded-full ${getScoreStatus(toneOfVoiceData.score).dot}`} />
               {getScoreStatus(toneOfVoiceData.score).label}
             </span>
-            <span className={`${getScoreStatus(toneOfVoiceData.score).color} font-bold`}>
+            <span className={`${getScoreStatus(toneOfVoiceData.score).color} font-bold text-[9.5px] sm:text-[11px]`}>
               {getScoreStatus(toneOfVoiceData.score).trend}
             </span>
           </div>
         </div>
 
         {/* Card 3: Audience Fit */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between hover:border-slate-300 transition-all relative">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600">
-                <Users className="w-4 h-4" />
+        <div className="bg-white rounded-2xl border border-slate-200 p-3 sm:p-5 shadow-xs sm:shadow-sm flex flex-col justify-between hover:border-slate-300 transition-all relative">
+          <div className="flex items-center justify-between mb-2 sm:mb-3">
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+              <div className="p-1 sm:p-1.5 rounded-lg bg-blue-50 text-blue-600 shrink-0">
+                <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </div>
-              <h3 className="font-bold text-sm text-slate-900">
+              <h3 className="font-bold text-xs sm:text-sm text-slate-900 truncate">
                 Audience Fit
               </h3>
             </div>
-            <div className="relative">
+            <div className="relative shrink-0">
               <button
                 type="button"
                 onClick={() => setActiveScoreTooltip(activeScoreTooltip === 'audience' ? null : 'audience')}
                 className="p-1 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
                 title="View mathematical audit breakdown"
               >
-                <Info className="w-3.5 h-3.5" />
+                <Info className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               </button>
               {activeScoreTooltip === 'audience' && (
                 <div className="absolute right-0 top-6 z-30 w-72 p-3.5 bg-slate-900 text-white rounded-xl shadow-xl text-xs space-y-2.5 border border-slate-700 animate-fade-in">
@@ -571,46 +585,46 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
               )}
             </div>
           </div>
-          <div className="flex items-baseline gap-1 mb-2">
-            <span className="text-3xl sm:text-4xl font-black text-blue-600">{audienceFitData.score}</span>
-            <span className="text-xs font-semibold text-slate-400">/100</span>
+          <div className="flex items-baseline gap-1 mb-1.5 sm:mb-2">
+            <span className="text-2xl sm:text-4xl font-black text-blue-600">{audienceFitData.score}</span>
+            <span className="text-[10px] sm:text-xs font-semibold text-slate-400">/100</span>
           </div>
-          <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mb-3">
+          <div className="w-full h-1 sm:h-1.5 bg-slate-100 rounded-full overflow-hidden mb-2 sm:mb-3">
             <div
               className={`h-full ${getScoreStatus(audienceFitData.score).barBg} rounded-full transition-all duration-500`}
               style={{ width: `${audienceFitData.score}%` }}
             />
           </div>
-          <div className="flex items-center justify-between text-[11px] font-semibold">
-            <span className="flex items-center gap-1.5 text-slate-700">
-              <span className={`w-2 h-2 rounded-full ${getScoreStatus(audienceFitData.score).dot}`} />
+          <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-semibold">
+            <span className="flex items-center gap-1 text-slate-700 truncate">
+              <span className={`w-1.5 h-1.5 rounded-full ${getScoreStatus(audienceFitData.score).dot}`} />
               {getScoreStatus(audienceFitData.score).label}
             </span>
-            <span className={`${getScoreStatus(audienceFitData.score).color} font-bold`}>
+            <span className={`${getScoreStatus(audienceFitData.score).color} font-bold text-[9.5px] sm:text-[11px]`}>
               {getScoreStatus(audienceFitData.score).trend}
             </span>
           </div>
         </div>
 
         {/* Card 4: Visual Identity */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between hover:border-slate-300 transition-all relative">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-pink-50 text-pink-600">
-                <Palette className="w-4 h-4" />
+        <div className="bg-white rounded-2xl border border-slate-200 p-3 sm:p-5 shadow-xs sm:shadow-sm flex flex-col justify-between hover:border-slate-300 transition-all relative">
+          <div className="flex items-center justify-between mb-2 sm:mb-3">
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+              <div className="p-1 sm:p-1.5 rounded-lg bg-pink-50 text-pink-600 shrink-0">
+                <Palette className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </div>
-              <h3 className="font-bold text-sm text-slate-900">
+              <h3 className="font-bold text-xs sm:text-sm text-slate-900 truncate">
                 Visual Identity
               </h3>
             </div>
-            <div className="relative">
+            <div className="relative shrink-0">
               <button
                 type="button"
                 onClick={() => setActiveScoreTooltip(activeScoreTooltip === 'visual' ? null : 'visual')}
                 className="p-1 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
                 title="View mathematical audit breakdown"
               >
-                <Info className="w-3.5 h-3.5" />
+                <Info className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               </button>
               {activeScoreTooltip === 'visual' && (
                 <div className="absolute right-0 top-6 z-30 w-72 p-3.5 bg-slate-900 text-white rounded-xl shadow-xl text-xs space-y-2.5 border border-slate-700 animate-fade-in">
@@ -633,22 +647,22 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
               )}
             </div>
           </div>
-          <div className="flex items-baseline gap-1 mb-2">
-            <span className="text-3xl sm:text-4xl font-black text-pink-600">{visualIdentityData.score}</span>
-            <span className="text-xs font-semibold text-slate-400">/100</span>
+          <div className="flex items-baseline gap-1 mb-1.5 sm:mb-2">
+            <span className="text-2xl sm:text-4xl font-black text-pink-600">{visualIdentityData.score}</span>
+            <span className="text-[10px] sm:text-xs font-semibold text-slate-400">/100</span>
           </div>
-          <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mb-3">
+          <div className="w-full h-1 sm:h-1.5 bg-slate-100 rounded-full overflow-hidden mb-2 sm:mb-3">
             <div
               className={`h-full ${getScoreStatus(visualIdentityData.score).barBg} rounded-full transition-all duration-500`}
               style={{ width: `${visualIdentityData.score}%` }}
             />
           </div>
-          <div className="flex items-center justify-between text-[11px] font-semibold">
-            <span className="flex items-center gap-1.5 text-slate-700">
-              <span className={`w-2 h-2 rounded-full ${getScoreStatus(visualIdentityData.score).dot}`} />
+          <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-semibold">
+            <span className="flex items-center gap-1 text-slate-700 truncate">
+              <span className={`w-1.5 h-1.5 rounded-full ${getScoreStatus(visualIdentityData.score).dot}`} />
               {getScoreStatus(visualIdentityData.score).label}
             </span>
-            <span className={`${getScoreStatus(visualIdentityData.score).color} font-bold`}>
+            <span className={`${getScoreStatus(visualIdentityData.score).color} font-bold text-[9.5px] sm:text-[11px]`}>
               {getScoreStatus(visualIdentityData.score).trend}
             </span>
           </div>
@@ -658,40 +672,44 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
       {/* 3. Middle 3 Profile Cards (Brand Profile, Visual Identity, Brand Voice) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Card 1: Brand Profile */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
           <div>
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-              <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4 gap-2">
+              <h3 className="font-bold text-sm text-slate-900 flex items-center gap-1.5 shrink-0">
                 <Target className="w-4 h-4 text-slate-600" />
-                Brand Profile
+                <span>Brand Profile</span>
               </h3>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 shrink-0">
                 <button
                   type="button"
                   onClick={handleRefresh}
                   disabled={isRefreshing}
-                  className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold text-slate-800 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200 transition-colors cursor-pointer disabled:opacity-50"
+                  className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-slate-800 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200 transition-colors cursor-pointer disabled:opacity-50"
                   title="Run live AI re-analysis on domain"
                 >
                   <RefreshCw className={`w-3 h-3 ${isRefreshing ? 'animate-spin' : ''}`} />
-                  <span>{isRefreshing ? 'Analyzing with AI...' : '✦ Re-analyze with AI'}</span>
+                  <span>{isRefreshing ? 'Analyzing...' : 'Re-analyze with AI'}</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setEditingModal('profile')}
-                  className="flex items-center gap-1.5 px-3 py-1 text-xs font-bold text-slate-800 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200 transition-colors cursor-pointer"
+                  className="flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-slate-800 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200 transition-colors cursor-pointer"
                 >
-                  <Edit2 className="w-3 h-3" /> Edit
+                  <Edit2 className="w-3 h-3" />
+                  <span>Edit</span>
                 </button>
               </div>
             </div>
 
-            <div className="space-y-4 text-xs">
-              <div className="flex items-start">
-                <div className="w-1/3 flex items-center gap-2 text-slate-700 font-bold">
-                  <Globe className="w-3.5 h-3.5 text-slate-400" /> Website
+            {/* Beautiful Structured Key-Value Table View */}
+            <div className="rounded-xl border border-slate-200 overflow-hidden divide-y divide-slate-100 bg-slate-50/50 text-xs">
+              {/* Row 1: Website */}
+              <div className="flex items-center justify-between p-2.5 hover:bg-slate-50 transition-colors">
+                <div className="flex items-center gap-2 text-slate-600 font-bold text-[11px] shrink-0">
+                  <Globe className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <span>Website</span>
                 </div>
-                <div className="w-2/3">
+                <div className="text-right ml-2 min-w-0">
                   <a
                     href={websiteUrl}
                     target="_blank"
@@ -703,91 +721,103 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
                 </div>
               </div>
 
-              <div className="flex items-start">
-                <div className="w-1/3 flex items-center gap-2 text-slate-700 font-bold">
-                  <Building2 className="w-3.5 h-3.5 text-slate-400" /> Industry
+              {/* Row 2: Industry */}
+              <div className="flex items-center justify-between p-2.5 hover:bg-slate-50 transition-colors">
+                <div className="flex items-center gap-2 text-slate-600 font-bold text-[11px] shrink-0">
+                  <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <span>Industry</span>
                 </div>
-                <div className="w-2/3 font-semibold text-slate-900">
+                <div className="text-right font-semibold text-slate-900 text-xs ml-2 flex-1 pl-3 leading-snug break-words">
                   {project?.industry || 'Industrial Equipment Manufacturing'}
                 </div>
               </div>
 
-              <div className="flex items-start">
-                <div className="w-1/3 flex items-center gap-2 text-slate-700 font-bold">
-                  <Tag className="w-3.5 h-3.5 text-slate-400" /> Business Category
+              {/* Row 3: Business Category */}
+              <div className="flex items-center justify-between p-2.5 hover:bg-slate-50 transition-colors">
+                <div className="flex items-center gap-2 text-slate-600 font-bold text-[11px] shrink-0">
+                  <Tag className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <span>Category</span>
                 </div>
-                <div className="w-2/3 font-semibold text-slate-900">
+                <div className="text-right font-semibold text-slate-900 text-xs ml-2 flex-1 pl-3 leading-snug break-words">
                   {project?.businessCategory || 'Mineral & Chemical Processing Equipment'}
                 </div>
               </div>
 
-              <div className="flex items-start">
-                <div className="w-1/3 flex items-center gap-2 text-slate-700 font-bold">
-                  <MapPin className="w-3.5 h-3.5 text-emerald-600" /> Target Market
+              {/* Row 4: Target Market */}
+              <div className="flex items-center justify-between p-2.5 hover:bg-slate-50 transition-colors">
+                <div className="flex items-center gap-2 text-slate-600 font-bold text-[11px] shrink-0">
+                  <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <span>Target Market</span>
                 </div>
-                <div className="w-2/3 font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-md px-2.5 py-0.5 inline-flex items-center gap-1.5 w-fit">
-                  <span>{project?.targetMarket?.toLowerCase()?.includes('india') ? '🇮🇳' : '🌐'}</span>
-                  <span>{project?.targetMarket?.toLowerCase()?.includes('india') ? 'Pan India' : 'Global'}</span>
+                <div className="text-right">
+                  <span className="font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-md px-2 py-0.5 inline-flex items-center gap-1.5 text-[10.5px]">
+                    <span>{project?.targetMarket?.toLowerCase()?.includes('india') ? '🇮🇳' : '🌐'}</span>
+                    <span>{project?.targetMarket?.toLowerCase()?.includes('india') ? 'Pan India' : 'Global'}</span>
+                  </span>
                 </div>
               </div>
 
-              <div className="flex items-start">
-                <div className="w-1/3 flex items-center gap-2 text-slate-700 font-bold">
-                  <Target className="w-3.5 h-3.5 text-slate-400" /> Target Audience
+              {/* Row 5: Target Audience */}
+              <div className="p-2.5 hover:bg-slate-50 transition-colors space-y-1">
+                <div className="flex items-center gap-2 text-slate-600 font-bold text-[11px]">
+                  <Target className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <span>Target Audience</span>
                 </div>
-                <div className="w-2/3 text-slate-900 font-medium leading-relaxed">
+                <p className="text-slate-800 font-medium leading-relaxed text-[11px] pl-5.5">
                   {project?.targetAudience || 'Enterprise leaders, founders, and engineering teams scaling custom AI automation workflows and software systems'}
-                </div>
+                </p>
               </div>
 
-              <div className="flex items-start border-t border-slate-100 pt-3">
-                <div className="w-1/3 flex items-center gap-2 text-slate-700 font-bold">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Positioning
+              {/* Row 6: Positioning */}
+              <div className="p-2.5 hover:bg-slate-50 transition-colors space-y-1">
+                <div className="flex items-center gap-2 text-slate-600 font-bold text-[11px]">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                  <span>Positioning</span>
                 </div>
-                <div className="w-2/3 text-slate-900 font-medium leading-relaxed">
-                  {project?.brandPositioning || (project?.summary ? project.summary.slice(0, 140) + '...' : 'Leading precision engineering with autonomous performance acceleration.')}
-                </div>
+                <p className="text-slate-800 font-medium leading-relaxed text-[11px] pl-5.5 break-words">
+                  {project?.brandPositioning || project?.summary || 'Leading precision engineering with autonomous performance acceleration.'}
+                </p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Card 2: Visual Identity */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
           <div>
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-              <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4 gap-2">
+              <h3 className="font-bold text-sm text-slate-900 flex items-center gap-1.5 shrink-0">
                 <Palette className="w-4 h-4 text-pink-500" />
-                Visual Identity
+                <span>Visual Identity</span>
               </h3>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 shrink-0">
                 <button
                   type="button"
                   onClick={handleRefresh}
                   disabled={isRefreshing}
-                  className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold text-slate-800 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200 transition-colors cursor-pointer disabled:opacity-50"
+                  className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-slate-800 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200 transition-colors cursor-pointer disabled:opacity-50"
                   title="Scan live website HTML and CSS for exact brand colors"
                 >
                   <RefreshCw className={`w-3 h-3 ${isRefreshing ? 'animate-spin' : ''}`} />
-                  <span>{isRefreshing ? 'Scanning...' : '↻ Re-fetch Colors'}</span>
+                  <span>{isRefreshing ? 'Scanning...' : 'Re-fetch Colors'}</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setEditingModal('visual')}
-                  className="flex items-center gap-1.5 px-3 py-1 text-xs font-bold text-slate-800 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200 transition-colors cursor-pointer"
+                  className="flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-slate-800 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200 transition-colors cursor-pointer"
                 >
-                  <Edit2 className="w-3 h-3" /> Edit
+                  <Edit2 className="w-3 h-3" />
+                  <span>Edit</span>
                 </button>
               </div>
             </div>
 
-            {/* Logo and Favicon Previews with SoloSpider-style Canvas Background Switcher */}
+            {/* Logo and Favicon Previews with Canvas Background Switcher */}
             <div className="space-y-4 text-xs">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
                   Brand Assets
                 </span>
-                {/* SoloSpider Style Canvas Background Switcher */}
                 <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
                   <span className="text-[9px] font-bold text-slate-400 px-1 uppercase tracking-tight">Canvas:</span>
                   <button
@@ -832,9 +862,9 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Logo</span>
-                  <div className={`h-16 rounded-xl flex items-center justify-center p-2 overflow-hidden shadow-xs transition-colors border ${
+                  <div className={`h-20 rounded-xl flex items-center justify-center p-3 overflow-hidden shadow-xs transition-colors border ${
                     logoCanvasBg === 'dark'
-                      ? 'bg-slate-950 border-slate-800'
+                      ? 'bg-slate-950 border-slate-800 shadow-inner'
                       : logoCanvasBg === 'grid'
                       ? 'bg-[repeating-conic-gradient(#e2e8f0_0%_25%,#ffffff_0%_50%)] bg-[length:14px_14px] border-slate-200'
                       : 'bg-slate-50 border-slate-200'
@@ -856,15 +886,40 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
                         <img
                           src={displayLogo}
                           alt={project?.name || 'Logo'}
-                          className="max-h-12 max-w-full object-contain"
+                          className="max-h-14 max-w-full object-contain filter drop-shadow-xs"
                           onError={() => setLogoFailed(true)}
+                          onLoad={(e) => {
+                            try {
+                              const img = e.currentTarget;
+                              const canvas = document.createElement('canvas');
+                              canvas.width = Math.min(img.naturalWidth || 64, 64);
+                              canvas.height = Math.min(img.naturalHeight || 64, 64);
+                              const ctx = canvas.getContext('2d');
+                              if (ctx) {
+                                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                                const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+                                let whitePixels = 0;
+                                let opaquePixels = 0;
+                                for (let i = 0; i < data.length; i += 4) {
+                                  if (data[i + 3] > 30) {
+                                    opaquePixels++;
+                                    const brightness = (data[i] * 299 + data[i+1] * 587 + data[i+2] * 114) / 1000;
+                                    if (brightness > 210) whitePixels++;
+                                  }
+                                }
+                                if (opaquePixels > 0 && (whitePixels / opaquePixels) > 0.3) {
+                                  setLogoCanvasBg('dark');
+                                }
+                              }
+                            } catch (_) {}
+                          }}
                         />
                       ) : (
                         <div className="flex items-center justify-center">
                           <img
                             src={project?.faviconUrl || `https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128`}
                             alt="Brand Mark"
-                            className="max-h-9 max-w-full object-contain rounded-md"
+                            className="max-h-10 max-w-full object-contain rounded-md"
                             onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
                           />
                         </div>
@@ -875,7 +930,7 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
 
                 <div>
                   <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Favicon</span>
-                  <div className={`h-16 rounded-xl flex items-center justify-center p-2 shadow-xs transition-colors border ${
+                  <div className={`h-20 rounded-xl flex items-center justify-center p-3 shadow-xs transition-colors border ${
                     logoCanvasBg === 'dark'
                       ? 'bg-slate-950 border-slate-800'
                       : logoCanvasBg === 'grid'
@@ -885,14 +940,14 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
                     <img
                       src={project?.faviconUrl || `https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128`}
                       alt="Favicon"
-                      className="w-8 h-8 object-contain"
+                      className="w-10 h-10 object-contain"
                       onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Color Palette (Clean Core Identity - Zero 1-Button Noise) */}
+              {/* Color Palette (Single line small on mobile with hover/tap copy) */}
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
@@ -902,20 +957,27 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
                     {palette.length} Core Brand Colors
                   </span>
                 </div>
-                <div className={`grid ${palette.length <= 3 ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-4'} gap-2`}>
+                <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
                   {palette.map((hex: string, i: number) => {
                     return (
-                      <div key={i} className="text-center group bg-white p-2.5 rounded-xl border border-slate-200 shadow-xs hover:border-slate-300 transition-colors relative z-10">
+                      <div
+                        key={i}
+                        onClick={() => {
+                          navigator.clipboard?.writeText(hex);
+                          showToast(`✓ Copied ${hex} to clipboard!`);
+                        }}
+                        className="text-center group bg-white p-1.5 sm:p-2.5 rounded-xl border border-slate-200 shadow-xs hover:border-slate-300 transition-all relative z-10 cursor-pointer"
+                        title={`Click to copy: ${hex}`}
+                      >
                         <div
-                          onClick={() => {
-                            navigator.clipboard?.writeText(hex);
-                            showToast(`✓ Copied ${hex} to clipboard!`);
-                          }}
-                          className="h-10 rounded-lg border border-black/10 shadow-xs cursor-pointer hover:scale-105 transition-transform !opacity-100"
+                          className="h-7 sm:h-10 rounded-lg border border-black/10 shadow-xs group-hover:scale-105 transition-transform !opacity-100 relative flex items-center justify-center overflow-hidden"
                           style={{ backgroundColor: hex, opacity: 1, filter: 'none' }}
-                          title={`Click to copy: ${hex}`}
-                        />
-                        <span className="text-[11px] font-mono font-bold text-slate-900 block mt-2 truncate">
+                        >
+                          <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 text-white text-[9px] font-bold px-1 py-0.5 rounded shadow pointer-events-none">
+                            Copy
+                          </span>
+                        </div>
+                        <span className="text-[9px] sm:text-[11px] font-mono font-bold text-slate-900 block mt-1 sm:mt-2 truncate">
                           {hex}
                         </span>
                       </div>
@@ -928,13 +990,13 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
               <div className="grid grid-cols-2 gap-3 border-t border-slate-100 pt-3">
                 <div>
                   <span className="text-[10px] text-slate-500 font-bold uppercase block">Fonts Used</span>
-                  <p className="font-bold text-slate-900 text-xs mt-0.5">
+                  <p className="font-bold text-slate-900 text-xs mt-0.5 truncate">
                     {project?.fonts && project.fonts.length > 0 ? project.fonts.join(' / ') : 'Inter / Sans-Serif'}
                   </p>
                 </div>
                 <div>
                   <span className="text-[10px] text-slate-500 font-bold uppercase block">Design Style</span>
-                  <p className="font-bold text-slate-900 text-xs mt-0.5">
+                  <p className="font-bold text-slate-900 text-xs mt-0.5 truncate">
                     {project?.designStyle || 'Modern Minimalist Tech'}
                   </p>
                 </div>
@@ -944,19 +1006,20 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
         </div>
 
         {/* Card 3: Brand Voice */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
           <div>
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-              <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4 gap-2">
+              <h3 className="font-bold text-sm text-slate-900 flex items-center gap-1.5 shrink-0">
                 <Radio className="w-4 h-4 text-purple-600" />
-                Brand Voice
+                <span>Brand Voice</span>
               </h3>
               <button
                 type="button"
                 onClick={() => setEditingModal('voice')}
-                className="flex items-center gap-1.5 px-3 py-1 text-xs font-bold text-slate-800 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200 transition-colors cursor-pointer"
+                className="flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-slate-800 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200 transition-colors cursor-pointer"
               >
-                <Edit2 className="w-3 h-3" /> Edit
+                <Edit2 className="w-3 h-3" />
+                <span>Edit</span>
               </button>
             </div>
 
@@ -1015,17 +1078,20 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
           </div>
 
           <div>
-            <div className="flex items-center justify-between pb-3 border-b border-purple-200/60 mb-3 relative z-10">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-purple-100 text-purple-700">
+            <div className="flex items-start sm:items-center justify-between pb-3 border-b border-purple-200/60 mb-3 relative z-10 gap-3">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="p-2 rounded-xl bg-purple-100 text-purple-700 shrink-0">
                   <Sparkles className="w-4 h-4" />
                 </div>
-                <div>
-                  <h3 className="font-bold text-sm text-slate-900">
+                <div className="min-w-0">
+                  <h3 className="font-bold text-sm text-slate-900 truncate">
                     AI Brand Summary
                   </h3>
-                  <p className="text-[11px] text-purple-800 font-medium">
+                  <p className="text-[11px] text-purple-800 font-medium hidden sm:block">
                     Autonomous positioning synthesis crawled from your live digital footprint
+                  </p>
+                  <p className="text-[10px] text-purple-800 font-medium sm:hidden">
+                    Autonomous positioning synthesis
                   </p>
                 </div>
               </div>
@@ -1034,11 +1100,11 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
                 type="button"
                 onClick={handleRegenerateSummary}
                 disabled={isRegeneratingSummary}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-purple-900 bg-purple-100 hover:bg-purple-200 border border-purple-300 rounded-xl transition-all cursor-pointer disabled:opacity-50 shrink-0"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-purple-900 bg-purple-100 hover:bg-purple-200 border border-purple-300 rounded-xl transition-all cursor-pointer disabled:opacity-50 shrink-0 ml-auto"
                 title="Re-check website and regenerate summary with new wording"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${isRegeneratingSummary ? 'animate-spin' : ''}`} />
-                <span>{isRegeneratingSummary ? 'Checking...' : '↻ Regenerate'}</span>
+                <span>{isRegeneratingSummary ? 'Checking...' : 'Regenerate'}</span>
               </button>
             </div>
 
@@ -1155,28 +1221,29 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
       </div>
 
       {/* 5. Competitor Snapshot (Full-Width High-Impact Benchmark) */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4 hover:shadow-md transition-shadow">
+      <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-sm space-y-4 hover:shadow-md transition-shadow">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-3">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600">
+          <div className="flex items-start gap-2.5 flex-1 min-w-0">
+            <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600 shrink-0 mt-0.5">
               <Users className="w-5 h-5" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between sm:justify-start gap-2">
                 <h3 className="font-bold text-sm sm:text-base text-slate-900">
                   Competitor Snapshot
                 </h3>
-                <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 shrink-0 sm:ml-1">
                   {project?.targetMarket?.toLowerCase()?.includes('india') ? '🇮🇳 Pan India' : '🌐 Global'}
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-slate-500 mt-1">
                 Direct competitive benchmarks with verified website presence, real market positioning, and voice share
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-1 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+            <span className="text-xs font-bold text-slate-600">({competitorsList.length} Rivals)</span>
             <button
               type="button"
               onClick={handleRefresh}
@@ -1187,18 +1254,17 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
               <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
               <span>{isRefreshing ? 'Scanning...' : 'Rescan Market'}</span>
             </button>
-            <span className="text-xs font-bold text-slate-600">({competitorsList.length} Rivals)</span>
           </div>
         </div>
 
         <div className="overflow-x-auto -mx-2 sm:mx-0">
-          <table className="w-full text-left text-xs min-w-[620px]">
+          <table className="w-full text-left text-xs min-w-[700px]">
             <thead>
               <tr className="border-b border-slate-100 text-slate-500 uppercase tracking-wider text-[10px]">
-                <th className="py-2.5 px-3 font-bold w-[28%]">Competitor & Website</th>
-                <th className="py-2.5 px-3 font-bold w-[34%]">Positioning</th>
-                <th className="py-2.5 px-3 font-bold w-[24%]">Key Strength</th>
-                <th className="py-2.5 px-3 font-bold text-right w-[14%]">Share</th>
+                <th className="py-2.5 px-3 font-bold min-w-[180px] w-[26%]">Competitor & Website</th>
+                <th className="py-2.5 px-3 font-bold min-w-[240px] w-[36%]">Positioning</th>
+                <th className="py-2.5 px-3 font-bold min-w-[180px] w-[24%]">Key Strength</th>
+                <th className="py-2.5 px-3 font-bold text-right min-w-[130px] w-[14%] whitespace-nowrap">Share</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -1214,7 +1280,7 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
                 return (
                   <tr key={idx} className="hover:bg-slate-50/70 transition-colors group">
                     {/* Competitor & Verified Website */}
-                    <td className="py-3.5 px-3">
+                    <td className="py-3.5 px-3 min-w-[180px]">
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0 overflow-hidden shadow-xs">
                           <img
@@ -1244,7 +1310,7 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
 
                     {/* Positioning (Click to expand full text) */}
                     <td 
-                      className="py-3.5 px-3 cursor-pointer group/cell"
+                      className="py-3.5 px-3 cursor-pointer group/cell min-w-[240px]"
                       onClick={() => setExpandedCompIdx(expandedCompIdx === idx ? null : idx)}
                       title={comp.positioning || `${cName} Market Segment`}
                     >
@@ -1263,7 +1329,7 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
 
                     {/* Strengths (Click to expand full text) */}
                     <td 
-                      className="py-3.5 px-3 cursor-pointer group/cell"
+                      className="py-3.5 px-3 cursor-pointer group/cell min-w-[180px]"
                       onClick={() => setExpandedCompIdx(expandedCompIdx === idx ? null : idx)}
                       title={comp.strengths || 'Established regional footprint'}
                     >
@@ -1281,9 +1347,9 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
                     </td>
 
                     {/* Share of Voice */}
-                    <td className="py-3.5 px-3 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <span className="font-bold text-slate-900 text-xs shrink-0">{comp.share || 25}%</span>
+                    <td className="py-3.5 px-3 text-right whitespace-nowrap min-w-[130px]">
+                      <div className="inline-flex items-center justify-end gap-2.5">
+                        <span className="font-bold text-slate-900 text-xs shrink-0 tabular-nums">{comp.share || 25}%</span>
                         <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden shrink-0">
                           <div
                             className="h-full bg-slate-900 rounded-full"

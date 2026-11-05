@@ -1,4 +1,4 @@
-import { auditPageForGeo, GeoTestResult } from './brandExtractor';
+import { auditPageForGeo, GeoTestResult, decodeHtmlEntities } from './brandExtractor';
 
 export interface RealCrawledPage {
   id: string;
@@ -36,6 +36,11 @@ export interface RealSeoIssue {
   whatIsThis: string;
   howDoIFix: string;
   failedPages: { id: string; url: string; detail?: string }[];
+  groups?: {
+    sharedContent: string;
+    count: number;
+    pages: { id: string; url: string; detail?: string }[];
+  }[];
 }
 
 export interface RealCrawlAuditResult {
@@ -81,9 +86,16 @@ function normalizeUrl(rawUrl: string, domain: string): string | null {
     const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
     const targetDomain = domain.toLowerCase().replace(/^www\./, '');
 
-    // Must match domain or subdomain
-    if (host !== targetDomain && !host.endsWith(`.${targetDomain}`)) {
-      return null;
+    // Must match domain or direct content subdomain
+    if (host !== targetDomain) {
+      // Exclude standalone app/portal/auth subdomains unless target domain specifically targets them
+      const isAppSubdomain = /^(?:booking|app|portal|api|auth|admin|dashboard|login|mail|cdn|assets|status|checkout)\./i.test(host);
+      if (isAppSubdomain && !targetDomain.startsWith(host.split('.')[0])) {
+        return null;
+      }
+      if (!host.endsWith(`.${targetDomain}`)) {
+        return null;
+      }
     }
 
     // Filter out non-html extensions
@@ -207,14 +219,33 @@ export async function crawlDomainPages(
 
         // Title
         const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-        const title = titleMatch ? titleMatch[1].replace(/\s+/g, ' ').trim() : '';
+        const title = titleMatch ? decodeHtmlEntities(titleMatch[1].replace(/\s+/g, ' ').trim()) : '';
 
-        // Meta Description (search name="description", name="Description", or og:description)
-        const metaMatch = html.match(/<meta\s+[^>]*name=["']description["'][^>]*content=["']([^"']*)["']/i) ||
-                          html.match(/<meta\s+[^>]*content=["']([^"']*)["'][^>]*name=["']description["']/i) ||
-                          html.match(/<meta\s+[^>]*property=["']og:description["'][^>]*content=["']([^"']*)["']/i) ||
-                          html.match(/<meta\s+[^>]*content=["']([^"']*)["'][^>]*property=["']og:description["']/i);
-        const metaDesc = metaMatch ? metaMatch[1].replace(/\s+/g, ' ').trim() : '';
+        // Meta Description (search name="description" with high priority, then og:description)
+        let metaDesc = '';
+        const metaTags = html.match(/<meta\b[^>]*>/gi) || [];
+        for (const tag of metaTags) {
+          const isDesc = /name\s*=\s*["']description["']/i.test(tag);
+          if (isDesc) {
+            const contentMatch = tag.match(/content\s*=\s*"([^"]*)"/i) || tag.match(/content\s*=\s*'([^']*)'/i);
+            if (contentMatch) {
+              metaDesc = decodeHtmlEntities(contentMatch[1].replace(/\s+/g, ' ').trim());
+              break;
+            }
+          }
+        }
+        if (!metaDesc) {
+          for (const tag of metaTags) {
+            const isOgDesc = /property\s*=\s*["']og:description["']/i.test(tag);
+            if (isOgDesc) {
+              const contentMatch = tag.match(/content\s*=\s*"([^"]*)"/i) || tag.match(/content\s*=\s*'([^']*)'/i);
+              if (contentMatch) {
+                metaDesc = decodeHtmlEntities(contentMatch[1].replace(/\s+/g, ' ').trim());
+                break;
+              }
+            }
+          }
+        }
 
         // Canonical
         const canonicalMatch = html.match(/<link\s+[^>]*rel=["']canonical["'][^>]*href=["']([^"']*)["']/i) ||
@@ -233,10 +264,29 @@ export async function crawlDomainPages(
         const robotsTag = robotsMatch ? robotsMatch[1].trim().toLowerCase() : '';
         const isNoIndex = robotsTag.includes('noindex');
 
-        // Heading tags
-        const h1Matches = Array.from(html.matchAll(/<h1[^>]*>([\s\S]*?)<\/h1>/gi)).map(m =>
-          m[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim()
+        // Heading tags (Support raw <h1>, aria-level="1" role="heading", or Next.js / SPA hydration headers)
+        let h1Matches = Array.from(html.matchAll(/<h1[^>]*>([\s\S]*?)<\/h1>/gi)).map(m =>
+          decodeHtmlEntities(m[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim())
         ).filter(Boolean);
+
+        // Fallback for SPAs / accessible headings with role="heading" aria-level="1"
+        if (h1Matches.length === 0) {
+          const ariaH1Matches = Array.from(html.matchAll(/<[^>]+role=["']heading["'][^>]+aria-level=["']1["'][^>]*>([\s\S]*?)<\/[^>]+>/gi)).map(m =>
+            decodeHtmlEntities(m[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim())
+          ).filter(Boolean);
+          if (ariaH1Matches.length > 0) {
+            h1Matches = ariaH1Matches;
+          }
+        }
+
+        // SPA detection: if page has client-side redirect or Next.js / React page title heading
+        if (h1Matches.length === 0 && (html.includes('id="__NEXT_DATA__"') || html.includes('window.__INITIAL_STATE__') || html.includes('react-root') || html.includes('_next'))) {
+          const spaHeading = html.match(/"heading":\s*"([^"]+)"/i) || html.match(/"title":\s*"([^"]+)"/i);
+          if (spaHeading && spaHeading[1] && spaHeading[1].length > 3 && spaHeading[1].length < 100) {
+            h1Matches = [decodeHtmlEntities(spaHeading[1].trim())];
+          }
+        }
+
         const h1 = h1Matches[0] || null;
         const h1Count = h1Matches.length;
 
@@ -517,16 +567,16 @@ export async function crawlDomainPages(
   if (missingH1Pages.length > 0) {
     issues.push({
       id: 'missing-h1',
-      title: `${missingH1Pages.length} page${missingH1Pages.length > 1 ? 's have' : ' has'} no <h1> heading tag`,
+      title: `${missingH1Pages.length} page${missingH1Pages.length > 1 ? 's have' : ' has'} no H1 heading tag`,
       desc: 'Pages without an H1 tag lack semantic hierarchy, weakening topical authority in search algorithms.',
       impact: 'Important',
       impactBadge: 'bg-amber-50 text-amber-700 border-amber-200',
-      howToFix: 'Add a single descriptive <h1> heading at the top of each page content section.',
+      howToFix: 'Add a single descriptive H1 heading at the top of each page content section.',
       difficulty: 'EASY',
       impactLevel: 'HIGH',
-      whatIsThis: 'The <h1> heading is a crucial semantic indicator for crawlers to understand page structure and user intent.',
-      howDoIFix: `Wrap the page's primary headline in an <h1> tag near the top of the body copy.`,
-      failedPages: missingH1Pages.map(p => ({ id: p.id, url: p.url, detail: 'Zero <h1> tags found' }))
+      whatIsThis: 'The H1 heading is a crucial semantic indicator for crawlers to understand page structure and user intent.',
+      howDoIFix: `Wrap the page's primary headline in an H1 tag near the top of the body copy.`,
+      failedPages: missingH1Pages.map(p => ({ id: p.id, url: p.url, detail: 'Zero H1 tags found' }))
     });
   }
 
@@ -549,8 +599,9 @@ export async function crawlDomainPages(
     });
   }
 
-  // Issue 9: Thin Content (< 300 words)
-  const thinPages = crawledPages.filter(p => p.wordCount < 300 && p.status === 200);
+  // Issue 9: Thin Content (< 300 words) — Exclude utility/auth/legal/booking paths & noindex pages
+  const utilityPathRegex = /\/(?:login|signin|sign-in|signup|sign-up|register|cart|checkout|book|booking|experts|contact|contact-us|privacy|privacy-policy|terms|terms-and-conditions|terms-of-service|legal|disclaimer|auth|forgot-password|reset-password|account|dashboard)\b/i;
+  const thinPages = crawledPages.filter(p => p.wordCount < 300 && p.status === 200 && !p.isNoIndex && !utilityPathRegex.test(p.url));
   if (thinPages.length > 0) {
     issues.push({
       id: 'thin-content',
@@ -585,7 +636,7 @@ export async function crawlDomainPages(
     });
   }
 
-  // Issue 11: Duplicate Page Titles Across URLs
+  // Issue 11: Duplicate Page Titles Across URLs (Clustered by Shared Title)
   const titleGroups = new Map<string, typeof crawledPages>();
   for (const p of crawledPages) {
     if (p.status === 200 && p.title && p.titleChars > 0) {
@@ -595,11 +646,29 @@ export async function crawlDomainPages(
     }
   }
   const duplicateTitlePages: { id: string; url: string; detail: string }[] = [];
-  titleGroups.forEach((pages, t) => {
+  const duplicateTitleClusters: {
+    sharedContent: string;
+    count: number;
+    pages: { id: string; url: string; detail?: string }[];
+  }[] = [];
+
+  titleGroups.forEach((pages) => {
     if (pages.length > 1) {
-      pages.forEach(p => duplicateTitlePages.push({ id: p.id, url: p.url, detail: `Shared title across ${pages.length} URLs: "${p.title.slice(0, 45)}..."` }));
+      const sampleTitle = pages[0].title;
+      pages.forEach(p => duplicateTitlePages.push({ id: p.id, url: p.url, detail: `Shared title across ${pages.length} URLs` }));
+      duplicateTitleClusters.push({
+        sharedContent: sampleTitle,
+        count: pages.length,
+        pages: pages.map(p => ({
+          id: p.id,
+          url: p.url,
+          detail: `Shared Title: "${sampleTitle}"`
+        }))
+      });
     }
   });
+  duplicateTitleClusters.sort((a, b) => b.count - a.count);
+
   if (duplicateTitlePages.length > 0) {
     issues.push({
       id: 'duplicate-titles',
@@ -612,11 +681,12 @@ export async function crawlDomainPages(
       impactLevel: 'HIGH',
       whatIsThis: 'Every indexable page should represent a unique intent. Duplicate titles confuse search crawlers and dilute topical relevance.',
       howDoIFix: 'Customize the <title> tag on each URL listed below to ensure 100% unique title copy.',
-      failedPages: duplicateTitlePages
+      failedPages: duplicateTitlePages,
+      groups: duplicateTitleClusters
     });
   }
 
-  // Issue 12: Duplicate Meta Descriptions
+  // Issue 12: Duplicate Meta Descriptions (Clustered by Exact Matching Snippet)
   const descGroups = new Map<string, typeof crawledPages>();
   for (const p of crawledPages) {
     if (p.status === 200 && p.metaDesc && p.metaChars > 25) {
@@ -626,11 +696,29 @@ export async function crawlDomainPages(
     }
   }
   const duplicateDescPages: { id: string; url: string; detail: string }[] = [];
+  const duplicateDescClusters: {
+    sharedContent: string;
+    count: number;
+    pages: { id: string; url: string; detail?: string }[];
+  }[] = [];
+
   descGroups.forEach((pages) => {
     if (pages.length > 1) {
+      const sampleDesc = pages[0].metaDesc;
       pages.forEach(p => duplicateDescPages.push({ id: p.id, url: p.url, detail: `Shared description across ${pages.length} URLs` }));
+      duplicateDescClusters.push({
+        sharedContent: sampleDesc,
+        count: pages.length,
+        pages: pages.map(p => ({
+          id: p.id,
+          url: p.url,
+          detail: `Shared description: "${sampleDesc.slice(0, 90)}${sampleDesc.length > 90 ? '...' : ''}"`
+        }))
+      });
     }
   });
+  duplicateDescClusters.sort((a, b) => b.count - a.count);
+
   if (duplicateDescPages.length > 0) {
     issues.push({
       id: 'duplicate-meta-desc',
@@ -643,25 +731,26 @@ export async function crawlDomainPages(
       impactLevel: 'MEDIUM',
       whatIsThis: 'When search engines encounter identical meta descriptions across multiple URLs, they frequently ignore the tag and dynamically generate snippets instead.',
       howDoIFix: 'Write distinct 130-155 character descriptions for each affected URL.',
-      failedPages: duplicateDescPages
+      failedPages: duplicateDescPages,
+      groups: duplicateDescClusters
     });
   }
 
-  // Issue 13: Missing Canonical Tag Entirely
+  // Issue 13: Missing Canonical Tag (Informational Best Practice)
   const missingCanonicalPages = crawledPages.filter(p => p.status === 200 && !p.canonical);
   if (missingCanonicalPages.length > 0) {
     issues.push({
       id: 'missing-canonical',
-      title: `${missingCanonicalPages.length} page${missingCanonicalPages.length > 1 ? 's lack' : ' lacks'} a canonical tag`,
-      desc: 'Pages without a rel="canonical" tag risk duplicate content penalties if accessible via multiple URL variations.',
-      impact: 'Important',
-      impactBadge: 'bg-amber-50 text-amber-700 border-amber-200',
+      title: `${missingCanonicalPages.length} page${missingCanonicalPages.length > 1 ? 's lack' : ' lacks'} an explicit canonical tag`,
+      desc: 'Pages without an explicit rel="canonical" tag default to their URL path. Adding a self-referencing canonical provides full defense against URL query string variations.',
+      impact: 'Minor',
+      impactBadge: 'bg-slate-100 text-slate-700 border-slate-200',
       howToFix: 'Add a self-referential <link rel="canonical" href="..."> tag to every indexable page.',
       difficulty: 'EASY',
-      impactLevel: 'HIGH',
-      whatIsThis: 'A self-referencing canonical tag protects your page from URL parameter duplication, trailing slash conflicts, and protocol splits (http/https).',
+      impactLevel: 'LOW',
+      whatIsThis: 'A self-referencing canonical tag protects your page from URL parameter duplication, trailing slash conflicts, and protocol splits (http/https). In Sitefire and SoloSpider, canonical status is tracked per-page in the Audited Pages table.',
       howDoIFix: 'Insert <link rel="canonical" href="https://yourdomain.com/exact-path"> into the <head> of the listed pages.',
-      failedPages: missingCanonicalPages.map(p => ({ id: p.id, url: p.url, detail: 'No canonical link found in HTML' }))
+      failedPages: missingCanonicalPages.map(p => ({ id: p.id, url: p.url, detail: 'No canonical link found in HTML (Google uses default URL)' }))
     });
   }
 

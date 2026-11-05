@@ -31,6 +31,9 @@ export function DashboardOverview({ project, user, onNavigateTab }: DashboardOve
   const [gscModalOpen, setGscModalOpen] = useState(false);
   const [gscConnected, setGscConnected] = useState(false);
   const [connectingGsc, setConnectingGsc] = useState(false);
+  const [selectedDateRange, setSelectedDateRange] = useState('Oct 28 - Nov 3, 2026');
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   // Top SEO Issues State
   const [issues] = useState([
@@ -62,52 +65,160 @@ export function DashboardOverview({ project, user, onNavigateTab }: DashboardOve
   const firstName = user?.name ? user.name.split(' ')[0] : (user?.email?.split('@')[0] || 'User');
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      {/* 1. Header with Welcome, Subtitle & Date Pill */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-[#2b1b12] tracking-tight">
+    <div className="space-y-6 sm:space-y-8 animate-fade-in">
+      {/* 1. Header with Full Welcome Greeting & Corner Controls */}
+      <div className="space-y-1 pb-2 border-b border-[#e4d6c6]/60">
+        {/* Row 1: Greeting on Left (Full name readable, never truncated) + Notification Bell on Right */}
+        <div className="flex items-center justify-between gap-2">
+          <h1 className="text-xl sm:text-3xl font-black text-[#2b1b12] tracking-tight">
             Welcome back, {firstName}! 👋
           </h1>
-          <p className="text-xs sm:text-sm text-[#6f5a4c] font-medium mt-1">
-            Here&apos;s what&apos;s happening with your brand today.
-          </p>
+
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Desktop Calendar Range Picker */}
+            <div className="relative hidden sm:block">
+              <button
+                type="button"
+                onClick={() => setCalendarOpen(prev => !prev)}
+                className="flex items-center gap-1.5 bg-white border border-[#e4d6c6] px-3 py-1.5 rounded-xl text-xs font-semibold text-[#2b1b12] shadow-xs hover:border-[#c5a059] transition-all cursor-pointer"
+              >
+                <Calendar className="w-3.5 h-3.5 text-[#c5a059] shrink-0" />
+                <span>{selectedDateRange}</span>
+                <span className="text-[9px] text-[#6f5a4c]">▼</span>
+              </button>
+
+              {calendarOpen && (
+                <div className="absolute right-0 top-full mt-1.5 w-56 bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl shadow-xl z-50 p-2 space-y-1 text-xs animate-fade-in">
+                  <div className="text-[9.5px] font-bold text-[#6f5a4c] uppercase tracking-wider px-2 py-1">
+                    Select Date Range
+                  </div>
+                  {[
+                    { label: 'Last 7 Days', range: 'Oct 28 - Nov 3, 2026' },
+                    { label: 'Last 14 Days', range: 'Oct 21 - Nov 3, 2026' },
+                    { label: 'Last 30 Days', range: 'Oct 4 - Nov 3, 2026' },
+                    { label: 'This Month', range: 'Oct 1 - Oct 31, 2026' },
+                  ].map((preset, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        setSelectedDateRange(preset.range);
+                        setCalendarOpen(false);
+                      }}
+                      className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer flex items-center justify-between ${
+                        selectedDateRange === preset.range
+                          ? 'bg-[#2b1b12] text-[#fffcf7] font-bold'
+                          : 'hover:bg-[#f1e8dc] text-[#2b1b12]'
+                      }`}
+                    >
+                      <span>{preset.label}</span>
+                      <span className="text-[10px] opacity-70">{preset.range.split(',')[0]}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Notification Bell (Corner) */}
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => setNotificationsOpen(prev => !prev)}
+                className="w-7 h-7 sm:w-9 sm:h-9 bg-white border border-[#e4d6c6] rounded-xl flex items-center justify-center text-[#6f5a4c] hover:text-[#2b1b12] hover:bg-[#f1e8dc] transition-colors relative shadow-xs sm:shadow-sm cursor-pointer"
+                title="Notifications"
+              >
+                <Bell className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="w-2 h-2 rounded-full bg-[#c5a059] absolute top-1 sm:top-2 right-1 sm:right-2 ring-2 ring-white" />
+              </button>
+
+              {notificationsOpen && (
+                <div className="absolute right-0 top-full mt-2 w-72 bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl shadow-xl z-50 p-3 space-y-2 text-xs animate-fade-in">
+                  <div className="flex items-center justify-between pb-1.5 border-b border-[#e4d6c6]">
+                    <span className="font-bold text-[#2b1b12]">Live Notifications</span>
+                    <button onClick={() => setNotificationsOpen(false)} className="text-[#6f5a4c] font-bold">✕</button>
+                  </div>
+                  <div className="p-2 rounded-lg bg-emerald-50 text-emerald-900 text-[11px]">
+                    <strong>✓ Crawl Completed:</strong> Verified live pages for {project?.domain || 'your domain'}.
+                  </div>
+                  <div className="p-2 rounded-lg bg-amber-50 text-amber-900 text-[11px]">
+                    <strong>⚡ AEO Benchmark:</strong> Indexed across Gemini & ChatGPT models.
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-white border border-[#e4d6c6] px-3.5 py-1.5 rounded-xl text-xs font-semibold text-[#2b1b12] shadow-sm">
-            <Calendar className="w-3.5 h-3.5 text-[#c5a059]" />
-            <span>Oct 28 - Nov 3, 2026</span>
+        {/* Row 2: Subtitle on Left + Calendar Date Range on Mobile Right Corner */}
+        <div className="flex items-center justify-between gap-2 pt-0.5">
+          <p className="text-[11px] sm:text-sm text-[#6f5a4c] font-medium leading-relaxed">
+            Here&apos;s what&apos;s happening with your brand today.
+          </p>
+
+          {/* Mobile Calendar Date Range Picker */}
+          <div className="relative sm:hidden shrink-0">
+            <button
+              type="button"
+              onClick={() => setCalendarOpen(prev => !prev)}
+              className="flex items-center gap-1 bg-white border border-[#e4d6c6] px-2 py-1 rounded-xl text-[10px] font-semibold text-[#2b1b12] shadow-xs hover:border-[#c5a059] transition-all cursor-pointer"
+            >
+              <Calendar className="w-3 h-3 text-[#c5a059] shrink-0" />
+              <span className="truncate max-w-[100px]">{selectedDateRange}</span>
+              <span className="text-[8px] text-[#6f5a4c]">▼</span>
+            </button>
+
+            {calendarOpen && (
+              <div className="absolute right-0 top-full mt-1.5 w-52 bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl shadow-xl z-50 p-2 space-y-1 text-xs animate-fade-in">
+                <div className="text-[9.5px] font-bold text-[#6f5a4c] uppercase tracking-wider px-2 py-1">
+                  Select Date Range
+                </div>
+                {[
+                  { label: 'Last 7 Days', range: 'Oct 28 - Nov 3, 2026' },
+                  { label: 'Last 14 Days', range: 'Oct 21 - Nov 3, 2026' },
+                  { label: 'Last 30 Days', range: 'Oct 4 - Nov 3, 2026' },
+                  { label: 'This Month', range: 'Oct 1 - Oct 31, 2026' },
+                ].map((preset, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => {
+                      setSelectedDateRange(preset.range);
+                      setCalendarOpen(false);
+                    }}
+                    className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer flex items-center justify-between ${
+                      selectedDateRange === preset.range
+                        ? 'bg-[#2b1b12] text-[#fffcf7] font-bold'
+                        : 'hover:bg-[#f1e8dc] text-[#2b1b12]'
+                    }`}
+                  >
+                    <span>{preset.label}</span>
+                    <span className="text-[10px] opacity-70">{preset.range.split(',')[0]}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-          <button
-            type="button"
-            className="w-9 h-9 bg-white border border-[#e4d6c6] rounded-xl flex items-center justify-center text-[#6f5a4c] hover:text-[#2b1b12] hover:bg-[#f1e8dc] transition-colors relative shadow-sm"
-            title="Notifications"
-          >
-            <Bell className="w-4 h-4" />
-            <span className="w-2 h-2 rounded-full bg-[#c5a059] absolute top-2 right-2 ring-2 ring-white" />
-          </button>
         </div>
       </div>
 
-      {/* 2. Top Metric Cards Row (5 Cards exactly like SoloSpider) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {/* Metric 1: Overall SEO Score */}
-        <div className="bg-white rounded-2xl p-5 border border-[#e4d6c6] shadow-sm flex flex-col justify-between min-h-[160px] hover:border-[#c5a059] transition-all">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-            <h3 className="text-[#6f5a4c] font-black text-[11px] uppercase tracking-wider">Overall SEO Score</h3>
-            <span className="text-slate-400 text-xs cursor-help" title="Technical SEO health calculated from crawls, schema, and mobile performance">ⓘ</span>
+      {/* 2. Top Metric Cards Row: 3 in line 1, 2 in line 2 on mobile (< lg), 5 in line on desktop */}
+      <div className="grid grid-cols-6 lg:grid-cols-5 gap-2 sm:gap-4">
+        {/* Metric 1: Overall SEO Score (Line 1 on Mobile: 1/3) */}
+        <div className="col-span-2 lg:col-span-1 bg-white rounded-2xl p-2.5 sm:p-5 border border-[#e4d6c6] shadow-xs sm:shadow-sm flex flex-col justify-between min-h-[105px] sm:min-h-[160px] hover:border-[#c5a059] transition-all">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-1 sm:pb-2">
+            <h3 className="text-[#6f5a4c] font-black text-[8px] sm:text-[11px] uppercase tracking-tight sm:tracking-wider truncate">SEO Score</h3>
+            <span className="text-slate-400 text-[10px] hidden sm:inline cursor-help">ⓘ</span>
           </div>
-          <div className="flex items-center gap-4 mt-2">
-            <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
-              <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 80 80">
-                <circle cx="40" cy="40" r="32" stroke="#f1e8dc" strokeWidth="6" fill="transparent" />
+          <div className="flex items-center gap-1.5 sm:gap-4 mt-1 sm:mt-2">
+            <div className="relative w-9 h-9 sm:w-16 sm:h-16 flex items-center justify-center shrink-0">
+              <svg className="w-9 h-9 sm:w-16 sm:h-16 transform -rotate-90" viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="32" stroke="#f1e8dc" strokeWidth="8" fill="transparent" />
                 <circle
                   cx="40"
                   cy="40"
                   r="32"
                   stroke="#10b981"
-                  strokeWidth="6"
+                  strokeWidth="8"
                   fill="transparent"
                   strokeDasharray={2 * Math.PI * 32}
                   strokeDashoffset={2 * Math.PI * 32 * (1 - (project?.seoScore || 84) / 100)}
@@ -115,152 +226,105 @@ export function DashboardOverview({ project, user, onNavigateTab }: DashboardOve
                 />
               </svg>
               <div className="absolute flex flex-col items-center justify-center">
-                <span className="text-lg font-black text-[#2b1b12]">{project?.seoScore || 84}</span>
-                <span className="text-[8px] text-[#6f5a4c] font-bold">/100</span>
+                <span className="text-xs sm:text-lg font-black text-[#2b1b12]">{project?.seoScore || 84}</span>
+                <span className="text-[6px] sm:text-[8px] text-[#6f5a4c] font-bold hidden sm:inline">/100</span>
               </div>
             </div>
-            <div>
-              <div className="text-xs font-bold text-emerald-600">Great!</div>
-              <div className="text-[11px] font-semibold text-emerald-600 flex items-center gap-0.5 mt-0.5">
+            <div className="min-w-0">
+              <div className="text-[10px] sm:text-xs font-bold text-emerald-600 truncate">Great!</div>
+              <div className="text-[8.5px] sm:text-[11px] font-semibold text-emerald-600 hidden sm:flex items-center gap-0.5 mt-0.5">
                 <span>+8%</span>
-                <span>from last week</span>
+                <span>vs last week</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Metric 2: Organic Traffic (GSC) */}
+        {/* Metric 2: Organic Traffic (Line 1 on Mobile: 2/3) */}
         <div
           onClick={() => !gscConnected && setGscModalOpen(true)}
-          className="bg-white rounded-2xl p-5 border border-[#e4d6c6] shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[160px] cursor-pointer hover:border-[#c5a059] transition-all group"
+          className="col-span-2 lg:col-span-1 bg-white rounded-2xl p-2.5 sm:p-5 border border-[#e4d6c6] shadow-xs sm:shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[105px] sm:min-h-[160px] cursor-pointer hover:border-[#c5a059] transition-all group"
         >
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2 relative z-20">
-            <h3 className="text-[#6f5a4c] font-black text-[11px] uppercase tracking-wider">Organic Traffic</h3>
-            <span className="text-[9px] font-bold text-amber-800 bg-amber-50 border border-amber-200/70 rounded px-1.5 py-0.5">GSC</span>
+          <div className="flex items-center justify-between border-b border-slate-100 pb-1 sm:pb-2 relative z-20">
+            <h3 className="text-[#6f5a4c] font-black text-[8px] sm:text-[11px] uppercase tracking-tight sm:tracking-wider truncate">Traffic</h3>
+            <span className="text-[7.5px] sm:text-[9px] font-bold text-amber-800 bg-amber-50 border border-amber-200/70 rounded px-1 py-0.2 sm:px-1.5 sm:py-0.5 shrink-0">GSC</span>
           </div>
           {gscConnected ? (
-            <div className="mt-2">
-              <div className="text-2xl font-black text-[#2b1b12]">8,420</div>
-              <div className="text-xs font-semibold text-emerald-600 mt-1 flex items-center gap-1">
-                <span>▲ +14.2%</span>
-                <span className="text-slate-400 font-normal">vs last month</span>
+            <div className="mt-1 sm:mt-2">
+              <div className="text-sm sm:text-2xl font-black text-[#2b1b12]">8,420</div>
+              <div className="text-[9px] sm:text-xs font-semibold text-emerald-600 mt-0.5 flex items-center gap-1">
+                <span>▲ +14%</span>
+                <span className="text-slate-400 font-normal hidden sm:inline">vs last mo</span>
               </div>
             </div>
           ) : (
-            <>
-              {/* Blurred background preview */}
-              <div className="filter blur-[6px] select-none opacity-40 mt-2 space-y-1">
-                <div className="text-2xl font-black text-slate-800">8,210</div>
-                <div className="h-6 w-full bg-gradient-to-r from-emerald-100 to-emerald-200 rounded" />
-              </div>
-              {/* Overlay Glass Badge with clear heading */}
-              <div className="absolute inset-x-0 top-[46px] bottom-0 z-10 bg-[#fffcf7]/85 backdrop-blur-[2px] rounded-b-2xl flex flex-col items-center justify-center p-3 text-center">
-                <span className="px-2 py-0.5 bg-[#f1e8dc] text-[#7a5242] border border-[#d8c09e] rounded-md text-[9px] font-black tracking-wider uppercase mb-1">
-                  Google Search Console Required
-                </span>
-                <span className="text-xs font-bold text-[#2b1b12]">
-                  Organic Traffic Clicks
-                </span>
-                <span className="text-[10px] text-[#6f5a4c] group-hover:underline mt-0.5 font-medium">
-                  Connect GSC to view data →
-                </span>
-              </div>
-            </>
+            <div className="flex flex-col justify-center items-center h-full text-center py-1">
+              <span className="text-base sm:text-2xl font-black text-slate-300">--</span>
+              <span className="text-[7.5px] sm:text-[9.5px] text-amber-800 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5 font-bold mt-1 group-hover:bg-amber-100 transition-colors">
+                Connect GSC →
+              </span>
+            </div>
           )}
         </div>
 
-        {/* Metric 3: Total Impressions (GSC) */}
+        {/* Metric 3: Total Impressions (Line 1 on Mobile: 3/3) */}
         <div
           onClick={() => !gscConnected && setGscModalOpen(true)}
-          className="bg-white rounded-2xl p-5 border border-[#e4d6c6] shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[160px] cursor-pointer hover:border-[#c5a059] transition-all group"
+          className="col-span-2 lg:col-span-1 bg-white rounded-2xl p-2.5 sm:p-5 border border-[#e4d6c6] shadow-xs sm:shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[105px] sm:min-h-[160px] cursor-pointer hover:border-[#c5a059] transition-all group"
         >
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2 relative z-20">
-            <h3 className="text-[#6f5a4c] font-black text-[11px] uppercase tracking-wider">Total Impressions</h3>
-            <span className="text-[9px] font-bold text-amber-800 bg-amber-50 border border-amber-200/70 rounded px-1.5 py-0.5">GSC</span>
+          <div className="flex items-center justify-between border-b border-slate-100 pb-1 sm:pb-2 relative z-20">
+            <h3 className="text-[#6f5a4c] font-black text-[8px] sm:text-[11px] uppercase tracking-tight sm:tracking-wider truncate">Impressions</h3>
+            <span className="text-[7.5px] sm:text-[9px] font-bold text-amber-800 bg-amber-50 border border-amber-200/70 rounded px-1 py-0.2 sm:px-1.5 sm:py-0.5 shrink-0">GSC</span>
           </div>
           {gscConnected ? (
-            <div className="mt-2">
-              <div className="text-2xl font-black text-[#2b1b12]">46.8K</div>
-              <div className="text-xs font-semibold text-emerald-600 mt-1 flex items-center gap-1">
-                <span>▲ +28.5%</span>
-                <span className="text-slate-400 font-normal">SERP impressions</span>
+            <div className="mt-1 sm:mt-2">
+              <div className="text-sm sm:text-2xl font-black text-[#2b1b12]">46.8K</div>
+              <div className="text-[9px] sm:text-xs font-semibold text-emerald-600 mt-0.5 flex items-center gap-1">
+                <span>▲ +28%</span>
+                <span className="text-slate-400 font-normal hidden sm:inline">SERP</span>
               </div>
             </div>
           ) : (
-            <>
-              <div className="filter blur-[6px] select-none opacity-40 mt-2 space-y-1">
-                <div className="text-2xl font-black text-slate-800">42.5K</div>
-                <div className="h-6 w-full bg-gradient-to-r from-purple-100 to-purple-200 rounded" />
-              </div>
-              <div className="absolute inset-x-0 top-[46px] bottom-0 z-10 bg-[#fffcf7]/85 backdrop-blur-[2px] rounded-b-2xl flex flex-col items-center justify-center p-3 text-center">
-                <span className="px-2 py-0.5 bg-[#f1e8dc] text-[#7a5242] border border-[#d8c09e] rounded-md text-[9px] font-black tracking-wider uppercase mb-1">
-                  Google Search Console Required
-                </span>
-                <span className="text-xs font-bold text-[#2b1b12]">
-                  SERP Impressions Volume
-                </span>
-                <span className="text-[10px] text-[#6f5a4c] group-hover:underline mt-0.5 font-medium">
-                  Connect GSC to view data →
-                </span>
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* Metric 4: Backlinks (GSC) */}
-        <div
-          onClick={() => !gscConnected && setGscModalOpen(true)}
-          className="bg-white rounded-2xl p-5 border border-[#e4d6c6] shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[160px] cursor-pointer hover:border-[#c5a059] transition-all group"
-        >
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2 relative z-20">
-            <h3 className="text-[#6f5a4c] font-black text-[11px] uppercase tracking-wider">Backlinks</h3>
-            <span className="text-[9px] font-bold text-amber-800 bg-amber-50 border border-amber-200/70 rounded px-1.5 py-0.5">GSC</span>
-          </div>
-          {gscConnected ? (
-            <div className="mt-2">
-              <div className="text-2xl font-black text-[#2b1b12]">342</div>
-              <div className="text-xs font-semibold text-emerald-600 mt-1 flex items-center gap-1">
-                <span>▲ 18 New</span>
-                <span className="text-slate-400 font-normal">high DA links</span>
-              </div>
+            <div className="flex flex-col justify-center items-center h-full text-center py-1">
+              <span className="text-base sm:text-2xl font-black text-slate-300">--</span>
+              <span className="text-[7.5px] sm:text-[9.5px] text-amber-800 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5 font-bold mt-1 group-hover:bg-amber-100 transition-colors">
+                Connect GSC →
+              </span>
             </div>
-          ) : (
-            <>
-              <div className="filter blur-[6px] select-none opacity-40 mt-2 space-y-1">
-                <div className="text-2xl font-black text-slate-800">320</div>
-                <div className="h-6 w-full bg-gradient-to-r from-blue-100 to-blue-200 rounded" />
-              </div>
-              <div className="absolute inset-x-0 top-[46px] bottom-0 z-10 bg-[#fffcf7]/85 backdrop-blur-[2px] rounded-b-2xl flex flex-col items-center justify-center p-3 text-center">
-                <span className="px-2 py-0.5 bg-[#f1e8dc] text-[#7a5242] border border-[#d8c09e] rounded-md text-[9px] font-black tracking-wider uppercase mb-1">
-                  Google Search Console Required
-                </span>
-                <span className="text-xs font-bold text-[#2b1b12]">
-                  Verified Backlinks
-                </span>
-                <span className="text-[10px] text-[#6f5a4c] group-hover:underline mt-0.5 font-medium">
-                  Connect GSC to view data →
-                </span>
-              </div>
-            </>
           )}
         </div>
 
-        {/* Metric 5: AI Visibility Score */}
-        <div className="bg-white rounded-2xl p-5 border border-[#e4d6c6] shadow-sm flex flex-col justify-between min-h-[160px] hover:border-[#c5a059] transition-all">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-            <h3 className="text-[#6f5a4c] font-black text-[11px] uppercase tracking-wider">AI Visibility Score</h3>
-            <span className="text-slate-400 text-xs cursor-help" title="Citation share across Gemini, ChatGPT, Claude, and Perplexity">ⓘ</span>
+        {/* Metric 4: Backlinks (Line 2 on Mobile: 1/2) */}
+        <div
+          onClick={() => onNavigateTab('backlinks')}
+          className="col-span-3 lg:col-span-1 bg-white rounded-2xl p-2.5 sm:p-5 border border-[#e4d6c6] shadow-xs sm:shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[105px] sm:min-h-[160px] cursor-pointer hover:border-[#c5a059] transition-all group"
+        >
+          <div className="flex items-center justify-between border-b border-slate-100 pb-1 sm:pb-2 relative z-20">
+            <h3 className="text-[#6f5a4c] font-black text-[8px] sm:text-[11px] uppercase tracking-tight sm:tracking-wider truncate">Backlinks</h3>
+            <span className="text-[7.5px] sm:text-[9px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/70 rounded px-1 py-0.2 sm:px-1.5 sm:py-0.5 shrink-0">INDEX</span>
           </div>
-          <div className="flex items-center gap-4 mt-2">
-            <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
-              <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 80 80">
-                <circle cx="40" cy="40" r="32" stroke="#f1e8dc" strokeWidth="6" fill="transparent" />
+          <div className="mt-1 sm:mt-2">
+            <div className="text-sm sm:text-2xl font-black text-[#2b1b12]">342</div>
+            <div className="text-[9px] sm:text-xs font-semibold text-emerald-600 mt-0.5">▲ Verified Links</div>
+          </div>
+        </div>
+
+        {/* Metric 5: AI Visibility Score (Line 2 on Mobile: 2/2) */}
+        <div className="col-span-3 lg:col-span-1 bg-white rounded-2xl p-2.5 sm:p-5 border border-[#e4d6c6] shadow-xs sm:shadow-sm flex flex-col justify-between min-h-[105px] sm:min-h-[160px] hover:border-[#c5a059] transition-all">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-1 sm:pb-2">
+            <h3 className="text-[#6f5a4c] font-black text-[8px] sm:text-[11px] uppercase tracking-tight sm:tracking-wider truncate">AI Visibility</h3>
+            <span className="text-slate-400 text-[10px] hidden sm:inline cursor-help">ⓘ</span>
+          </div>
+          <div className="flex items-center gap-1.5 sm:gap-4 mt-1 sm:mt-2">
+            <div className="relative w-9 h-9 sm:w-16 sm:h-16 flex items-center justify-center shrink-0">
+              <svg className="w-9 h-9 sm:w-16 sm:h-16 transform -rotate-90" viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="32" stroke="#f1e8dc" strokeWidth="8" fill="transparent" />
                 <circle
                   cx="40"
                   cy="40"
                   r="32"
                   stroke="#c5a059"
-                  strokeWidth="6"
+                  strokeWidth="8"
                   fill="transparent"
                   strokeDasharray={2 * Math.PI * 32}
                   strokeDashoffset={2 * Math.PI * 32 * (1 - (project?.aeoScore || 88) / 100)}
@@ -268,14 +332,14 @@ export function DashboardOverview({ project, user, onNavigateTab }: DashboardOve
                 />
               </svg>
               <div className="absolute flex flex-col items-center justify-center">
-                <span className="text-lg font-black text-[#2b1b12]">{project?.aeoScore || 88}</span>
-                <span className="text-[8px] text-[#6f5a4c] font-bold">/100</span>
+                <span className="text-xs sm:text-lg font-black text-[#2b1b12]">{project?.aeoScore || 88}</span>
+                <span className="text-[6px] sm:text-[8px] text-[#6f5a4c] font-bold hidden sm:inline">/100</span>
               </div>
             </div>
-            <div>
-              <div className="text-xs font-bold text-[#c5a059]">Great!</div>
-              <div className="text-[10px] text-[#6f5a4c] mt-0.5 leading-snug">
-                Recommended by 4 major AI engines
+            <div className="min-w-0">
+              <div className="text-[10px] sm:text-xs font-bold text-[#c5a059] truncate">Great!</div>
+              <div className="text-[8px] sm:text-[10px] text-[#6f5a4c] leading-tight hidden sm:block">
+                4 AI Engines
               </div>
             </div>
           </div>
@@ -303,10 +367,10 @@ export function DashboardOverview({ project, user, onNavigateTab }: DashboardOve
                   key={issue.id}
                   className="p-3 rounded-xl border text-xs flex items-center justify-between gap-2 bg-[#f8f3ec] border-[#e4d6c6] hover:border-[#c5a059] transition-all"
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
                     <FileText className="w-4 h-4 text-amber-500 shrink-0" />
-                    <div className="min-w-0">
-                      <p className="font-semibold truncate text-[#2b1b12]">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-[#2b1b12] leading-snug break-words">
                         {issue.text}
                       </p>
                       <span className="text-[10px] font-bold text-amber-700">
@@ -334,7 +398,7 @@ export function DashboardOverview({ project, user, onNavigateTab }: DashboardOve
         <div className="lg:col-span-5 bg-white rounded-2xl border border-[#e4d6c6] p-5 shadow-sm relative overflow-hidden flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-              <h3 className="font-bold text-sm text-[#2b1b12]">Traffic Overview</h3>
+              <h3 className="font-bold text-sm text-[#2b1b12]">Traffic Overview (Google Search Console)</h3>
               <div className="flex items-center gap-3 text-[11px] text-[#6f5a4c] font-medium">
                 <span className="flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-[#c5a059]" /> Organic Traffic
@@ -498,17 +562,17 @@ export function DashboardOverview({ project, user, onNavigateTab }: DashboardOve
         </div>
       </div>
 
-      {/* 5. Fourth Row: All Modules Grid */}
-      <div className="space-y-4">
+      {/* 5. Fourth Row: All Modules (Scrollable Single Line on Mobile, Grid on Desktop) */}
+      <div className="space-y-3 sm:space-y-4">
         <div>
-          <h3 className="font-bold text-base text-[#2b1b12]">All Modules</h3>
-          <p className="text-xs text-[#6f5a4c]">Access your autonomous growth engines and content accelerators</p>
+          <h3 className="font-bold text-sm sm:text-base text-[#2b1b12]">All Modules</h3>
+          <p className="text-[11px] sm:text-xs text-[#6f5a4c]">Access your autonomous growth engines and content accelerators</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="flex md:grid md:grid-cols-2 lg:grid-cols-3 overflow-x-auto md:overflow-x-visible gap-2.5 sm:gap-4 pb-2 md:pb-0 snap-x snap-mandatory no-scrollbar">
           {[
             { id: 'audit', title: 'SEO', desc: 'Audit, inspect, and optimize your website for search engines.', icon: Search, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-            { id: 'blogs', title: 'Blogs', desc: 'Create SEO-optimized blogs with AI and auto-publish.', icon: FileText, color: 'text-indigo-600', bg: 'bg-indigo-50', isComingSoon: true },
+            { id: 'blogs', title: 'Blogs', desc: 'Create SEO-optimized blogs with AI and auto-publish.', icon: FileText, color: 'text-indigo-600', bg: 'bg-indigo-50' },
             { id: 'backlinks', title: 'Backlinks', desc: 'Build quality backlinks and improve domain authority.', icon: LinkIcon, color: 'text-blue-600', bg: 'bg-blue-50', isComingSoon: true },
             { id: 'social', title: 'Social Media', desc: 'Create, schedule & publish across all social platforms.', icon: Share2, color: 'text-pink-600', bg: 'bg-pink-50' },
             { id: 'aeo', title: 'AEO / GEO', desc: 'Improve visibility in AI search engines & generative AI.', icon: Sparkles, color: 'text-[#c5a059]', bg: 'bg-[#f1e8dc]' },
@@ -517,7 +581,7 @@ export function DashboardOverview({ project, user, onNavigateTab }: DashboardOve
             <div
               key={mod.id}
               onClick={() => onNavigateTab(mod.id)}
-              className="bg-white rounded-2xl border border-[#e4d6c6] p-5 shadow-sm hover:border-[#c5a059] hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group"
+              className="min-w-[195px] w-[210px] md:w-auto md:min-w-0 shrink-0 snap-start bg-white rounded-2xl border border-[#e4d6c6] p-4 sm:p-5 shadow-xs sm:shadow-sm hover:border-[#c5a059] hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group"
             >
               <div className="flex items-start justify-between mb-3">
                 <div className={`p-2.5 rounded-xl ${mod.bg} ${mod.color}`}>
@@ -564,14 +628,14 @@ export function DashboardOverview({ project, user, onNavigateTab }: DashboardOve
             { title: 'Instagram marketing carousel scheduled in Social Queue', time: '3 hours ago', type: 'social', icon: Share2, color: 'text-pink-600', bg: 'bg-pink-50' },
             { title: 'AEO Entity Knowledge Graph radar calibrated across LLMs', time: '1 day ago', type: 'aeo', icon: Activity, color: 'text-purple-600', bg: 'bg-purple-50' },
           ].map((act, idx) => (
-            <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-[#f8f3ec] border border-[#e4d6c6] text-xs">
-              <div className="flex items-center gap-3">
-                <div className={`p-1.5 rounded-lg ${act.bg} ${act.color}`}>
+            <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-[#f8f3ec] border border-[#e4d6c6] text-xs gap-2">
+              <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                <div className={`p-1.5 rounded-lg ${act.bg} ${act.color} shrink-0`}>
                   <act.icon className="w-4 h-4" />
                 </div>
-                <span className="font-semibold text-[#2b1b12]">{act.title}</span>
+                <span className="font-semibold text-[#2b1b12] leading-snug break-words">{act.title}</span>
               </div>
-              <span className="text-[11px] text-[#6f5a4c] font-medium">{act.time}</span>
+              <span className="text-[10px] sm:text-[11px] text-[#6f5a4c] font-medium shrink-0">{act.time}</span>
             </div>
           ))}
         </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   Globe,
   RefreshCw,
@@ -43,10 +43,20 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
   const [pageFilter, setPageFilter] = useState('all');
   const [issuesSearchQuery, setIssuesSearchQuery] = useState('');
   const [pagesSearchQuery, setPagesSearchQuery] = useState('');
-  const [expandedIssueId, setExpandedIssueId] = useState<string | null>(null);
+  const [expandedIssueIds, setExpandedIssueIds] = useState<Record<string, boolean>>({});
+  const hasInitializedRef = useRef(false);
+
+  const toggleIssue = (id: string) => {
+    setExpandedIssueIds(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [auditData, setAuditData] = useState<any>(null);
+  const [showAllPagesModal, setShowAllPagesModal] = useState(false);
+  const [allPagesSearch, setAllPagesSearch] = useState('');
 
   // Live crawler progress simulation state
   const [crawlerProgress, setCrawlerProgress] = useState(15);
@@ -341,12 +351,13 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
     return realIssues;
   }, [auditData, pagesList]);
 
-  // Set default expanded issue to first issue if available
+  // Set default expanded issue to first issue only on initial load (never force reopen if user closes it)
   useEffect(() => {
-    if (!expandedIssueId && issuesList.length > 0) {
-      setExpandedIssueId(issuesList[0].id);
+    if (!hasInitializedRef.current && issuesList.length > 0) {
+      hasInitializedRef.current = true;
+      setExpandedIssueIds({ [issuesList[0].id]: true });
     }
-  }, [issuesList, expandedIssueId]);
+  }, [issuesList]);
 
   // Export Issues CSV
   const handleExportIssuesCsv = () => {
@@ -378,98 +389,310 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
     showToast("✓ Exported audited pages CSV successfully!");
   };
 
-  // Download Full PDF Report
+  // Download Full PDF Report (Clean, High-Res, Dark Logo Support, No about:blank)
   const handleDownloadPdf = () => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      window.print();
-      return;
-    }
+    const brandLogoUrl = project?.brandProfile?.logoUrl || project?.logoUrl || '';
+    const criticalCount = issuesList.filter((i: any) => i.impact === 'Critical').length;
+    const importantCount = issuesList.filter((i: any) => i.impact === 'Important').length;
+    const minorCount = issuesList.filter((i: any) => i.impact === 'Minor').length;
+    const passedCount = issuesList.filter((i: any) => i.impact === 'Passed').length;
+    const seoScore = auditData?.seoScore || currentSeoScore || 85;
+
+    // Detect if logo is white or brand is dark-themed
+    const isWhiteLogo =
+      cleanDomain.includes('zenup') ||
+      project?.logoDarkBg ||
+      (project?.palette && Array.isArray(project.palette) && project.palette.some((c: string) =>
+        ['#111111', '#000000', '#0a0a0a', '#18181b', '#0f172a'].includes(c.toLowerCase())
+      ));
 
     const html = `
       <!DOCTYPE html>
       <html>
       <head>
+        <meta charset="utf-8">
         <title>Rank Monk — SEO Audit Executive Report (${cleanDomain})</title>
         <style>
-          @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700;800&family=Fraunces:wght@700;800&display=swap');
-          body { font-family: 'Instrument Sans', sans-serif; color: #2b1b12; background: #fff; padding: 40px; margin: 0; }
-          .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e4d6c6; padding-bottom: 20px; margin-bottom: 30px; }
-          .logo { font-size: 24px; font-weight: 800; color: #2b1b12; }
-          .logo span { color: #c5a059; }
-          .date { font-size: 12px; color: #6f5a4c; }
-          .score-card { display: flex; gap: 20px; margin-bottom: 30px; }
-          .score-box { flex: 1; border: 1px solid #e4d6c6; border-radius: 16px; padding: 20px; background: #faf7f2; }
-          .score-title { font-size: 11px; text-transform: uppercase; font-weight: 800; color: #6f5a4c; }
-          .score-val { font-size: 36px; font-weight: 900; color: #2b1b12; margin: 10px 0; }
-          .table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px; }
-          .table th { background: #f8f3ec; padding: 10px; border: 1px solid #e4d6c6; text-align: left; }
-          .table td { padding: 10px; border: 1px solid #e4d6c6; }
-          .badge { padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: bold; }
-          .badge-critical { background: #fee2e2; color: #991b1b; }
-          .badge-important { background: #fef3c7; color: #92400e; }
-          .badge-minor { background: #f3f4f6; color: #374151; }
-          .badge-success { background: #def7ec; color: #03543f; }
+          @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=Fraunces:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+          @page {
+            size: A4 portrait;
+            margin: 10mm 12mm;
+          }
+          * { box-sizing: border-box; }
+          body {
+            font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: #2b1b12;
+            background: #ffffff;
+            margin: 0;
+            padding: 16px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e4d6c6;
+            padding-bottom: 16px;
+            margin-bottom: 20px;
+          }
+          .brand-col {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+          }
+          .logo-img {
+            max-height: 44px;
+            max-width: 150px;
+            object-fit: contain;
+          }
+          .rankmonk-badge {
+            font-size: 9.5px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #c5a059;
+            background: #2b1b12;
+            padding: 3px 7px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-bottom: 3px;
+          }
+          .title {
+            font-family: 'Fraunces', serif;
+            font-size: 19px;
+            font-weight: 700;
+            color: #2b1b12;
+            margin: 0;
+          }
+          .subtitle {
+            font-size: 11px;
+            color: #6f5a4c;
+            margin: 2px 0 0;
+          }
+          .meta-col {
+            text-align: right;
+            font-size: 11px;
+            color: #6f5a4c;
+          }
+          .meta-col strong {
+            color: #2b1b12;
+            font-size: 12.5px;
+          }
+          .score-card {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+          }
+          .score-box {
+            border: 1px solid #e4d6c6;
+            border-radius: 10px;
+            padding: 12px;
+            background: #faf7f2;
+          }
+          .score-title {
+            font-size: 9.5px;
+            text-transform: uppercase;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            color: #6f5a4c;
+          }
+          .score-val {
+            font-size: 24px;
+            font-weight: 800;
+            color: #2b1b12;
+            margin: 3px 0 5px;
+            font-family: 'Fraunces', serif;
+          }
+          .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+          }
+          .badge-critical { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+          .badge-important { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+          .badge-minor { background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
+          .badge-success { background: #def7ec; color: #03543f; border: 1px solid #bcf0da; }
+          .section-title {
+            font-family: 'Fraunces', serif;
+            font-size: 14px;
+            font-weight: 700;
+            margin: 20px 0 10px;
+            color: #2b1b12;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
+          .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10.5px;
+            margin-bottom: 20px;
+          }
+          .table th {
+            background: #f8f3ec;
+            padding: 7px 9px;
+            border: 1px solid #e4d6c6;
+            text-align: left;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #6f5a4c;
+            font-weight: 800;
+          }
+          .table td {
+            padding: 7px 9px;
+            border: 1px solid #e4d6c6;
+            vertical-align: top;
+            line-height: 1.35;
+          }
+          .table tr {
+            page-break-inside: avoid;
+          }
+          .table tr:nth-child(even) td {
+            background: #fdfbf7;
+          }
+          .footer {
+            margin-top: 24px;
+            padding-top: 12px;
+            border-top: 1px solid #e4d6c6;
+            display: flex;
+            justify-content: space-between;
+            font-size: 9.5px;
+            color: #8c7464;
+          }
+          @media print {
+            body { padding: 0; }
+          }
         </style>
       </head>
       <body>
         <div class="header">
-          <div>
-            <div class="logo">RANK <span>MONK</span></div>
-            <p style="margin: 4px 0 0; font-size: 13px; color: #6f5a4c;">Autonomous Technical SEO Crawl & AEO Discovery Audit</p>
+          <div class="brand-col">
+            ${brandLogoUrl ? (
+              isWhiteLogo ? `
+                <div style="background: #18181b; padding: 6px 12px; border-radius: 8px; border: 1px solid #27272a; display: inline-flex; align-items: center; justify-content: center;">
+                  <img src="${brandLogoUrl}" alt="${brandName}" class="logo-img" style="filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));" />
+                </div>
+              ` : `
+                <img src="${brandLogoUrl}" alt="${brandName}" class="logo-img" />
+              `
+            ) : ''}
+            <div>
+              <div class="rankmonk-badge">RANK MONK • TECHNICAL AUDIT</div>
+              <h1 class="title">${brandName}</h1>
+              <p class="subtitle">Autonomous Technical SEO & Generative Engine Optimization Audit</p>
+            </div>
           </div>
-          <div style="text-align: right;">
-            <div style="font-weight: bold; font-size: 14px;">${cleanDomain}</div>
-            <div class="date">Report Generated: ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+          <div class="meta-col">
+            <div>Target Domain: <strong>${cleanDomain}</strong></div>
+            <div style="margin-top: 2px;">Generated: ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+            <div style="margin-top: 2px;">Audit Engine: <strong>RankMonkBot/2.0</strong></div>
           </div>
         </div>
 
         <div class="score-card">
           <div class="score-box">
             <div class="score-title">On-Page SEO Score</div>
-            <div class="score-val" style="color: #10b981;">${auditData?.seoScore || 86} / 100</div>
-            <span class="badge badge-success">● Excellent Health</span>
+            <div class="score-val" style="color: ${seoScore >= 80 ? '#10b981' : seoScore >= 65 ? '#d97706' : '#dc2626'};">${seoScore} <span style="font-size: 13px; color: #6f5a4c;">/ 100</span></div>
+            <span class="badge ${seoScore >= 80 ? 'badge-success' : 'badge-important'}">${seoScore >= 80 ? '● Strong Health' : '● Needs Work'}</span>
           </div>
           <div class="score-box">
-            <div class="score-title">Total Pages Audited</div>
-            <div class="score-val">${pagesList.length} Real Pages</div>
-            <span class="badge badge-success">● 100% Crawl Success</span>
+            <div class="score-title">Audited Real Pages</div>
+            <div class="score-val">${pagesList.length}</div>
+            <span class="badge badge-success">● 100% Verified Crawl</span>
           </div>
           <div class="score-box">
-            <div class="score-title">Crawl Health</div>
+            <div class="score-title">Crawl Health Ratio</div>
             <div class="score-val">${auditData?.crawlHealth || 100}%</div>
-            <span class="badge badge-success">Verified Routing</span>
+            <span class="badge badge-success">${pagesList.filter((p: any) => (p.status || 200) === 200).length} Pages 200 OK</span>
+          </div>
+          <div class="score-box">
+            <div class="score-title">Critical Ranking Barriers</div>
+            <div class="score-val" style="color: ${criticalCount > 0 ? '#dc2626' : '#10b981'};">${criticalCount}</div>
+            <span class="badge ${criticalCount > 0 ? 'badge-critical' : 'badge-success'}">${criticalCount > 0 ? 'Action Required' : 'Zero Barriers'}</span>
           </div>
         </div>
 
-        <h3 style="margin-top: 30px; font-size: 16px;">Technical SEO Issues Breakdown (${issuesList.length} Detected)</h3>
+        <div class="section-title">
+          <span>Technical SEO Issues & Diagnostic Breakdown</span>
+          <span style="font-size: 10.5px; font-weight: normal; color: #6f5a4c;">${issuesList.length} Total Issues Detected</span>
+        </div>
+
         <table class="table">
           <thead>
             <tr>
-              <th>Issue Summary</th>
-              <th>Impact</th>
-              <th>Root Cause & Diagnosis</th>
-              <th>Automated Recommendation</th>
+              <th style="width: 28%;">Issue Description</th>
+              <th style="width: 12%;">Severity</th>
+              <th style="width: 32%;">Root Cause & Technical Impact</th>
+              <th style="width: 28%;">Prescribed Remediation</th>
             </tr>
           </thead>
           <tbody>
-            ${issuesList.map((issue: any) => `
-              <tr>
-                <td><strong>${issue.title}</strong></td>
-                <td><span class="badge ${issue.impact === 'Critical' ? 'badge-critical' : (issue.impact === 'Important' ? 'badge-important' : 'badge-minor')}">${issue.impact}</span></td>
-                <td>${issue.desc}</td>
-                <td>${issue.howToFix}</td>
-              </tr>
-            `).join('')}
+            ${issuesList.map((issue: any) => {
+              // Sanitize raw heading tags to prevent gigantic text
+              const safeTitle = (issue.title || '').replace(/<h1[^>]*>/gi, 'H1 ').replace(/<\/h1>/gi, '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+              const safeDesc = (issue.desc || '').replace(/<h1[^>]*>/gi, 'H1 ').replace(/<\/h1>/gi, '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+              const safeFix = (issue.howToFix || '').replace(/<h1[^>]*>/gi, 'H1 ').replace(/<\/h1>/gi, '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+              return `
+                <tr>
+                  <td><strong>${safeTitle}</strong></td>
+                  <td>
+                    <span class="badge ${
+                      issue.impact === 'Critical' ? 'badge-critical' :
+                      issue.impact === 'Important' ? 'badge-important' :
+                      issue.impact === 'Passed' ? 'badge-success' : 'badge-minor'
+                    }">
+                      ${issue.impact}
+                    </span>
+                  </td>
+                  <td style="color: #4b382d;">${safeDesc}</td>
+                  <td style="color: #2b1b12;"><strong>Action:</strong> ${safeFix}</td>
+                </tr>
+              `;
+            }).join('')}
           </tbody>
         </table>
+
+        <div class="footer">
+          <span>Rank Monk Autonomous Growth Engine — rankmonk.in</span>
+          <span>Confidential Executive Audit — Generated for ${cleanDomain}</span>
+        </div>
       </body>
       </html>
     `;
-    printWindow.document.write(html);
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => printWindow.print(), 250);
+
+    // Hidden iframe prevents 'about:blank' printed in browser footer
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentWindow?.document;
+    if (doc) {
+      doc.open();
+      doc.write(html);
+      doc.close();
+      iframe.contentWindow?.focus();
+      setTimeout(() => {
+        iframe.contentWindow?.print();
+        setTimeout(() => {
+          document.body.removeChild(iframe);
+        }, 1500);
+      }, 350);
+    } else {
+      window.print();
+    }
   };
 
   // Filtered Issues
@@ -505,73 +728,85 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
   return (
     <div className="space-y-6 animate-fade-in max-w-[1600px] mx-auto pb-10">
       {/* 1. Top Header */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-[#2b1b12] tracking-tight flex items-center gap-2">
-            <span>SEO Audit</span>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-extrabold border border-emerald-200">
-              Live Engine
-            </span>
+      <div className="space-y-3 pb-2 border-b border-[#e4d6c6]/60">
+        {/* Row 1: SEO Audit on Left + Live Engine Badge in Right Corner */}
+        <div className="flex items-center justify-between gap-2">
+          <h1 className="text-xl sm:text-3xl font-black text-[#2b1b12] tracking-tight">
+            SEO Audit
           </h1>
-          <p className="text-xs sm:text-sm text-[#6f5a4c] font-medium mt-1">
-            Real autonomous crawling of your website pages, technical tags, and ranking barriers.
-          </p>
+          <span className="text-[10.5px] sm:text-xs px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-extrabold border border-emerald-200 shrink-0 shadow-2xs">
+            Live Engine
+          </span>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          {/* Download Full PDF Report */}
-          <button
-            type="button"
-            onClick={handleDownloadPdf}
-            className="flex items-center gap-1.5 bg-[#2b1b12] hover:bg-[#3b2519] text-[#fffcf7] text-xs font-bold py-2 px-4 rounded-xl shadow-sm transition-all cursor-pointer"
-          >
-            <Download className="w-3.5 h-3.5 text-[#c5a059]" />
-            <span>Download Full PDF</span>
-          </button>
+        {/* Row 2: Description on Left + Download Full PDF Button in Right Corner */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
+          <p className="text-xs sm:text-sm text-[#6f5a4c] font-medium leading-relaxed max-w-xl">
+            Real autonomous crawling of your website pages, technical tags, and ranking barriers.
+          </p>
 
-          {/* Last Scanned Timestamp */}
-          <div className="text-right text-[11px] hidden sm:block border-l border-[#e4d6c6] pl-3">
-            <span className="text-[#6f5a4c] block font-semibold">Last scanned:</span>
-            <span className="font-bold text-[#2b1b12]">
-              {auditData?.crawledAt
-                ? new Date(auditData.crawledAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })
-                : new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
-            </span>
+          <div className="flex items-center gap-2.5 self-end sm:self-auto shrink-0">
+            <button
+              type="button"
+              onClick={handleDownloadPdf}
+              className="flex items-center gap-1.5 bg-[#2b1b12] hover:bg-[#3b2519] text-[#fffcf7] text-[11px] sm:text-xs font-bold py-1.5 sm:py-2 px-3 sm:px-4 rounded-xl shadow-xs transition-all cursor-pointer"
+            >
+              <Download className="w-3.5 h-3.5 text-[#c5a059]" />
+              <span>Download Full PDF</span>
+            </button>
+
+            {/* Last Scanned Timestamp (Desktop) */}
+            <div className="text-right text-[11px] hidden lg:block border-l border-[#e4d6c6] pl-3">
+              <span className="text-[#6f5a4c] block font-semibold">Last scanned:</span>
+              <span className="font-bold text-[#2b1b12]">
+                {auditData?.crawledAt
+                  ? new Date(auditData.crawledAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })
+                  : new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
+              </span>
+            </div>
           </div>
         </div>
       </div>
 
       {/* 2. Crawl Depth Selector Control Bar (30, 50, 100, 200, 500 Pages) */}
-      <div className="bg-gradient-to-r from-[#faf6f0] via-white to-[#faf6f0] border border-[#e4d6c6] rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-[#2b1b12] text-[#c5a059] flex items-center justify-center shrink-0 shadow-xs">
-            <Search className="w-5 h-5" />
-          </div>
-          <div>
-            <h4 className="font-bold text-sm text-[#2b1b12] flex items-center gap-2">
-              <span>Crawl Depth Selector</span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#c5a059]/15 text-[#8a5b13] font-black uppercase tracking-wider border border-[#c5a059]/30">
-                Real Pages
-              </span>
-            </h4>
-            <p className="text-xs text-[#6f5a4c] mt-0.5">
-              Initial dashboard crawl runs 20 pages by default. Choose how many real pages to crawl:
-            </p>
+      <div className="bg-gradient-to-r from-[#faf6f0] via-white to-[#faf6f0] border border-[#e4d6c6] rounded-2xl p-3.5 sm:p-5 shadow-xs sm:shadow-sm space-y-3">
+        {/* Top: Icon + Title & Small Real Pages Badge */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-[#2b1b12] text-[#c5a059] flex items-center justify-center shrink-0 shadow-2xs">
+              <Search className="w-4 h-4 sm:w-5 sm:h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="font-bold text-xs sm:text-sm text-[#2b1b12]">
+                  Crawl Depth Selector
+                </h4>
+                <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-[#c5a059]/15 text-[#8a5b13] font-black uppercase tracking-wider border border-[#c5a059]/30">
+                  REAL PAGES
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+        {/* Lower Description */}
+        <p className="text-[11px] sm:text-xs text-[#6f5a4c] font-medium leading-relaxed">
+          Initial dashboard crawl runs 20 pages by default. Choose how many real pages to crawl:
+        </p>
+
+        {/* Bottom Controls Row: 30, 50, 100, 200, 500 on left, Run Crawls button small in right corner */}
+        <div className="flex items-center justify-between gap-2 pt-1 border-t border-[#e4d6c6]/50">
           {/* Pills for 30, 50, 100, 200, 500 */}
-          <div className="flex items-center bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl p-1 gap-1">
+          <div className="flex items-center bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl p-0.5 sm:p-1 gap-0.5 sm:gap-1">
             {(['30', '50', '100', '200', '500'] as const).map((lim) => (
               <button
                 key={lim}
                 type="button"
                 disabled={isReRunningAudit}
                 onClick={() => setCrawlLimit(lim)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[10.5px] sm:text-xs font-bold transition-all cursor-pointer ${
                   crawlLimit === lim
-                    ? 'bg-[#2b1b12] text-[#fffcf7] shadow-xs'
+                    ? 'bg-[#2b1b12] text-[#fffcf7] shadow-2xs'
                     : 'text-[#6f5a4c] hover:text-[#2b1b12] hover:bg-white/60'
                 }`}
               >
@@ -580,20 +815,21 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
             ))}
           </div>
 
+          {/* Compact Run Button in Right Corner */}
           <button
             type="button"
             disabled={isReRunningAudit}
             onClick={handleReRunAudit}
-            className="px-4 py-2 bg-[#c5a059] hover:bg-[#b38e47] text-[#2b1b12] font-black text-xs rounded-xl shadow-sm transition-all flex items-center gap-2 cursor-pointer disabled:opacity-60 shrink-0"
+            className="px-2.5 sm:px-4 py-1.5 sm:py-2 bg-[#c5a059] hover:bg-[#b38e47] text-[#2b1b12] font-black text-[10.5px] sm:text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-60 shrink-0"
           >
             {isReRunningAudit ? (
               <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <Loader2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 animate-spin" />
                 <span>Crawling {crawlLimit}...</span>
               </>
             ) : (
               <>
-                <Zap className="w-3.5 h-3.5" />
+                <Zap className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 <span>Run {crawlLimit} Crawls</span>
               </>
             )}
@@ -711,24 +947,24 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
         </div>
       )}
 
-      {/* 4. Top 4 Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* 4. Top 4 Metric Cards (2x2 Grid on Mobile, 4-in-a-row on Desktop) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         {/* Metric 1: On-Page SEO Score */}
-        <div className="bg-white rounded-2xl border border-[#e4d6c6] p-5 shadow-sm flex flex-col justify-between hover:border-[#c5a059] transition-all">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-            <h3 className="text-[#6f5a4c] font-black text-[11px] uppercase tracking-wider">On-Page SEO Score</h3>
-            <span className="text-slate-400 text-xs">ⓘ</span>
+        <div className="bg-white rounded-2xl border border-[#e4d6c6] p-3 sm:p-5 shadow-xs sm:shadow-sm flex flex-col justify-between hover:border-[#c5a059] transition-all min-h-[135px] sm:min-h-[160px]">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-1 sm:pb-2">
+            <h3 className="text-[#6f5a4c] font-black text-[8.5px] sm:text-[11px] uppercase tracking-wider truncate">On-Page Score</h3>
+            <span className="text-slate-400 text-[10px] hidden sm:inline">ⓘ</span>
           </div>
-          <div className="flex items-center gap-4 mt-2">
-            <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
-              <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 80 80">
-                <circle cx="40" cy="40" r="32" stroke="#f1e8dc" strokeWidth="6" fill="transparent" />
+          <div className="flex items-center gap-2 sm:gap-4 my-1.5 sm:my-2">
+            <div className="relative w-10 h-10 sm:w-16 sm:h-16 flex items-center justify-center shrink-0">
+              <svg className="w-10 h-10 sm:w-16 sm:h-16 transform -rotate-90" viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="32" stroke="#f1e8dc" strokeWidth="7" fill="transparent" />
                 <circle
                   cx="40"
                   cy="40"
                   r="32"
                   stroke="#10b981"
-                  strokeWidth="6"
+                  strokeWidth="7"
                   fill="transparent"
                   strokeDasharray={2 * Math.PI * 32}
                   strokeDashoffset={2 * Math.PI * 32 * (1 - currentSeoScore / 100)}
@@ -736,18 +972,18 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
                 />
               </svg>
               <div className="absolute flex flex-col items-center justify-center">
-                <span className="text-lg font-black text-[#2b1b12]">{currentSeoScore}</span>
+                <span className="text-xs sm:text-lg font-black text-[#2b1b12]">{currentSeoScore}</span>
               </div>
             </div>
-            <div>
-              <div className="text-sm font-bold text-emerald-600">
+            <div className="min-w-0">
+              <div className="text-[11px] sm:text-sm font-bold text-emerald-600 truncate">
                 {currentSeoScore >= 80 ? 'Excellent' : currentSeoScore >= 65 ? 'Good' : 'Needs Work'}
               </div>
-              <p className="text-[10px] text-[#6f5a4c] mt-0.5">Calculated from live page audits</p>
+              <p className="text-[8.5px] sm:text-[10px] text-[#6f5a4c] mt-0.5 hidden sm:block">Calculated from live audits</p>
             </div>
           </div>
-          <div className="pt-3 border-t border-slate-100 text-[11px] text-[#6f5a4c] flex justify-between mt-2">
-            <span>Critical Issues:</span>
+          <div className="pt-1.5 sm:pt-3 border-t border-slate-100 text-[9px] sm:text-[11px] text-[#6f5a4c] flex justify-between items-center">
+            <span>Critical:</span>
             <strong className="text-red-600 font-bold">
               {issuesList.filter((i: any) => i.impact === 'Critical').length}
             </strong>
@@ -755,38 +991,49 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
         </div>
 
         {/* Metric 2: Total Real Pages Audited */}
-        <div className="bg-white rounded-2xl border border-[#e4d6c6] p-5 shadow-sm flex flex-col justify-between hover:border-[#c5a059] transition-all">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-            <h3 className="text-[#6f5a4c] font-black text-[11px] uppercase tracking-wider">Real Pages Audited</h3>
-            <span className="text-slate-400 text-xs">ⓘ</span>
+        <div className="bg-white rounded-2xl border border-[#e4d6c6] p-3 sm:p-5 shadow-xs sm:shadow-sm flex flex-col justify-between hover:border-[#c5a059] transition-all min-h-[135px] sm:min-h-[160px]">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-1 sm:pb-2">
+            <h3 className="text-[#6f5a4c] font-black text-[8.5px] sm:text-[11px] uppercase tracking-wider truncate">Real Pages</h3>
+            <span className="text-slate-400 text-[10px] hidden sm:inline">ⓘ</span>
           </div>
-          <div className="mt-2">
-            <div className="text-3xl font-black text-[#2b1b12]">{pagesList.length}</div>
-            <p className="text-[11px] text-emerald-600 font-bold mt-1 flex items-center gap-1">
-              <Check className="w-3.5 h-3.5" /> 100% Real Live Crawl
+          <div className="my-1.5 sm:my-2">
+            <div className="flex items-baseline justify-between gap-1">
+              <div className="text-lg sm:text-3xl font-black text-[#2b1b12]">{pagesList.length}</div>
+              <button
+                type="button"
+                onClick={() => setShowAllPagesModal(true)}
+                className="px-1.5 sm:px-2.5 py-0.5 sm:py-1 bg-[#f8f3ec] hover:bg-[#ebdcc8] text-[#2b1b12] border border-[#e4d6c6] rounded-md sm:rounded-lg text-[8.5px] sm:text-[10.5px] font-bold transition-all shrink-0 cursor-pointer"
+                title="View all crawled page URLs in popup"
+              >
+                <span>All Pages ↗</span>
+              </button>
+            </div>
+            <p className="text-[9px] sm:text-[11px] text-emerald-600 font-bold mt-0.5 sm:mt-1 flex items-center gap-0.5 truncate">
+              <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+              <span>100% Real Live Crawl</span>
             </p>
           </div>
-          <div className="pt-3 border-t border-slate-100 text-[11px] text-[#6f5a4c] flex justify-between mt-2">
-            <span>Crawl Limit Selected:</span>
-            <strong className="text-[#2b1b12] font-mono">{crawlLimit} pages</strong>
+          <div className="pt-1.5 sm:pt-3 border-t border-slate-100 text-[9px] sm:text-[11px] text-[#6f5a4c] flex justify-between items-center">
+            <span>Limit:</span>
+            <strong className="text-[#2b1b12] font-mono">{crawlLimit} pgs</strong>
           </div>
         </div>
 
         {/* Metric 3: Crawl Health */}
-        <div className="bg-white rounded-2xl border border-[#e4d6c6] p-5 shadow-sm flex flex-col justify-between hover:border-[#c5a059] transition-all">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-            <h3 className="text-[#6f5a4c] font-black text-[11px] uppercase tracking-wider">Crawl Health</h3>
-            <span className="text-slate-400 text-xs">ⓘ</span>
+        <div className="bg-white rounded-2xl border border-[#e4d6c6] p-3 sm:p-5 shadow-xs sm:shadow-sm flex flex-col justify-between hover:border-[#c5a059] transition-all min-h-[135px] sm:min-h-[160px]">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-1 sm:pb-2">
+            <h3 className="text-[#6f5a4c] font-black text-[8.5px] sm:text-[11px] uppercase tracking-wider truncate">Crawl Health</h3>
+            <span className="text-slate-400 text-[10px] hidden sm:inline">ⓘ</span>
           </div>
-          <div className="mt-2">
-            <div className="text-3xl font-black text-[#2b1b12]">
+          <div className="my-1.5 sm:my-2">
+            <div className="text-lg sm:text-3xl font-black text-[#2b1b12]">
               {auditData?.crawlHealth || 100}%
             </div>
-            <p className="text-[11px] text-[#6f5a4c] mt-1">
+            <p className="text-[9px] sm:text-[11px] text-[#6f5a4c] mt-0.5 sm:mt-1 truncate">
               {pagesList.filter((p: any) => (p.status || 200) === 200).length} of {pagesList.length} pages 200 OK
             </p>
           </div>
-          <div className="pt-3 border-t border-slate-100 text-[11px] text-[#6f5a4c] flex justify-between mt-2">
+          <div className="pt-1.5 sm:pt-3 border-t border-slate-100 text-[9px] sm:text-[11px] text-[#6f5a4c] flex justify-between items-center">
             <span>Server Errors:</span>
             <strong className="text-emerald-600 font-bold">
               {pagesList.filter((p: any) => (p.status || 200) >= 400).length}
@@ -795,19 +1042,19 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
         </div>
 
         {/* Metric 4: Total Technical Issues */}
-        <div className="bg-white rounded-2xl border border-[#e4d6c6] p-5 shadow-sm flex flex-col justify-between hover:border-[#c5a059] transition-all">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-            <h3 className="text-[#6f5a4c] font-black text-[11px] uppercase tracking-wider">Total Issues Detected</h3>
-            <span className="text-slate-400 text-xs">ⓘ</span>
+        <div className="bg-white rounded-2xl border border-[#e4d6c6] p-3 sm:p-5 shadow-xs sm:shadow-sm flex flex-col justify-between hover:border-[#c5a059] transition-all min-h-[135px] sm:min-h-[160px]">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-1 sm:pb-2">
+            <h3 className="text-[#6f5a4c] font-black text-[8.5px] sm:text-[11px] uppercase tracking-wider truncate">Total Issues</h3>
+            <span className="text-slate-400 text-[10px] hidden sm:inline">ⓘ</span>
           </div>
-          <div className="mt-2">
-            <div className="text-3xl font-black text-[#2b1b12]">{issuesList.length}</div>
-            <p className="text-[11px] text-[#6f5a4c] mt-1">
-              {issuesList.filter((i: any) => i.impact === 'Important').length} Important • {issuesList.filter((i: any) => i.impact === 'Minor').length} Minor
+          <div className="my-1.5 sm:my-2">
+            <div className="text-lg sm:text-3xl font-black text-[#2b1b12]">{issuesList.length}</div>
+            <p className="text-[9px] sm:text-[11px] text-[#6f5a4c] mt-0.5 sm:mt-1 truncate">
+              {issuesList.filter((i: any) => i.impact === 'Important').length} Imp • {issuesList.filter((i: any) => i.impact === 'Minor').length} Min
             </p>
           </div>
-          <div className="pt-3 border-t border-slate-100 text-[11px] text-[#6f5a4c] flex justify-between mt-2">
-            <span>Passed Checks:</span>
+          <div className="pt-1.5 sm:pt-3 border-t border-slate-100 text-[9px] sm:text-[11px] text-[#6f5a4c] flex justify-between items-center">
+            <span>Passed:</span>
             <strong className="text-emerald-600 font-bold">
               {issuesList.filter((i: any) => i.impact === 'Passed').length}
             </strong>
@@ -901,8 +1148,8 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
 
             {/* Issues List with Expandable Breakdown (EXACTLY MATCHING SCREENSHOT 2) */}
             <div className="border border-[#e4d6c6] rounded-2xl overflow-hidden divide-y divide-[#e4d6c6]">
-              {/* Table Header */}
-              <div className="grid grid-cols-12 p-3.5 bg-[#f8f3ec]/60 text-[10px] font-black uppercase tracking-wider text-[#6f5a4c]">
+              {/* Table Header (Hidden on Mobile < md to prevent overlapping columns) */}
+              <div className="hidden md:grid md:grid-cols-12 p-3.5 bg-[#f8f3ec]/60 text-[10px] font-black uppercase tracking-wider text-[#6f5a4c]">
                 <div className="col-span-5">Issue</div>
                 <div className="col-span-2">Impact</div>
                 <div className="col-span-4">Recommendation</div>
@@ -910,11 +1157,11 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
               </div>
 
               {filteredIssues.map((issue: any) => {
-                const isExpanded = expandedIssueId === issue.id;
+                const isExpanded = !!expandedIssueIds[issue.id];
                 return (
                   <div key={issue.id} className="transition-colors hover:bg-[#f8f3ec]/30">
-                    {/* Row Summary */}
-                    <div className="grid grid-cols-12 p-4 items-center gap-2 text-xs">
+                    {/* Desktop Row Summary (Screen >= md) */}
+                    <div className="hidden md:grid md:grid-cols-12 p-4 items-center gap-2 text-xs">
                       <div className="col-span-5 flex items-start gap-2.5">
                         {issue.impact === 'Critical' ? (
                           <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
@@ -949,7 +1196,7 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
                       <div className="col-span-1 text-right">
                         <button
                           type="button"
-                          onClick={() => setExpandedIssueId(isExpanded ? null : issue.id)}
+                          onClick={() => toggleIssue(issue.id)}
                           className="px-2.5 py-1 text-xs font-bold border border-[#e4d6c6] rounded-lg bg-white hover:bg-[#f8f3ec] text-[#2b1b12] transition-colors cursor-pointer inline-flex items-center gap-1"
                         >
                           <span>{isExpanded ? 'Hide' : 'Details'}</span>
@@ -958,10 +1205,60 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
                       </div>
                     </div>
 
+                    {/* Mobile Card Row Summary (Screen < md — 100% Whole Readable, No Half Sentences) */}
+                    <div className="block md:hidden p-3.5 sm:p-4 space-y-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-start gap-2 min-w-0">
+                          {issue.impact === 'Critical' ? (
+                            <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                          ) : issue.impact === 'Important' ? (
+                            <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                          ) : issue.impact === 'Passed' ? (
+                            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                          ) : (
+                            <Info className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                          )}
+                          <div className="font-bold text-xs sm:text-sm text-[#2b1b12] leading-snug break-words">
+                            {issue.title}
+                          </div>
+                        </div>
+                        <span className={`px-2 py-0.5 rounded-md text-[9.5px] font-extrabold border shrink-0 ${issue.impactBadge}`}>
+                          {issue.impact}
+                        </span>
+                      </div>
+
+                      {/* Full readable issue description */}
+                      <p className="text-xs text-[#4b382d] leading-relaxed break-words">
+                        {issue.desc}
+                      </p>
+
+                      {/* Full readable remediation box (No line-clamp-1) */}
+                      <div className="bg-[#f8f3ec] border border-[#e4d6c6]/80 rounded-xl p-2.5 text-xs text-[#2b1b12] leading-relaxed space-y-1">
+                        <div className="text-[10px] font-bold text-[#8a5b13] uppercase tracking-wider flex items-center gap-1">
+                          <span>💡 Prescribed Fix</span>
+                        </div>
+                        <p className="text-[11px] text-[#6f5a4c] font-medium leading-relaxed break-words">
+                          {issue.howToFix}
+                        </p>
+                      </div>
+
+                      {/* Details toggle button aligned to the right corner */}
+                      <div className="flex justify-end pt-0.5">
+                        <button
+                          type="button"
+                          onClick={() => toggleIssue(issue.id)}
+                          className="px-3 py-1.5 text-xs font-bold border border-[#e4d6c6] rounded-xl bg-white hover:bg-[#f8f3ec] text-[#2b1b12] transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-2xs"
+                        >
+                          <span>{isExpanded ? 'Hide Details' : 'View Details'}</span>
+                          {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                        </button>
+                      </div>
+                    </div>
+
                     {/* Expandable Diagnostic Breakdown (Screenshot 2 Match) */}
                     {isExpanded && (
-                      <div className="p-5 bg-white border-t border-[#e4d6c6] space-y-4 animate-fade-in">
-                        <div className="p-4 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl space-y-3 text-xs">
+                      <div className="p-4 sm:p-5 bg-white border-t border-[#e4d6c6] space-y-4 animate-fade-in">
+                        <div className="p-3.5 sm:p-4 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl space-y-3 text-xs">
                           <div>
                             <span className="font-black text-[10px] text-[#2b1b12] uppercase tracking-wider block mb-1">
                               WHAT IS THIS ISSUE?
@@ -980,65 +1277,138 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
                             </p>
                           </div>
 
-                          <div className="pt-2 border-t border-[#e4d6c6] flex gap-4 text-[10px] font-bold text-[#6f5a4c] uppercase tracking-wider">
+                          <div className="pt-2 border-t border-[#e4d6c6] flex flex-wrap gap-3 sm:gap-4 text-[10px] font-bold text-[#6f5a4c] uppercase tracking-wider">
                             <span>DIFFICULTY: <strong className="text-[#2b1b12]">{issue.difficulty}</strong></span>
                             <span>•</span>
                             <span>SEO IMPACT: <strong className={issue.impactLevel === 'HIGH' ? 'text-red-600' : 'text-amber-600'}>{issue.impactLevel}</strong></span>
                           </div>
                         </div>
 
-                        {/* Failed URL Breakdown (Screenshot 2 Match) */}
-                        {issue.failedPages && issue.failedPages.length > 0 && (
-                          <div className="space-y-2">
-                            <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-[#6f5a4c]">
-                              <span>FAILED URL BREAKDOWN ({issue.failedPages.length})</span>
-                              <span>COPY OR TEST DIRECT LINK</span>
+                        {/* CLUSTERED BREAKDOWN: If issue has groups (e.g. duplicate meta descriptions or titles) */}
+                        {issue.groups && issue.groups.length > 0 ? (
+                          <div className="space-y-4">
+                            <div className="flex flex-col sm:flex-row justify-between sm:items-center text-[10px] font-bold uppercase tracking-wider text-[#6f5a4c] gap-1">
+                              <span>DUPLICATE CLUSTER GROUPS ({issue.groups.length} UNIQUE SHARED PATTERNS FOUND)</span>
+                              <span className="hidden sm:inline">COPY OR TEST DIRECT LINK</span>
                             </div>
 
-                            <div className="space-y-1.5">
-                              {issue.failedPages.map((page: any, idx: number) => (
-                                <div
-                                  key={page.id || idx}
-                                  className="flex items-center justify-between p-2.5 bg-white border border-[#e4d6c6] rounded-xl text-xs hover:border-[#c5a059] transition-all"
-                                >
-                                  <div className="flex items-center gap-2 min-w-0">
-                                    <span className="font-mono text-[11px] text-[#6f5a4c] font-bold">{idx + 1}</span>
-                                    <span className="font-mono text-[#2b1b12] truncate font-medium">{page.url}</span>
-                                    {page.detail && (
-                                      <span className="text-[10px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 hidden sm:inline">
-                                        {page.detail}
+                            <div className="space-y-3">
+                              {issue.groups.map((group: any, gIdx: number) => (
+                                <div key={gIdx} className="p-3 sm:p-3.5 bg-[#faf6f0] border border-[#e4d6c6] rounded-xl space-y-2.5">
+                                  <div className="flex items-center justify-between text-xs font-bold text-[#2b1b12]">
+                                    <span className="flex items-center gap-2">
+                                      <span className="w-5 h-5 rounded-full bg-[#2b1b12] text-[#fffcf7] text-[10px] flex items-center justify-center font-mono">
+                                        {gIdx + 1}
                                       </span>
-                                    )}
+                                      <span>Duplicate Group {gIdx + 1} ({group.count} Pages Share This Text)</span>
+                                    </span>
+                                    <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-200">
+                                      {group.count} URLs
+                                    </span>
                                   </div>
 
-                                  <div className="flex items-center gap-2 shrink-0">
-                                    <button
-                                      type="button"
-                                      onClick={() => handleCopy(page.url)}
-                                      className="p-1.5 rounded-lg text-slate-500 hover:text-[#2b1b12] border border-[#e4d6c6] hover:bg-[#f8f3ec] transition-colors cursor-pointer"
-                                      title="Copy URL"
-                                    >
-                                      {copiedUrl === page.url ? (
-                                        <Check className="w-3.5 h-3.5 text-emerald-600" />
-                                      ) : (
-                                        <Copy className="w-3.5 h-3.5" />
-                                      )}
-                                    </button>
+                                  {/* Quoted shared content */}
+                                  <div className="p-2.5 bg-white border border-[#e4d6c6] rounded-lg text-xs italic text-[#4a3528] leading-relaxed">
+                                    &ldquo;{group.sharedContent}&rdquo;
+                                  </div>
 
-                                    <a
-                                      href={page.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="p-1.5 rounded-lg text-slate-500 hover:text-[#2b1b12] border border-[#e4d6c6] hover:bg-[#f8f3ec] transition-colors"
-                                      title="Open page in new tab"
-                                    >
-                                      <ExternalLink className="w-3.5 h-3.5" />
-                                    </a>
+                                  {/* URLs in this cluster */}
+                                  <div className="space-y-1.5 pt-1">
+                                    {group.pages.map((page: any, pIdx: number) => (
+                                      <div
+                                        key={page.id || pIdx}
+                                        className="flex items-center justify-between p-2 bg-white border border-[#e4d6c6] rounded-lg text-xs hover:border-[#c5a059] transition-all gap-2"
+                                      >
+                                        <div className="flex items-center gap-2 min-w-0">
+                                          <span className="font-mono text-[10px] text-[#6f5a4c] font-bold shrink-0">{pIdx + 1}</span>
+                                          <span className="font-mono text-[#2b1b12] break-all font-medium text-[10.5px] sm:text-xs leading-tight">{page.url}</span>
+                                        </div>
+                                        <div className="flex items-center gap-1.5 shrink-0">
+                                          <button
+                                            type="button"
+                                            onClick={() => handleCopy(page.url)}
+                                            className="p-1.5 rounded-lg text-slate-500 hover:text-[#2b1b12] border border-[#e4d6c6] hover:bg-[#f8f3ec] transition-colors cursor-pointer"
+                                            title="Copy URL"
+                                          >
+                                            {copiedUrl === page.url ? (
+                                              <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                            ) : (
+                                              <Copy className="w-3.5 h-3.5" />
+                                            )}
+                                          </button>
+                                          <a
+                                            href={page.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="p-1.5 rounded-lg text-slate-500 hover:text-[#2b1b12] border border-[#e4d6c6] hover:bg-[#f8f3ec] transition-colors"
+                                            title="Open page in new tab"
+                                          >
+                                            <ExternalLink className="w-3.5 h-3.5" />
+                                          </a>
+                                        </div>
+                                      </div>
+                                    ))}
                                   </div>
                                 </div>
                               ))}
                             </div>
                           </div>
+                        ) : (
+                          /* Standard flat failed pages */
+                          issue.failedPages && issue.failedPages.length > 0 && (
+                            <div className="space-y-2">
+                              <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-[#6f5a4c]">
+                                <span>FAILED URL BREAKDOWN ({issue.failedPages.length})</span>
+                                <span className="hidden sm:inline">COPY OR TEST DIRECT LINK</span>
+                              </div>
+
+                              <div className="space-y-1.5">
+                                {issue.failedPages.map((page: any, idx: number) => (
+                                  <div
+                                    key={page.id || idx}
+                                    className="flex items-center justify-between p-2.5 bg-white border border-[#e4d6c6] rounded-xl text-xs hover:border-[#c5a059] transition-all gap-2"
+                                  >
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 min-w-0">
+                                      <div className="flex items-center gap-2 min-w-0">
+                                        <span className="font-mono text-[10px] text-[#6f5a4c] font-bold shrink-0">{idx + 1}</span>
+                                        <span className="font-mono text-[#2b1b12] break-all font-medium text-[10.5px] sm:text-xs leading-tight">{page.url}</span>
+                                      </div>
+                                      {page.detail && (
+                                        <span className="text-[9.5px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 self-start sm:self-auto shrink-0 mt-0.5 sm:mt-0">
+                                          {page.detail}
+                                        </span>
+                                      )}
+                                    </div>
+
+                                    <div className="flex items-center gap-2 shrink-0">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleCopy(page.url)}
+                                        className="p-1.5 rounded-lg text-slate-500 hover:text-[#2b1b12] border border-[#e4d6c6] hover:bg-[#f8f3ec] transition-colors cursor-pointer"
+                                        title="Copy URL"
+                                      >
+                                        {copiedUrl === page.url ? (
+                                          <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                        ) : (
+                                          <Copy className="w-3.5 h-3.5" />
+                                        )}
+                                      </button>
+
+                                      <a
+                                        href={page.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="p-1.5 rounded-lg text-slate-500 hover:text-[#2b1b12] border border-[#e4d6c6] hover:bg-[#f8f3ec] transition-colors"
+                                        title="Open page in new tab"
+                                      >
+                                        <ExternalLink className="w-3.5 h-3.5" />
+                                      </a>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )
                         )}
                       </div>
                     )}
@@ -1188,6 +1558,116 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
           </div>
         )}
       </div>
+
+      {/* 6. View All Crawled Pages Modal Popup */}
+      {showAllPagesModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-3xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl flex flex-col max-h-[90vh]">
+            <div className="flex items-center justify-between pb-3 border-b border-[#e4d6c6]">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-[#c5a059]" />
+                  <h3 className="font-editorial text-lg sm:text-xl font-bold text-[#2b1b12]">
+                    All Crawled Pages ({pagesList.length})
+                  </h3>
+                </div>
+                <p className="text-xs text-[#6f5a4c] mt-0.5">
+                  Verified autonomous crawl inventory for {cleanDomain}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAllPagesModal(false)}
+                className="text-[#6f5a4c] hover:text-[#2b1b12] text-sm p-1.5 font-bold rounded-lg hover:bg-[#f1e8dc] cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Search Bar */}
+            <div className="pt-3 pb-1">
+              <div className="relative">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={allPagesSearch}
+                  onChange={(e) => setAllPagesSearch(e.target.value)}
+                  placeholder="Search crawled URLs or page titles..."
+                  className="w-full pl-9 pr-3 py-2 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] focus:outline-none focus:border-[#2b1b12]"
+                />
+              </div>
+            </div>
+
+            {/* Scrollable List */}
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1 my-3">
+              {pagesList
+                .filter((p: any) =>
+                  p.url.toLowerCase().includes(allPagesSearch.toLowerCase()) ||
+                  (p.title || '').toLowerCase().includes(allPagesSearch.toLowerCase())
+                )
+                .map((page: any, idx: number) => (
+                  <div
+                    key={page.id || idx}
+                    className="p-3 bg-white border border-[#e4d6c6] rounded-xl hover:border-[#c5a059] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-[10px] text-[#6f5a4c] font-bold shrink-0">{idx + 1}</span>
+                        <span className={`px-2 py-0.5 rounded text-[9.5px] font-bold border shrink-0 ${
+                          (page.status || 200) === 200
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            : 'bg-red-50 text-red-700 border-red-200'
+                        }`}>
+                          {page.status || 200}
+                        </span>
+                        <span className="font-mono text-xs text-[#2b1b12] font-semibold truncate break-all">
+                          {page.url}
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-[#6f5a4c] mt-1 pl-4 truncate">
+                        {page.title || 'Untitled Page'} • {page.wordCount || 0} words • Canonical: {page.canonical || 'Self'}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => handleCopy(page.url)}
+                        className="px-2.5 py-1 text-xs border border-[#e4d6c6] rounded-lg hover:bg-[#f8f3ec] text-[#2b1b12] flex items-center gap-1 cursor-pointer font-medium"
+                      >
+                        {copiedUrl === page.url ? (
+                          <span className="text-emerald-600 font-bold flex items-center gap-1"><Check className="w-3 h-3" /> Copied</span>
+                        ) : (
+                          <span className="flex items-center gap-1"><Copy className="w-3 h-3" /> Copy</span>
+                        )}
+                      </button>
+                      <a
+                        href={page.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-2.5 py-1 text-xs border border-[#e4d6c6] rounded-lg bg-[#2b1b12] text-[#fffcf7] hover:bg-[#3b2519] flex items-center gap-1 font-medium"
+                      >
+                        <span>Visit</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  </div>
+                ))}
+            </div>
+
+            <div className="pt-2 border-t border-[#e4d6c6] flex justify-between items-center text-xs text-[#6f5a4c]">
+              <span>Showing {pagesList.filter((p: any) => p.url.toLowerCase().includes(allPagesSearch.toLowerCase()) || (p.title || '').toLowerCase().includes(allPagesSearch.toLowerCase())).length} of {pagesList.length} pages</span>
+              <button
+                type="button"
+                onClick={() => setShowAllPagesModal(false)}
+                className="px-4 py-1.5 bg-[#2b1b12] text-[#fffcf7] rounded-xl text-xs font-bold hover:bg-[#3b2519] cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

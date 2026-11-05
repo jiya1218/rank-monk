@@ -8,6 +8,7 @@ import { DashboardOverview } from '@/components/dashboard/DashboardOverview';
 import { BrandingStudio } from '@/components/dashboard/BrandingStudio';
 import { MediaStudio } from '@/components/dashboard/MediaStudio';
 import { SeoAuditWorkspace } from '@/components/dashboard/SeoAuditWorkspace';
+import { BlogsWorkspace } from '@/components/dashboard/BlogsWorkspace';
 import { ComingSoonWorkspace } from '@/components/dashboard/ComingSoonWorkspace';
 import { SocialStudio } from '@/components/dashboard/SocialStudio';
 import { IntegrationsWorkspace } from '@/components/dashboard/IntegrationsWorkspace';
@@ -54,6 +55,8 @@ export default function DashboardPage() {
   const [newDomainText, setNewDomainText] = useState('');
   const [adminTargetMarket, setAdminTargetMarket] = useState('Pan India');
   const [addingAdminDomain, setAddingAdminDomain] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showAccountDropdown, setShowAccountDropdown] = useState(false);
 
   useEffect(() => {
     // 1. Verify User Session & Subscription
@@ -824,31 +827,32 @@ export default function DashboardPage() {
   // ACTIVE DASHBOARD VIEW (Single Fixed Domain Loaded)
   return (
     <div className="h-screen bg-[#f8f3ec] text-[#2b1b12] flex flex-col font-sans overflow-hidden relative z-10">
-      {/* FIXED TOP HEADER (NO DOMAIN SWITCHER) */}
-      <header className="h-16 shrink-0 bg-[#fffcf7] border-b border-[#e4d6c6] px-4 sm:px-6 flex items-center justify-between z-40">
-        <div className="flex items-center gap-6">
-          <Link href="/" className="flex items-center gap-2.5">
-            <img src="/assets/rank-monk-logo-horizontal.png" alt="Rank Monk" className="h-10 sm:h-11 w-auto object-contain" />
+      {/* FIXED TOP HEADER */}
+      <header className="h-16 shrink-0 bg-[#fffcf7] border-b border-[#e4d6c6] px-4 sm:px-6 flex items-center justify-between z-40 gap-2">
+        {/* Left Side: Brand Logo (Indented slightly for clean breathing room on mobile) */}
+        <div className="flex items-center gap-2 sm:gap-6 min-w-0">
+          <Link href="/" className="flex items-center gap-2.5 shrink-0 pl-1 sm:pl-0">
+            <img src="/assets/rank-monk-logo-horizontal.png" alt="Rank Monk" className="h-8 sm:h-11 w-auto object-contain" />
           </Link>
 
-          {/* Domain Badge / Switcher */}
-          <div className="relative flex items-center gap-2 px-3 py-1.5 bg-[#f1e8dc] border border-[#d8c09e] rounded-xl text-xs">
-            <span className="w-2 h-2 rounded-full bg-[#5d7a4f] animate-pulse" />
-            <span className="text-[#6f5a4c] font-medium hidden sm:inline">Active Domain:</span>
-            <span className="font-bold text-[#2b1b12]">{project.domain?.replace(/^https?:\/\//i, '').replace(/\/$/, '')}</span>
+          {/* Desktop Active Domain Badge (Hidden on mobile < md, moved to Hamburger Drawer) */}
+          <div className="hidden md:flex relative items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 bg-[#f1e8dc] border border-[#d8c09e] rounded-xl text-xs min-w-0">
+            <span className="w-2 h-2 rounded-full bg-[#5d7a4f] animate-pulse shrink-0" />
+            <span className="text-[#6f5a4c] font-medium shrink-0">Active Domain:</span>
+            <span className="font-bold text-[#2b1b12] truncate max-w-[180px] md:max-w-none">{project.domain?.replace(/^https?:\/\//i, '').replace(/\/$/, '')}</span>
             <a
               href={`https://${project.domain?.replace(/^https?:\/\//i, '').replace(/\/$/, '')}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#c5a059] hover:text-[#2b1b12] font-bold text-xs ml-1"
+              className="text-[#c5a059] hover:text-[#2b1b12] font-bold text-xs ml-0.5 shrink-0"
               title="Open website in new tab"
             >
               ↗
             </a>
 
-            {/* ONLY FOR jiyapatel181224@gmail.com: Switcher & Add Button */}
+            {/* ONLY FOR jiyapatel181224@gmail.com on Desktop (Hidden on mobile, available in Hamburger Menu) */}
             {isSuperAdminTester && (
-              <div className="ml-2 pl-2 border-l border-[#d8c09e] flex items-center gap-1.5">
+              <div className="flex ml-2 pl-2 border-l border-[#d8c09e] items-center gap-1 shrink-0">
                 <button
                   type="button"
                   onClick={() => setShowDomainSwitcherDropdown(prev => !prev)}
@@ -869,9 +873,9 @@ export default function DashboardPage() {
               </div>
             )}
 
-            {/* Dropdown Menu for jiyapatel181224@gmail.com */}
+            {/* Desktop Dropdown Menu for jiyapatel181224@gmail.com */}
             {isSuperAdminTester && showDomainSwitcherDropdown && (
-              <div className="absolute top-full left-0 mt-2 w-72 bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl shadow-xl z-50 p-3 space-y-2 animate-fade-in">
+              <div className="absolute top-full left-0 mt-2 w-72 bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl shadow-xl z-50 p-3 space-y-2 animate-fade-in hidden md:block">
                 <div className="flex items-center justify-between pb-2 border-b border-[#e4d6c6]">
                   <span className="text-[10px] font-black uppercase tracking-wider text-[#6f5a4c]">
                     Dev Testing Workspaces ({adminDomainList.length})
@@ -934,26 +938,85 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* User Profile & Sign Out */}
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-[#2b1b12] text-[#fffcf7] border border-[#d8c09e] flex items-center justify-center font-bold text-xs">
-              {user ? (user.name || user.email)?.charAt(0).toUpperCase() : 'U'}
-            </div>
-            <div className="hidden sm:block text-left text-xs">
-              <div className="font-bold text-[#2b1b12]">{user ? user.name || user.email : 'Subscriber'}</div>
-              <div className="text-[10px] text-[#7a5242] uppercase font-semibold">
-                {user ? user.plan || 'Scale' : 'Scale'} Tier • Active
-              </div>
+        {/* Right Side: 3-Line Hamburger & Profile Avatar */}
+        <div className="relative flex items-center gap-2 sm:gap-4 shrink-0">
+          {/* Mobile Hamburger Toggle (< md) on Right Side */}
+          <button
+            type="button"
+            onClick={() => setShowMobileMenu(true)}
+            className="md:hidden p-2 rounded-xl border border-[#e4d6c6] bg-white hover:bg-[#f1e8dc] text-[#2b1b12] transition-colors cursor-pointer shrink-0 shadow-xs"
+            title="Open modules navigation"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+
+          {/* User Profile Avatar */}
+          <button
+            type="button"
+            onClick={() => setShowAccountDropdown(prev => !prev)}
+            className="w-8 h-8 rounded-full bg-[#2b1b12] text-[#fffcf7] border border-[#d8c09e] flex items-center justify-center font-bold text-xs shrink-0 cursor-pointer hover:ring-2 hover:ring-[#c5a059] transition-all shadow-xs"
+            title="Account Menu (Tap to view details & log out)"
+          >
+            {user ? (user.name || user.email)?.charAt(0).toUpperCase() : 'U'}
+          </button>
+
+          <div className="hidden md:block text-left text-xs">
+            <div className="font-bold text-[#2b1b12] truncate max-w-[120px]">{user ? user.name || user.email : 'Subscriber'}</div>
+            <div className="text-[10px] text-[#7a5242] uppercase font-semibold">
+              {user ? user.plan || 'Scale' : 'Scale'} Tier • Active
             </div>
           </div>
 
           <button
             onClick={handleSignOut}
-            className="text-xs text-[#7a5242] hover:text-[#2b1b12] font-semibold border border-[#e4d6c6] hover:bg-[#f1e8dc] px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+            className="hidden md:block text-xs text-[#7a5242] hover:text-[#2b1b12] font-semibold border border-[#e4d6c6] hover:bg-[#f1e8dc] px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
           >
             Sign Out
           </button>
+
+          {/* Interactive Account Dropdown Popover (Works on Mobile & Desktop) */}
+          {showAccountDropdown && (
+            <div className="absolute right-0 top-full mt-2 w-64 bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl shadow-xl z-50 p-4 space-y-3 animate-fade-in">
+              <div className="flex items-center gap-3 pb-3 border-b border-[#e4d6c6]">
+                <div className="w-9 h-9 rounded-full bg-[#2b1b12] text-[#fffcf7] border border-[#d8c09e] flex items-center justify-center font-black text-sm shrink-0">
+                  {user ? (user.name || user.email)?.charAt(0).toUpperCase() : 'U'}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="font-bold text-xs text-[#2b1b12] truncate">
+                    {user?.name || user?.email?.split('@')[0] || 'User Account'}
+                  </div>
+                  <div className="text-[11px] text-[#6f5a4c] truncate">
+                    {user?.email || 'user@rankmonk.in'}
+                  </div>
+                  <div className="text-[9.5px] font-bold text-[#5d7a4f] uppercase tracking-wide mt-0.5">
+                    {user?.plan || 'Scale'} Tier • Active
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-1 text-xs">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAccountDropdown(false);
+                    setActiveTab('settings');
+                  }}
+                  className="w-full text-left p-2 rounded-xl hover:bg-[#f8f3ec] text-[#2b1b12] font-medium flex items-center gap-2 cursor-pointer transition-colors"
+                >
+                  <span>⚙️ Account Settings</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="w-full text-left p-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 font-bold flex items-center gap-2 cursor-pointer transition-colors"
+                >
+                  <span>🚪 Sign Out</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </header>
 
@@ -1010,7 +1073,7 @@ export default function DashboardPage() {
                 { id: 'overview', label: 'Dashboard', icon: '📊' },
                 { id: 'brand', label: 'Branding', icon: '🎨' },
                 { id: 'audit', label: 'SEO', icon: '🔍' },
-                { id: 'blogs', label: 'Blogs', icon: '✍️', isComingSoon: true },
+                { id: 'blogs', label: 'Blogs', icon: '✍️', badge: 'AI' },
                 { id: 'backlinks', label: 'Backlinks', icon: '🔗', isComingSoon: true },
                 { id: 'social', label: 'Social Media', icon: '📱' },
                 { id: 'aeo', label: 'AEO / GEO', icon: '⚡' },
@@ -1077,7 +1140,7 @@ export default function DashboardPage() {
         </aside>
 
         {/* MAIN TAB CONTENT */}
-        <main className="flex-1 h-full overflow-y-auto p-6 sm:p-8 max-w-7xl mx-auto w-full">
+        <main className="flex-1 h-full overflow-y-auto p-3.5 sm:p-6 md:p-8 pb-24 md:pb-8 max-w-7xl mx-auto w-full">
 
           {/* TAB 1: OVERVIEW (SOLOSPIDER EXACT LAYOUT) */}
           {activeTab === 'overview' && (
@@ -1105,11 +1168,12 @@ export default function DashboardPage() {
             />
           )}
 
-          {/* TAB 4: BLOGS (COMING SOON) */}
+          {/* TAB 4: BLOGS & CONTENT ENGINE */}
           {activeTab === 'blogs' && (
-            <ComingSoonWorkspace
-              moduleName="Blogs & Content Engine"
-              onBackToDashboard={() => setActiveTab('overview')}
+            <BlogsWorkspace
+              project={project}
+              user={user}
+              onRefreshBrand={handleRefreshBrand}
             />
           )}
 
@@ -1642,6 +1706,219 @@ export default function DashboardPage() {
           )}
         </main>
       </div>
+
+      {/* Mobile Fixed Bottom Quick Actions Bar (< md) - Anchored strictly to bottom */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#fffcf7] border-t border-[#e4d6c6] px-2 py-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom))] flex items-center justify-around shadow-lg">
+        {[
+          { label: 'SEO Crawl', icon: '⚡', action: () => setActiveTab('audit'), active: activeTab === 'audit' },
+          { label: 'Branding', icon: '🎨', action: () => setActiveTab('brand'), active: activeTab === 'brand' },
+          { label: 'AEO Check', icon: '🤖', action: () => setActiveTab('aeo'), active: activeTab === 'aeo' },
+          { label: 'AI Media', icon: '🖼️', action: () => setActiveTab('media'), active: activeTab === 'media' },
+          { label: 'Overview', icon: '📊', action: () => setActiveTab('overview'), active: activeTab === 'overview' }
+        ].map((btn, idx) => (
+          <button
+            key={idx}
+            type="button"
+            onClick={btn.action}
+            className={`flex flex-col items-center py-1 px-2.5 rounded-xl transition-all cursor-pointer ${
+              btn.active ? 'text-[#2b1b12] font-black' : 'text-[#6f5a4c] font-medium'
+            }`}
+          >
+            <span className={`text-base p-1 rounded-lg ${btn.active ? 'bg-[#f1e8dc]' : ''}`}>{btn.icon}</span>
+            <span className="text-[10px] tracking-tight">{btn.label}</span>
+          </button>
+        ))}
+      </nav>
+
+      {/* Mobile Full-Screen Hamburger Drawer Navigation (< md) */}
+      {showMobileMenu && (
+        <div className="fixed inset-0 z-50 flex md:hidden animate-fade-in">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
+            onClick={() => setShowMobileMenu(false)}
+          />
+
+          {/* Drawer Panel */}
+          <div className="relative w-4/5 max-w-sm bg-[#fffcf7] border-r border-[#e4d6c6] h-full flex flex-col justify-between shadow-2xl z-10 overflow-y-auto p-4 animate-slide-right">
+            <div className="space-y-4">
+              {/* Drawer Header */}
+              <div className="flex items-center justify-between pb-3 border-b border-[#e4d6c6]">
+                <Link href="/" onClick={() => setShowMobileMenu(false)} className="flex items-center gap-2">
+                  <img src="/assets/rank-monk-logo-horizontal.png" alt="Rank Monk" className="h-9 w-auto object-contain" />
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setShowMobileMenu(false)}
+                  className="p-1.5 rounded-lg border border-[#e4d6c6] hover:bg-[#f1e8dc] text-[#2b1b12] text-sm font-bold cursor-pointer"
+                  title="Close Navigation"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Active Domain Card in Drawer */}
+              <div className="p-3 bg-[#f1e8dc] border border-[#d8c09e] rounded-2xl flex items-center justify-between">
+                <div className="min-w-0 flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#5d7a4f] animate-pulse shrink-0" />
+                  <div className="min-w-0">
+                    <span className="text-[9.5px] text-[#6f5a4c] font-bold block uppercase tracking-wider">Active Domain</span>
+                    <span className="font-bold text-xs text-[#2b1b12] truncate block max-w-[170px]">
+                      {project.domain?.replace(/^https?:\/\//i, '').replace(/\/$/, '')}
+                    </span>
+                  </div>
+                </div>
+                <a
+                  href={`https://${project.domain?.replace(/^https?:\/\//i, '').replace(/\/$/, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2.5 py-1 bg-white hover:bg-[#f8f3ec] text-[#2b1b12] border border-[#d8c09e] rounded-lg text-xs font-bold shrink-0 shadow-xs"
+                  title="Visit Website in new tab"
+                >
+                  Visit ↗
+                </a>
+              </div>
+
+              {/* Testing Domain Switcher & Add Domain (Shifted into Hamburger for Mobile) */}
+              {isSuperAdminTester && (
+                <div className="p-3 bg-[#f1e8dc]/70 border border-[#d8c09e] rounded-2xl space-y-2">
+                  <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-wider text-[#6f5a4c]">
+                    <span>⚡ Testing Workspaces ({adminDomainList.length})</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowMobileMenu(false);
+                        setShowAddDomainModal(true);
+                      }}
+                      className="text-[#5d7a4f] hover:underline font-bold text-[10px] cursor-pointer"
+                    >
+                      + Add Domain
+                    </button>
+                  </div>
+
+                  <div className="max-h-40 overflow-y-auto space-y-1 pr-1">
+                    {adminDomainList.map((p: any) => {
+                      const isActive = p.domain?.toLowerCase() === project.domain?.toLowerCase();
+                      return (
+                        <div
+                          key={p.domain}
+                          onClick={() => {
+                            handleSwitchDomain(p.domain);
+                            setShowMobileMenu(false);
+                          }}
+                          className={`p-2 rounded-xl flex items-center justify-between cursor-pointer transition-all ${
+                            isActive
+                              ? 'bg-[#2b1b12] text-[#fffcf7] shadow-sm'
+                              : 'bg-white hover:bg-[#f8f3ec] text-[#2b1b12] border border-[#e4d6c6]'
+                          }`}
+                        >
+                          <div className="min-w-0 flex items-center gap-2">
+                            <img
+                              src={p.faviconUrl || `https://www.google.com/s2/favicons?domain=${p.domain}&sz=64`}
+                              alt={p.name}
+                              className="w-4 h-4 rounded object-contain shrink-0"
+                              onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                            />
+                            <span className={`text-xs truncate ${isActive ? 'font-black' : 'font-semibold'}`}>
+                              {p.domain}
+                            </span>
+                          </div>
+                          {isActive && (
+                            <span className="text-[9px] font-bold bg-[#5d7a4f] text-white px-1.5 py-0.5 rounded shrink-0">
+                              Active
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* All Modules Menu List */}
+              <div className="space-y-1">
+                <div className="text-[10px] font-black uppercase tracking-wider text-[#6f5a4c] mb-2 px-1">
+                  All Dashboard Modules
+                </div>
+
+                <nav className="space-y-1">
+                  {[
+                    { id: 'overview', label: 'Dashboard', icon: '📊' },
+                    { id: 'brand', label: 'Branding', icon: '🎨' },
+                    { id: 'audit', label: 'SEO Audit', icon: '🔍', badge: 'Live' },
+                    { id: 'blogs', label: 'Blogs', icon: '✍️', badge: 'AI' },
+                    { id: 'backlinks', label: 'Backlinks', icon: '🔗', isComingSoon: true },
+                    { id: 'social', label: 'Social Media', icon: '📱' },
+                    { id: 'aeo', label: 'AEO / GEO Radar', icon: '⚡' },
+                    { id: 'media', label: 'Media Studio', icon: '🖼️', badge: 'BETA' },
+                    { id: 'reports', label: 'Reports', icon: '📈', isComingSoon: true },
+                    { id: 'tracking', label: 'Rank Tracking', icon: '🎯', isComingSoon: true },
+                    { id: 'integrations', label: 'Integrations', icon: '🔌' },
+                    { id: 'settings', label: 'Settings', icon: '⚙️' },
+                  ].map((tab) => {
+                    const isActive = activeTab === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => {
+                          setActiveTab(tab.id as any);
+                          setShowMobileMenu(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                          isActive
+                            ? 'bg-[#2b1b12] text-[#fffcf7] shadow-sm'
+                            : 'text-[#6f5a4c] hover:bg-[#f1e8dc] hover:text-[#2b1b12]'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span className="text-base shrink-0">{tab.icon}</span>
+                          <span className="truncate">{tab.label}</span>
+                        </div>
+                        {tab.isComingSoon && (
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-tight bg-amber-100 text-amber-800 border border-amber-300 shrink-0">
+                            Soon
+                          </span>
+                        )}
+                        {tab.badge && (
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-tight bg-purple-100 text-purple-700 border border-purple-200 shrink-0">
+                            {tab.badge}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </nav>
+              </div>
+            </div>
+
+            {/* Drawer User Footer */}
+            <div className="pt-3 border-t border-[#e4d6c6] mt-4 space-y-2">
+              <div className="p-2.5 bg-white border border-[#e4d6c6] rounded-xl flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-[#2b1b12] text-[#fffcf7] flex items-center justify-center font-black text-xs shrink-0">
+                  {user ? (user.name || user.email)?.charAt(0).toUpperCase() : 'U'}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs font-bold text-[#2b1b12] truncate">
+                    {user?.name || user?.email?.split('@')[0] || 'User'}
+                  </div>
+                  <div className="text-[10px] text-[#6f5a4c] truncate">
+                    {user?.email || 'user@rankmonk.in'}
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="w-full py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Exclusive Add Testing Domain Modal for jiyapatel181224@gmail.com */}
       {isSuperAdminTester && showAddDomainModal && (

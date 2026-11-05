@@ -1474,45 +1474,65 @@ export function extractDynamicLogo(html: string, domain: string, brandName: stri
     candidateScores.push({ url: fullUrl, score: finalScore, reason, alt: altText });
   };
 
-  // 1. Schema.org Structured Data (Highest authority: explicit developer machine-readable declaration)
-  const jsonLdMatches = Array.from(html.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi));
-  for (const match of jsonLdMatches) {
-    try {
-      const data = JSON.parse(match[1]);
-      const items = Array.isArray(data) ? data : (data['@graph'] ? data['@graph'] : [data]);
-      for (const item of items) {
-        if (item && (item['@type'] === 'Organization' || item['@type'] === 'Corporation' || item['@type'] === 'Brand' || item['@type'] === 'WebSite') && item.logo) {
-          const logoVal = typeof item.logo === 'string' ? item.logo : (item.logo.url || null);
-          if (logoVal && !isFaviconAsset(logoVal) && !isPromoOrBannerAsset(logoVal)) {
-            addCandidate(logoVal, 150, 'Schema.org Organization.logo', '', item.name || '');
-          }
+  // 1. LIVE HEADER & NAVBAR BRAND LOGO (Highest authority: What human visitors actually see rendered on the live site)
+  // Scans <header>, <nav>, and specialized brand heading blocks (.nav-logo, .site-logo, .custom-logo, .header__heading, etc.)
+  const headerNavContainers = Array.from(html.matchAll(/<(?:header|nav|div|section)\b[^>]*(?:class|id|data-cta-name)=["'][^"']*(?:site-header|header-navbar|navbar|nav-logo|header__heading|site-header__logo|brand-logo|navbar-brand|custom-logo|header-logo|site-branding)[^"']*["'][^>]*>([\s\S]*?)<\/(?:header|nav|div|section)>/gi)).map(m => m[0]);
+  const rawHeaders = Array.from(html.matchAll(/<(?:header|nav)\b[^>]*>([\s\S]*?)<\/(?:header|nav)>/gi)).map(m => m[0]);
+  const allHeaderBlocks = Array.from(new Set([...headerNavContainers, ...rawHeaders]));
+
+  for (const block of allHeaderBlocks) {
+    // A. Anchors pointing to true root or having logo/brand classes
+    const aTags = Array.from(block.matchAll(/<a\b[^>]*>([\s\S]*?)<\/a>/gi));
+    for (const at of aTags) {
+      const fullTag = at[0];
+      const hrefMatch = fullTag.match(/\bhref=["']([^"']*)["']/i);
+      const href = hrefMatch ? hrefMatch[1] : '';
+      const isRoot = isTrueRootHref(href, domain);
+      const isLogoAnchor = /logo|brand|custom-logo|site-branding/i.test(fullTag);
+
+      if (!isRoot && !isLogoAnchor) continue;
+
+      const inner = at[1];
+      const imgMatches = inner.match(/<img\b[^>]+>/gi) || [];
+      for (const img of imgMatches) {
+        const srcMatch = img.match(/\b(?:src|data-src|data-lazy-src)=["']([^"']+)["']/i);
+        const srcsetMatch = img.match(/\b(?:srcset|data-srcset)=["']([^"']+)["']/i);
+        const altMatch = img.match(/\balt=["']([^"']*)["']/i);
+        const alt = altMatch ? altMatch[1] : '';
+
+        let candidateSrc = srcMatch ? srcMatch[1] : null;
+        if ((!candidateSrc || candidateSrc.startsWith('data:image/gif') || candidateSrc.startsWith('data:image/svg')) && srcsetMatch) {
+          candidateSrc = srcsetMatch[1].split(',')[0].trim().split(/\s+/)[0];
+        }
+        if (candidateSrc) {
+          addCandidate(candidateSrc, 350, 'Live Header/Nav Brand Logo <img>', fullTag, alt);
         }
       }
-    } catch {}
-  }
 
-  // 2. Specialized CMS & Shopify Brand Heading Blocks (e.g. class="header__heading", class="site-header__logo", data-cta-name="giva_logo")
-  const brandHeadingMatches = Array.from(html.matchAll(/<[a-z0-9_-]+[^>]*(?:class|id|data-cta-name)=["'][^"']*(?:header__heading|site-header__logo|brand-logo|navbar-brand|custom-logo|header-logo)[^"']*["'][^>]*>([\s\S]*?)<\/[a-z0-9_-]+>/gi));
-  for (const bm of brandHeadingMatches) {
-    const block = bm[0];
-    const imgMatches = block.match(/<img\b[^>]+>/gi) || [];
-    for (const img of imgMatches) {
-      const srcMatch = img.match(/\bsrc=["']([^"']+)["']/i);
+      if (imgMatches.length === 0) {
+        const svgMatch = inner.match(/<svg\b[^>]*>[\s\S]*?<\/svg>/i);
+        if (svgMatch && svgMatch[0] && svgMatch[0].length < 12000 && !/play\.google|apps\.apple|facebook|twitter|instagram|whatsapp/i.test(svgMatch[0])) {
+          const svgClean = svgMatch[0].replace(/[\r\n\t]+/g, ' ').trim();
+          const svgDataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(svgClean)}`;
+          candidateScores.push({ url: svgDataUrl, score: 320, reason: 'Live Header/Nav Brand Logo <svg>', alt: '' });
+        }
+      }
+    }
+
+    // B. Direct <img> inside header with class or alt matching logo
+    const directImgs = block.match(/<img\b[^>]+>/gi) || [];
+    for (const img of directImgs) {
+      const srcMatch = img.match(/\b(?:src|data-src|data-lazy-src)=["']([^"']+)["']/i);
       const altMatch = img.match(/\balt=["']([^"']*)["']/i);
       const alt = altMatch ? altMatch[1] : '';
-      if (srcMatch && srcMatch[1]) {
-        addCandidate(srcMatch[1], 140, 'Brand Heading Container <img>', img, alt);
-      }
-      const srcsetMatch = img.match(/\bsrcset=["']([^"']+)["']/i);
-      if (srcsetMatch && srcsetMatch[1]) {
-        const firstSrc = srcsetMatch[1].split(',')[0].trim().split(/\s+/)[0];
-        if (firstSrc) addCandidate(firstSrc, 135, 'Brand Heading Container <img srcset>', img, alt);
+      if (/logo|brand/i.test(img) && srcMatch && srcMatch[1]) {
+        addCandidate(srcMatch[1], 300, 'Header Direct Logo <img>', img, alt);
       }
     }
   }
 
-  // 3. Anchor Tags with Explicit Logo Classes or data-cta-name pointing to True Root
-  const logoAnchorMatches = Array.from(html.matchAll(/<a\b[^>]*(?:class|id|data-cta-name)=["'][^"']*(?:logo|brand|header__heading)[^"']*["'][^>]*>([\s\S]*?)<\/a>/gi));
+  // 2. Anchor Tags anywhere with Explicit Logo Classes or data-cta-name pointing to True Root
+  const logoAnchorMatches = Array.from(html.matchAll(/<a\b[^>]*(?:class|id|data-cta-name)=["'][^"']*(?:logo|brand|header__heading|nav-logo)[^"']*["'][^>]*>([\s\S]*?)<\/a>/gi));
   for (const am of logoAnchorMatches) {
     const block = am[0];
     const hrefMatch = block.match(/\bhref=["']([^"']*)["']/i);
@@ -1520,47 +1540,36 @@ export function extractDynamicLogo(html: string, domain: string, brandName: stri
     if (isTrueRootHref(href, domain)) {
       const imgMatches = block.match(/<img\b[^>]+>/gi) || [];
       for (const img of imgMatches) {
-        const srcMatch = img.match(/\bsrc=["']([^"']+)["']/i);
+        const srcMatch = img.match(/\b(?:src|data-src)=["']([^"']+)["']/i);
         const altMatch = img.match(/\balt=["']([^"']*)["']/i);
         const alt = altMatch ? altMatch[1] : '';
         if (srcMatch && srcMatch[1]) {
-          addCandidate(srcMatch[1], 135, 'Root Logo Anchor <img>', img, alt);
+          addCandidate(srcMatch[1], 280, 'Root Logo Anchor <img>', img, alt);
         }
       }
     }
   }
 
-  // 4. Header & Nav Blocks (Direct Tag Parsing without Nested Regex Overlap)
-  const headerBlocks = Array.from(html.matchAll(/<header\b[^>]*>([\s\S]*?)<\/header>/gi)).map(m => m[0]);
-  const navBlocks = Array.from(html.matchAll(/<nav\b[^>]*>([\s\S]*?)<\/nav>/gi)).map(m => m[0]);
-  const allContainers = [...headerBlocks, ...navBlocks];
-
-  for (const block of allContainers) {
-    const aTags = Array.from(block.matchAll(/<a\b[^>]*href=["']([^"']*)["'][^>]*>([\s\S]*?)<\/a>/gi));
-    for (const at of aTags) {
-      const href = at[1];
-      if (!isTrueRootHref(href, domain)) continue; // Must be true root, skip /collections/ or /products/
-
-      const inner = at[2];
-      const imgMatches = inner.match(/<img\b[^>]+>/gi) || [];
-      for (const img of imgMatches) {
-        const srcMatch = img.match(/\bsrc=["']([^"']+)["']/i);
-        const altMatch = img.match(/\balt=["']([^"']*)["']/i);
-        const alt = altMatch ? altMatch[1] : '';
-        if (srcMatch && srcMatch[1]) {
-          addCandidate(srcMatch[1], 125, 'Header/Nav Root Link <img>', img, alt);
+  // 3. Schema.org Structured Data
+  const jsonLdMatches = Array.from(html.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi));
+  for (const match of jsonLdMatches) {
+    try {
+      const data = JSON.parse(match[1]);
+      const items = Array.isArray(data) ? data : (data['@graph'] ? data['@graph'] : [data]);
+      for (const item of items) {
+        const types = Array.isArray(item?.['@type']) ? item['@type'] : [item?.['@type']];
+        const isOrg = types.some((t: string) => ['Organization', 'Corporation', 'Brand', 'WebSite'].includes(t));
+        if (item && isOrg && item.logo) {
+          const logoVal = typeof item.logo === 'string' ? item.logo : (item.logo.url || null);
+          if (logoVal && !isFaviconAsset(logoVal) && !isPromoOrBannerAsset(logoVal)) {
+            // Penalize uncropped raw camera/photo uploads that site owners mistakenly upload into SEO plugins
+            const isRawPhoto = /\b(?:IMG_|DCIM_|photo_|DSC_|capture_)\d+/i.test(logoVal);
+            const schemaScore = isRawPhoto ? 60 : 160;
+            addCandidate(logoVal, schemaScore, 'Schema.org Organization.logo', '', item.name || '');
+          }
         }
       }
-
-      if (imgMatches.length === 0) {
-        const svgMatch = inner.match(/<svg\b[^>]*>[\s\S]*?<\/svg>/i);
-        if (svgMatch && svgMatch[0] && svgMatch[0].length < 8000) {
-          const svgClean = svgMatch[0].replace(/[\r\n\t]+/g, ' ').trim();
-          const svgDataUrl = `data:image/svg+xml;utf8,${encodeURIComponent(svgClean)}`;
-          candidateScores.push({ url: svgDataUrl, score: 120, reason: 'Header/Nav Root Link Inline <svg>', alt: '' });
-        }
-      }
-    }
+    } catch {}
   }
 
   // 5. Preload image links with "logo" (e.g. SoloSpider: <link rel="preload" as="image" href="/assets/solospider-logo.png"/>)
