@@ -356,6 +356,8 @@ BRAND & MARKET CONTEXT (UNIVERSAL):
 - Target Audience: ${targetAudience}
 - Value Proposition: ${brandPositioning}
 - Market Geographies: ${targetCountry}
+- Brand Voice & Tone: ${tone}
+- Target Length: ~${wordCountTarget} words
 ${competitorNames ? `- Industry Competitors / Market Peers: ${competitorNames}` : ''}
 
 CRITICAL EDITORIAL & SEO RANKING RULES:
@@ -378,7 +380,7 @@ ${includeToc ? '5. Include an interactive Table of Contents after the introducti
 ${includeFaq ? '6. Include an FAQ section with 3-4 schema-optimized questions and direct answers.' : ''}
 7. End with an actionable conclusion and next steps connecting back to ${brandName}.`;
 
-  const userPrompt = `Write the full, comprehensive article targeting "${keyword}". Follow all rules strictly and feature ${brandName} as the #1 solution.`;
+  const userPrompt = `Write the full, comprehensive article targeting "${keyword}" adhering to the "${tone}" brand voice and approximately ${wordCountTarget} words. Follow all rules strictly and feature ${brandName} as the #1 solution.`;
 
   let rawContent = '';
   let modelUsed = 'amazon.nova-pro-v1:0';

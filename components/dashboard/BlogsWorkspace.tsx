@@ -397,7 +397,13 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
                   type="text"
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
-                  placeholder="e.g. Best Mental Health Therapy Apps in India"
+                  placeholder={
+                    project?.businessCategory
+                      ? `e.g. Best ${project.businessCategory} Solutions for 2026`
+                      : project?.industry
+                      ? `e.g. Strategic Guide to ${project.industry}`
+                      : "e.g. Comprehensive Industry Comparison & Guide"
+                  }
                   className="w-full pl-10 pr-3.5 py-2.5 text-xs font-medium bg-[#f8f3ec]/60 border border-[#e4d6c6] rounded-xl text-[#2b1b12] placeholder:text-slate-400 focus:outline-none focus:border-[#c5a059] focus:bg-white transition-all"
                 />
               </div>
@@ -405,24 +411,48 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
 
             {/* Smart Suggested Topics */}
             <div className="space-y-1.5">
-              <span className="text-[10.5px] font-bold text-[#6f5a4c] uppercase tracking-wider block">
-                Suggested Topics for {cleanDomain}
-              </span>
+              <div className="flex items-center justify-between">
+                <span className="text-[10.5px] font-bold text-[#6f5a4c] uppercase tracking-wider block">
+                  Suggested Topics for {cleanDomain || brandName}
+                </span>
+                <span className="text-[10px] text-slate-400">Click to select & configure</span>
+              </div>
               <div className="space-y-1.5">
-                {suggestedTopics.map((top, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => {
-                      setKeyword(top);
-                      handleGenerate(top);
-                    }}
-                    className="w-full text-left p-2 rounded-xl border border-[#e4d6c6] bg-[#faf6f0] hover:bg-[#ebdcc8] hover:border-[#c5a059] text-[11px] font-semibold text-[#2b1b12] transition-colors flex items-center justify-between group cursor-pointer"
-                  >
-                    <span className="truncate pr-2">{top}</span>
-                    <ArrowRight className="w-3 h-3 text-slate-400 group-hover:text-[#2b1b12] shrink-0" />
-                  </button>
-                ))}
+                {suggestedTopics.map((top, idx) => {
+                  const isSelected = keyword === top;
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setKeyword(top)}
+                      className={`w-full text-left p-2.5 rounded-xl border transition-all flex items-center justify-between group cursor-pointer ${
+                        isSelected
+                          ? 'border-[#c5a059] bg-[#ebdcc8]/60 text-[#2b1b12] ring-1 ring-[#c5a059]/40 shadow-xs'
+                          : 'border-[#e4d6c6] bg-[#faf6f0] hover:bg-[#ebdcc8]/40 hover:border-[#c5a059]/60 text-[#2b1b12]'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 truncate pr-2">
+                        <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 text-[9px] font-bold ${
+                          isSelected ? 'bg-[#c5a059] text-white' : 'bg-[#e4d6c6]/60 text-[#6f5a4c] group-hover:bg-[#c5a059]/30'
+                        }`}>
+                          {isSelected ? <Check className="w-2.5 h-2.5 stroke-[3]" /> : idx + 1}
+                        </div>
+                        <span className={`text-[11px] truncate ${isSelected ? 'font-bold text-[#2b1b12]' : 'font-medium text-[#4a3528]'}`}>
+                          {top}
+                        </span>
+                      </div>
+                      {isSelected ? (
+                        <span className="text-[9.5px] font-bold bg-[#c5a059]/20 text-[#8a5b13] px-1.5 py-0.5 rounded shrink-0">
+                          Selected ✓
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-slate-400 group-hover:text-[#2b1b12] shrink-0 font-medium">
+                          Select →
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -436,9 +466,11 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
                   className="w-full px-2.5 py-2 text-xs font-medium bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl text-[#2b1b12] focus:outline-none focus:border-[#c5a059]"
                 >
                   <option value="Professional & Authoritative">Professional & Authoritative</option>
+                  <option value="Executive & Thought Leadership">Executive & Thought Leadership</option>
                   <option value="Engaging & Conversational">Engaging & Conversational</option>
-                  <option value="Clinical & Evidence-based">Clinical & Evidence-based</option>
-                  <option value="Visionary & Thought Leadership">Visionary & Thought Leadership</option>
+                  <option value="Data-Driven & Analytical">Data-Driven & Analytical</option>
+                  <option value="Educational & Step-by-Step">Educational & Step-by-Step</option>
+                  <option value="Direct & Persuasive">Direct & Persuasive</option>
                 </select>
               </div>
 
@@ -449,9 +481,10 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
                   onChange={(e) => setWordCountTarget(Number(e.target.value))}
                   className="w-full px-2.5 py-2 text-xs font-medium bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl text-[#2b1b12] focus:outline-none focus:border-[#c5a059]"
                 >
-                  <option value={1000}>1,000 words (Standard)</option>
-                  <option value={1500}>1,500 words (Deep Dive)</option>
-                  <option value={2200}>2,200 words (Skyscraper Guide)</option>
+                  <option value={1000}>1,000 words (Standard Article)</option>
+                  <option value={1500}>1,500 words (Comprehensive Deep Dive)</option>
+                  <option value={2000}>2,000 words (Authority Pillar Guide)</option>
+                  <option value={2500}>2,500 words (Skyscraper Benchmark)</option>
                 </select>
               </div>
             </div>
@@ -895,7 +928,7 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
                       type="text"
                       value={githubConfig.repo}
                       onChange={(e) => setGithubConfig({ ...githubConfig, repo: e.target.value })}
-                      placeholder="e.g. jiyapatel/zenup-web"
+                      placeholder="e.g. your-org/your-repo"
                       className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:outline-none focus:border-[#c5a059]"
                     />
                   </div>
