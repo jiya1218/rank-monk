@@ -58,7 +58,7 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
     token: '',
     repo: '',
     branch: 'main',
-    folderPath: 'content/blogs'
+    folderPath: cleanDomain.includes('officex') ? 'content/resources' : 'content/blogs'
   });
 
   const [wpConfig, setWpConfig] = useState({
@@ -139,6 +139,8 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishSuccessInfo, setPublishSuccessInfo] = useState<{ url?: string; message?: string } | null>(null);
   const [showSeoChecklist, setShowSeoChecklist] = useState(false);
+  const [showGithubGuide, setShowGithubGuide] = useState(true);
+  const [showWpGuide, setShowWpGuide] = useState(true);
 
   // Universal dynamic suggested topics based on project industry & category
   const suggestedTopics = useMemo(() => {
@@ -905,8 +907,36 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
             {/* TAB A: GitHub GitOps Config */}
             {activeIntegrationTab === 'github' && (
               <div className="space-y-3.5 text-xs">
-                <div className="p-3 bg-[#f8f3ec] border border-[#e4d6c6] rounded-2xl text-[11px] text-[#4a3528] leading-relaxed">
-                  <strong>How it works:</strong> Commits `.md` files directly to your repo. When committed, your host (Vercel, Netlify, Cloudflare Pages) automatically builds and publishes the blog live in ~30s!
+                <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs text-amber-950 flex items-center gap-1.5">
+                      <HelpCircle className="w-3.5 h-3.5 text-amber-600" />
+                      <span>How to get your GitHub Token (30-Second Guide)</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowGithubGuide(!showGithubGuide)}
+                      className="text-[11px] font-bold text-amber-800 hover:text-amber-950 flex items-center gap-1 cursor-pointer"
+                    >
+                      <span>{showGithubGuide ? 'Hide Steps' : 'View Steps'}</span>
+                      {showGithubGuide ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+
+                  {showGithubGuide && (
+                    <div className="space-y-2 pt-2 border-t border-amber-200/60 text-[11px] text-[#4a3528]">
+                      <ol className="list-decimal list-inside space-y-1.5 leading-relaxed font-medium">
+                        <li>
+                          Open <a href="https://github.com/settings/tokens?type=beta" target="_blank" rel="noopener noreferrer" className="font-bold text-[#0F8B7D] underline inline-flex items-center gap-0.5">GitHub Token Settings <ExternalLink className="w-3 h-3" /></a>
+                        </li>
+                        <li>Click <strong>Generate new token</strong> (Fine-grained).</li>
+                        <li>Give it a name like <code className="bg-white px-1 py-0.5 rounded border border-amber-200 text-xs font-mono">RankMonk</code>.</li>
+                        <li>Under <strong>Repository access</strong>, select <strong>Only select repositories</strong> and choose your website repo.</li>
+                        <li>Under <strong>Permissions → Repository permissions</strong>, find <strong>Contents</strong> and set it to <strong>Read and write</strong>.</li>
+                        <li>Click <strong>Generate token</strong> at the bottom, copy the <code className="bg-white px-1 py-0.5 rounded border border-amber-200 font-mono text-xs">ghp_...</code> string, and paste it below!</li>
+                      </ol>
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-1">
@@ -968,8 +998,34 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
             {/* TAB B: WordPress REST API Config */}
             {activeIntegrationTab === 'wordpress' && (
               <div className="space-y-3.5 text-xs">
-                <div className="p-3 bg-[#f8f3ec] border border-[#e4d6c6] rounded-2xl text-[11px] text-[#4a3528] leading-relaxed">
-                  <strong>No plugins needed:</strong> Uses WordPress native Application Passwords (generated in your WP Admin under <em>Users → Profile → Application Passwords</em>).
+                <div className="bg-blue-50/70 border border-blue-200/80 rounded-2xl p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs text-blue-950 flex items-center gap-1.5">
+                      <HelpCircle className="w-3.5 h-3.5 text-blue-600" />
+                      <span>How to get your WordPress Password (No plugins needed)</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowWpGuide(!showWpGuide)}
+                      className="text-[11px] font-bold text-blue-800 hover:text-blue-950 flex items-center gap-1 cursor-pointer"
+                    >
+                      <span>{showWpGuide ? 'Hide Steps' : 'View Steps'}</span>
+                      {showWpGuide ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+
+                  {showWpGuide && (
+                    <div className="space-y-2 pt-2 border-t border-blue-200/60 text-[11px] text-[#2c3e50]">
+                      <ol className="list-decimal list-inside space-y-1.5 leading-relaxed font-medium">
+                        <li>Log in to your WordPress Admin dashboard (<code className="bg-white px-1 py-0.5 rounded border border-blue-200 font-mono text-xs">yourdomain.com/wp-admin</code>).</li>
+                        <li>In the left sidebar, click <strong>Users → Profile</strong> (or <em>Users → All Users</em> and click your administrator name).</li>
+                        <li>Scroll down near the bottom to the <strong>Application Passwords</strong> section.</li>
+                        <li>Type <code className="bg-white px-1 py-0.5 rounded border border-blue-200 text-xs font-mono">RankMonk</code> in the <em>New Application Password Name</em> input.</li>
+                        <li>Click <strong>Add New Application Password</strong>.</li>
+                        <li>WordPress will display a 16-character password (e.g. <code className="bg-white px-1 py-0.5 rounded border border-blue-200 font-mono text-xs">xxxx xxxx xxxx xxxx</code>). Copy and paste it below!</li>
+                      </ol>
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-1">

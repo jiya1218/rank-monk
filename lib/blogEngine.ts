@@ -667,7 +667,99 @@ ${article.contentMarkdown}
 
   const base64Content = Buffer.from(frontmatter, 'utf-8').toString('base64');
 
-  // Check if file already exists to get SHA
+  // 1. Auto-Scaffold Next.js Dynamic Reader Route if missing from repo
+  let scaffoldedRoute: string | null = null;
+  try {
+    const isResource = cleanFolder.includes('resource') || cleanFolder.includes('case-stud');
+    const targetRouteFolder = isResource ? 'resources' : 'blog';
+    const targetReaderPath = `app/${targetRouteFolder}/[slug]/page.tsx`;
+
+    // Check if reader route already exists
+    const routeCheck = await fetch(`https://api.github.com/repos/${cleanRepo}/contents/${targetReaderPath}?ref=${branch}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/vnd.github+json',
+        'User-Agent': 'RankMonk-GitOps/2.0'
+      }
+    });
+
+    if (routeCheck.status === 404) {
+      // Check if this repo has an app/ folder (Next.js App Router)
+      const appCheck = await fetch(`https://api.github.com/repos/${cleanRepo}/contents/app?ref=${branch}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/vnd.github+json',
+          'User-Agent': 'RankMonk-GitOps/2.0'
+        }
+      });
+
+      if (appCheck.ok) {
+        // Auto-commit the complete Next.js reader page directly into repo
+        const readerCode = `import fs from 'fs';
+import path from 'path';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+
+export async function generateStaticParams() {
+  const dir = path.join(process.cwd(), '${cleanFolder}');
+  if (!fs.existsSync(dir)) return [];
+  const files = fs.readdirSync(dir);
+  return files.filter(f => f.endsWith('.md')).map(f => ({
+    slug: f.replace(/\\.md$/, '')
+  }));
+}
+
+export default async function ${isResource ? 'ResourceArticlePage' : 'BlogArticlePage'}({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const filePath = path.join(process.cwd(), '${cleanFolder}', \`\${slug}.md\`);
+  if (!fs.existsSync(filePath)) notFound();
+
+  const raw = fs.readFileSync(filePath, 'utf-8');
+  const match = raw.match(/^---\\s*\\n([\\s\\S]*?)\\n---\\s*\\n([\\s\\S]*)$/);
+  const body = match ? match[2] : raw;
+  const titleMatch = raw.match(/title:\\s*"(.*?)"/);
+  const title = titleMatch ? titleMatch[1] : slug;
+
+  return (
+    <main className="min-h-screen py-16 px-4 sm:px-6 bg-slate-50">
+      <div className="max-w-4xl mx-auto bg-white border border-slate-200 rounded-3xl p-6 sm:p-12 shadow-sm">
+        <Link href="/${targetRouteFolder}" className="text-xs font-bold text-teal-600 hover:underline mb-6 inline-flex items-center gap-1">
+          ← Back to ${isResource ? 'Resources & Case Studies' : 'Articles'}
+        </Link>
+        <h1 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight mb-8 leading-snug">
+          {title}
+        </h1>
+        <article className="prose prose-slate max-w-none text-slate-700 leading-relaxed whitespace-pre-line text-sm sm:text-base">
+          {body}
+        </article>
+      </div>
+    </main>
+  );
+}
+`;
+        const readerBase64 = Buffer.from(readerCode, 'utf-8').toString('base64');
+        await fetch(`https://api.github.com/repos/${cleanRepo}/contents/${targetReaderPath}`, {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/vnd.github+json',
+            'Content-Type': 'application/json',
+            'User-Agent': 'RankMonk-GitOps/2.0'
+          },
+          body: JSON.stringify({
+            message: `chore: auto-scaffold ${targetReaderPath} via Rank Monk`,
+            content: readerBase64,
+            branch
+          })
+        });
+        scaffoldedRoute = targetReaderPath;
+      }
+    }
+  } catch (scaffoldErr) {
+    console.warn('[GitOps] Auto-scaffold check note:', scaffoldErr);
+  }
+
+  // 2. Check if file already exists to get SHA
   let sha: string | undefined = undefined;
   try {
     const checkRes = await fetch(`https://api.github.com/repos/${cleanRepo}/contents/${filePath}?ref=${branch}`, {
@@ -683,7 +775,7 @@ ${article.contentMarkdown}
     }
   } catch {}
 
-  // Commit file to GitHub
+  // 3. Commit file to GitHub
   const commitRes = await fetch(`https://api.github.com/repos/${cleanRepo}/contents/${filePath}`, {
     method: 'PUT',
     headers: {
@@ -711,7 +803,9 @@ ${article.contentMarkdown}
     filePath,
     commitSha: result.commit?.sha,
     commitUrl: result.commit?.html_url || `https://github.com/${cleanRepo}/blob/${branch}/${filePath}`,
-    message: `Article committed to ${cleanRepo} (${branch}) successfully!`
+    message: scaffoldedRoute
+      ? `✓ Auto-scaffolded dynamic reader route and committed article to ${cleanRepo} (${branch})!`
+      : `✓ Article committed to ${cleanRepo} (${branch}) successfully!`
   };
 }
 
