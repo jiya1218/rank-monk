@@ -35,7 +35,8 @@ export async function POST(req: NextRequest) {
         repo,
         branch: branch || 'main',
         folderPath: folderPath || 'content/blogs',
-        article
+        article,
+        brandDomain: config?.brandDomain || body?.brandDomain || ''
       });
 
       return NextResponse.json(res);

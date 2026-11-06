@@ -137,7 +137,7 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
   const [articlesList, setArticlesList] = useState<BlogArticle[]>([]);
   const [copiedType, setCopiedType] = useState<'html' | 'md' | null>(null);
   const [isPublishing, setIsPublishing] = useState(false);
-  const [publishSuccessInfo, setPublishSuccessInfo] = useState<{ url?: string; message?: string } | null>(null);
+  const [publishSuccessInfo, setPublishSuccessInfo] = useState<{ url?: string; liveUrl?: string; commitUrl?: string; message?: string } | null>(null);
   const [showSeoChecklist, setShowSeoChecklist] = useState(false);
   const [showGithubGuide, setShowGithubGuide] = useState(true);
   const [showWpGuide, setShowWpGuide] = useState(true);
@@ -244,8 +244,12 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           destination,
-          config,
-          article: currentArticle
+          config: {
+            ...config,
+            brandDomain: cleanDomain
+          },
+          article: currentArticle,
+          brandDomain: cleanDomain
         })
       });
 
@@ -254,11 +258,16 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
         throw new Error(result.error || 'Failed to publish');
       }
 
+      const isResource = (config?.folderPath || '').includes('resource') || cleanDomain.includes('officex');
+      const targetFolder = isResource ? 'resources' : 'blog';
+      const liveArticleUrl = result.liveUrl || result.postUrl || (cleanDomain ? `https://${cleanDomain}/${targetFolder}/${currentArticle.slug}` : undefined);
+
       setPublishSuccessInfo({
-        url: result.commitUrl || result.postUrl,
-        message: result.message
+        liveUrl: liveArticleUrl,
+        commitUrl: result.commitUrl,
+        message: liveArticleUrl ? `Blog is successfully posted on: ${liveArticleUrl}` : result.message
       });
-      setToastMessage(`✓ ${result.message}`);
+      setToastMessage(`✓ Blog is successfully posted on: ${liveArticleUrl || cleanDomain}`);
     } catch (err: any) {
       console.error(err);
       setToastMessage(`Publishing error: ${err.message}`);
@@ -745,21 +754,53 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
                 </div>
 
                 {publishSuccessInfo && (
-                  <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900 flex items-center justify-between animate-fade-in">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <span>{publishSuccessInfo.message}</span>
+                  <div className="p-3.5 bg-emerald-50 border-2 border-emerald-300 rounded-2xl text-xs text-emerald-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs animate-fade-in">
+                    <div className="flex items-start sm:items-center gap-2.5">
+                      <div className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 text-[10px] font-bold">
+                        ✓
+                      </div>
+                      <div className="space-y-0.5">
+                        <span className="font-bold text-xs text-emerald-950 flex items-center gap-1.5">
+                          ✓ Blog is successfully posted on:
+                        </span>
+                        {publishSuccessInfo.liveUrl && (
+                          <a
+                            href={publishSuccessInfo.liveUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-mono text-[11px] text-emerald-800 hover:text-emerald-950 underline font-semibold break-all flex items-center gap-1"
+                          >
+                            <span>{publishSuccessInfo.liveUrl}</span>
+                            <ExternalLink className="w-3 h-3 shrink-0" />
+                          </a>
+                        )}
+                      </div>
                     </div>
-                    {publishSuccessInfo.url && (
-                      <a
-                        href={publishSuccessInfo.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-bold underline text-emerald-700 hover:text-emerald-900 flex items-center gap-1 shrink-0"
-                      >
-                        <span>View Live ↗</span>
-                      </a>
-                    )}
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      {publishSuccessInfo.liveUrl && (
+                        <a
+                          href={publishSuccessInfo.liveUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3.5 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                        >
+                          <span>Open Live Blog ↗</span>
+                        </a>
+                      )}
+                      {publishSuccessInfo.commitUrl && (
+                        <a
+                          href={publishSuccessInfo.commitUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-2.5 py-1.5 bg-white border border-emerald-200 hover:bg-emerald-100/60 text-emerald-900 font-bold text-xs rounded-xl transition-all flex items-center gap-1"
+                          title="View commit in GitHub"
+                        >
+                          <GithubIcon className="w-3 h-3" />
+                          <span>Commit</span>
+                        </a>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>

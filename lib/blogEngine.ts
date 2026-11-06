@@ -639,13 +639,15 @@ export async function publishToGitHub({
   repo,
   branch = 'main',
   folderPath = 'content/blogs',
-  article
+  article,
+  brandDomain
 }: {
   token: string;
   repo: string;
   branch?: string;
   folderPath?: string;
   article: BlogArticle;
+  brandDomain?: string;
 }) {
   const cleanRepo = repo.replace(/^(https?:\/\/)?github\.com\//, '').replace(/\/$/, '');
   const cleanFolder = folderPath.replace(/^\/+|\/+$/g, '');
@@ -798,14 +800,20 @@ export default async function ${isResource ? 'ResourceArticlePage' : 'BlogArticl
   }
 
   const result = await commitRes.json();
+  const isResource = cleanFolder.includes('resource') || cleanFolder.includes('case-stud');
+  const targetRouteFolder = isResource ? 'resources' : 'blog';
+  const cleanDomain = brandDomain ? brandDomain.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '') : '';
+  const liveUrl = cleanDomain ? `https://${cleanDomain}/${targetRouteFolder}/${article.slug}` : undefined;
+
   return {
     success: true,
     filePath,
+    liveUrl,
     commitSha: result.commit?.sha,
     commitUrl: result.commit?.html_url || `https://github.com/${cleanRepo}/blob/${branch}/${filePath}`,
-    message: scaffoldedRoute
-      ? `✓ Auto-scaffolded dynamic reader route and committed article to ${cleanRepo} (${branch})!`
-      : `✓ Article committed to ${cleanRepo} (${branch}) successfully!`
+    message: liveUrl
+      ? `Blog is successfully posted on: ${liveUrl}`
+      : `Article committed to ${cleanRepo} (${branch}) successfully!`
   };
 }
 
