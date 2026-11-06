@@ -12,6 +12,7 @@ import { BlogsWorkspace } from '@/components/dashboard/BlogsWorkspace';
 import { ComingSoonWorkspace } from '@/components/dashboard/ComingSoonWorkspace';
 import { SocialStudio } from '@/components/dashboard/SocialStudio';
 import { IntegrationsWorkspace } from '@/components/dashboard/IntegrationsWorkspace';
+import { ReportsWorkspace } from '@/components/dashboard/ReportsWorkspace';
 import { DomainCrawlerProgress } from '@/components/domain/DomainCrawlerProgress';
 import { semanticSortPalette, auditPageForGeo } from '@/lib/brandExtractor';
 
@@ -1086,7 +1087,7 @@ export default function DashboardPage() {
                 { id: 'social', label: 'Social Media', icon: '📱' },
                 { id: 'aeo', label: 'AEO / GEO', icon: '⚡' },
                 { id: 'media', label: 'Media Studio', icon: '🖼️', badge: 'BETA' },
-                { id: 'reports', label: 'Reports', icon: '📈', isComingSoon: true },
+                { id: 'reports', label: 'Reports', icon: '📈' },
                 { id: 'tracking', label: 'Rank Tracking', icon: '🎯', isComingSoon: true },
                 { id: 'integrations', label: 'Integrations', icon: '🔌' },
                 { id: 'settings', label: 'Settings', icon: '⚙️' },
@@ -1613,11 +1614,12 @@ export default function DashboardPage() {
             />
           )}
 
-          {/* TAB 9: REPORTS (COMING SOON) */}
+          {/* TAB 9: REPORTS (EXECUTIVE ORGANIC GROWTH & CRAWL DIGEST) */}
           {activeTab === 'reports' && (
-            <ComingSoonWorkspace
-              moduleName="Executive SEO Reports"
-              onBackToDashboard={() => setActiveTab('overview')}
+            <ReportsWorkspace
+              project={project}
+              user={user}
+              onNavigateToTab={(tab: any) => setActiveTab(tab)}
             />
           )}
 
@@ -1859,7 +1861,7 @@ export default function DashboardPage() {
                     { id: 'social', label: 'Social Media', icon: '📱' },
                     { id: 'aeo', label: 'AEO / GEO Radar', icon: '⚡' },
                     { id: 'media', label: 'Media Studio', icon: '🖼️', badge: 'BETA' },
-                    { id: 'reports', label: 'Reports', icon: '📈', isComingSoon: true },
+                    { id: 'reports', label: 'Reports', icon: '📈' },
                     { id: 'tracking', label: 'Rank Tracking', icon: '🎯', isComingSoon: true },
                     { id: 'integrations', label: 'Integrations', icon: '🔌' },
                     { id: 'settings', label: 'Settings', icon: '⚙️' },

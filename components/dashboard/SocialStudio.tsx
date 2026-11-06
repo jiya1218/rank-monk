@@ -19,6 +19,7 @@ import {
   X,
   BookOpen
 } from 'lucide-react';
+import { UniversalZoomModal } from '@/components/ui/UniversalZoomModal';
 
 const Instagram = ({ className = "w-5 h-5" }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -87,6 +88,7 @@ export function SocialStudio({ project, user, mediaAssets = [], onNavigateToInte
   const [isPublishing, setIsPublishing] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
+  const [zoomImage, setZoomImage] = useState<string | null>(null);
 
   const brandName = project?.name || 'Your Brand';
   const domain = project?.domain || 'company.com';
@@ -622,15 +624,19 @@ What’s your primary organic focus this quarter? Let us know in the comments be
 
             {selectedMediaUrl ? (
               <div className="relative rounded-2xl overflow-hidden border border-[#e4d6c6] bg-[#f8f3ec] p-2 flex items-center justify-between">
-                <div className="flex items-center gap-3">
+                <div
+                  onClick={() => setZoomImage(selectedMediaUrl)}
+                  className="flex items-center gap-3 cursor-zoom-in group"
+                  title="Click to Zoom In & Inspect Full HD"
+                >
                   <img
                     src={selectedMediaUrl}
                     alt="Attached"
-                    className="w-14 h-14 rounded-xl object-cover border border-[#e4d6c6]"
+                    className="w-14 h-14 rounded-xl object-cover border border-[#e4d6c6] group-hover:scale-105 transition-transform"
                   />
                   <div className="text-xs">
-                    <span className="font-bold text-[#2b1b12] block">Visual Attached</span>
-                    <span className="text-[10px] text-[#6f5a4c] truncate max-w-xs block">Ready to publish</span>
+                    <span className="font-bold text-[#2b1b12] block">Visual Attached 🔍</span>
+                    <span className="text-[10px] text-[#6f5a4c] truncate max-w-xs block">Click to inspect Full HD</span>
                   </div>
                 </div>
                 <button
@@ -766,9 +772,20 @@ What’s your primary organic focus this quarter? Let us know in the comments be
               </div>
 
               {/* Instagram Image */}
-              <div className="aspect-square bg-slate-950 flex items-center justify-center overflow-hidden">
+              <div
+                onClick={() => selectedMediaUrl && setZoomImage(selectedMediaUrl)}
+                className={`aspect-square bg-slate-950 flex items-center justify-center overflow-hidden ${
+                  selectedMediaUrl ? 'cursor-zoom-in group relative' : ''
+                }`}
+                title={selectedMediaUrl ? "Click to Zoom In & Inspect Full HD" : undefined}
+              >
                 {selectedMediaUrl ? (
-                  <img src={selectedMediaUrl} alt="Post" className="w-full h-full object-cover" />
+                  <>
+                    <img src={selectedMediaUrl} alt="Post" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform" />
+                    <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/70 text-white text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">
+                      🔍 Zoom
+                    </div>
+                  </>
                 ) : (
                   <div className="text-center p-6 text-slate-400 space-y-2">
                     <ImageIcon className="w-10 h-10 mx-auto text-slate-600" />
@@ -816,8 +833,15 @@ What’s your primary organic focus this quarter? Let us know in the comments be
                 {postText || 'Your executive LinkedIn post and industry insight will display here...'}
               </div>
               {selectedMediaUrl && (
-                <div className="rounded-xl overflow-hidden border border-slate-200">
-                  <img src={selectedMediaUrl} alt="Visual" className="w-full h-48 object-cover" />
+                <div
+                  onClick={() => setZoomImage(selectedMediaUrl)}
+                  className="rounded-xl overflow-hidden border border-slate-200 cursor-zoom-in group relative"
+                  title="Click to Zoom In & Inspect Full HD"
+                >
+                  <img src={selectedMediaUrl} alt="Visual" className="w-full h-48 object-cover group-hover:scale-[1.02] transition-transform" />
+                  <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/70 text-white text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">
+                    🔍 Zoom
+                  </div>
                 </div>
               )}
             </div>
@@ -844,8 +868,15 @@ What’s your primary organic focus this quarter? Let us know in the comments be
                 {postText || 'Your high-velocity X post will display here...'}
               </div>
               {selectedMediaUrl && (
-                <div className="rounded-2xl overflow-hidden border border-slate-200">
-                  <img src={selectedMediaUrl} alt="Media" className="w-full h-44 object-cover" />
+                <div
+                  onClick={() => setZoomImage(selectedMediaUrl)}
+                  className="rounded-2xl overflow-hidden border border-slate-200 cursor-zoom-in group relative"
+                  title="Click to Zoom In & Inspect Full HD"
+                >
+                  <img src={selectedMediaUrl} alt="Media" className="w-full h-44 object-cover group-hover:scale-[1.02] transition-transform" />
+                  <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/70 text-white text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">
+                    🔍 Zoom
+                  </div>
                 </div>
               )}
             </div>
@@ -869,8 +900,15 @@ What’s your primary organic focus this quarter? Let us know in the comments be
                 {postText || 'Your Facebook Page update will appear here...'}
               </div>
               {selectedMediaUrl && (
-                <div className="rounded-xl overflow-hidden border border-slate-200">
-                  <img src={selectedMediaUrl} alt="Visual" className="w-full h-48 object-cover" />
+                <div
+                  onClick={() => setZoomImage(selectedMediaUrl)}
+                  className="rounded-xl overflow-hidden border border-slate-200 cursor-zoom-in group relative"
+                  title="Click to Zoom In & Inspect Full HD"
+                >
+                  <img src={selectedMediaUrl} alt="Visual" className="w-full h-48 object-cover group-hover:scale-[1.02] transition-transform" />
+                  <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/70 text-white text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">
+                    🔍 Zoom
+                  </div>
                 </div>
               )}
             </div>
@@ -977,6 +1015,15 @@ What’s your primary organic focus this quarter? Let us know in the comments be
           </div>
         </div>
       )}
+
+      {/* Universal Asset Inspection & HD Zoom Lightbox */}
+      <UniversalZoomModal
+        isOpen={Boolean(zoomImage)}
+        onClose={() => setZoomImage(null)}
+        imageUrl={zoomImage}
+        title={`${brandName} Social Visual Preview`}
+        subtitle="1080p High-Resolution Post Asset"
+      />
     </div>
   );
 }

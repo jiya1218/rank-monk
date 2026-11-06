@@ -29,8 +29,13 @@ import {
   Info,
   MapPin,
   Plus,
-  Trash2
+  Trash2,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
+  Maximize2
 } from 'lucide-react';
+import { UniversalZoomModal } from '@/components/ui/UniversalZoomModal';
 
 interface BrandingStudioProps {
   project: any;
@@ -51,6 +56,8 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
   const [logoFailed, setLogoFailed] = useState(false);
   const [logoCanvasBg, setLogoCanvasBg] = useState<'light' | 'dark' | 'grid'>('light');
   const [activeScoreTooltip, setActiveScoreTooltip] = useState<'health' | 'tone' | 'audience' | 'visual' | null>(null);
+  const [assetZoom, setAssetZoom] = useState<number>(1);
+  const [zoomModalImage, setZoomModalImage] = useState<{ url: string; title: string; subtitle?: string } | null>(null);
 
   // Auto-detect white logos or dark brand identity to show on dark canvas automatically
   useEffect(() => {
@@ -814,153 +821,248 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
               </div>
             </div>
 
-            {/* Logo and Favicon Previews with Canvas Background Switcher */}
+            {/* Logo and Favicon Previews with Canvas Background Switcher & Universal Zoom */}
             <div className="space-y-4 text-xs">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
                   Brand Assets
                 </span>
-                <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
-                  <span className="text-[9px] font-bold text-slate-400 px-1 uppercase tracking-tight">Canvas:</span>
-                  <button
-                    type="button"
-                    onClick={() => setLogoCanvasBg('light')}
-                    className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
-                      logoCanvasBg === 'light'
-                        ? 'bg-white text-slate-900 shadow-xs border border-slate-200'
-                        : 'text-slate-500 hover:text-slate-900'
-                    }`}
-                    title="Light background (standard)"
-                  >
-                    ☀️ Light
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setLogoCanvasBg('dark')}
-                    className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
-                      logoCanvasBg === 'dark'
-                        ? 'bg-slate-950 text-white shadow-xs'
-                        : 'text-slate-500 hover:text-slate-900'
-                    }`}
-                    title="Dark background (reveals white & transparent logos)"
-                  >
-                    🌙 Dark
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setLogoCanvasBg('grid')}
-                    className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
-                      logoCanvasBg === 'grid'
-                        ? 'bg-white text-slate-900 shadow-xs border border-slate-200'
-                        : 'text-slate-500 hover:text-slate-900'
-                    }`}
-                    title="Transparent grid canvas"
-                  >
-                    🏁 Grid
-                  </button>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {/* Canvas Background Controls */}
+                  <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+                    <span className="text-[9px] font-bold text-slate-400 px-1 uppercase tracking-tight">Canvas:</span>
+                    <button
+                      type="button"
+                      onClick={() => setLogoCanvasBg('light')}
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
+                        logoCanvasBg === 'light'
+                          ? 'bg-white text-slate-900 shadow-xs border border-slate-200'
+                          : 'text-slate-500 hover:text-slate-900'
+                      }`}
+                      title="Light background (standard)"
+                    >
+                      ☀️ Light
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setLogoCanvasBg('dark')}
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
+                        logoCanvasBg === 'dark'
+                          ? 'bg-slate-950 text-white shadow-xs'
+                          : 'text-slate-500 hover:text-slate-900'
+                      }`}
+                      title="Dark background (reveals white & transparent logos)"
+                    >
+                      🌙 Dark
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setLogoCanvasBg('grid')}
+                      className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
+                        logoCanvasBg === 'grid'
+                          ? 'bg-white text-slate-900 shadow-xs border border-slate-200'
+                          : 'text-slate-500 hover:text-slate-900'
+                      }`}
+                      title="Transparent grid canvas"
+                    >
+                      🏁 Grid
+                    </button>
+                  </div>
+
+                  {/* Universal In-Place Zoom Controls */}
+                  <div className="flex items-center gap-0.5 bg-slate-100 p-0.5 rounded-lg border border-slate-200 shadow-2xs">
+                    <span className="text-[9px] font-bold text-slate-400 px-1 uppercase tracking-tight">Zoom:</span>
+                    <button
+                      type="button"
+                      onClick={() => setAssetZoom(prev => Math.max(0.5, Number((prev - 0.25).toFixed(2))))}
+                      className="w-5 h-5 flex items-center justify-center rounded text-slate-600 hover:text-slate-900 hover:bg-white text-xs font-bold transition-all cursor-pointer"
+                      title="Zoom Out (-)"
+                    >
+                      <ZoomOut className="w-3 h-3" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAssetZoom(1)}
+                      className="text-[10px] font-mono font-bold text-slate-700 min-w-[34px] text-center hover:text-[#c5a059] cursor-pointer"
+                      title="Click to reset zoom to 100%"
+                    >
+                      {Math.round(assetZoom * 100)}%
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAssetZoom(prev => Math.min(3, Number((prev + 0.25).toFixed(2))))}
+                      className="w-5 h-5 flex items-center justify-center rounded text-slate-600 hover:text-slate-900 hover:bg-white text-xs font-bold transition-all cursor-pointer"
+                      title="Zoom In (+)"
+                    >
+                      <ZoomIn className="w-3 h-3" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAssetZoom(1)}
+                      className="w-5 h-5 flex items-center justify-center rounded text-slate-400 hover:text-slate-700 hover:bg-white transition-all cursor-pointer"
+                      title="Reset Zoom to 100%"
+                    >
+                      <RotateCcw className="w-2.5 h-2.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Logo</span>
-                  <div className={`h-20 rounded-xl flex items-center justify-center p-3 overflow-hidden shadow-xs transition-colors border ${
-                    logoCanvasBg === 'dark'
-                      ? 'bg-slate-950 border-slate-800 shadow-inner'
-                      : logoCanvasBg === 'grid'
-                      ? 'bg-[repeating-conic-gradient(#e2e8f0_0%_25%,#ffffff_0%_50%)] bg-[length:14px_14px] border-slate-200'
-                      : 'bg-slate-50 border-slate-200'
-                  }`}>
-                    {(() => {
-                      const isBadPromo = project?.logoUrl && (
-                        project.logoUrl.includes('Frame_1171278262') ||
-                        project.logoUrl.toLowerCase().includes('under1000') ||
-                        project.logoUrl.toLowerCase().includes('under-1000') ||
-                        project.logoUrl.toLowerCase().includes('grandchild-pill')
-                      );
-                      const displayLogo = (!logoFailed && project?.logoUrl && !isBadPromo && !project.logoUrl.includes('google.com/s2/favicons'))
-                        ? project.logoUrl
-                        : (!logoFailed && project?.faviconUrl && !project.faviconUrl.includes('google.com/s2/favicons'))
-                        ? project.faviconUrl
-                        : (cleanDomain.includes('giva.co') ? 'https://www.giva.co/cdn/shop/files/logo__3.png' : null);
+                {/* LOGO CARD */}
+                {(() => {
+                  const isBadPromo = project?.logoUrl && (
+                    project.logoUrl.includes('Frame_1171278262') ||
+                    project.logoUrl.toLowerCase().includes('under1000') ||
+                    project.logoUrl.toLowerCase().includes('under-1000') ||
+                    project.logoUrl.toLowerCase().includes('grandchild-pill')
+                  );
+                  const displayLogo = (!logoFailed && project?.logoUrl && !isBadPromo && !project.logoUrl.includes('google.com/s2/favicons'))
+                    ? project.logoUrl
+                    : (!logoFailed && project?.faviconUrl && !project.faviconUrl.includes('google.com/s2/favicons'))
+                    ? project.faviconUrl
+                    : (cleanDomain.includes('giva.co') ? 'https://www.giva.co/cdn/shop/files/logo__3.png' : null);
 
-                      return displayLogo ? (
-                        project?.logoWordmarkUrl ? (
-                          <div className="flex items-center justify-center gap-2 max-h-14 max-w-full px-1">
-                            <img
-                              src={displayLogo}
-                              alt={project?.name || 'Logo Mark'}
-                              className="max-h-12 w-auto object-contain filter drop-shadow-xs shrink-0"
-                              onError={() => setLogoFailed(true)}
-                            />
-                            <img
-                              src={project.logoWordmarkUrl}
-                              alt="Brand Wordmark"
-                              className="max-h-8 w-auto object-contain filter drop-shadow-xs shrink-0"
-                            />
-                          </div>
-                        ) : (
-                          <img
-                            src={displayLogo}
-                            alt={project?.name || 'Logo'}
-                            className="max-h-14 max-w-full object-contain filter drop-shadow-xs"
-                            onError={() => setLogoFailed(true)}
-                            onLoad={(e) => {
-                              try {
-                                const img = e.currentTarget;
-                                const canvas = document.createElement('canvas');
-                                canvas.width = Math.min(img.naturalWidth || 64, 64);
-                                canvas.height = Math.min(img.naturalHeight || 64, 64);
-                                const ctx = canvas.getContext('2d');
-                                if (ctx) {
-                                  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                                  const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-                                  let whitePixels = 0;
-                                  let opaquePixels = 0;
-                                  for (let i = 0; i < data.length; i += 4) {
-                                    if (data[i + 3] > 30) {
-                                      opaquePixels++;
-                                      const brightness = (data[i] * 299 + data[i+1] * 587 + data[i+2] * 114) / 1000;
-                                      if (brightness > 210) whitePixels++;
+                  return (
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Logo</span>
+                        <span className="text-[10px] text-slate-400 font-medium">Click to inspect HD</span>
+                      </div>
+                      <div
+                        onClick={() => {
+                          if (displayLogo) {
+                            setZoomModalImage({
+                              url: displayLogo,
+                              title: `${project?.name || 'Brand'} Official Logo`,
+                              subtitle: `Domain: ${cleanDomain} • Original Aspect Ratio`
+                            });
+                          }
+                        }}
+                        className={`h-24 sm:h-28 rounded-xl flex items-center justify-center p-3 overflow-hidden shadow-xs transition-all border cursor-zoom-in group relative ${
+                          logoCanvasBg === 'dark'
+                            ? 'bg-slate-950 border-slate-800 shadow-inner'
+                            : logoCanvasBg === 'grid'
+                            ? 'bg-[repeating-conic-gradient(#e2e8f0_0%_25%,#ffffff_0%_50%)] bg-[length:14px_14px] border-slate-200'
+                            : 'bg-slate-50 border-slate-200'
+                        }`}
+                        title="Click to Zoom In & Inspect Full HD"
+                      >
+                        <div
+                          className="transition-transform duration-150 ease-out origin-center flex items-center justify-center max-w-full max-h-full"
+                          style={{ transform: `scale(${assetZoom})` }}
+                        >
+                          {displayLogo ? (
+                            project?.logoWordmarkUrl ? (
+                              <div className="flex items-center justify-center gap-2 max-h-16 max-w-full px-1">
+                                <img
+                                  src={displayLogo}
+                                  alt={project?.name || 'Logo Mark'}
+                                  className="max-h-14 w-auto object-contain filter drop-shadow-xs shrink-0"
+                                  onError={() => setLogoFailed(true)}
+                                />
+                                <img
+                                  src={project.logoWordmarkUrl}
+                                  alt="Brand Wordmark"
+                                  className="max-h-10 w-auto object-contain filter drop-shadow-xs shrink-0"
+                                />
+                              </div>
+                            ) : (
+                              <img
+                                src={displayLogo}
+                                alt={project?.name || 'Logo'}
+                                className="max-h-16 max-w-full object-contain filter drop-shadow-xs"
+                                onError={() => setLogoFailed(true)}
+                                onLoad={(e) => {
+                                  try {
+                                    const img = e.currentTarget;
+                                    const canvas = document.createElement('canvas');
+                                    canvas.width = Math.min(img.naturalWidth || 64, 64);
+                                    canvas.height = Math.min(img.naturalHeight || 64, 64);
+                                    const ctx = canvas.getContext('2d');
+                                    if (ctx) {
+                                      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                                      const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+                                      let whitePixels = 0;
+                                      let opaquePixels = 0;
+                                      for (let i = 0; i < data.length; i += 4) {
+                                        if (data[i + 3] > 30) {
+                                          opaquePixels++;
+                                          const brightness = (data[i] * 299 + data[i+1] * 587 + data[i+2] * 114) / 1000;
+                                          if (brightness > 210) whitePixels++;
+                                        }
+                                      }
+                                      if (opaquePixels > 0 && (whitePixels / opaquePixels) > 0.3) {
+                                        setLogoCanvasBg('dark');
+                                      }
                                     }
-                                  }
-                                  if (opaquePixels > 0 && (whitePixels / opaquePixels) > 0.3) {
-                                    setLogoCanvasBg('dark');
-                                  }
-                                }
-                              } catch (_) {}
-                            }}
-                          />
-                        )
-                      ) : (
-                        <div className="flex items-center justify-center">
-                          <img
-                            src={project?.faviconUrl || `https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128`}
-                            alt="Brand Mark"
-                            className="max-h-10 max-w-full object-contain rounded-md"
-                            onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
-                          />
+                                  } catch (_) {}
+                                }}
+                              />
+                            )
+                          ) : (
+                            <div className="flex items-center justify-center">
+                              <img
+                                src={project?.faviconUrl || `https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128`}
+                                alt="Brand Mark"
+                                className="max-h-12 max-w-full object-contain rounded-md"
+                                onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                              />
+                            </div>
+                          )}
                         </div>
-                      );
-                    })()}
-                  </div>
-                </div>
 
+                        {/* Hover inspect badge */}
+                        <div className="absolute inset-x-0 bottom-0 py-1 bg-black/60 backdrop-blur-xs text-white text-[9.5px] font-bold text-center opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1 pointer-events-none">
+                          <Maximize2 className="w-3 h-3 text-[#c5a059]" />
+                          <span>Click to Zoom &amp; Inspect HD</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* FAVICON CARD */}
                 <div>
-                  <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Favicon</span>
-                  <div className={`h-20 rounded-xl flex items-center justify-center p-3 shadow-xs transition-colors border ${
-                    logoCanvasBg === 'dark'
-                      ? 'bg-slate-950 border-slate-800'
-                      : logoCanvasBg === 'grid'
-                      ? 'bg-[repeating-conic-gradient(#e2e8f0_0%_25%,#ffffff_0%_50%)] bg-[length:14px_14px] border-slate-200'
-                      : 'bg-slate-50 border-slate-200'
-                  }`}>
-                    <img
-                      src={project?.faviconUrl || `https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128`}
-                      alt="Favicon"
-                      className="w-10 h-10 object-contain"
-                      onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
-                    />
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Favicon</span>
+                    <span className="text-[10px] text-slate-400 font-medium">Click to inspect HD</span>
+                  </div>
+                  <div
+                    onClick={() => {
+                      const favUrl = project?.faviconUrl || `https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128`;
+                      setZoomModalImage({
+                        url: favUrl,
+                        title: `${project?.name || 'Brand'} Official Favicon`,
+                        subtitle: `Domain: ${cleanDomain} • 128×128 High-Resolution Asset`
+                      });
+                    }}
+                    className={`h-24 sm:h-28 rounded-xl flex items-center justify-center p-3 overflow-hidden shadow-xs transition-colors border cursor-zoom-in group relative ${
+                      logoCanvasBg === 'dark'
+                        ? 'bg-slate-950 border-slate-800'
+                        : logoCanvasBg === 'grid'
+                        ? 'bg-[repeating-conic-gradient(#e2e8f0_0%_25%,#ffffff_0%_50%)] bg-[length:14px_14px] border-slate-200'
+                        : 'bg-slate-50 border-slate-200'
+                    }`}
+                    title="Click to Zoom In & Inspect Full HD"
+                  >
+                    <div
+                      className="transition-transform duration-150 ease-out origin-center flex items-center justify-center"
+                      style={{ transform: `scale(${assetZoom})` }}
+                    >
+                      <img
+                        src={project?.faviconUrl || `https://www.google.com/s2/favicons?domain=${cleanDomain}&sz=128`}
+                        alt="Favicon"
+                        className="w-10 h-10 object-contain drop-shadow-xs"
+                        onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                      />
+                    </div>
+
+                    {/* Hover inspect badge */}
+                    <div className="absolute inset-x-0 bottom-0 py-1 bg-black/60 backdrop-blur-xs text-white text-[9.5px] font-bold text-center opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1 pointer-events-none">
+                      <Maximize2 className="w-3 h-3 text-[#c5a059]" />
+                      <span>Click to Zoom &amp; Inspect HD</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1855,6 +1957,16 @@ export function BrandingStudio({ project, onRefreshBrand, onNavigateTab }: Brand
           </div>
         </div>
       )}
+
+      {/* Universal Asset Inspection & HD Zoom Lightbox */}
+      <UniversalZoomModal
+        isOpen={Boolean(zoomModalImage)}
+        onClose={() => setZoomModalImage(null)}
+        imageUrl={zoomModalImage?.url || null}
+        title={zoomModalImage?.title}
+        subtitle={zoomModalImage?.subtitle}
+        initialCanvasBg={logoCanvasBg}
+      />
     </div>
   );
 }
