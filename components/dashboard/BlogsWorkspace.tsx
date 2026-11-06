@@ -73,11 +73,27 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
     secretKey: `rm_sec_${Math.random().toString(36).substr(2, 10)}`
   });
 
+  const normalizeRepoName = (r: string) => {
+    return (r || '')
+      .replace(/^(https?:\/\/)?(www\.)?github\.com\//i, '')
+      .replace(/\.git$/i, '')
+      .replace(/^\/+|\/+$/g, '')
+      .trim();
+  };
+
+  const cleanRepoName = useMemo(() => {
+    return normalizeRepoName(githubConfig.repo);
+  }, [githubConfig.repo]);
+
   // Load saved configurations and articles from localStorage on mount
   useEffect(() => {
     try {
       const savedGh = localStorage.getItem(`rm_gh_config_${cleanDomain}`);
-      if (savedGh) setGithubConfig(JSON.parse(savedGh));
+      if (savedGh) {
+        const parsed = JSON.parse(savedGh);
+        if (parsed.repo) parsed.repo = normalizeRepoName(parsed.repo);
+        setGithubConfig(parsed);
+      }
 
       const savedWp = localStorage.getItem(`rm_wp_config_${cleanDomain}`);
       if (savedWp) setWpConfig(JSON.parse(savedWp));
@@ -147,7 +163,10 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
   const saveIntegrationConfig = (type: 'github' | 'wordpress' | 'webhook') => {
     try {
       if (type === 'github') {
-        localStorage.setItem(`rm_gh_config_${cleanDomain}`, JSON.stringify(githubConfig));
+        const cleanRepo = normalizeRepoName(githubConfig.repo);
+        const sanitized = { ...githubConfig, repo: cleanRepo };
+        setGithubConfig(sanitized);
+        localStorage.setItem(`rm_gh_config_${cleanDomain}`, JSON.stringify(sanitized));
       } else if (type === 'wordpress') {
         localStorage.setItem(`rm_wp_config_${cleanDomain}`, JSON.stringify(wpConfig));
       } else if (type === 'webhook') {
@@ -513,7 +532,8 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 <GithubIcon className="w-3 h-3 text-emerald-800" />
-                <span>GitHub: <strong className="font-mono text-emerald-950">{githubConfig.repo}</strong></span>
+                <span>GitHub: <strong className="font-mono text-emerald-950">{cleanRepoName || githubConfig.repo}</strong></span>
+                <span className="text-[9px] font-black uppercase tracking-wider bg-emerald-600 text-white px-1.5 py-0.2 rounded">● LIVE</span>
               </div>
             ) : isWpConnected ? (
               <div

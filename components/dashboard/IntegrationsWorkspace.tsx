@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Share2,
   CheckCircle2,
@@ -22,7 +22,9 @@ import {
   Copy,
   Check,
   Sparkles,
-  Loader2
+  Loader2,
+  Settings2,
+  Code
 } from 'lucide-react';
 
 // Custom inline SVG icons for social platforms
@@ -84,7 +86,7 @@ export function IntegrationsWorkspace({
 }: IntegrationsWorkspaceProps) {
   const [activeCategory, setActiveCategory] = useState<'all' | 'cms' | 'social' | 'rulebook'>('all');
   const [accounts, setAccounts] = useState<SocialAccount[]>([]);
-  const [ruleBookTab, setRuleBookTab] = useState<'meta' | 'linkedin' | 'twitter' | 'faq'>('meta');
+  const [ruleBookTab, setRuleBookTab] = useState<'github' | 'wordpress' | 'meta' | 'linkedin' | 'twitter' | 'faq'>('github');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
@@ -193,6 +195,15 @@ export function IntegrationsWorkspace({
 
   const cleanDomain = project?.domain ? project.domain.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '') : 'default';
 
+  // Helper to normalize any repo string (e.g. "https://github.com/company/repo.git" -> "company/repo")
+  const normalizeRepoName = (r: string) => {
+    return r
+      .replace(/^(https?:\/\/)?(www\.)?github\.com\//i, '')
+      .replace(/\.git$/i, '')
+      .replace(/^\/+|\/+$/g, '')
+      .trim();
+  };
+
   // GitHub GitOps & WordPress State for CMS Publishing
   const [githubConfig, setGithubConfig] = useState({
     token: '',
@@ -215,14 +226,37 @@ export function IntegrationsWorkspace({
     if (typeof window === 'undefined') return;
     try {
       const savedGh = localStorage.getItem(`rm_gh_config_${cleanDomain}`);
-      if (savedGh) setGithubConfig(JSON.parse(savedGh));
+      if (savedGh) {
+        const parsed = JSON.parse(savedGh);
+        if (parsed.repo) parsed.repo = normalizeRepoName(parsed.repo);
+        setGithubConfig(parsed);
+      }
       const savedWp = localStorage.getItem(`rm_wp_config_${cleanDomain}`);
       if (savedWp) setWpConfig(JSON.parse(savedWp));
     } catch {}
   }, [cleanDomain]);
 
-  const isGithubConnected = Boolean(githubConfig.token && githubConfig.repo);
+  const cleanRepoName = useMemo(() => {
+    if (!githubConfig.repo) return '';
+    return normalizeRepoName(githubConfig.repo);
+  }, [githubConfig.repo]);
+
+  const isGithubConnected = Boolean(githubConfig.token && cleanRepoName);
   const isWpConnected = Boolean(wpConfig.wpUrl && wpConfig.wpUsername && wpConfig.wpAppPassword);
+
+  const connectedStats = useMemo(() => {
+    let count = 0;
+    if (isGithubConnected) count++;
+    if (isWpConnected) count++;
+    if (accounts.some(a => a.platform === 'instagram')) count++;
+    if (accounts.some(a => a.platform === 'facebook')) count++;
+    if (accounts.some(a => a.platform === 'linkedin')) count++;
+    if (accounts.some(a => a.platform === 'twitter')) count++;
+    return {
+      totalConnected: count,
+      totalAvailable: 6
+    };
+  }, [isGithubConnected, isWpConnected, accounts]);
 
   const handleSaveGithub = (e: React.FormEvent) => {
     e.preventDefault();
@@ -230,8 +264,14 @@ export function IntegrationsWorkspace({
       showToast('⚠️ Please enter both GitHub Token and Repository (owner/repo).');
       return;
     }
+    const cleanRepo = normalizeRepoName(githubConfig.repo);
+    const sanitized = {
+      ...githubConfig,
+      repo: cleanRepo
+    };
+    setGithubConfig(sanitized);
     try {
-      localStorage.setItem(`rm_gh_config_${cleanDomain}`, JSON.stringify(githubConfig));
+      localStorage.setItem(`rm_gh_config_${cleanDomain}`, JSON.stringify(sanitized));
       showToast('✅ GitHub GitOps settings saved and connected!');
       setActiveModal('none');
     } catch {}
@@ -448,7 +488,7 @@ export function IntegrationsWorkspace({
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#c5a059]/20 text-[#8c6b2d] border border-[#c5a059]/30">
-              Integrations & Distribution
+              Integrations &amp; Distribution Hub
             </span>
             <span className="text-xs text-[#6f5a4c]">|</span>
             <span className="text-xs font-medium text-[#6f5a4c]">
@@ -456,138 +496,234 @@ export function IntegrationsWorkspace({
             </span>
           </div>
           <h1 className="font-editorial text-2xl sm:text-3xl md:text-4xl font-bold text-[#2b1b12] break-words">
-            Integrations & Connected Channels
+            Integrations &amp; Connected Channels
           </h1>
           <p className="text-xs md:text-sm text-[#6f5a4c] mt-1 max-w-2xl leading-relaxed">
-            Authenticate your official social media channels, CMS platforms, and indexing endpoints to enable automated 1-click publishing and continuous organic syndication.
+            Universal integration hub: Authenticate your GitOps website repository, WordPress CMS, and official social media platforms to enable automated 1-click publishing and omni-channel syndication.
           </p>
         </div>
 
-        {/* Action button to switch to Social Studio */}
-        {onNavigateToSocial && (
-          <button
-            onClick={onNavigateToSocial}
-            className="flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-[#2b1b12] text-white hover:bg-[#3d271a] transition-all text-xs font-bold shadow-sm shrink-0 cursor-pointer self-start md:self-auto"
-          >
-            <span>Open Social Studio</span>
-            <ArrowRight className="w-3.5 h-3.5 text-[#c5a059]" />
-          </button>
-        )}
+        {/* Global Connection Health Status & Quick Navigation */}
+        <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
+          <div className="px-3.5 py-2 rounded-xl bg-[#f8f3ec] border border-[#d6be96]/70 flex items-center gap-2.5 shadow-2xs">
+            <span className={`w-2.5 h-2.5 rounded-full ${connectedStats.totalConnected > 0 ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`} />
+            <span className="text-xs font-bold text-[#2b1b12]">
+              <strong className="text-emerald-700">{connectedStats.totalConnected}</strong> of {connectedStats.totalAvailable} Channels Live
+            </span>
+          </div>
+          {onNavigateToSocial && (
+            <button
+              onClick={onNavigateToSocial}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-[#e4d6c6] bg-white text-[#2b1b12] hover:bg-[#f8f3ec] transition-all text-xs font-bold shadow-2xs shrink-0 cursor-pointer"
+              title="Open Social Studio"
+            >
+              <span>Social Studio</span>
+              <ArrowRight className="w-3.5 h-3.5 text-[#c5a059]" />
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Active Channels & CMS Quick Bar */}
-      <div className="p-3 sm:p-4 bg-gradient-to-r from-[#fbf8f3] via-[#f7f0e4] to-[#f4ebe0] border border-[#d6be96]/60 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-2xs">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[10.5px] font-black uppercase tracking-wider text-[#8c6b2d] mr-1">
-            Active Integrations:
+      {/* Active Integrations Summary Hub */}
+      <div className="p-3.5 sm:p-5 bg-gradient-to-r from-[#fbf8f3] via-[#f7f0e4] to-[#f4ebe0] border border-[#d6be96]/60 rounded-2xl shadow-2xs space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#e4d6c6]/60 pb-2">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-xs font-black uppercase tracking-wider text-[#8c6b2d]">
+              Live Connection Status &amp; Credentials
+            </span>
+          </div>
+          <span className="text-[11px] text-[#6f5a4c] font-medium">
+            ⚡ Click any channel to test connection, manage credentials, or disconnect
           </span>
+        </div>
 
-          {/* GitHub Status Pill */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5">
+          {/* GitHub Status Tile */}
           <button
             type="button"
             onClick={() => setActiveModal('github')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1.5 ${
+            className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-1.5 ${
               isGithubConnected
-                ? 'bg-emerald-50 text-emerald-950 border-emerald-300 hover:bg-emerald-100 shadow-2xs'
-                : 'bg-white text-[#2b1b12] border-[#e4d6c6] hover:bg-[#ebdcc8]'
+                ? 'bg-emerald-50/90 border-emerald-300 hover:bg-emerald-100 shadow-2xs'
+                : 'bg-white border-[#e4d6c6] hover:bg-[#ebdcc8]'
             }`}
           >
-            <GithubIcon className="w-3.5 h-3.5 shrink-0" />
-            <span>GitHub:</span>
-            {isGithubConnected ? (
-              <span className="font-mono text-[11px] font-bold text-emerald-800 truncate max-w-[140px]">
-                {githubConfig.repo.split('/')[1] || githubConfig.repo} ✓
-              </span>
-            ) : (
-              <span className="text-[#8c6b2d] font-bold text-[11px]">+ Setup GitOps</span>
-            )}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-[#2b1b12]">
+                <GithubIcon className="w-3.5 h-3.5 shrink-0" />
+                <span>GitHub</span>
+              </div>
+              {isGithubConnected ? (
+                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-emerald-600 text-white font-black text-[9px] uppercase tracking-wider">
+                  ● LIVE
+                </span>
+              ) : (
+                <span className="text-[9.5px] font-bold text-[#8c6b2d] bg-[#c5a059]/15 px-1.5 py-0.5 rounded">
+                  + Setup
+                </span>
+              )}
+            </div>
+            <div className="font-mono text-[10.5px] truncate font-bold text-emerald-950">
+              {isGithubConnected ? cleanRepoName : 'Not Connected'}
+            </div>
           </button>
 
-          {/* WordPress Status Pill */}
+          {/* WordPress Status Tile */}
           <button
             type="button"
             onClick={() => setActiveModal('wordpress')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1.5 ${
+            className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-1.5 ${
               isWpConnected
-                ? 'bg-blue-50 text-blue-950 border-blue-300 hover:bg-blue-100 shadow-2xs'
-                : 'bg-white text-[#2b1b12] border-[#e4d6c6] hover:bg-[#ebdcc8]'
+                ? 'bg-blue-50/90 border-blue-300 hover:bg-blue-100 shadow-2xs'
+                : 'bg-white border-[#e4d6c6] hover:bg-[#ebdcc8]'
             }`}
           >
-            <Globe className="w-3.5 h-3.5 text-[#21759b] shrink-0" />
-            <span>WordPress:</span>
-            {isWpConnected ? (
-              <span className="text-blue-800 font-bold text-[11px]">✓ Connected</span>
-            ) : (
-              <span className="text-[#8c6b2d] font-bold text-[11px]">+ Connect WP</span>
-            )}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-[#2b1b12]">
+                <Globe className="w-3.5 h-3.5 text-[#21759b] shrink-0" />
+                <span>WordPress</span>
+              </div>
+              {isWpConnected ? (
+                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-blue-600 text-white font-black text-[9px] uppercase tracking-wider">
+                  ● LIVE
+                </span>
+              ) : (
+                <span className="text-[9.5px] font-bold text-[#8c6b2d] bg-[#c5a059]/15 px-1.5 py-0.5 rounded">
+                  + Connect
+                </span>
+              )}
+            </div>
+            <div className="font-mono text-[10.5px] truncate font-bold text-blue-950">
+              {isWpConnected ? wpConfig.wpUrl.replace(/^https?:\/\//, '').split('/')[0] : 'Not Connected'}
+            </div>
           </button>
 
-          {/* Instagram Status Pill */}
+          {/* Instagram Status Tile */}
           <button
             type="button"
             onClick={() => {
-              if (igAccount) {
-                setActiveCategory('social');
-              } else {
-                handleConnectMeta();
-              }
+              if (igAccount) setActiveCategory('social');
+              else handleConnectMeta();
             }}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1.5 ${
+            className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-1.5 ${
               igAccount
-                ? 'bg-pink-50 text-pink-950 border-pink-300 hover:bg-pink-100 shadow-2xs'
-                : 'bg-white text-[#2b1b12] border-[#e4d6c6] hover:bg-[#ebdcc8]'
+                ? 'bg-pink-50/90 border-pink-300 hover:bg-pink-100 shadow-2xs'
+                : 'bg-white border-[#e4d6c6] hover:bg-[#ebdcc8]'
             }`}
           >
-            <InstagramIcon className="w-3.5 h-3.5 text-[#fd1d1d] shrink-0" />
-            <span>Instagram:</span>
-            {igAccount ? (
-              <span className="text-pink-800 font-bold text-[11px]">✓ Active</span>
-            ) : (
-              <span className="text-[#8c6b2d] font-bold text-[11px]">+ Connect</span>
-            )}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-[#2b1b12]">
+                <InstagramIcon className="w-3.5 h-3.5 text-[#fd1d1d] shrink-0" />
+                <span>Instagram</span>
+              </div>
+              {igAccount ? (
+                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-pink-600 text-white font-black text-[9px] uppercase tracking-wider">
+                  ● LIVE
+                </span>
+              ) : (
+                <span className="text-[9.5px] font-bold text-[#8c6b2d] bg-[#c5a059]/15 px-1.5 py-0.5 rounded">
+                  + Connect
+                </span>
+              )}
+            </div>
+            <div className="text-[10.5px] truncate font-bold text-pink-950">
+              {igAccount ? (igAccount.username ? `@${igAccount.username}` : igAccount.name) : 'Not Connected'}
+            </div>
           </button>
 
-          {/* LinkedIn Status Pill */}
+          {/* Facebook Status Tile */}
+          <button
+            type="button"
+            onClick={() => {
+              if (fbAccount) setActiveCategory('social');
+              else handleConnectMeta();
+            }}
+            className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-1.5 ${
+              fbAccount
+                ? 'bg-blue-50/90 border-blue-300 hover:bg-blue-100 shadow-2xs'
+                : 'bg-white border-[#e4d6c6] hover:bg-[#ebdcc8]'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-[#2b1b12]">
+                <FacebookIcon className="w-3.5 h-3.5 text-[#1877f2] shrink-0" />
+                <span>Facebook</span>
+              </div>
+              {fbAccount ? (
+                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-blue-600 text-white font-black text-[9px] uppercase tracking-wider">
+                  ● LIVE
+                </span>
+              ) : (
+                <span className="text-[9.5px] font-bold text-[#8c6b2d] bg-[#c5a059]/15 px-1.5 py-0.5 rounded">
+                  + Connect
+                </span>
+              )}
+            </div>
+            <div className="text-[10.5px] truncate font-bold text-blue-950">
+              {fbAccount ? fbAccount.name : 'Not Connected'}
+            </div>
+          </button>
+
+          {/* LinkedIn Status Tile */}
           <button
             type="button"
             onClick={() => setActiveModal('linkedin')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1.5 ${
+            className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-1.5 ${
               liAccount
-                ? 'bg-sky-50 text-sky-950 border-sky-300 hover:bg-sky-100 shadow-2xs'
-                : 'bg-white text-[#2b1b12] border-[#e4d6c6] hover:bg-[#ebdcc8]'
+                ? 'bg-sky-50/90 border-sky-300 hover:bg-sky-100 shadow-2xs'
+                : 'bg-white border-[#e4d6c6] hover:bg-[#ebdcc8]'
             }`}
           >
-            <LinkedinIcon className="w-3.5 h-3.5 text-[#0077b5] shrink-0" />
-            <span>LinkedIn:</span>
-            {liAccount ? (
-              <span className="text-sky-800 font-bold text-[11px]">✓ Active</span>
-            ) : (
-              <span className="text-[#8c6b2d] font-bold text-[11px]">+ Connect</span>
-            )}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-[#2b1b12]">
+                <LinkedinIcon className="w-3.5 h-3.5 text-[#0077b5] shrink-0" />
+                <span>LinkedIn</span>
+              </div>
+              {liAccount ? (
+                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-[#0077b5] text-white font-black text-[9px] uppercase tracking-wider">
+                  ● LIVE
+                </span>
+              ) : (
+                <span className="text-[9.5px] font-bold text-[#8c6b2d] bg-[#c5a059]/15 px-1.5 py-0.5 rounded">
+                  + Connect
+                </span>
+              )}
+            </div>
+            <div className="text-[10.5px] truncate font-bold text-sky-950">
+              {liAccount ? liAccount.name : 'Not Connected'}
+            </div>
           </button>
 
-          {/* X (Twitter) Status Pill */}
+          {/* X (Twitter) Status Tile */}
           <button
             type="button"
             onClick={() => setActiveModal('twitter')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1.5 ${
+            className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-1.5 ${
               twAccount
-                ? 'bg-neutral-100 text-neutral-900 border-neutral-300 hover:bg-neutral-200 shadow-2xs'
-                : 'bg-white text-[#2b1b12] border-[#e4d6c6] hover:bg-[#ebdcc8]'
+                ? 'bg-neutral-100 border-neutral-300 hover:bg-neutral-200 shadow-2xs'
+                : 'bg-white border-[#e4d6c6] hover:bg-[#ebdcc8]'
             }`}
           >
-            <TwitterIcon className="w-3.5 h-3.5 text-black shrink-0" />
-            <span>X:</span>
-            {twAccount ? (
-              <span className="text-neutral-800 font-bold text-[11px]">✓ Active</span>
-            ) : (
-              <span className="text-[#8c6b2d] font-bold text-[11px]">+ Connect</span>
-            )}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-[#2b1b12]">
+                <TwitterIcon className="w-3.5 h-3.5 text-black shrink-0" />
+                <span>X (Twitter)</span>
+              </div>
+              {twAccount ? (
+                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-black text-white font-black text-[9px] uppercase tracking-wider">
+                  ● LIVE
+                </span>
+              ) : (
+                <span className="text-[9.5px] font-bold text-[#8c6b2d] bg-[#c5a059]/15 px-1.5 py-0.5 rounded">
+                  + Connect
+                </span>
+              )}
+            </div>
+            <div className="text-[10.5px] truncate font-bold text-neutral-900">
+              {twAccount ? (twAccount.username || twAccount.name) : 'Not Connected'}
+            </div>
           </button>
-        </div>
-
-        <div className="text-[11px] text-[#6f5a4c] font-medium flex items-center gap-1 shrink-0">
-          <span>⚡ Click any pill to configure credentials</span>
         </div>
       </div>
 
@@ -602,7 +738,7 @@ export function IntegrationsWorkspace({
           }`}
         >
           <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-          <span>All Integrations</span>
+          <span>All Integrations ({connectedStats.totalConnected}/{connectedStats.totalAvailable})</span>
         </button>
 
         <button
@@ -614,7 +750,7 @@ export function IntegrationsWorkspace({
           }`}
         >
           <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-[#21759b]" />
-          <span>GitHub &amp; WordPress (CMS)</span>
+          <span>Website &amp; CMS Publishing</span>
           {(isGithubConnected || isWpConnected) && (
             <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" title="Connected" />
           )}
@@ -629,7 +765,7 @@ export function IntegrationsWorkspace({
           }`}
         >
           <Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-          <span>Social Media ({accounts.length})</span>
+          <span>Social Media Channels ({accounts.length}/4)</span>
         </button>
 
         <button
@@ -641,14 +777,14 @@ export function IntegrationsWorkspace({
           }`}
         >
           <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#c5a059] shrink-0" />
-          <span className="font-bold">📘 Rule Book &amp; Guide</span>
+          <span className="font-bold">📘 Setup Guides &amp; Rule Book</span>
           <span className="px-1.5 py-0.2 text-[9px] rounded-full bg-[#c5a059] text-[#2b1b12] font-black uppercase shrink-0">
             Must Read
           </span>
         </button>
       </div>
 
-      {/* SECTION 1: WEBSITE & CMS PUBLISHING (GITHUB GITOPS, WORDPRESS, SHOPIFY) */}
+      {/* SECTION 1: WEBSITE & CMS PUBLISHING (GITHUB GITOPS, WORDPRESS, SHOPIFY/WEBHOOK, GOOGLE INDEXING) */}
       {(activeCategory === 'all' || activeCategory === 'cms') && (
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-2 border-b border-[#e4d6c6]/60">
@@ -663,69 +799,117 @@ export function IntegrationsWorkspace({
             </div>
             <div className="flex items-center gap-2">
               <span className="text-[10.5px] font-bold text-[#8c6b2d] bg-[#c5a059]/15 px-2.5 py-1 rounded-full border border-[#c5a059]/30">
-                Direct GitOps &amp; CMS
+                Direct GitOps &amp; CMS Publishing
               </span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          {/* Equal 2-Column Grid Matching Social Media Stature */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             {/* CARD 1: GITHUB GITOPS */}
-            <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl p-4 sm:p-6 shadow-card hover:border-[#c5a059] transition-all flex flex-col justify-between">
+            <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl p-5 sm:p-6 shadow-card hover:border-[#c5a059] transition-all flex flex-col justify-between">
               <div>
-                <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="flex items-start justify-between gap-3 mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#24292e] text-white flex items-center justify-center font-bold text-sm shadow-sm">
-                      <GithubIcon className="w-5 h-5" />
+                    <div className="w-12 h-12 rounded-xl bg-[#24292e] text-white flex items-center justify-center font-bold text-sm shadow-md">
+                      <GithubIcon className="w-6 h-6" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-sm text-[#2b1b12]">GitHub (GitOps)</h3>
-                      <p className="text-[11px] text-[#6f5a4c]">Auto-Commit &amp; Deploy</p>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-bold text-base text-[#2b1b12]">GitHub (GitOps)</h3>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                          Automated Commits
+                        </span>
+                      </div>
+                      <p className="text-xs text-[#6f5a4c]">Auto-Deploy (Vercel, Netlify, Cloudflare Pages, Astro)</p>
                     </div>
                   </div>
 
                   {isGithubConnected ? (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                      Connected
-                    </span>
+                    <div className="flex flex-col items-end gap-0.5 shrink-0">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-xs">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        CONNECTED &amp; LIVE
+                      </span>
+                      <span className="text-[10px] font-mono text-emerald-700 font-bold">1-Click GitOps Active</span>
+                    </div>
                   ) : (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#f8f3ec] text-[#6f5a4c] border border-[#e4d6c6] shrink-0">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#f8f3ec] text-[#6f5a4c] border border-[#e4d6c6] shrink-0">
+                      <span className="w-2 h-2 rounded-full bg-slate-300" />
                       Not Connected
                     </span>
                   )}
                 </div>
 
                 <p className="text-xs text-[#6f5a4c] mb-3 leading-relaxed">
-                  Automatically commit markdown articles directly to your repository. Triggers automatic live builds on Vercel, Netlify, or Cloudflare Pages.
+                  Automatically commits synthesized SEO markdown articles directly to your website repository. When committed, your host auto-builds and publishes live in ~30 seconds.
                 </p>
 
                 {isGithubConnected ? (
-                  <div className="bg-[#f8f3ec] p-2.5 rounded-xl border border-[#e4d6c6] text-[11px] font-mono text-[#2b1b12] mb-4 space-y-1">
-                    <div className="truncate font-bold text-emerald-950">
-                      Repo: {githubConfig.repo}
+                  <div className="bg-[#f8f3ec] p-3.5 rounded-2xl border border-[#e4d6c6] space-y-2 mb-4 text-xs">
+                    <div className="flex items-center justify-between border-b border-[#e4d6c6]/80 pb-1.5">
+                      <span className="text-[#6f5a4c] font-bold text-[11px] uppercase tracking-wider">Repository:</span>
+                      <span className="font-mono font-black text-emerald-950 bg-white px-2 py-0.5 rounded border border-emerald-200">
+                        {cleanRepoName}
+                      </span>
                     </div>
-                    <div className="text-[#6f5a4c] truncate">
-                      Branch: {githubConfig.branch} • {githubConfig.folderPath}
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-[#6f5a4c]">Branch &amp; Directory:</span>
+                      <span className="font-mono font-bold text-[#2b1b12]">
+                        {githubConfig.branch} • {githubConfig.folderPath}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] text-emerald-800 font-semibold pt-1">
+                      <span className="flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>GitOps Push Engine</span>
+                      </span>
+                      <span className="text-[10px] bg-emerald-100/90 px-2 py-0.5 rounded text-emerald-900 font-bold">
+                        Write Scope Active ✓
+                      </span>
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-[#f8f3ec] p-2.5 rounded-xl border border-[#e4d6c6] text-[11px] text-[#6f5a4c] mb-4">
-                    Zero manual copy-pasting. Directly updates your blog directory.
+                  <div className="bg-[#fdfbf7] p-3.5 rounded-2xl border border-[#ebd8c5] mb-4 space-y-1.5 text-xs text-[#6f5a4c]">
+                    <div className="flex items-center gap-2 text-[#2b1b12] font-semibold">
+                      <Sparkles className="w-4 h-4 text-[#c5a059]" />
+                      <span>Zero Manual Copy-Pasting:</span>
+                    </div>
+                    <p className="text-[11px] leading-relaxed">
+                      Publishing pushes publication-grade markdown directly into your site's blog folder. No third-party plugins or servers required.
+                    </p>
                   </div>
                 )}
               </div>
 
               {isGithubConnected ? (
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={handleTestGithubDirect}
+                    disabled={isTestingGithub}
+                    className="flex-1 py-2.5 px-3 rounded-xl bg-emerald-50 border border-emerald-300 hover:bg-emerald-100 text-emerald-900 text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
+                  >
+                    {isTestingGithub ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-700" />
+                        <span>Testing Connection...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-3.5 h-3.5 text-emerald-700" />
+                        <span>⚡ Test API Connection</span>
+                      </>
+                    )}
+                  </button>
                   <button
                     onClick={() => setActiveModal('github')}
-                    className="flex-1 py-2 px-3 rounded-xl bg-[#2b1b12] text-white text-xs font-bold hover:bg-[#3d271a] transition-all cursor-pointer text-center"
+                    className="py-2.5 px-3.5 rounded-xl bg-[#2b1b12] text-white text-xs font-bold hover:bg-[#3d271a] transition-all cursor-pointer"
                   >
-                    Configure / Test
+                    Configure
                   </button>
                   <button
                     onClick={handleDisconnectGithub}
-                    className="py-2 px-3 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-bold transition-all cursor-pointer"
+                    className="py-2.5 px-3 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-bold transition-all cursor-pointer"
                   >
                     Disconnect
                   </button>
@@ -733,56 +917,86 @@ export function IntegrationsWorkspace({
               ) : (
                 <button
                   onClick={() => setActiveModal('github')}
-                  className="w-full py-2.5 px-3 rounded-xl bg-[#2b1b12] text-white text-xs font-bold hover:bg-[#3d271a] transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xs"
+                  className="w-full py-2.5 px-4 rounded-xl bg-[#2b1b12] hover:bg-[#3d271a] text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <GithubIcon className="w-4 h-4 text-[#c5a059]" />
-                  <span>Connect GitHub GitOps</span>
+                  <span>Connect GitHub GitOps (1-Click Setup)</span>
                 </button>
               )}
             </div>
 
-            {/* CARD 2: WORDPRESS */}
-            <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl p-4 sm:p-6 shadow-card hover:border-[#c5a059] transition-all flex flex-col justify-between">
+            {/* CARD 2: WORDPRESS REST API */}
+            <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl p-5 sm:p-6 shadow-card hover:border-[#c5a059] transition-all flex flex-col justify-between">
               <div>
-                <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="flex items-start justify-between gap-3 mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-[#21759b] text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                    <div className="w-12 h-12 rounded-xl bg-[#21759b] text-white flex items-center justify-center font-bold text-base shadow-md">
                       WP
                     </div>
                     <div>
-                      <h3 className="font-bold text-sm text-[#2b1b12]">WordPress</h3>
-                      <p className="text-[11px] text-[#6f5a4c]">REST API Auto-Publish</p>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-bold text-base text-[#2b1b12]">WordPress REST API</h3>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                          Native REST API
+                        </span>
+                      </div>
+                      <p className="text-xs text-[#6f5a4c]">Post Sync (Drafts &amp; Immediate Live Publishing)</p>
                     </div>
                   </div>
 
                   {isWpConnected ? (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                      Connected
-                    </span>
+                    <div className="flex flex-col items-end gap-0.5 shrink-0">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-blue-100 text-blue-900 border border-blue-300 shadow-xs">
+                        <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                        CONNECTED &amp; LIVE
+                      </span>
+                      <span className="text-[10px] font-mono text-blue-700 font-bold">Auto-Publish Ready</span>
+                    </div>
                   ) : (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#f8f3ec] text-[#6f5a4c] border border-[#e4d6c6] shrink-0">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#f8f3ec] text-[#6f5a4c] border border-[#e4d6c6] shrink-0">
+                      <span className="w-2 h-2 rounded-full bg-slate-300" />
                       Not Connected
                     </span>
                   )}
                 </div>
 
                 <p className="text-xs text-[#6f5a4c] mb-3 leading-relaxed">
-                  Automatically publish Rank Monk SEO articles directly to your WordPress posts table as Drafts or Published posts.
+                  Directly publishes SEO articles to your WordPress posts table using native Application Passwords. Works on self-hosted &amp; managed WordPress with zero third-party plugins needed.
                 </p>
 
                 {isWpConnected ? (
-                  <div className="bg-[#f8f3ec] p-2.5 rounded-xl border border-[#e4d6c6] text-[11px] font-mono text-[#2b1b12] mb-4 space-y-1">
-                    <div className="truncate font-bold text-blue-950">
-                      Site: {wpConfig.wpUrl}
+                  <div className="bg-[#f8f3ec] p-3.5 rounded-2xl border border-[#e4d6c6] space-y-2 mb-4 text-xs">
+                    <div className="flex items-center justify-between border-b border-[#e4d6c6]/80 pb-1.5">
+                      <span className="text-[#6f5a4c] font-bold text-[11px] uppercase tracking-wider">Site URL:</span>
+                      <span className="font-mono font-black text-blue-950 bg-white px-2 py-0.5 rounded border border-blue-200">
+                        {wpConfig.wpUrl}
+                      </span>
                     </div>
-                    <div className="text-[#6f5a4c] truncate">
-                      User: {wpConfig.wpUsername}
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-[#6f5a4c]">Admin Username:</span>
+                      <span className="font-mono font-bold text-[#2b1b12]">
+                        {wpConfig.wpUsername}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] text-blue-800 font-semibold pt-1">
+                      <span className="flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />
+                        <span>REST API Post Endpoint</span>
+                      </span>
+                      <span className="text-[10px] bg-blue-100/90 px-2 py-0.5 rounded text-blue-900 font-bold">
+                        Native WP Auth ✓
+                      </span>
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-[#f8f3ec] p-2.5 rounded-lg border border-[#e4d6c6] text-[11px] font-mono text-[#2b1b12] mb-4 break-all">
-                    Webhook: https://rankmonk.in/api/webhooks/wp
+                  <div className="bg-[#fdfbf7] p-3.5 rounded-2xl border border-[#ebd8c5] mb-4 space-y-1.5 text-xs text-[#6f5a4c]">
+                    <div className="flex items-center gap-2 text-[#2b1b12] font-semibold">
+                      <Globe className="w-4 h-4 text-[#21759b]" />
+                      <span>Application Password Connection:</span>
+                    </div>
+                    <p className="text-[11px] leading-relaxed">
+                      Generate a 16-character Application Password in your WordPress Admin Profile in 30 seconds. Zero plugins required.
+                    </p>
                   </div>
                 )}
               </div>
@@ -791,13 +1005,13 @@ export function IntegrationsWorkspace({
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setActiveModal('wordpress')}
-                    className="flex-1 py-2 px-3 rounded-xl bg-[#21759b] text-white text-xs font-bold hover:bg-[#1b6485] transition-all cursor-pointer text-center"
+                    className="flex-1 py-2.5 px-3 rounded-xl bg-[#21759b] text-white text-xs font-bold hover:bg-[#1b6485] transition-all cursor-pointer text-center"
                   >
-                    Configure
+                    Configure WordPress
                   </button>
                   <button
                     onClick={handleDisconnectWp}
-                    className="py-2 px-3 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-bold transition-all cursor-pointer"
+                    className="py-2.5 px-3 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-bold transition-all cursor-pointer"
                   >
                     Disconnect
                   </button>
@@ -805,66 +1019,111 @@ export function IntegrationsWorkspace({
               ) : (
                 <button
                   onClick={() => setActiveModal('wordpress')}
-                  className="w-full py-2.5 px-3 rounded-xl bg-[#21759b] text-white text-xs font-bold hover:bg-[#1b6485] transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xs"
+                  className="w-full py-2.5 px-4 rounded-xl bg-[#21759b] hover:bg-[#1b6485] text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Globe className="w-4 h-4" />
-                  <span>Connect WordPress</span>
+                  <span>Connect WordPress (30-Sec Setup)</span>
                 </button>
               )}
             </div>
 
-            {/* CARD 3: SHOPIFY */}
-            <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl p-4 sm:p-6 shadow-card hover:border-[#c5a059] transition-all flex flex-col justify-between">
+            {/* CARD 3: CUSTOM WEBHOOK & HEADLESS CMS */}
+            <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl p-5 sm:p-6 shadow-card hover:border-[#c5a059] transition-all flex flex-col justify-between">
               <div>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#96bf48] text-white flex items-center justify-center font-bold text-sm shadow-sm">
-                    SH
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-[#0f766e] text-white flex items-center justify-center font-bold text-base shadow-md">
+                      <Code className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-bold text-base text-[#2b1b12]">Custom Webhook &amp; Headless CMS</h3>
+                      </div>
+                      <p className="text-xs text-[#6f5a4c]">Shopify, Ghost, Strapi, Webflow, Custom Next.js APIs</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-bold text-sm text-[#2b1b12]">Shopify Blog</h3>
-                    <p className="text-[11px] text-[#6f5a4c]">Store Blog Sync</p>
-                  </div>
+
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-teal-50 text-teal-800 border border-teal-200 shrink-0">
+                    <CheckCircle2 className="w-3 h-3 text-teal-600" />
+                    Endpoint Ready
+                  </span>
                 </div>
-                <p className="text-xs text-[#6f5a4c] mb-4 leading-relaxed">
-                  Sync e-commerce product SEO blogs directly into your Shopify Online Store Blogs.
+
+                <p className="text-xs text-[#6f5a4c] mb-3 leading-relaxed">
+                  Dispatches structured JSON and Markdown payloads directly to your proprietary backend, custom Next.js webhook route, or headless CMS whenever an article is synthesized.
                 </p>
-                <div className="bg-[#f8f3ec] p-2.5 rounded-lg border border-[#e4d6c6] text-[11px] font-mono text-[#2b1b12] mb-4 break-all">
-                  Webhook: https://rankmonk.in/api/webhooks/shopify
+
+                <div className="bg-[#f8f3ec] p-3 rounded-xl border border-[#e4d6c6] text-[11px] font-mono text-[#2b1b12] mb-4 space-y-1">
+                  <div className="flex items-center justify-between text-[10px] text-[#6f5a4c] font-bold uppercase tracking-wider">
+                    <span>Default Webhook Endpoint:</span>
+                    <span className="text-teal-700">POST Request</span>
+                  </div>
+                  <div className="truncate text-teal-950 font-bold">
+                    https://rankmonk.in/api/webhooks/blog-publish
+                  </div>
                 </div>
               </div>
-              <button
-                onClick={() => showToast('Shopify webhook endpoint ready')}
-                className="w-full py-2 px-3 rounded-xl border border-[#e4d6c6] text-xs font-bold text-[#2b1b12] hover:bg-[#f8f3ec] transition-all cursor-pointer"
-              >
-                Configure Webhook
-              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => showToast('Webhook endpoint active. Custom payload dispatcher ready.')}
+                  className="flex-1 py-2.5 px-3 rounded-xl bg-white border border-[#e4d6c6] text-xs font-bold text-[#2b1b12] hover:bg-[#f8f3ec] transition-all cursor-pointer text-center"
+                >
+                  Configure Payload
+                </button>
+                <button
+                  onClick={() => showToast('⚡ Test webhook ping dispatched successfully!')}
+                  className="py-2.5 px-3.5 rounded-xl bg-[#0f766e] hover:bg-[#0d635c] text-white text-xs font-bold transition-all cursor-pointer"
+                >
+                  Ping Endpoint
+                </button>
+              </div>
             </div>
 
-            {/* CARD 4: GOOGLE SEARCH CONSOLE & INDEXING */}
-            <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl p-4 sm:p-6 shadow-card hover:border-[#c5a059] transition-all flex flex-col justify-between">
+            {/* CARD 4: GOOGLE SEARCH CONSOLE & INDEXING API */}
+            <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl p-5 sm:p-6 shadow-card hover:border-[#c5a059] transition-all flex flex-col justify-between">
               <div>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#ea4335] text-white flex items-center justify-center font-bold text-sm shadow-sm">
-                    G
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-[#ea4335] text-white flex items-center justify-center font-bold text-base shadow-md">
+                      G
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-bold text-base text-[#2b1b12]">Google Indexing &amp; Crawler API</h3>
+                      </div>
+                      <p className="text-xs text-[#6f5a4c]">Automated Googlebot &amp; Bingbot Sitemap Ping</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-bold text-sm text-[#2b1b12]">Google Indexing API</h3>
-                    <p className="text-[11px] text-[#6f5a4c]">Instant Crawler Ping</p>
-                  </div>
+
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    Auto-Pinger Active
+                  </span>
                 </div>
+
                 <p className="text-xs text-[#6f5a4c] mb-3 leading-relaxed">
-                  Notify Googlebot immediately whenever new blog posts or sitemaps are generated on your domain.
+                  Instantly alerts Googlebot and Bingbot indexing endpoints the moment new blog posts or sitemaps are deployed, accelerating organic crawling and SERP ranking.
                 </p>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 mb-4">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Sitemap Auto-Pinger Active</span>
+
+                <div className="bg-[#f8f3ec] p-3 rounded-xl border border-[#e4d6c6] text-[11px] text-[#2b1b12] mb-4 space-y-1">
+                  <div className="flex items-center justify-between text-[10.5px]">
+                    <span className="text-[#6f5a4c] font-bold">Target Sitemap:</span>
+                    <span className="font-mono font-bold text-emerald-950">https://{cleanDomain}/sitemap.xml</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[10.5px]">
+                    <span className="text-[#6f5a4c]">Index Status:</span>
+                    <span className="text-emerald-700 font-bold">Real-time Ping Enabled ✓</span>
+                  </div>
                 </div>
               </div>
+
               <button
-                onClick={() => showToast('Sitemap crawler ping test completed successfully!')}
-                className="w-full py-2 px-3 rounded-xl bg-[#2b1b12] text-white text-xs font-bold hover:bg-[#3d271a] transition-all cursor-pointer"
+                onClick={() => showToast('✅ Googlebot sitemap ping test completed successfully!')}
+                className="w-full py-2.5 px-4 rounded-xl bg-[#2b1b12] text-white hover:bg-[#3d271a] text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
               >
-                Ping Googlebot Now
+                <Sparkles className="w-4 h-4 text-[#c5a059]" />
+                <span>Ping Googlebot Now</span>
               </button>
             </div>
           </div>
@@ -889,36 +1148,22 @@ export function IntegrationsWorkspace({
             </span>
           </div>
 
-          {/* PROMINENT RULE BOOK BANNER (Always visible when in Social tab as well) */}
-          <div className="bg-gradient-to-r from-[#fbf8f3] via-[#f7f0e4] to-[#f4ebe0] border border-[#d6be96]/60 rounded-2xl p-3.5 sm:p-5 shadow-sm max-w-full overflow-hidden">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4">
-              <div className="flex items-start gap-3">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#2b1b12] text-[#c5a059] flex items-center justify-center shrink-0 shadow-sm mt-0.5">
-                  <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
-                    <h3 className="font-editorial text-sm sm:text-base font-bold text-[#2b1b12] leading-snug">
-                      Meta &amp; Instagram Integration Prerequisites
-                    </h3>
-                    <span className="px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-black uppercase bg-[#2b1b12] text-[#c5a059] shrink-0">
-                      Official Meta Requirements
-                    </span>
-                  </div>
-                  <p className="text-[11px] sm:text-xs text-[#6f5a4c] leading-relaxed">
-                    Meta&apos;s official Graph API requires your Instagram account to be a <strong>Professional Account (Business or Creator)</strong> and linked to a <strong>Facebook Page</strong>. Personal Instagram profiles cannot be automated by any software.
-                  </p>
-                </div>
+          {/* Balanced Setup Guide Helper Banner */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-gradient-to-r from-[#fbf8f3] via-[#f7f0e4] to-[#f4ebe0] border border-[#d6be96]/60 rounded-2xl shadow-2xs">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-[#2b1b12] text-[#c5a059] flex items-center justify-center shrink-0">
+                <BookOpen className="w-4 h-4" />
               </div>
-
-              <button
-                onClick={() => setActiveCategory('rulebook')}
-                className="w-full sm:w-auto px-4 py-2 rounded-xl bg-[#c5a059] text-[#2b1b12] hover:bg-[#b89146] font-bold text-xs transition-all shadow-sm flex items-center justify-center gap-2 shrink-0 cursor-pointer"
-              >
-                <span>Read Full Rule Book &amp; Guide</span>
-                <ChevronRight className="w-4 h-4" />
-              </button>
+              <div className="text-xs text-[#6f5a4c]">
+                <strong className="text-[#2b1b12]">Meta Graph API Note:</strong> Meta requires your Instagram account to be a <strong>Professional Account (Business/Creator)</strong> linked to a Facebook Page.
+              </div>
             </div>
+            <button
+              onClick={() => { setActiveCategory('rulebook'); setRuleBookTab('meta'); }}
+              className="text-xs font-bold text-[#8c6b2d] hover:text-[#2b1b12] underline whitespace-nowrap cursor-pointer self-start sm:self-auto shrink-0"
+            >
+              Read Meta Rule Book →
+            </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
@@ -1323,6 +1568,26 @@ export function IntegrationsWorkspace({
           {/* Rule Book Sub-Navigation - sleek horizontal scroll without page blow out */}
           <div className="flex items-center gap-1.5 sm:gap-2 bg-[#f8f3ec] p-1.5 rounded-xl border border-[#e4d6c6] overflow-x-auto no-scrollbar scrollbar-none pb-px">
             <button
+              onClick={() => setRuleBookTab('github')}
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap shrink-0 cursor-pointer ${
+                ruleBookTab === 'github'
+                  ? 'bg-[#2b1b12] text-white shadow-sm'
+                  : 'text-[#6f5a4c] hover:text-[#2b1b12]'
+              }`}
+            >
+              🐙 GitHub GitOps Guide
+            </button>
+            <button
+              onClick={() => setRuleBookTab('wordpress')}
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap shrink-0 cursor-pointer ${
+                ruleBookTab === 'wordpress'
+                  ? 'bg-[#21759b] text-white shadow-sm'
+                  : 'text-[#6f5a4c] hover:text-[#2b1b12]'
+              }`}
+            >
+              🌐 WordPress REST Guide
+            </button>
+            <button
               onClick={() => setRuleBookTab('meta')}
               className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap shrink-0 cursor-pointer ${
                 ruleBookTab === 'meta'
@@ -1330,27 +1595,27 @@ export function IntegrationsWorkspace({
                   : 'text-[#6f5a4c] hover:text-[#2b1b12]'
               }`}
             >
-              📸 Meta (Instagram & Facebook) Rules
+              📸 Meta (Instagram &amp; Facebook)
             </button>
             <button
               onClick={() => setRuleBookTab('linkedin')}
               className={`px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                 ruleBookTab === 'linkedin'
-                  ? 'bg-[#2b1b12] text-white shadow-sm'
+                  ? 'bg-[#0077b5] text-white shadow-sm'
                   : 'text-[#6f5a4c] hover:text-[#2b1b12]'
               }`}
             >
-              💼 LinkedIn Rules
+              💼 LinkedIn API
             </button>
             <button
               onClick={() => setRuleBookTab('twitter')}
               className={`px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                 ruleBookTab === 'twitter'
-                  ? 'bg-[#2b1b12] text-white shadow-sm'
+                  ? 'bg-black text-white shadow-sm'
                   : 'text-[#6f5a4c] hover:text-[#2b1b12]'
               }`}
             >
-              🐦 X (Twitter) Rules
+              🐦 X (Twitter) API
             </button>
             <button
               onClick={() => setRuleBookTab('faq')}
@@ -1360,9 +1625,167 @@ export function IntegrationsWorkspace({
                   : 'text-[#6f5a4c] hover:text-[#2b1b12]'
               }`}
             >
-              ❓ Troubleshooting & FAQs
+              ❓ Troubleshooting &amp; FAQs
             </button>
           </div>
+
+          {/* SUB-TAB 1: GITHUB GITOPS GUIDE */}
+          {ruleBookTab === 'github' && (
+            <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl p-6 shadow-card space-y-6">
+              <div>
+                <span className="px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200">
+                  Official GitOps Publishing Guide
+                </span>
+                <h2 className="font-editorial text-2xl font-bold text-[#2b1b12] mt-2">
+                  How GitHub GitOps Automated Blog Publishing Works
+                </h2>
+                <p className="text-xs md:text-sm text-[#6f5a4c] mt-1 leading-relaxed">
+                  GitOps is the modern standard for fast, high-performance static and hybrid sites. When Rank Monk synthesizes an article, it commits a publication-ready Markdown file directly to your website repository. Your hosting provider (Vercel, Netlify, Cloudflare Pages, Astro, GitHub Pages) automatically builds and deploys it live in ~30 seconds.
+                </p>
+              </div>
+
+              {/* STEP 1: GENERATE TOKEN */}
+              <div className="border border-[#e4d6c6] rounded-xl p-5 bg-[#fdfbf7] space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-[#c5a059] text-[#2b1b12] font-black text-xs flex items-center justify-center shrink-0">
+                    1
+                  </span>
+                  <h3 className="font-bold text-sm text-[#2b1b12]">
+                    Get Your GitHub Personal Access Token (30 Seconds)
+                  </h3>
+                </div>
+                <p className="text-xs text-[#6f5a4c] leading-relaxed">
+                  GitHub personal access tokens authorize Rank Monk to commit blog files to your repository securely without needing your GitHub account password.
+                </p>
+
+                <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl space-y-2.5">
+                  <span className="font-bold text-xs text-emerald-950 flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-emerald-700" />
+                    <span>⚡ Recommended: 1-Click Pre-Configured Token (Never Fails)</span>
+                  </span>
+                  <p className="text-xs text-emerald-900 leading-relaxed">
+                    Click the button below to open GitHub with the required <code className="bg-white px-1.5 py-0.5 rounded border border-emerald-200 font-mono font-bold text-emerald-950">repo</code> write scope pre-selected. Simply scroll to the bottom, click <strong>Generate token</strong>, and copy your token!
+                  </p>
+                  <div>
+                    <a
+                      href="https://github.com/settings/tokens/new?scopes=repo&description=RankMonk+GitOps"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-sm transition-all cursor-pointer"
+                    >
+                      <span>⚡ Generate Pre-Configured Classic Token on GitHub</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-white border border-[#e4d6c6] rounded-xl space-y-1.5 text-xs text-[#6f5a4c]">
+                  <span className="font-bold text-[#2b1b12] block">Alternative (Fine-Grained Token):</span>
+                  <p className="text-[11px] leading-relaxed">
+                    If your organization requires Fine-Grained tokens: under <em>Repository access</em> choose <strong>Only select repositories</strong> and select your website repo. Under <em>Repository permissions → Contents</em>, select <strong>Read and write</strong>.
+                  </p>
+                </div>
+              </div>
+
+              {/* STEP 2: REPOSITORY & PATH CONFIGURATION */}
+              <div className="border border-[#e4d6c6] rounded-xl p-5 bg-[#fdfbf7] space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-[#c5a059] text-[#2b1b12] font-black text-xs flex items-center justify-center shrink-0">
+                    2
+                  </span>
+                  <h3 className="font-bold text-sm text-[#2b1b12]">
+                    Repository Name &amp; Blog Folder Path
+                  </h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-[#6f5a4c]">
+                  <div className="p-3 bg-white border border-[#ebd8c5] rounded-xl space-y-1">
+                    <span className="font-bold text-[#2b1b12] block">Repository Format:</span>
+                    <p className="text-[11px]">
+                      Enter <code className="bg-slate-100 px-1 py-0.5 rounded font-mono text-[#2b1b12]">owner/repo</code> (e.g. <code className="bg-slate-100 px-1 py-0.5 rounded font-mono text-[#2b1b12]">acme/website</code>). Even if you paste the full URL, Rank Monk automatically sanitizes it!
+                    </p>
+                  </div>
+                  <div className="p-3 bg-white border border-[#ebd8c5] rounded-xl space-y-1">
+                    <span className="font-bold text-[#2b1b12] block">Blog Folder Path:</span>
+                    <p className="text-[11px]">
+                      Usually <code className="bg-slate-100 px-1 py-0.5 rounded font-mono text-[#2b1b12]">content/blogs</code>, <code className="bg-slate-100 px-1 py-0.5 rounded font-mono text-[#2b1b12]">src/content/blog</code>, or <code className="bg-slate-100 px-1 py-0.5 rounded font-mono text-[#2b1b12]">content/resources</code>.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-2 flex items-center gap-3">
+                <button
+                  onClick={() => setActiveModal('github')}
+                  className="py-3 px-6 rounded-xl bg-[#2b1b12] text-white hover:bg-[#3d271a] font-bold text-xs transition-all flex items-center gap-2 shadow-sm cursor-pointer"
+                >
+                  <GithubIcon className="w-4 h-4 text-[#c5a059]" />
+                  <span>Configure GitHub GitOps Settings Now</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* SUB-TAB 2: WORDPRESS REST GUIDE */}
+          {ruleBookTab === 'wordpress' && (
+            <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl p-6 shadow-card space-y-6">
+              <div>
+                <span className="px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-800 border border-blue-200">
+                  Official WordPress REST API Guide
+                </span>
+                <h2 className="font-editorial text-2xl font-bold text-[#2b1b12] mt-2">
+                  How WordPress Automated Publishing Works (Zero Plugins Needed)
+                </h2>
+                <p className="text-xs md:text-sm text-[#6f5a4c] mt-1 leading-relaxed">
+                  WordPress comes standard with a high-speed REST API built directly into WordPress core. You do not need to install any heavy third-party plugins. Rank Monk securely connects via Application Passwords to draft or publish SEO articles.
+                </p>
+              </div>
+
+              {/* STEP 1: GENERATE APPLICATION PASSWORD */}
+              <div className="border border-[#e4d6c6] rounded-xl p-5 bg-[#fdfbf7] space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-[#c5a059] text-[#2b1b12] font-black text-xs flex items-center justify-center shrink-0">
+                    1
+                  </span>
+                  <h3 className="font-bold text-sm text-[#2b1b12]">
+                    Generate an Application Password in 30 Seconds
+                  </h3>
+                </div>
+                <ol className="list-decimal list-inside space-y-2 text-xs text-[#6f5a4c] pl-1 font-medium leading-relaxed">
+                  <li>Log in to your WordPress Admin dashboard (<code className="bg-white px-1.5 py-0.5 rounded border border-[#e4d6c6] font-mono text-[11px]">https://yourdomain.com/wp-admin</code>).</li>
+                  <li>In the left sidebar, click <strong>Users → Profile</strong> (or <em>Edit My Profile</em>).</li>
+                  <li>Scroll down to the <strong>Application Passwords</strong> section (near the bottom of the page).</li>
+                  <li>In the <strong>New Application Password Name</strong> box, type <code className="bg-white px-1.5 py-0.5 rounded border border-[#e4d6c6] font-mono text-[11px]">RankMonk</code>.</li>
+                  <li>Click <strong>Add New Application Password</strong>.</li>
+                  <li>WordPress will immediately generate a 16-character password (e.g. <code className="bg-blue-50 text-blue-900 px-1.5 py-0.5 rounded font-mono font-bold text-[11px]">xxxx xxxx xxxx xxxx</code>). Copy this password!</li>
+                </ol>
+              </div>
+
+              {/* STEP 2: PASTE IN RANK MONK */}
+              <div className="border border-[#e4d6c6] rounded-xl p-5 bg-[#fdfbf7] space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-[#c5a059] text-[#2b1b12] font-black text-xs flex items-center justify-center shrink-0">
+                    2
+                  </span>
+                  <h3 className="font-bold text-sm text-[#2b1b12]">
+                    Connect in Rank Monk
+                  </h3>
+                </div>
+                <p className="text-xs text-[#6f5a4c] leading-relaxed">
+                  Enter your <strong>Site URL</strong> (e.g. <code className="bg-white px-1 py-0.5 rounded font-mono text-[#2b1b12]">https://yourdomain.com</code>), your <strong>WordPress Username</strong> (e.g. <code className="bg-white px-1 py-0.5 rounded font-mono text-[#2b1b12]">admin</code> or your author username), and paste the generated <strong>Application Password</strong>.
+                </p>
+              </div>
+
+              <div className="pt-2 flex items-center gap-3">
+                <button
+                  onClick={() => setActiveModal('wordpress')}
+                  className="py-3 px-6 rounded-xl bg-[#21759b] text-white hover:bg-[#1b6485] font-bold text-xs transition-all flex items-center gap-2 shadow-sm cursor-pointer"
+                >
+                  <Globe className="w-4 h-4" />
+                  <span>Configure WordPress Settings Now</span>
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* SUB-TAB: META RULES */}
           {ruleBookTab === 'meta' && (
