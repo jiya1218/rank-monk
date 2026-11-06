@@ -1148,7 +1148,7 @@ export default function DashboardPage() {
         </aside>
 
         {/* MAIN TAB CONTENT */}
-        <main className="flex-1 h-full overflow-y-auto p-3.5 sm:p-6 md:p-8 pb-24 md:pb-8 max-w-7xl mx-auto w-full">
+        <main className="flex-1 h-full overflow-y-auto overflow-x-hidden p-3.5 sm:p-6 md:p-8 pb-24 md:pb-8 max-w-7xl mx-auto w-full">
 
           {/* TAB 1: OVERVIEW (SOLOSPIDER EXACT LAYOUT) */}
           {activeTab === 'overview' && (
