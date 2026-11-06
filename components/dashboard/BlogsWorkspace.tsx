@@ -965,17 +965,22 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
                   </div>
 
                   {showGithubGuide && (
-                    <div className="space-y-2 pt-2 border-t border-amber-200/60 text-[11px] text-[#4a3528]">
-                      <ol className="list-decimal list-inside space-y-1.5 leading-relaxed font-medium">
-                        <li>
-                          Open <a href="https://github.com/settings/tokens?type=beta" target="_blank" rel="noopener noreferrer" className="font-bold text-[#0F8B7D] underline inline-flex items-center gap-0.5">GitHub Token Settings <ExternalLink className="w-3 h-3" /></a>
-                        </li>
-                        <li>Click <strong>Generate new token</strong> (Fine-grained).</li>
-                        <li>Give it a name like <code className="bg-white px-1 py-0.5 rounded border border-amber-200 text-xs font-mono">RankMonk</code>.</li>
-                        <li>Under <strong>Repository access</strong>, select <strong>Only select repositories</strong> and choose your website repo.</li>
-                        <li>Under <strong>Permissions → Repository permissions</strong>, find <strong>Contents</strong> and set it to <strong>Read and write</strong>.</li>
-                        <li>Click <strong>Generate token</strong> at the bottom, copy the <code className="bg-white px-1 py-0.5 rounded border border-amber-200 font-mono text-xs">ghp_...</code> string, and paste it below!</li>
-                      </ol>
+                    <div className="space-y-2.5 pt-2 border-t border-amber-200/60 text-[11px] text-[#4a3528]">
+                      <div className="p-2 bg-emerald-50/80 border border-emerald-200 rounded-xl space-y-1">
+                        <span className="font-bold text-emerald-900 block">⚡ Fastest Way (1-Click Classic Token - Recommended):</span>
+                        <p className="text-[10.5px] leading-relaxed text-emerald-800">
+                          Click 👉 <a href="https://github.com/settings/tokens/new?scopes=repo&description=RankMonk" target="_blank" rel="noopener noreferrer" className="font-bold underline text-emerald-900 inline-flex items-center gap-0.5">Generate Pre-Configured Token <ExternalLink className="w-3 h-3" /></a>. This automatically checks the <code className="bg-white px-1 py-0.2 rounded border font-mono font-bold">repo</code> write scope for you. Scroll down, click <strong>Generate token</strong>, and paste it below!
+                        </p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <span className="font-bold text-[#2b1b12] block">Alternative (Fine-Grained Token):</span>
+                        <ol className="list-decimal list-inside space-y-1 leading-relaxed font-medium pl-1">
+                          <li>Open <a href="https://github.com/settings/tokens?type=beta" target="_blank" rel="noopener noreferrer" className="font-bold text-[#0F8B7D] underline inline-flex items-center gap-0.5">Fine-grained Tokens <ExternalLink className="w-3 h-3" /></a>.</li>
+                          <li>Under <strong>Repository access</strong>, select your website repo.</li>
+                          <li>Under <strong>Repository permissions → Contents</strong>, choose <strong>Read and write</strong>.</li>
+                        </ol>
+                      </div>
                     </div>
                   )}
                 </div>

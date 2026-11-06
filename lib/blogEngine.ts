@@ -796,6 +796,9 @@ export default async function ${isResource ? 'ResourceArticlePage' : 'BlogArticl
 
   if (!commitRes.ok) {
     const errData = await commitRes.json().catch(() => ({}));
+    if (commitRes.status === 403 && errData.message?.includes('Resource not accessible')) {
+      throw new Error(`Resource not accessible by personal access token. Fix: Your token lacks write access to this repo. Please generate a Classic token with "repo" scope (or grant "Contents: Read & write" on Fine-Grained token).`);
+    }
     throw new Error(errData.message || `GitHub commit failed with status ${commitRes.status}`);
   }
 
