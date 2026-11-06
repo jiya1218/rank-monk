@@ -59,8 +59,39 @@ interface ReportsWorkspaceProps {
 }
 
 export function ReportsWorkspace({ project, user, onNavigateToTab }: ReportsWorkspaceProps) {
-  const brandName = project?.name || 'Your Company';
-  const domain = project?.domain || 'zenuphealth.com';
+  // Sync live project from localStorage so any changes made in Branding module or Brand Studio are immediately reflected
+  const [liveProject, setLiveProject] = useState<any>(project);
+
+  useEffect(() => {
+    try {
+      const activeRaw = localStorage.getItem('rankmonk_active_project');
+      if (activeRaw) {
+        const parsed = JSON.parse(activeRaw);
+        if (parsed && typeof parsed === 'object') {
+          setLiveProject(parsed);
+          return;
+        }
+      }
+      if (user?.email) {
+        const userKey = `rankmonk_project_${user.email.toLowerCase()}`;
+        const userRaw = localStorage.getItem(userKey);
+        if (userRaw) {
+          const parsed = JSON.parse(userRaw);
+          if (parsed && typeof parsed === 'object') {
+            setLiveProject(parsed);
+            return;
+          }
+        }
+      }
+    } catch {}
+    if (project) {
+      setLiveProject(project);
+    }
+  }, [project, user?.email]);
+
+  const activeProj = liveProject || project || {};
+  const brandName = activeProj?.name || 'Your Company';
+  const domain = activeProj?.domain || 'zenuphealth.com';
   const cleanDomain = domain.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '');
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -68,6 +99,23 @@ export function ReportsWorkspace({ project, user, onNavigateToTab }: ReportsWork
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeReportTab, setActiveReportTab] = useState<'preview' | 'schedule' | 'archive'>('preview');
   const [showScheduleSettings, setShowScheduleSettings] = useState(false);
+  const [logoFailed, setLogoFailed] = useState(false);
+
+  // Logo & Wordmark resolution matching BrandingStudio.tsx exactly
+  const isBadPromo = activeProj?.logoUrl && (
+    activeProj.logoUrl.includes('Frame_1171278262') ||
+    activeProj.logoUrl.toLowerCase().includes('under1000') ||
+    activeProj.logoUrl.toLowerCase().includes('under-1000') ||
+    activeProj.logoUrl.toLowerCase().includes('grandchild-pill')
+  );
+
+  const displayLogo = (!logoFailed && activeProj?.logoUrl && !isBadPromo && !activeProj.logoUrl.includes('google.com/s2/favicons'))
+    ? activeProj.logoUrl
+    : (!logoFailed && activeProj?.faviconUrl && !activeProj.faviconUrl.includes('google.com/s2/favicons'))
+    ? activeProj.faviconUrl
+    : (cleanDomain.includes('giva.co') ? 'https://www.giva.co/cdn/shop/files/logo__3.png' : null);
+
+  const displayWordmark = activeProj?.logoWordmarkUrl || null;
 
   // New recipient input state
   const [newRecipientInput, setNewRecipientInput] = useState('');
@@ -509,25 +557,25 @@ export function ReportsWorkspace({ project, user, onNavigateToTab }: ReportsWork
       )}
 
       {/* 3. Navigation Controls & Past Reports Timeline Pills */}
-      <div className="flex items-center justify-between gap-3 border-b border-[#e4d6c6] pb-3 no-print overflow-x-auto no-scrollbar">
-        <div className="flex items-center gap-2 shrink-0">
-          <span className="text-[11px] font-black uppercase tracking-wider text-[#8c6b2d]">
-            Select Report:
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 border-b border-[#e4d6c6] pb-3 no-print">
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+          <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-[#8c6b2d] shrink-0">
+            Reports:
           </span>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 shrink-0">
             {archiveList.map((item) => (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => setSelectedReportId(item.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+                className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
                   selectedReportId === item.id
                     ? 'bg-[#2b1b12] text-white border-[#2b1b12] shadow-xs'
                     : 'bg-[#fffcf7] text-[#6f5a4c] border-[#e4d6c6] hover:bg-[#f8f3ec]'
                 }`}
               >
                 <span>{item.date}</span>
-                <span className="text-[10px] px-1.5 py-0.2 rounded bg-[#c5a059]/25 text-[#c5a059] font-mono font-black">
+                <span className="text-[9.5px] sm:text-[10px] px-1.5 py-0.2 rounded bg-[#c5a059]/25 text-[#c5a059] font-mono font-black">
                   {item.grade} ({item.score}%)
                 </span>
               </button>
@@ -535,22 +583,22 @@ export function ReportsWorkspace({ project, user, onNavigateToTab }: ReportsWork
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
           <button
             type="button"
             onClick={handleCopyShareLink}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-[#e4d6c6] hover:bg-[#f8f3ec] text-xs font-bold text-[#2b1b12] transition-all cursor-pointer shadow-2xs"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-white border border-[#e4d6c6] hover:bg-[#f8f3ec] text-xs font-bold text-[#2b1b12] transition-all cursor-pointer shadow-2xs"
           >
             {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-[#8c6b2d]" />}
-            <span>{copiedLink ? 'Link Copied' : 'Share Link'}</span>
+            <span>{copiedLink ? 'Copied' : 'Share Link'}</span>
           </button>
           <button
             type="button"
             onClick={handleDownloadPdf}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#2b1b12] text-white hover:bg-[#3d271a] text-xs font-bold transition-all cursor-pointer shadow-xs"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#2b1b12] text-white hover:bg-[#3d271a] text-xs font-bold transition-all cursor-pointer shadow-xs"
           >
             <Printer className="w-3.5 h-3.5 text-[#c5a059]" />
-            <span>Print / PDF</span>
+            <span>Print PDF</span>
           </button>
         </div>
       </div>
@@ -558,159 +606,185 @@ export function ReportsWorkspace({ project, user, onNavigateToTab }: ReportsWork
       {/* 4. THE LIVE PRINTABLE EXECUTIVE REPORT CANVAS (What renders in PDF & Viewport) */}
       <div
         id="printable-executive-report"
-        className="bg-white border border-[#e4d6c6] rounded-3xl p-5 sm:p-10 shadow-card max-w-5xl mx-auto space-y-8 text-[#2b1b12]"
+        className="bg-white border border-[#e4d6c6] rounded-2xl sm:rounded-3xl p-3.5 sm:p-8 md:p-10 shadow-card max-w-5xl mx-auto space-y-6 sm:space-y-8 text-[#2b1b12]"
       >
         {/* REPORT COVER & HEADER */}
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b-2 border-[#2b1b12] pb-6">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b-2 border-[#2b1b12] pb-5 sm:pb-6">
           <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              {project?.logoUrl ? (
-                <img
-                  src={project.logoUrl}
-                  alt={brandName}
-                  className="max-h-12 w-auto object-contain filter drop-shadow-xs"
-                  onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
-                />
+            <div className="flex items-center gap-2.5 sm:gap-3.5">
+              {displayLogo ? (
+                displayWordmark ? (
+                  <div className="flex items-center gap-2 max-h-12 sm:max-h-14">
+                    <img
+                      src={displayLogo}
+                      alt={brandName}
+                      className="max-h-10 sm:max-h-12 w-auto object-contain filter drop-shadow-xs shrink-0"
+                      onError={() => setLogoFailed(true)}
+                    />
+                    <img
+                      src={displayWordmark}
+                      alt={`${brandName} Wordmark`}
+                      className="max-h-8 sm:max-h-9 w-auto object-contain filter drop-shadow-xs shrink-0"
+                    />
+                  </div>
+                ) : (
+                  <img
+                    src={displayLogo}
+                    alt={brandName}
+                    className="max-h-10 sm:max-h-12 max-w-[160px] sm:max-w-[220px] w-auto object-contain filter drop-shadow-xs"
+                    onError={() => setLogoFailed(true)}
+                  />
+                )
               ) : (
-                <div className="w-12 h-12 rounded-xl bg-[#2b1b12] text-[#c5a059] flex items-center justify-center font-bold text-base">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#2b1b12] text-[#c5a059] flex items-center justify-center font-bold text-sm sm:text-base shrink-0">
                   {brandName.slice(0, 2).toUpperCase()}
                 </div>
               )}
               <div>
-                <h2 className="font-editorial text-2xl sm:text-3xl font-black text-[#2b1b12] tracking-tight">
+                <h2 className="font-editorial text-xl sm:text-2xl md:text-3xl font-black text-[#2b1b12] tracking-tight">
                   {brandName}
                 </h2>
-                <div className="flex items-center gap-2 text-xs text-[#6f5a4c] font-mono">
-                  <Globe className="w-3.5 h-3.5 text-[#8c6b2d]" />
+                <div className="flex items-center gap-1.5 text-[11px] sm:text-xs text-[#6f5a4c] font-mono">
+                  <Globe className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#8c6b2d]" />
                   <span>https://{cleanDomain}</span>
                 </div>
               </div>
             </div>
-            <p className="text-xs text-[#6f5a4c] font-medium max-w-lg leading-relaxed pt-1">
+            <p className="text-[11px] sm:text-xs text-[#6f5a4c] font-medium max-w-lg leading-relaxed pt-0.5 sm:pt-1">
               Executive Organic Growth, Search Engine Optimization &amp; AI Citation Verification Audit.
             </p>
           </div>
 
-          <div className="flex flex-col sm:items-end gap-1.5 bg-[#f8f3ec] p-4 rounded-2xl border border-[#e4d6c6] shrink-0">
-            <span className="text-[10px] font-black uppercase tracking-wider text-[#8c6b2d]">
-              Audited &amp; Verified By Rank Monk
-            </span>
+          <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 bg-[#f8f3ec] p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-[#e4d6c6] shrink-0">
+            <div className="flex flex-col sm:items-end">
+              <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-[#8c6b2d]">
+                Audited &amp; Verified By Rank Monk
+              </span>
+              <span className="text-[10px] sm:text-[11px] font-mono text-[#6f5a4c] hidden sm:block">
+                Audit Date: {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              </span>
+            </div>
             <div className="flex items-center gap-2">
-              <span className="text-2xl sm:text-3xl font-black font-editorial text-[#2b1b12]">
+              <span className="text-xl sm:text-2xl md:text-3xl font-black font-editorial text-[#2b1b12]">
                 98 / 100
               </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white font-black text-xs">
+              <span className="px-2 sm:px-2.5 py-0.5 rounded-full bg-emerald-600 text-white font-black text-[11px] sm:text-xs">
                 Grade A+
               </span>
             </div>
-            <span className="text-[11px] font-mono text-[#6f5a4c]">
-              Audit Date: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-            </span>
           </div>
         </div>
 
         {/* SECTION 1: BEFORE VS. AFTER DELTA SCORECARD (WHAT CHANGED THIS PERIOD) */}
-        <div className="space-y-3 break-inside-avoid">
+        <div className="space-y-2.5 sm:space-y-3 break-inside-avoid">
           <div className="flex items-center justify-between">
-            <h3 className="font-editorial text-lg font-bold text-[#2b1b12] flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-[#8c6b2d]" />
+            <h3 className="font-editorial text-base sm:text-lg font-bold text-[#2b1b12] flex items-center gap-1.5 sm:gap-2">
+              <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-[#8c6b2d]" />
               <span>Executive Progress &amp; Delta Scorecard</span>
             </h3>
-            <span className="text-xs text-emerald-800 font-bold bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-              +16% Improvement Over Baseline
+            <span className="text-[10px] sm:text-xs text-emerald-800 font-bold bg-emerald-50 px-2 sm:px-2.5 py-0.5 rounded-full border border-emerald-200 shrink-0">
+              +16% Over Baseline
             </span>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="p-4 rounded-2xl bg-[#fbf8f3] border border-[#e4d6c6] space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#6f5a4c] block">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+            <div className="p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-[#fbf8f3] border border-[#e4d6c6] space-y-1">
+              <span className="text-[9.5px] sm:text-[10px] font-bold uppercase tracking-tight sm:tracking-wider text-[#6f5a4c] block truncate">
                 Technical Health Score
               </span>
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-black text-[#2b1b12]">98%</span>
-                <span className="text-xs font-bold text-emerald-700">▲ from 82%</span>
+              <div className="flex flex-wrap items-baseline gap-1 sm:gap-2">
+                <span className="text-xl sm:text-2xl font-black text-[#2b1b12]">98%</span>
+                <span className="text-[10px] sm:text-xs font-bold text-emerald-700 whitespace-nowrap">▲ from 82%</span>
               </div>
-              <p className="text-[10.5px] text-[#6f5a4c]">Zero critical errors detected</p>
+              <p className="text-[9.5px] sm:text-[10.5px] text-[#6f5a4c] leading-tight truncate sm:whitespace-normal">
+                Zero critical errors detected
+              </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-[#fbf8f3] border border-[#e4d6c6] space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#6f5a4c] block">
+            <div className="p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-[#fbf8f3] border border-[#e4d6c6] space-y-1">
+              <span className="text-[9.5px] sm:text-[10px] font-bold uppercase tracking-tight sm:tracking-wider text-[#6f5a4c] block truncate">
                 Critical On-Page Issues
               </span>
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-black text-emerald-800">0</span>
-                <span className="text-xs font-bold text-emerald-700">▼ 6 resolved</span>
+              <div className="flex flex-wrap items-baseline gap-1 sm:gap-2">
+                <span className="text-xl sm:text-2xl font-black text-emerald-800">0</span>
+                <span className="text-[10px] sm:text-xs font-bold text-emerald-700 whitespace-nowrap">▼ 6 resolved</span>
               </div>
-              <p className="text-[10.5px] text-[#6f5a4c]">100% crawl checks passed</p>
+              <p className="text-[9.5px] sm:text-[10.5px] text-[#6f5a4c] leading-tight truncate sm:whitespace-normal">
+                100% crawl checks passed
+              </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-[#fbf8f3] border border-[#e4d6c6] space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#6f5a4c] block">
+            <div className="p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-[#fbf8f3] border border-[#e4d6c6] space-y-1">
+              <span className="text-[9.5px] sm:text-[10px] font-bold uppercase tracking-tight sm:tracking-wider text-[#6f5a4c] block truncate">
                 Live Published Articles
               </span>
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-black text-[#2b1b12]">{publishedArticles.length || 3}</span>
-                <span className="text-xs font-bold text-emerald-700">▲ Auto-Deployed</span>
+              <div className="flex flex-wrap items-baseline gap-1 sm:gap-2">
+                <span className="text-xl sm:text-2xl font-black text-[#2b1b12]">{publishedArticles.length || 3}</span>
+                <span className="text-[10px] sm:text-xs font-bold text-emerald-700 whitespace-nowrap">▲ Auto-Deployed</span>
               </div>
-              <p className="text-[10.5px] text-[#6f5a4c]">Direct GitHub/WP GitOps sync</p>
+              <p className="text-[9.5px] sm:text-[10.5px] text-[#6f5a4c] leading-tight truncate sm:whitespace-normal">
+                Direct GitHub/WP GitOps
+              </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-[#fbf8f3] border border-[#e4d6c6] space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#6f5a4c] block">
+            <div className="p-2.5 sm:p-4 rounded-xl sm:rounded-2xl bg-[#fbf8f3] border border-[#e4d6c6] space-y-1">
+              <span className="text-[9.5px] sm:text-[10px] font-bold uppercase tracking-tight sm:tracking-wider text-[#6f5a4c] block truncate">
                 AEO Citation Readiness
               </span>
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-black text-[#2b1b12]">Grade A+</span>
-                <span className="text-xs font-bold text-emerald-700">▲ High Entity</span>
+              <div className="flex flex-wrap items-baseline gap-1 sm:gap-2">
+                <span className="text-xl sm:text-2xl font-black text-[#2b1b12]">Grade A+</span>
+                <span className="text-[10px] sm:text-xs font-bold text-emerald-700 whitespace-nowrap">▲ High Entity</span>
               </div>
-              <p className="text-[10.5px] text-[#6f5a4c]">LLM search index optimized</p>
+              <p className="text-[9.5px] sm:text-[10.5px] text-[#6f5a4c] leading-tight truncate sm:whitespace-normal">
+                LLM search index optimized
+              </p>
             </div>
           </div>
         </div>
 
         {/* SECTION 2: TECHNICAL SEO & CRAWL HEALTH BREAKDOWN */}
-        <div className="space-y-3 break-inside-avoid">
-          <h3 className="font-editorial text-lg font-bold text-[#2b1b12] flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-[#8c6b2d]" />
+        <div className="space-y-2.5 sm:space-y-3 break-inside-avoid">
+          <h3 className="font-editorial text-base sm:text-lg font-bold text-[#2b1b12] flex items-center gap-1.5 sm:gap-2">
+            <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-[#8c6b2d]" />
             <span>Technical SEO &amp; Crawl Audit (100% Verified)</span>
           </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-            <div className="p-3.5 rounded-2xl border border-emerald-200 bg-emerald-50/60 flex items-start gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3 text-xs">
+            <div className="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border border-emerald-200 bg-emerald-50/60 flex items-start gap-2.5">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
               <div>
-                <span className="font-bold text-[#2b1b12] block">HTTP Status &amp; Link Hygiene: 100% Passed</span>
-                <p className="text-[11px] text-[#6f5a4c] mt-0.5 leading-relaxed">
+                <span className="font-bold text-[#2b1b12] block text-[11.5px] sm:text-xs">HTTP Status &amp; Link Hygiene: 100% Passed</span>
+                <p className="text-[10.5px] sm:text-[11px] text-[#6f5a4c] mt-0.5 leading-relaxed">
                   0 broken links (404), canonical tags validated across all pages, proper HTTPS enforcement.
                 </p>
               </div>
             </div>
 
-            <div className="p-3.5 rounded-2xl border border-emerald-200 bg-emerald-50/60 flex items-start gap-3">
+            <div className="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border border-emerald-200 bg-emerald-50/60 flex items-start gap-2.5">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
               <div>
-                <span className="font-bold text-[#2b1b12] block">Semantic Heading Hierarchy (H1 - H3): Validated</span>
-                <p className="text-[11px] text-[#6f5a4c] mt-0.5 leading-relaxed">
+                <span className="font-bold text-[#2b1b12] block text-[11.5px] sm:text-xs">Semantic Heading Hierarchy (H1 - H3): Validated</span>
+                <p className="text-[10.5px] sm:text-[11px] text-[#6f5a4c] mt-0.5 leading-relaxed">
                   Clear single H1 tag matching core brand intent; nested H2 and H3 tags structured logically.
                 </p>
               </div>
             </div>
 
-            <div className="p-3.5 rounded-2xl border border-emerald-200 bg-emerald-50/60 flex items-start gap-3">
+            <div className="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border border-emerald-200 bg-emerald-50/60 flex items-start gap-2.5">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
               <div>
-                <span className="font-bold text-[#2b1b12] block">Structured Data &amp; JSON-LD Schemas: Live</span>
-                <p className="text-[11px] text-[#6f5a4c] mt-0.5 leading-relaxed">
+                <span className="font-bold text-[#2b1b12] block text-[11.5px] sm:text-xs">Structured Data &amp; JSON-LD Schemas: Live</span>
+                <p className="text-[10.5px] sm:text-[11px] text-[#6f5a4c] mt-0.5 leading-relaxed">
                   Organization, Article, and FAQPage schemas properly formatted for rich snippet extraction.
                 </p>
               </div>
             </div>
 
-            <div className="p-3.5 rounded-2xl border border-emerald-200 bg-emerald-50/60 flex items-start gap-3">
+            <div className="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border border-emerald-200 bg-emerald-50/60 flex items-start gap-2.5">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
               <div>
-                <span className="font-bold text-[#2b1b12] block">Sitemap Auto-Pinger Active</span>
-                <p className="text-[11px] text-[#6f5a4c] mt-0.5 leading-relaxed">
+                <span className="font-bold text-[#2b1b12] block text-[11.5px] sm:text-xs">Sitemap Auto-Pinger Active</span>
+                <p className="text-[10.5px] sm:text-[11px] text-[#6f5a4c] mt-0.5 leading-relaxed">
                   Automated Googlebot and Bingbot pinging enabled on every new article build.
                 </p>
               </div>
@@ -719,62 +793,62 @@ export function ReportsWorkspace({ project, user, onNavigateToTab }: ReportsWork
         </div>
 
         {/* SECTION 3: LIVE BLOGS PUBLISHING LOG & GITOPS PROOF */}
-        <div className="space-y-3 break-inside-avoid">
-          <div className="flex items-center justify-between">
-            <h3 className="font-editorial text-lg font-bold text-[#2b1b12] flex items-center gap-2">
-              <FileText className="w-5 h-5 text-[#8c6b2d]" />
+        <div className="space-y-2.5 sm:space-y-3 break-inside-avoid">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+            <h3 className="font-editorial text-base sm:text-lg font-bold text-[#2b1b12] flex items-center gap-1.5 sm:gap-2">
+              <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-[#8c6b2d]" />
               <span>Live Content Delivery Log (Publication Proof)</span>
             </h3>
-            <span className="text-xs font-mono text-[#6f5a4c]">
+            <span className="text-[10px] sm:text-xs font-mono text-[#6f5a4c]">
               Target: {cleanDomain}
             </span>
           </div>
 
-          <div className="border border-[#e4d6c6] rounded-2xl overflow-hidden divide-y divide-[#e4d6c6]">
+          <div className="border border-[#e4d6c6] rounded-xl sm:rounded-2xl overflow-hidden divide-y divide-[#e4d6c6]">
             {publishedArticles.length > 0 ? (
               publishedArticles.slice(0, 4).map((art: any, idx: number) => (
-                <div key={art.id || idx} className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-[#fdfbf7] text-xs">
+                <div key={art.id || idx} className="p-2.5 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-[#fdfbf7] text-xs">
                   <div className="min-w-0 flex-1">
-                    <span className="font-bold text-[#2b1b12] block truncate">
+                    <span className="font-bold text-[#2b1b12] block truncate text-[11.5px] sm:text-xs">
                       {art.title}
                     </span>
-                    <div className="flex flex-wrap items-center gap-2 text-[10.5px] text-[#6f5a4c] mt-0.5">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[10px] sm:text-[10.5px] text-[#6f5a4c] mt-0.5">
                       <span>Target: <strong className="text-[#2b1b12]">{art.keyword || 'Primary Intent'}</strong></span>
                       <span>•</span>
                       <span>Word Count: <strong>{art.wordCount || 1500} words</strong></span>
                       <span>•</span>
-                      <span className="text-emerald-800 font-bold">SEO Audit Score: {art.seoScore || 98}% (Grade A+)</span>
+                      <span className="text-emerald-800 font-bold">SEO Score: {art.seoScore || 98}% (Grade A+)</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 self-start sm:self-auto">
                     {art.liveUrl && (
                       <a
                         href={art.liveUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-900 border border-emerald-300 font-bold text-[10.5px] flex items-center gap-1 hover:bg-emerald-100"
+                        className="px-2 sm:px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-900 border border-emerald-300 font-bold text-[10px] sm:text-[10.5px] flex items-center gap-1 hover:bg-emerald-100"
                       >
                         <span>Live Post ↗</span>
                       </a>
                     )}
-                    <span className="px-2 py-1 rounded-lg bg-[#2b1b12] text-white text-[10px] font-mono font-bold">
+                    <span className="px-2 py-1 rounded-lg bg-[#2b1b12] text-white text-[9.5px] sm:text-[10px] font-mono font-bold">
                       GitOps Verified ✓
                     </span>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="p-4 text-xs text-[#6f5a4c] bg-[#fdfbf7]">
-                <div className="flex items-center justify-between">
+              <div className="p-3 sm:p-4 text-xs text-[#6f5a4c] bg-[#fdfbf7]">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
-                    <span className="font-bold text-[#2b1b12] block">
+                    <span className="font-bold text-[#2b1b12] block text-[11.5px] sm:text-xs">
                       Top Mistakes to Avoid When Evaluating CRE &amp; FM SaaS Platform with Marketplace Integration Solutions
                     </span>
-                    <span className="text-[11px] text-[#6f5a4c]">
+                    <span className="text-[10px] sm:text-[11px] text-[#6f5a4c]">
                       Word Count: 1,640 words • Score: 98/100 (A+) • Destination: content/resources
                     </span>
                   </div>
-                  <span className="px-2 py-1 rounded-lg bg-emerald-100 text-emerald-800 font-bold text-[10.5px]">
+                  <span className="px-2 py-1 rounded-lg bg-emerald-100 text-emerald-800 font-bold text-[10px] sm:text-[10.5px] self-start sm:self-auto shrink-0">
                     Live on Website ✓
                   </span>
                 </div>
@@ -784,34 +858,34 @@ export function ReportsWorkspace({ project, user, onNavigateToTab }: ReportsWork
         </div>
 
         {/* SECTION 4: AI ENGINE OPTIMIZATION (AEO) CITATION AUDIT */}
-        <div className="space-y-3 break-inside-avoid">
-          <h3 className="font-editorial text-lg font-bold text-[#2b1b12] flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-[#8c6b2d]" />
+        <div className="space-y-2.5 sm:space-y-3 break-inside-avoid">
+          <h3 className="font-editorial text-base sm:text-lg font-bold text-[#2b1b12] flex items-center gap-1.5 sm:gap-2">
+            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-[#8c6b2d]" />
             <span>AI Engine Optimization (AEO) Citation Readiness</span>
           </h3>
 
-          <div className="p-4 rounded-2xl bg-[#fbf8f3] border border-[#e4d6c6] space-y-3 text-xs">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#e4d6c6]/80 pb-2.5">
+          <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-[#fbf8f3] border border-[#e4d6c6] space-y-2.5 sm:space-y-3 text-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 border-b border-[#e4d6c6]/80 pb-2 sm:pb-2.5">
               <div>
-                <span className="font-bold text-[#2b1b12]">Topical Authority &amp; Entity Clarity Index</span>
-                <p className="text-[11px] text-[#6f5a4c]">Evaluation of brand entity extraction by ChatGPT, Perplexity, and Claude.</p>
+                <span className="font-bold text-[#2b1b12] text-[11.5px] sm:text-xs">Topical Authority &amp; Entity Clarity Index</span>
+                <p className="text-[10px] sm:text-[11px] text-[#6f5a4c]">Evaluation of brand entity extraction by generative search engines.</p>
               </div>
-              <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 font-black text-xs self-start sm:self-auto">
+              <span className="px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-emerald-100 text-emerald-800 font-black text-[10.5px] sm:text-xs self-start sm:self-auto">
                 Grade A+ • High Citation Probability
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px]">
-              <div className="p-2.5 bg-white rounded-xl border border-[#e4d6c6]">
-                <span className="text-[#6f5a4c] block font-bold">OpenAI / ChatGPT:</span>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[10.5px] sm:text-[11px]">
+              <div className="p-2 sm:p-2.5 bg-white rounded-lg sm:rounded-xl border border-[#e4d6c6] flex sm:flex-col justify-between sm:justify-start items-center sm:items-start gap-1">
+                <span className="text-[#6f5a4c] font-bold">OpenAI / ChatGPT:</span>
                 <span className="text-emerald-900 font-extrabold">Primary Entity Recognized ✓</span>
               </div>
-              <div className="p-2.5 bg-white rounded-xl border border-[#e4d6c6]">
-                <span className="text-[#6f5a4c] block font-bold">Perplexity AI:</span>
+              <div className="p-2 sm:p-2.5 bg-white rounded-lg sm:rounded-xl border border-[#e4d6c6] flex sm:flex-col justify-between sm:justify-start items-center sm:items-start gap-1">
+                <span className="text-[#6f5a4c] font-bold">Perplexity AI:</span>
                 <span className="text-emerald-900 font-extrabold">Snippet Extractable ✓</span>
               </div>
-              <div className="p-2.5 bg-white rounded-xl border border-[#e4d6c6]">
-                <span className="text-[#6f5a4c] block font-bold">Claude 3.5 Sonnet:</span>
+              <div className="p-2 sm:p-2.5 bg-white rounded-lg sm:rounded-xl border border-[#e4d6c6] flex sm:flex-col justify-between sm:justify-start items-center sm:items-start gap-1">
+                <span className="text-[#6f5a4c] font-bold">Anthropic Claude:</span>
                 <span className="text-emerald-900 font-extrabold">Domain Anchor Grounded ✓</span>
               </div>
             </div>
@@ -819,44 +893,44 @@ export function ReportsWorkspace({ project, user, onNavigateToTab }: ReportsWork
         </div>
 
         {/* SECTION 5: PRIORITIZED 7-DAY ACTION PLAN */}
-        <div className="space-y-3 break-inside-avoid">
-          <h3 className="font-editorial text-lg font-bold text-[#2b1b12] flex items-center gap-2">
-            <Clock className="w-5 h-5 text-[#8c6b2d]" />
+        <div className="space-y-2.5 sm:space-y-3 break-inside-avoid">
+          <h3 className="font-editorial text-base sm:text-lg font-bold text-[#2b1b12] flex items-center gap-1.5 sm:gap-2">
+            <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-[#8c6b2d]" />
             <span>Strategic 7-Day Organic Growth Recommendations</span>
           </h3>
 
           <div className="space-y-2 text-xs">
-            <div className="p-3 bg-white border border-[#e4d6c6] rounded-xl flex items-start gap-2.5">
-              <span className="w-5 h-5 rounded-full bg-[#c5a059] text-[#2b1b12] font-black text-xs flex items-center justify-center shrink-0 mt-0.5">
+            <div className="p-2.5 sm:p-3 bg-white border border-[#e4d6c6] rounded-xl flex items-start gap-2.5">
+              <span className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#c5a059] text-[#2b1b12] font-black text-[10px] sm:text-xs flex items-center justify-center shrink-0 mt-0.5">
                 1
               </span>
               <div>
-                <span className="font-bold text-[#2b1b12]">Scale Topical Authority in Core Product Cluster:</span>
-                <p className="text-[11px] text-[#6f5a4c] mt-0.5">
+                <span className="font-bold text-[#2b1b12] text-[11.5px] sm:text-xs">Scale Topical Authority in Core Product Cluster:</span>
+                <p className="text-[10.5px] sm:text-[11px] text-[#6f5a4c] mt-0.5 leading-relaxed">
                   Publish 2 comparison-grade articles targeting high-intent long-tail keywords in your sector to reinforce SERP authority.
                 </p>
               </div>
             </div>
 
-            <div className="p-3 bg-white border border-[#e4d6c6] rounded-xl flex items-start gap-2.5">
-              <span className="w-5 h-5 rounded-full bg-[#c5a059] text-[#2b1b12] font-black text-xs flex items-center justify-center shrink-0 mt-0.5">
+            <div className="p-2.5 sm:p-3 bg-white border border-[#e4d6c6] rounded-xl flex items-start gap-2.5">
+              <span className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#c5a059] text-[#2b1b12] font-black text-[10px] sm:text-xs flex items-center justify-center shrink-0 mt-0.5">
                 2
               </span>
               <div>
-                <span className="font-bold text-[#2b1b12]">Omni-Channel Visual Post Syndication:</span>
-                <p className="text-[11px] text-[#6f5a4c] mt-0.5">
+                <span className="font-bold text-[#2b1b12] text-[11.5px] sm:text-xs">Omni-Channel Visual Post Syndication:</span>
+                <p className="text-[10.5px] sm:text-[11px] text-[#6f5a4c] mt-0.5 leading-relaxed">
                   Syndicate newly generated blog key takeaways across LinkedIn and Instagram using Media Studio visual templates.
                 </p>
               </div>
             </div>
 
-            <div className="p-3 bg-white border border-[#e4d6c6] rounded-xl flex items-start gap-2.5">
-              <span className="w-5 h-5 rounded-full bg-[#c5a059] text-[#2b1b12] font-black text-xs flex items-center justify-center shrink-0 mt-0.5">
+            <div className="p-2.5 sm:p-3 bg-white border border-[#e4d6c6] rounded-xl flex items-start gap-2.5">
+              <span className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#c5a059] text-[#2b1b12] font-black text-[10px] sm:text-xs flex items-center justify-center shrink-0 mt-0.5">
                 3
               </span>
               <div>
-                <span className="font-bold text-[#2b1b12]">Knowledge Graph Entity Interlinking:</span>
-                <p className="text-[11px] text-[#6f5a4c] mt-0.5">
+                <span className="font-bold text-[#2b1b12] text-[11.5px] sm:text-xs">Knowledge Graph Entity Interlinking:</span>
+                <p className="text-[10.5px] sm:text-[11px] text-[#6f5a4c] mt-0.5 leading-relaxed">
                   Add contextual internal links between resource pages and product landing pages to accelerate crawler indexation.
                 </p>
               </div>
@@ -865,11 +939,11 @@ export function ReportsWorkspace({ project, user, onNavigateToTab }: ReportsWork
         </div>
 
         {/* REPORT FOOTER SIGN-OFF */}
-        <div className="border-t border-[#e4d6c6] pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[10.5px] text-[#6f5a4c] break-inside-avoid">
+        <div className="border-t border-[#e4d6c6] pt-3.5 sm:pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 text-[10px] sm:text-[10.5px] text-[#6f5a4c] break-inside-avoid">
           <div>
             <span>Generated securely for <strong>{brandName}</strong> ({cleanDomain})</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             <span>Powered by <strong>Rank Monk Autonomous Growth Engine</strong></span>
             <span>•</span>
             <span>Confidential &amp; Proprietary</span>
