@@ -344,9 +344,6 @@ export default function EeatAnalyzerPage() {
             <span className="text-xs font-black text-[#2b1b12] tracking-wide uppercase">
               Rank Monk E-E-A-T Quality Engine
             </span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-extrabold border border-emerald-200">
-              Live Production
-            </span>
           </div>
 
           {/* Headline */}
@@ -751,7 +748,7 @@ export default function EeatAnalyzerPage() {
               const isOpen = openCategory === key;
               const activeSub = subTabs[key] || 'summary';
               const issuesCount = category.missing.length;
-              const passedCount = category.working.length;
+              const passedCount = category.passedCount ?? category.working.length;
 
               const metaMap: Record<string, { title: string; subtitle: string; icon: any }> = {
                 experience: { title: 'Experience', subtitle: 'First-hand, practical involvement and demonstrated execution', icon: UserCheck },
@@ -930,12 +927,28 @@ export default function EeatAnalyzerPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 pt-2">
               {[
-                { title: 'Deploy Organization & Service JSON-LD', desc: 'Declare entity types, founding credentials, contact points, and service catalogs directly in the HTML head.', tag: 'Technical Schema' },
+                {
+                  title: result.checklist.organizationSchema
+                    ? 'Expand Schema to Service & FAQPage JSON-LD'
+                    : 'Deploy Organization & Service JSON-LD',
+                  desc: result.checklist.organizationSchema
+                    ? 'Organization schema is verified. Now add granular Service, Offer, and FAQPage JSON-LD schemas to dominate AI answer engines.'
+                    : 'Declare entity types, founding credentials, contact points, and service catalogs directly in the HTML head.',
+                  tag: 'Technical Schema'
+                },
                 { title: 'Publish Quantified Case Studies', desc: 'Add 2–3 client operational success stories with verified metrics to prove hands-on Experience.', tag: 'Experience Proof' },
                 { title: 'Add Verified Author Bylines', desc: 'Include named author credentials and links to LinkedIn profiles on all educational articles to satisfy Expertise.', tag: 'Author Authority' },
                 { title: 'Secure G2 & Capterra Profiles', desc: 'Claim and optimize your brand profiles on independent software directories to anchor AI model grounding.', tag: 'Third-Party Trust' },
                 { title: 'Publish Standard llms.txt File', desc: 'Expose a canonical llms.txt file at your domain root (https://domain/llms.txt) to prevent AI hallucinations.', tag: 'AEO Protocol' },
-                { title: 'Transparent Legal Disclosures', desc: 'Ensure physical corporate address, Terms of Service, and Privacy Policy links are in the site-wide footer.', tag: 'Trust Compliance' }
+                {
+                  title: result.checklist.termsPrivacy
+                    ? 'Footer Corporate Governance Details'
+                    : 'Transparent Legal Disclosures',
+                  desc: result.checklist.termsPrivacy
+                    ? 'Terms & Privacy are verified. Ensure registered physical corporate address and company registration numbers are clear site-wide.'
+                    : 'Ensure physical corporate address, Terms of Service, and Privacy Policy links are in the site-wide footer.',
+                  tag: 'Trust Compliance'
+                }
               ].map((act, i) => (
                 <div key={i} className="p-4 bg-white rounded-2xl border border-[#e4d6c6] shadow-xs space-y-2 flex flex-col justify-between">
                   <div className="space-y-1">
