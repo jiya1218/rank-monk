@@ -100,7 +100,7 @@ function LoginForm() {
                 role: 'owner',
                 plan: 'scale',
                 paid: true,
-                domain: activeProj?.domain || 'officex.pro',
+                domain: activeProj?.domain || '',
                 createdAt: new Date().toISOString()
               };
             }

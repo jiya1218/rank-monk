@@ -2415,7 +2415,7 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
                               type="text"
                               value={githubRepoInput}
                               onChange={(e) => setGithubRepoInput(e.target.value)}
-                              placeholder="owner/repo (e.g. officex/website)"
+                              placeholder="owner/repo (e.g. company/website)"
                               className="w-full p-2 bg-white border border-[#e4d6c6] rounded-lg text-xs"
                             />
                             <input
@@ -2437,7 +2437,7 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
                               type="text"
                               value={wpUrlInput}
                               onChange={(e) => setWpUrlInput(e.target.value)}
-                              placeholder="https://officex.pro"
+                              placeholder="https://yourdomain.com"
                               className="w-full p-2 bg-white border border-[#e4d6c6] rounded-lg text-xs"
                             />
                             <div className="grid grid-cols-2 gap-2">

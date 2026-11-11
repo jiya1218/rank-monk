@@ -38,7 +38,7 @@ export async function POST(req: Request) {
             role: matched.role || 'owner',
             plan: matched.plan || 'scale',
             paid: true,
-            domain: matched.domain || 'officex.pro',
+            domain: matched.domain || '',
             createdAt: matched.created_at || new Date().toISOString()
           }
         });

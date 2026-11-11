@@ -7,6 +7,7 @@ import { HeroCanvas } from '@/components/home/HeroCanvas';
 import { ConnectDomainModal } from '@/components/domain/ConnectDomainModal';
 import { PricingSection } from '@/components/pricing/PricingSection';
 import { PricingModal } from '@/components/pricing/PricingModal';
+import { Navbar } from '@/components/ui/Navbar';
 
 export default function HomePage() {
   const router = useRouter();
@@ -69,209 +70,8 @@ export default function HomePage() {
 
   return (
     <div className="page-fade-in font-sans" style={{ backgroundColor: 'var(--bg)', color: 'var(--ink)' }}>
-      {/* ==========================================================================
-           1. SITE HEADER - BORDERLESS, AIRY, PROMINENT LOGO & DASHBOARD BUTTON
-           ========================================================================== */}
-      <header className="site-header" id="siteHeader" style={{ height: '76px', display: 'flex', alignItems: 'center' }}>
-        <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-          {/* Brand Logo - Prominent & Sized (48px) */}
-          <Link href="/" className="brand" aria-label="Rank Monk home" style={{ display: 'flex', alignItems: 'center' }}>
-            <img
-              src="/assets/rank-monk-logo-horizontal.png"
-              alt="Rank Monk"
-              className="brand-logo-img logo-light"
-              style={{ height: '48px', width: 'auto', maxHeight: '52px' }}
-            />
-          </Link>
-
-          {/* Desktop Navigation Links */}
-          <nav className="nav-links hidden lg:flex items-center gap-6 text-sm font-semibold text-[#6f5a4c]">
-            <Link href="/" className="nav-link active text-[#2b1b12]">Home</Link>
-            <Link href="/features" className="nav-link hover:text-[#2b1b12]">Features</Link>
-            <Link href="/#engines" className="nav-link hover:text-[#2b1b12]">AI Engines</Link>
-            <Link href="/#stack-collapse-teaser" className="nav-link hover:text-[#2b1b12]">Stack Collapse</Link>
-            <Link href="/pricing" className="nav-link hover:text-[#2b1b12]">Pricing</Link>
-            <Link href="/#faq" className="nav-link hover:text-[#2b1b12]">FAQ</Link>
-          </nav>
-
-          {/* Nav Actions - Desktop */}
-          <div className="hidden lg:flex items-center gap-3">
-            <a
-              href="https://calendly.com/utkarshmakwana31/demo-for-rankmonk"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-ghost btn-sm"
-              style={{ borderRadius: '10px', fontSize: '0.84rem', fontWeight: 600, padding: '7px 16px', border: '1px solid var(--line)' }}
-            >
-              Book Demo
-            </a>
-
-            {user ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <button
-                  onClick={handleDashboardClick}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '8px 18px',
-                    background: '#2b1b12',
-                    color: '#fffcf7',
-                    borderRadius: '12px',
-                    fontWeight: 700,
-                    fontSize: '0.85rem',
-                    boxShadow: '0 4px 12px rgba(43, 27, 18, 0.15)',
-                    transition: 'all 0.2s ease',
-                    cursor: 'pointer',
-                    border: 'none'
-                  }}
-                >
-                  <span>Dashboard</span>
-                  <span>→</span>
-                </button>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingLeft: '4px' }}>
-                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#f1e8dc', border: '1px solid #d8c09e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 700, color: '#2b1b12' }}>
-                    {(user.name || user.email || 'U').charAt(0).toUpperCase()}
-                  </div>
-                  <button
-                    onClick={handleLogout}
-                    style={{ fontSize: '0.75rem', color: '#7a5242', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}
-                  >
-                    Log Out
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Link
-                  href="/login"
-                  style={{ fontSize: '0.85rem', fontWeight: 700, color: '#2b1b12', padding: '6px 12px' }}
-                >
-                  Sign In
-                </Link>
-                <Link
-                  href="/signup"
-                  style={{
-                    padding: '8px 18px',
-                    background: '#2b1b12',
-                    color: '#fffcf7',
-                    borderRadius: '12px',
-                    fontWeight: 700,
-                    fontSize: '0.85rem',
-                    boxShadow: '0 4px 12px rgba(43, 27, 18, 0.15)'
-                  }}
-                >
-                  Start climbing
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile Hamburger Toggle Button */}
-          <div className="flex lg:hidden items-center gap-2">
-            {user && (
-              <button
-                onClick={handleDashboardClick}
-                style={{
-                  padding: '6px 12px',
-                  background: '#2b1b12',
-                  color: '#fffcf7',
-                  borderRadius: '10px',
-                  fontWeight: 700,
-                  fontSize: '0.78rem',
-                  cursor: 'pointer',
-                  border: 'none'
-                }}
-              >
-                Dashboard →
-              </button>
-            )}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-xl text-[#2b1b12] hover:bg-[#f1e8dc] transition-colors"
-              aria-label="Toggle navigation menu"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                {mobileMenuOpen ? (
-                  <>
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </>
-                ) : (
-                  <>
-                    <line x1="4" y1="6" x2="20" y2="6"></line>
-                    <line x1="4" y1="12" x2="20" y2="12"></line>
-                    <line x1="4" y1="18" x2="20" y2="18"></line>
-                  </>
-                )}
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Slide-down Sheet */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden absolute top-[76px] left-0 right-0 bg-[#fffcf7] border-b border-[#e4d6c6] shadow-xl p-6 z-50 animate-fade-in space-y-4">
-            <nav className="flex flex-col gap-3.5 font-semibold text-sm text-[#2b1b12]">
-              <Link href="/" onClick={() => setMobileMenuOpen(false)}>Home</Link>
-              <Link href="/features" onClick={() => setMobileMenuOpen(false)}>Features</Link>
-              <Link href="/#engines" onClick={() => setMobileMenuOpen(false)}>AI Engines</Link>
-              <Link href="/#stack-collapse-teaser" onClick={() => setMobileMenuOpen(false)}>Stack Collapse</Link>
-              <Link href="/pricing" onClick={() => setMobileMenuOpen(false)}>Pricing & Plans</Link>
-              <Link href="/#faq" onClick={() => setMobileMenuOpen(false)}>FAQ</Link>
-            </nav>
-
-            <div className="border-t border-[#e4d6c6] pt-4 flex flex-col gap-3">
-              <a
-                href="https://calendly.com/utkarshmakwana31/demo-for-rankmonk"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full text-center py-2.5 rounded-xl border border-[#e4d6c6] text-xs font-bold text-[#2b1b12]"
-              >
-                Book Demo (Calendly)
-              </a>
-
-              {user ? (
-                <div className="space-y-2.5">
-                  <button
-                    onClick={(e) => {
-                      setMobileMenuOpen(false);
-                      handleDashboardClick(e);
-                    }}
-                    className="w-full block text-center py-3 bg-[#2b1b12] text-[#fffcf7] rounded-xl text-xs font-bold cursor-pointer border-none"
-                  >
-                    Open Dashboard →
-                  </button>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-center text-xs text-[#7a5242] underline py-1 font-semibold"
-                  >
-                    Log Out ({user.email})
-                  </button>
-                </div>
-              ) : (
-                <div className="flex gap-2.5">
-                  <Link
-                    href="/login"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex-1 text-center py-2.5 rounded-xl border border-[#2b1b12] text-xs font-bold text-[#2b1b12]"
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    href="/signup"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex-1 text-center py-2.5 rounded-xl bg-[#2b1b12] text-[#fffcf7] text-xs font-bold"
-                  >
-                    Start Free
-                  </Link>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </header>
+      {/* Global Unified Navigation */}
+      <Navbar onOpenConnectModal={() => setConnectModalOpen(true)} />
 
       <main>
         {/* ==========================================================================
@@ -500,10 +300,48 @@ export default function HomePage() {
         </div>
 
         {/* ==========================================================================
-             4. INTERACTIVE LIVE PIPELINE SIMULATOR (FIXED CARD CONTAINER)
+             FEATURE SPOTLIGHT: RANK MONK E-E-A-T QUALITY ENGINE & PLATFORM FEATURES
              ========================================================================== */}
-        <section className="section section-alt" id="live-pipeline">
-          <div className="container">
+        <div id="features" className="container" style={{ marginTop: '28px', marginBottom: '14px' }}>
+          <div className="bg-gradient-to-r from-[#2b1b12] via-[#3a2518] to-[#20140d] border border-[#c5a059]/40 rounded-3xl p-6 sm:p-8 shadow-xl text-[#fffcf7] flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative overflow-hidden">
+            {/* Ambient decorative glow */}
+            <div className="absolute top-0 right-0 w-80 h-80 bg-[#c5a059]/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="space-y-2 max-w-2xl relative z-10">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#c5a059]/20 text-[#c5a059] border border-[#c5a059]/30 flex items-center gap-1.5">
+                  <span>✦</span>
+                  <span>E-E-A-T QUALITY ENGINE</span>
+                </span>
+                <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  NEW AUTONOMOUS TOOL
+                </span>
+              </div>
+              <h3 className="text-xl sm:text-2xl font-black font-editorial text-[#fffcf7]">
+                Audit Your Domain’s Experience, Expertise, Authoritativeness &amp; Trust
+              </h3>
+              <p className="text-xs sm:text-sm text-[#e4d6c6]/85 leading-relaxed">
+                Run an instant multi-page deep crawl evaluating 14 deterministic technical signals, an interactive 4-axis SVG radar diamond, and a complete generative search quality rater roadmap.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0 w-full sm:w-auto relative z-10">
+              <Link
+                href="/eeat-analyzer"
+                className="px-6 py-3.5 bg-[#c5a059] hover:bg-[#b38e47] text-[#2b1b12] font-black text-xs sm:text-sm rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer transform hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <span>Launch EEAT Analyzer</span>
+                <span>→</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* ==========================================================================
+             4. INTERACTIVE LIVE PIPELINE SIMULATOR & AI ENGINES
+             ========================================================================== */}
+        <section className="section section-alt" id="engines">
+          <div id="live-pipeline" className="container">
             <div className="section-header">
               <span className="eyebrow">Interactive Live Simulator</span>
               <h2>See the autonomous pipeline in action.</h2>
