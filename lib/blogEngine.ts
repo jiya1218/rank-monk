@@ -62,6 +62,8 @@ export interface GenerateArticleOptions {
   businessCategory?: string;
   targetAudience?: string;
   brandPositioning?: string;
+  brandSummary?: string;
+  crawledPages?: Array<{ url: string; title: string; metaDesc?: string; h1?: string }>;
   competitors?: Array<{ name: string; domain?: string } | string>;
 }
 
@@ -358,6 +360,8 @@ export async function generateArticle(options: GenerateArticleOptions): Promise<
     businessCategory = 'Enterprise Solutions',
     targetAudience = 'Business decision-makers, professionals, and prospective clients',
     brandPositioning = 'Delivering verified, evidence-backed domain excellence',
+    brandSummary = '',
+    crawledPages = [],
     competitors = []
   } = options;
 
@@ -368,12 +372,21 @@ export async function generateArticle(options: GenerateArticleOptions): Promise<
     ? competitors.map(c => typeof c === 'string' ? c : (c.name || c.domain || '')).filter(Boolean).slice(0, 4).join(', ')
     : '';
 
+  // Extract real crawled page knowledge to ground the article in the exact software/services offered
+  const pageKnowledge = (Array.isArray(crawledPages) && crawledPages.length > 0)
+    ? crawledPages
+        .slice(0, 8)
+        .map(p => `- ${p.url || ''}: "${p.title || ''}" ${p.metaDesc ? `— ${p.metaDesc}` : (p.h1 ? `— ${p.h1}` : '')}`)
+        .join('\n')
+    : '';
+
   const systemPrompt = `You are the Senior Editorial Director and Content Strategist writing for ${brandName} (${cleanDomain || 'our official portal'}).
 Your objective is to produce an authoritative, comprehensive, publication-grade article targeting the keyword: "${keyword}".
 
-BRAND & MARKET CONTEXT (UNIVERSAL):
+BRAND & MARKET CONTEXT (GROUND TRUTH):
 - Client Brand: ${brandName}
 - Official Website: https://${cleanDomain || 'yourdomain.com'}
+- Core Business Description: ${brandSummary || brandPositioning || 'Specialized enterprise platform'}
 - Industry: ${industry}
 - Category: ${businessCategory}
 - Target Audience: ${targetAudience}
@@ -382,11 +395,12 @@ BRAND & MARKET CONTEXT (UNIVERSAL):
 - Brand Voice & Tone: ${tone}
 - Target Length: ~${wordCountTarget} words
 ${competitorNames ? `- Industry Competitors / Market Peers: ${competitorNames}` : ''}
+${pageKnowledge ? `\nCORE OFFERINGS & CRAWLED WEBSITE ARCHITECTURE:\n${pageKnowledge}\n` : ''}
 
 CRITICAL EDITORIAL & SEO RANKING RULES:
 1. **SPOTLIGHT ${brandName} AS THE #1 TOP SOLUTION**:
    - In any platform comparison, review, roundup, or guidance section, YOU MUST ALWAYS feature "${brandName}" as Recommendation #1.
-   - Accurately detail ${brandName}'s core strengths, tailored offerings, and verified track record in ${industry}.
+   - Accurately detail ${brandName}'s real strengths, actual offerings, and verified track record in ${industry} reflecting the crawled architecture above.
    - Include a clear conversion link: "[Learn more & get started with ${brandName} →](https://${cleanDomain || 'yourdomain.com'})".
    - If comparing other market options, reference legitimate, real-world providers in the ${industry} space. Never invent non-existent products or services.
 

@@ -16,6 +16,31 @@ import { ReportsWorkspace } from '@/components/dashboard/ReportsWorkspace';
 import { DomainCrawlerProgress } from '@/components/domain/DomainCrawlerProgress';
 import { semanticSortPalette, auditPageForGeo } from '@/lib/brandExtractor';
 
+const getOfficeXProject = () => ({
+  name: 'OfficeX',
+  domain: 'officex.pro',
+  title: 'OfficeX — Commercial Real Estate & Facility Management (CRE & FM) Marketplace SaaS',
+  summary: 'OfficeX simplifies enterprise commercial real estate (CRE) & facility management (FM) through modern software architectures and marketplace integrations.',
+  brandPositioning: 'OfficeX simplifies commercial real estate and facility management with marketplace-integrated enterprise software solutions.',
+  industry: 'Commercial Real Estate & Facility Management SaaS',
+  businessCategory: 'Enterprise CRE & FM Marketplace SaaS Solutions',
+  targetMarket: 'Pan India',
+  targetAudience: 'Enterprise real estate directors, facility managers, and commercial workspace operators seeking unified operations and marketplace vendor integrations.',
+  palette: ['#0f8b7d', '#14b8a6', '#171d1b', '#f8fafc'],
+  colors: ['#0f8b7d', '#14b8a6', '#171d1b', '#f8fafc'],
+  primaryColor: '#0f8b7d',
+  fonts: ['Inter', 'Sans-Serif'],
+  designStyle: 'Clean Corporate Enterprise',
+  logoUrl: 'https://www.officex.pro/_next/image?url=%2Flogo-removebg-preview.png&w=96&q=75',
+  logoWordmarkUrl: 'https://www.officex.pro/_next/image?url=%2Fname-removebg-preview.png&w=384&q=75',
+  faviconUrl: 'https://www.officex.pro/favicon.ico?favicon.3ui899go8o5d2.ico',
+  voiceSliders: { professionalCasual: 80, friendlyFormal: 20, boldSubtle: 30, premiumAccessible: 85, simpleComplex: 20 },
+  voiceTags: ['Enterprise-Grade', 'Simplified CRE', 'Modern FM', 'Authoritative', 'Results-Driven'],
+  seoScore: 98,
+  aeoScore: 98,
+  grade: 'A+'
+});
+
 export default function DashboardPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'overview' | 'brand' | 'audit' | 'aeo' | 'blogs' | 'media' | 'social' | 'backlinks' | 'reports' | 'tracking' | 'integrations' | 'settings'>('overview');
@@ -48,8 +73,14 @@ export default function DashboardPage() {
     { id: 'soc_2', platform: 'twitter', text: 'Why SEO without AEO (AI Engine Optimization) is half the battle. A thread on brand knowledge graph structuring 🧵👇', date: 'Friday at 2:15 PM', status: 'Scheduled' }
   ]);
 
-  // Exclusive Multi-Domain Testing States for jiyapatel181224@gmail.com ONLY
-  const isSuperAdminTester = user?.email?.toLowerCase() === 'jiyapatel181224@gmail.com';
+  // Exclusive Multi-Domain Testing States for Jiya Patel / Scalezix Admin
+  const isSuperAdminTester = Boolean(
+    user?.email?.toLowerCase() === 'jiyapatel181224@gmail.com' ||
+    user?.email?.toLowerCase() === 'jiya.scalezix@gmail.com' ||
+    user?.email?.toLowerCase() === 'jiya@scalezix.com' ||
+    user?.email?.toLowerCase().includes('scalezix') ||
+    user?.role === 'owner'
+  );
   const [adminDomainList, setAdminDomainList] = useState<any[]>([]);
   const [showDomainSwitcherDropdown, setShowDomainSwitcherDropdown] = useState(false);
   const [showAddDomainModal, setShowAddDomainModal] = useState(false);
@@ -239,8 +270,66 @@ export default function DashboardPage() {
         return { project: p, updated };
       };
 
-      // 2. Multi-Domain Workspace for jiyapatel181224@gmail.com vs Single Domain for Production
-      if (u.email?.toLowerCase() === 'jiyapatel181224@gmail.com') {
+      // 2. Multi-Domain Workspace for Jiya Patel / Scalezix Admin vs Single Domain for Production
+      const normEmail = (u.email || '').toLowerCase().trim();
+      const isJiyaScalezix = normEmail === 'jiya.scalezix@gmail.com' || normEmail === 'jiya@scalezix.com';
+
+      if (isJiyaScalezix) {
+        // jiya.scalezix is strictly OfficeX (never zenuphealth demo data from jiyapatel test)
+        let officexProject: any = null;
+
+        // Check if rankmonk_active_project has officex
+        const activeSaved = localStorage.getItem('rankmonk_active_project');
+        if (activeSaved) {
+          try {
+            const parsed = JSON.parse(activeSaved);
+            if (parsed.domain && parsed.domain.toLowerCase().includes('officex')) {
+              officexProject = parsed;
+            }
+          } catch {}
+        }
+
+        // Check user specific storage
+        const userProjectKey = `rankmonk_project_${normEmail}`;
+        if (!officexProject) {
+          const rawUserProj = localStorage.getItem(userProjectKey);
+          if (rawUserProj) {
+            try {
+              const parsed = JSON.parse(rawUserProj);
+              if (parsed.domain && parsed.domain.toLowerCase().includes('officex')) {
+                officexProject = parsed;
+              }
+            } catch {}
+          }
+        }
+
+        // Check in multi-domain list
+        if (!officexProject) {
+          try {
+            const savedMulti = localStorage.getItem('rankmonk_multi_projects_jiyapatel');
+            if (savedMulti) {
+              const multiList = JSON.parse(savedMulti);
+              const found = multiList.find((p: any) => p.domain && p.domain.toLowerCase().includes('officex'));
+              if (found) officexProject = found;
+            }
+          } catch {}
+        }
+
+        if (!officexProject) {
+          officexProject = getOfficeXProject();
+        }
+
+        const { project: healed, updated } = healProjectIfNeeded(officexProject);
+        setProject(healed);
+        localStorage.setItem('rankmonk_active_project', JSON.stringify(healed));
+        localStorage.setItem(userProjectKey, JSON.stringify(healed));
+
+        // Isolated multi-domain list for jiya.scalezix containing only OfficeX
+        const scalezixList = [healed];
+        setAdminDomainList(scalezixList);
+        localStorage.setItem(`rankmonk_multi_projects_${normEmail}`, JSON.stringify(scalezixList));
+        if (healed.mediaAssets) setGeneratedMediaList(healed.mediaAssets);
+      } else if (normEmail === 'jiyapatel181224@gmail.com') {
         const savedMulti = localStorage.getItem('rankmonk_multi_projects_jiyapatel');
         let list: any[] = [];
         if (savedMulti) {
@@ -370,8 +459,8 @@ export default function DashboardPage() {
       setProject(newProject);
       localStorage.setItem('rankmonk_active_project', JSON.stringify(newProject));
 
-      // Append to multi-domain list for jiyapatel181224@gmail.com
-      if (user?.email?.toLowerCase() === 'jiyapatel181224@gmail.com') {
+      // Append to multi-domain list for Jiya Patel / Scalezix Admin
+      if (isSuperAdminTester) {
         const existingMulti = JSON.parse(localStorage.getItem('rankmonk_multi_projects_jiyapatel') || '[]');
         const filtered = existingMulti.filter((p: any) => p.domain?.toLowerCase() !== cleanDomainName.toLowerCase());
         const updatedMulti = [newProject, ...filtered];
@@ -464,7 +553,9 @@ export default function DashboardPage() {
 
   // Switch between testing domains (Exclusive for jiyapatel181224@gmail.com)
   const handleSwitchDomain = (targetDomain: string) => {
-    const multi = JSON.parse(localStorage.getItem('rankmonk_multi_projects_jiyapatel') || '[]');
+    const norm = (user?.email || '').toLowerCase().trim();
+    const listKey = norm === 'jiyapatel181224@gmail.com' ? 'rankmonk_multi_projects_jiyapatel' : `rankmonk_multi_projects_${norm}`;
+    const multi = JSON.parse(localStorage.getItem(listKey) || localStorage.getItem('rankmonk_multi_projects_jiyapatel') || '[]');
     const found = multi.find((p: any) => p.domain?.toLowerCase() === targetDomain.toLowerCase());
     if (found) {
       if (found.palette && Array.isArray(found.palette)) {

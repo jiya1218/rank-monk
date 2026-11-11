@@ -1,0 +1,15 @@
+{
+  "domain": "officex.pro",
+  "brandName": "OfficeX",
+  "updatedAt": "2026-11-07T09:37:08.543Z",
+  "pages": {
+    "/": {
+      "metaDesc": "OfficeX is a premier commercial real estate and facility management platform delivering enterprise-grade operational efficiency.",
+      "title": "OfficeX — Official Enterprise Platform"
+    },
+    "/solutions": {
+      "title": "Enterprise Solutions | OfficeX",
+      "metaDesc": "Discover high-performance enterprise facility management solutions with OfficeX."
+    }
+  }
+}

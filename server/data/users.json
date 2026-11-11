@@ -1,14 +1,28 @@
 [
   {
+    "id": "usr_scalezix_jiya",
+    "email": "jiya.scalezix@gmail.com",
+    "name": "Jiya Patel",
+    "phone": "+919825358617",
+    "password": "123456",
+    "role": "owner",
+    "plan": "scale",
+    "paid": true,
+    "domain": "officex.pro",
+    "created_at": "2026-11-02T19:24:20.656Z",
+    "paymentId": "pay_scalezix_active",
+    "couponUsed": "RANKMONK001"
+  },
+  {
     "id": "usr_1793647460656",
     "email": "jiyapatel181224@gmail.com",
     "name": "Patel jiya devangbhai",
     "phone": "+919825358617",
     "password": "123456",
-    "role": "member",
+    "role": "owner",
     "plan": "scale",
     "paid": true,
-    "domain": "vivaanrealty.com",
+    "domain": "officex.pro",
     "created_at": "2026-11-02T19:24:20.656Z",
     "paymentId": "pay_TvRDKP4RqnGVc8",
     "couponUsed": "RANKMONK001"

@@ -41,8 +41,8 @@ interface BlogsWorkspaceProps {
 }
 
 export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspaceProps) {
-  const brandName = project?.name || 'Rank Monk';
-  const domain = project?.domain || 'zenuphealth.com';
+  const brandName = project?.name || 'OfficeX';
+  const domain = project?.domain || 'officex.pro';
   const cleanDomain = domain.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '');
 
   // 1. Tech Stack Auto-Detection State
@@ -287,6 +287,13 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
           businessCategory: project?.businessCategory || '',
           targetAudience: project?.targetAudience || '',
           brandPositioning: project?.brandPositioning || project?.summary || '',
+          brandSummary: project?.summary || '',
+          crawledPages: (project?.crawledPages || []).map(p => ({
+            url: p.url,
+            title: p.title,
+            metaDesc: p.metaDesc,
+            h1: p.h1
+          })),
           competitors: project?.competitors || []
         })
       });

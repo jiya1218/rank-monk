@@ -17,6 +17,8 @@ export async function POST(req: NextRequest) {
       businessCategory,
       targetAudience,
       brandPositioning,
+      brandSummary,
+      crawledPages,
       competitors
     } = body;
 
@@ -40,6 +42,8 @@ export async function POST(req: NextRequest) {
       businessCategory: businessCategory || '',
       targetAudience: targetAudience || '',
       brandPositioning: brandPositioning || '',
+      brandSummary: brandSummary || '',
+      crawledPages: Array.isArray(crawledPages) ? crawledPages : [],
       competitors: competitors || []
     });
 

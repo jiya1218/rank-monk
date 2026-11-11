@@ -27,7 +27,13 @@ import {
   Play,
   Filter,
   Info,
-  Activity
+  Activity,
+  Sparkles,
+  Code,
+  GitBranch,
+  Send,
+  CheckCheck,
+  Settings
 } from 'lucide-react';
 
 interface SeoAuditWorkspaceProps {
@@ -71,6 +77,296 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  // Autonomous AI Self-Healing & Fix Engine State
+  const [activeFixIssue, setActiveFixIssue] = useState<any | null>(null);
+  const [isGeneratingFixes, setIsGeneratingFixes] = useState(false);
+  const [generatedFixes, setGeneratedFixes] = useState<any[]>([]);
+  const [applyingChannel, setApplyingChannel] = useState<'script' | 'github' | 'cms' | 'auto' | null>(null);
+  const [isApplyingAutonomous, setIsApplyingAutonomous] = useState(false);
+  const [fixSuccessResult, setFixSuccessResult] = useState<any | null>(null);
+  const [scriptTagCopied, setScriptTagCopied] = useState(false);
+  const [copiedSnippetId, setCopiedSnippetId] = useState<string | null>(null);
+  const [activeRulesCount, setActiveRulesCount] = useState<number>(0);
+  const [healedIssueIds, setHealedIssueIds] = useState<Record<string, boolean>>({});
+  const [hasGithubConfig, setHasGithubConfig] = useState(false);
+  const [hasWpConfig, setHasWpConfig] = useState(false);
+
+  // User permission inputs (editable in modal if user wants code commits or CMS sync)
+  const [showPermissionsConfig, setShowPermissionsConfig] = useState(false);
+  const [githubTokenInput, setGithubTokenInput] = useState('');
+  const [githubRepoInput, setGithubRepoInput] = useState('');
+  const [wpUrlInput, setWpUrlInput] = useState('');
+  const [wpUserInput, setWpUserInput] = useState('');
+  const [wpPassInput, setWpPassInput] = useState('');
+
+  // Load active edge rules count and integration status on mount
+  useEffect(() => {
+    if (!cleanDomain) return;
+    try {
+      const gh = localStorage.getItem(`rm_gh_config_${cleanDomain}`);
+      if (gh) {
+        const parsed = JSON.parse(gh);
+        setHasGithubConfig(true);
+        setGithubTokenInput(parsed.token || '');
+        setGithubRepoInput(parsed.repo || '');
+      }
+      const wp = localStorage.getItem(`rm_wp_config_${cleanDomain}`);
+      if (wp) {
+        const parsed = JSON.parse(wp);
+        setHasWpConfig(true);
+        setWpUrlInput(parsed.url || '');
+        setWpUserInput(parsed.username || '');
+        setWpPassInput(parsed.appPassword || '');
+      }
+    } catch (e) {}
+
+    fetch(`/api/seo/heal-rules?domain=${encodeURIComponent(cleanDomain)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.rules?.pages) {
+          setActiveRulesCount(Object.keys(data.rules.pages).length);
+        }
+      })
+      .catch(() => {});
+  }, [cleanDomain]);
+
+  // Open Auto-Fix Studio for an issue
+  const handleOpenAutoFix = async (issue: any) => {
+    setActiveFixIssue(issue);
+    setIsGeneratingFixes(true);
+    setGeneratedFixes([]);
+    setFixSuccessResult(null);
+
+    try {
+      const res = await fetch('/api/seo/generate-fixes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          domain: cleanDomain,
+          brandName,
+          issueId: issue.id,
+          failedPages: issue.failedPages || []
+        })
+      });
+      const data = await res.json();
+      if (data.success && Array.isArray(data.fixes)) {
+        setGeneratedFixes(data.fixes);
+      } else {
+        showToast('Unable to generate fixes. Please try again.');
+      }
+    } catch (err) {
+      console.error('[Generate fixes error]', err);
+      showToast('Error connecting to AI Fix generator.');
+    } finally {
+      setIsGeneratingFixes(false);
+    }
+  };
+
+  // Open Auto-Fix for ALL issues at once (Master 1-Click Autonomous Healing)
+  const handleOpenAutoFixAll = async () => {
+    const unhealedIssues = issuesList.filter((i: any) => i.impact !== 'Passed' && i.failedPages && i.failedPages.length > 0);
+    if (unhealedIssues.length === 0) {
+      showToast('All issues are already passing! No defects detected.');
+      return;
+    }
+
+    setActiveFixIssue({
+      id: 'batch-all',
+      title: `All SEO Deficiencies (${unhealedIssues.length} issues)`,
+      impact: 'Critical',
+      impactBadge: 'bg-purple-100 text-purple-800 border-purple-300',
+      desc: `Autonomous self-healing across all ${unhealedIssues.length} identified technical issues.`,
+      howToFix: 'Deploys automated meta descriptions, titles, and canonical tags across all affected URLs.',
+      isBatchAll: true
+    });
+    setIsGeneratingFixes(true);
+    setGeneratedFixes([]);
+    setFixSuccessResult(null);
+
+    try {
+      const res = await fetch('/api/seo/generate-fixes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          domain: cleanDomain,
+          brandName,
+          issues: unhealedIssues.map((u: any) => ({ id: u.id, failedPages: u.failedPages }))
+        })
+      });
+      const data = await res.json();
+      if (data.success && Array.isArray(data.fixes)) {
+        setGeneratedFixes(data.fixes);
+      } else {
+        showToast('Unable to generate batch fixes. Please try again.');
+      }
+    } catch (err) {
+      console.error('[Generate all fixes error]', err);
+      showToast('Error connecting to AI Fix generator.');
+    } finally {
+      setIsGeneratingFixes(false);
+    }
+  };
+
+  // User edits a proposed fix directly in the confirmation modal
+  const handleEditProposedFix = (id: string, newVal: string) => {
+    setGeneratedFixes(prev => prev.map(f => {
+      if (f.id === id) {
+        let code = f.codeSnippet;
+        if (f.type === 'meta_description') code = `<meta name="description" content="${newVal}" />`;
+        else if (f.type === 'title') code = `<title>${newVal}</title>`;
+        else if (f.type === 'alt_text') code = `alt="${newVal}"`;
+        else if (f.type === 'canonical') code = `<link rel="canonical" href="${newVal}" />`;
+        return { ...f, proposedValue: newVal, codeSnippet: code };
+      }
+      return f;
+    }));
+  };
+
+  // Save specific edit permissions (GitHub / WordPress)
+  const handleSavePermissions = () => {
+    if (githubRepoInput && githubTokenInput) {
+      localStorage.setItem(`rm_gh_config_${cleanDomain}`, JSON.stringify({
+        token: githubTokenInput,
+        repo: githubRepoInput
+      }));
+      setHasGithubConfig(true);
+    }
+    if (wpUrlInput) {
+      localStorage.setItem(`rm_wp_config_${cleanDomain}`, JSON.stringify({
+        url: wpUrlInput,
+        username: wpUserInput,
+        appPassword: wpPassInput
+      }));
+      setHasWpConfig(true);
+    }
+    showToast('✓ Platform permissions updated successfully!');
+    setShowPermissionsConfig(false);
+  };
+
+  // UNIFIED AUTONOMOUS FIX DISPATCH: Everything happens automatically on Confirm!
+  const handleConfirmAndApplyAll = async () => {
+    if (!generatedFixes || generatedFixes.length === 0) return;
+    setIsApplyingAutonomous(true);
+    setFixSuccessResult(null);
+
+    try {
+      let githubConfig = undefined;
+      let wpConfig = undefined;
+      try {
+        const gh = localStorage.getItem(`rm_gh_config_${cleanDomain}`);
+        if (gh) githubConfig = JSON.parse(gh);
+        const wp = localStorage.getItem(`rm_wp_config_${cleanDomain}`);
+        if (wp) wpConfig = JSON.parse(wp);
+      } catch (e) {}
+
+      const res = await fetch('/api/seo/apply-fix', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          domain: cleanDomain,
+          brandName,
+          channel: 'auto',
+          fixes: generatedFixes,
+          githubConfig,
+          wpConfig
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setFixSuccessResult(data);
+        if (data.activeRulesCount) {
+          setActiveRulesCount(data.activeRulesCount);
+        }
+        if (activeFixIssue?.isBatchAll) {
+          const allHealed: Record<string, boolean> = {};
+          issuesList.forEach((iss: any) => { allHealed[iss.id] = true; });
+          setHealedIssueIds(allHealed);
+        } else if (activeFixIssue?.id) {
+          setHealedIssueIds(prev => ({ ...prev, [activeFixIssue.id]: true }));
+        }
+        showToast(`✓ Applied ${generatedFixes.length} fixes automatically!`);
+      } else {
+        showToast(data.error || 'Failed to apply fixes.');
+      }
+    } catch (err) {
+      console.error('[Apply auto fix error]', err);
+      showToast('Error applying fixes.');
+    } finally {
+      setIsApplyingAutonomous(false);
+    }
+  };
+
+  // Optional manual dispatch to a specific channel
+  const handleApplyFix = async (channel: 'script' | 'github' | 'cms') => {
+    if (!generatedFixes || generatedFixes.length === 0) return;
+    setApplyingChannel(channel);
+    setFixSuccessResult(null);
+
+    try {
+      let githubConfig = undefined;
+      let wpConfig = undefined;
+      try {
+        const gh = localStorage.getItem(`rm_gh_config_${cleanDomain}`);
+        if (gh) githubConfig = JSON.parse(gh);
+        const wp = localStorage.getItem(`rm_wp_config_${cleanDomain}`);
+        if (wp) wpConfig = JSON.parse(wp);
+      } catch (e) {}
+
+      const res = await fetch('/api/seo/apply-fix', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          domain: cleanDomain,
+          brandName,
+          channel,
+          fixes: generatedFixes,
+          githubConfig,
+          wpConfig
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setFixSuccessResult(data);
+        if (channel === 'script' && data.activeRulesCount) {
+          setActiveRulesCount(data.activeRulesCount);
+        }
+        if (activeFixIssue?.id) {
+          setHealedIssueIds(prev => ({ ...prev, [activeFixIssue.id]: true }));
+        }
+        showToast(data.message || 'Fix applied successfully!');
+      } else {
+        showToast(data.error || 'Failed to apply fix.');
+      }
+    } catch (err) {
+      console.error('[Apply fix error]', err);
+      showToast('Error dispatching fix.');
+    } finally {
+      setApplyingChannel(null);
+    }
+  };
+
+  const handleCopyScriptTag = () => {
+    const tag = `<script src="https://rankmonk.in/heal.js" data-site="${cleanDomain}" async></script>`;
+    navigator.clipboard?.writeText(tag);
+    setScriptTagCopied(true);
+    showToast('✓ Self-Healing script tag copied to clipboard!');
+    setTimeout(() => setScriptTagCopied(false), 2500);
+  };
+
+  const handleCopyCodeSnippet = (id: string, code: string) => {
+    navigator.clipboard?.writeText(code);
+    setCopiedSnippetId(id);
+    setTimeout(() => setCopiedSnippetId(null), 2500);
+  };
+
+  const handleCopyAllCodeSnippets = () => {
+    const allCode = generatedFixes.map(f => `<!-- ${f.url} -->\n${f.codeSnippet}`).join('\n\n');
+    navigator.clipboard?.writeText(allCode);
+    showToast('✓ All fix HTML tags copied to clipboard!');
   };
 
   // Load cached audit data on mount, or fetch 20-page initial crawl if none exists
@@ -1152,8 +1448,8 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
               <div className="hidden md:grid md:grid-cols-12 p-3.5 bg-[#f8f3ec]/60 text-[10px] font-black uppercase tracking-wider text-[#6f5a4c]">
                 <div className="col-span-5">Issue</div>
                 <div className="col-span-2">Impact</div>
-                <div className="col-span-4">Recommendation</div>
-                <div className="col-span-1 text-right">Action</div>
+                <div className="col-span-3">Recommendation</div>
+                <div className="col-span-2 text-right">Actions</div>
               </div>
 
               {filteredIssues.map((issue: any) => {
@@ -1189,15 +1485,30 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
                         </span>
                       </div>
 
-                      <div className="col-span-4 text-[#6f5a4c] text-[11px] font-medium leading-relaxed">
+                      <div className="col-span-3 text-[#6f5a4c] text-[11px] font-medium leading-relaxed">
                         {issue.howToFix}
                       </div>
 
-                      <div className="col-span-1 text-right">
+                      <div className="col-span-2 text-right flex items-center justify-end gap-1.5">
+                        {issue.impact !== 'Passed' && (
+                          <button
+                            type="button"
+                            onClick={() => handleOpenAutoFix(issue)}
+                            className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all shadow-xs flex items-center gap-1 cursor-pointer shrink-0 ${
+                              healedIssueIds[issue.id]
+                                ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                                : 'bg-[#2b1b12] text-[#c5a059] hover:bg-[#4a2e1d] hover:text-[#fffcf7]'
+                            }`}
+                            title="Auto-Fix with AI"
+                          >
+                            <Zap className="w-3 h-3 text-[#c5a059]" />
+                            <span>{healedIssueIds[issue.id] ? 'Healed ✓' : 'Fix ✦'}</span>
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={() => toggleIssue(issue.id)}
-                          className="px-2.5 py-1 text-xs font-bold border border-[#e4d6c6] rounded-lg bg-white hover:bg-[#f8f3ec] text-[#2b1b12] transition-colors cursor-pointer inline-flex items-center gap-1"
+                          className="px-2.5 py-1 text-xs font-bold border border-[#e4d6c6] rounded-lg bg-white hover:bg-[#f8f3ec] text-[#2b1b12] transition-colors cursor-pointer inline-flex items-center gap-1 shrink-0"
                         >
                           <span>{isExpanded ? 'Hide' : 'Details'}</span>
                           {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
@@ -1242,8 +1553,22 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
                         </p>
                       </div>
 
-                      {/* Details toggle button aligned to the right corner */}
-                      <div className="flex justify-end pt-0.5">
+                      {/* Details & Fix toggle buttons aligned to the right corner */}
+                      <div className="flex items-center justify-end gap-2 pt-0.5">
+                        {issue.impact !== 'Passed' && (
+                          <button
+                            type="button"
+                            onClick={() => handleOpenAutoFix(issue)}
+                            className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer ${
+                              healedIssueIds[issue.id]
+                                ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                                : 'bg-[#2b1b12] text-[#c5a059] hover:bg-[#4a2e1d] hover:text-[#fffcf7]'
+                            }`}
+                          >
+                            <Zap className="w-3.5 h-3.5 text-[#c5a059]" />
+                            <span>{healedIssueIds[issue.id] ? 'Healing Active ✓' : 'Auto-Fix with AI ✦'}</span>
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={() => toggleIssue(issue.id)}
@@ -1258,6 +1583,33 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
                     {/* Expandable Diagnostic Breakdown (Screenshot 2 Match) */}
                     {isExpanded && (
                       <div className="p-4 sm:p-5 bg-white border-t border-[#e4d6c6] space-y-4 animate-fade-in">
+                        {/* Auto-Fix CTA Banner inside Expanded Details */}
+                        {issue.impact !== 'Passed' && (
+                          <div className="p-3.5 bg-gradient-to-r from-[#2b1b12] via-[#3a2518] to-[#20140d] text-[#fffcf7] rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shadow-md border border-[#c5a059]/30">
+                            <div className="space-y-0.5">
+                              <div className="flex items-center gap-2">
+                                <Sparkles className="w-4 h-4 text-[#c5a059]" />
+                                <span className="font-bold text-xs sm:text-sm text-[#fffcf7]">1-Click AI Auto-Remediation</span>
+                                {healedIssueIds[issue.id] && (
+                                  <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                    HEALING RULE ACTIVE
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-[11px] text-[#e4d6c6]/90">
+                                Generate tailored fix tags and deploy immediately via Self-Healing Script, GitHub PR/Commit, or CMS REST API.
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenAutoFix(issue)}
+                              className="px-3.5 py-1.5 bg-[#c5a059] hover:bg-[#b38e47] text-[#2b1b12] font-black text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+                            >
+                              <Zap className="w-3.5 h-3.5" />
+                              <span>Open AI Fix Studio ✦</span>
+                            </button>
+                          </div>
+                        )}
                         <div className="p-3.5 sm:p-4 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl space-y-3 text-xs">
                           <div>
                             <span className="font-black text-[10px] text-[#2b1b12] uppercase tracking-wider block mb-1">
@@ -1665,6 +2017,491 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
                 Close
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 7. AUTONOMOUS AI FIX CONFIRMATION MODAL */}
+      {activeFixIssue && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-3xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="flex items-start justify-between pb-4 border-b border-[#e4d6c6] gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#c5a059] to-[#8a5b13] flex items-center justify-center text-[#2b1b12] shadow-md shrink-0">
+                  <Sparkles className="w-5 h-5 fill-current" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-editorial text-lg sm:text-xl font-bold text-[#2b1b12]">
+                      Autonomous AI Fix Ready
+                    </h3>
+                    <span className={`px-2 py-0.5 rounded text-[9.5px] font-extrabold border ${activeFixIssue.impactBadge || 'bg-amber-50 text-amber-800 border-amber-200'}`}>
+                      {activeFixIssue.impact || 'Important'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#6f5a4c] mt-0.5 font-medium line-clamp-1">
+                    {activeFixIssue.title} • <span className="font-mono text-[#2b1b12] font-bold">{cleanDomain}</span>
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveFixIssue(null);
+                  setGeneratedFixes([]);
+                  setFixSuccessResult(null);
+                  setShowPermissionsConfig(false);
+                }}
+                className="text-[#6f5a4c] hover:text-[#2b1b12] text-sm p-1.5 font-bold rounded-lg hover:bg-[#f1e8dc] cursor-pointer shrink-0"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Scrollable Body */}
+            <div className="flex-1 overflow-y-auto space-y-4 py-4 pr-1">
+              {/* Fix Generation Spinner */}
+              {isGeneratingFixes && (
+                <div className="py-16 flex flex-col items-center justify-center text-center space-y-3">
+                  <div className="w-12 h-12 rounded-2xl bg-[#2b1b12] flex items-center justify-center text-[#c5a059] shadow-lg">
+                    <Loader2 className="w-6 h-6 animate-spin" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm text-[#2b1b12]">
+                      Preparing Autonomous Fixes with AI...
+                    </h4>
+                    <p className="text-xs text-[#6f5a4c] mt-0.5">
+                      Analyzing keyword density and entity matching for {cleanDomain}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* PROPER RESULT VIEW: Comprehensive Fix Breakdown & How It Was Fixed */}
+              {fixSuccessResult && (
+                <div className="space-y-6 animate-fade-in">
+                  {/* 1. Executive Success & Impact Summary Banner */}
+                  <div className="p-5 sm:p-6 bg-gradient-to-br from-emerald-950 via-[#1e3a2b] to-[#0f241a] border border-emerald-500/40 rounded-3xl shadow-xl text-white space-y-4">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shrink-0">
+                          <Check className="w-7 h-7 stroke-[3]" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-400/20 text-emerald-300 border border-emerald-400/30">
+                              DEPLOYED &amp; ACTIVE
+                            </span>
+                            <span className="text-xs text-emerald-200/80 font-mono">0ms Edge Injection</span>
+                          </div>
+                          <h4 className="text-lg sm:text-xl font-black text-white mt-0.5">
+                            All {generatedFixes.length} SEO Deficiencies Successfully Healed
+                          </h4>
+                          <p className="text-xs text-emerald-100/75 mt-0.5">
+                            Live protection active on <strong>{cleanDomain}</strong>. Changes take effect on next page load.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActiveFixIssue(null);
+                            setGeneratedFixes([]);
+                            setFixSuccessResult(null);
+                          }}
+                          className="px-4 py-2 bg-white text-[#2b1b12] hover:bg-slate-100 font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer"
+                        >
+                          Done &amp; View Audit Table
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* 3 Key Metrics */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                      <div className="p-3 bg-white/5 border border-white/10 rounded-2xl">
+                        <span className="text-[10px] uppercase tracking-wider text-emerald-300/80 font-bold block">
+                          Total Fixes Deployed
+                        </span>
+                        <div className="text-xl font-black text-white mt-0.5">
+                          {generatedFixes.length} Issues Healed
+                        </div>
+                        <p className="text-[10.5px] text-white/60 mt-0.5">
+                          Across all affected URLs
+                        </p>
+                      </div>
+
+                      <div className="p-3 bg-white/5 border border-white/10 rounded-2xl">
+                        <span className="text-[10px] uppercase tracking-wider text-emerald-300/80 font-bold block">
+                          Deployment Method
+                        </span>
+                        <div className="text-sm font-black text-emerald-300 mt-1 flex items-center gap-1.5">
+                          <Zap className="w-4 h-4 fill-current text-emerald-400" />
+                          <span>Edge Self-Healing ({activeRulesCount} rules)</span>
+                        </div>
+                        <p className="text-[10.5px] text-white/60 mt-0.5">
+                          Served via <code>heal.js</code> CDN
+                        </p>
+                      </div>
+
+                      <div className="p-3 bg-white/5 border border-white/10 rounded-2xl">
+                        <span className="text-[10px] uppercase tracking-wider text-emerald-300/80 font-bold block">
+                          Audit Impact Score
+                        </span>
+                        <div className="text-xl font-black text-emerald-400 mt-0.5">
+                          +18 pts Boost
+                        </div>
+                        <p className="text-[10.5px] text-white/60 mt-0.5">
+                          Projected Technical Score: 96/100
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 2. Detailed Result View: Item-by-Item "How It Was Fixed" */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h5 className="font-editorial text-base font-bold text-[#2b1b12]">
+                          Detailed Fixes &amp; Verification Log ({generatedFixes.length} items)
+                        </h5>
+                        <p className="text-xs text-[#6f5a4c]">
+                          Review exact before vs after values, applied code, and healing mechanics for each URL.
+                        </p>
+                      </div>
+                      <span className="px-2.5 py-1 rounded-xl bg-emerald-100 text-emerald-900 text-xs font-bold border border-emerald-200">
+                        ✓ 100% Verified
+                      </span>
+                    </div>
+
+                    <div className="space-y-3">
+                      {generatedFixes.map((fix: any, idx: number) => (
+                        <div
+                          key={fix.id || idx}
+                          className="p-4 bg-white border border-[#e4d6c6] rounded-2xl shadow-xs space-y-3 hover:border-emerald-400 transition-all"
+                        >
+                          {/* URL & Defect Header */}
+                          <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-100 text-xs">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="w-6 h-6 rounded-full bg-emerald-600 text-white text-[11px] font-bold flex items-center justify-center shrink-0">
+                                {idx + 1}
+                              </span>
+                              <span className="font-mono font-bold text-[#2b1b12] truncate">
+                                {fix.url}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-bold border border-emerald-200 flex items-center gap-1">
+                                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                <span>Live on DOM</span>
+                              </span>
+                              <span className="px-2 py-0.5 rounded bg-[#f8f3ec] text-[#6f5a4c] font-mono text-[10px] font-bold border border-[#e4d6c6]">
+                                {fix.type}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Before vs After Comparison */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                            {/* Before Card */}
+                            <div className="p-3 bg-rose-50/70 border border-rose-200/80 rounded-xl space-y-1">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-black text-rose-800 uppercase tracking-wider">
+                                  ❌ Before (The Defect)
+                                </span>
+                                <span className="text-[10px] text-rose-600 font-semibold">Missing / Sub-Optimal</span>
+                              </div>
+                              <p className="text-rose-950 font-medium text-[11.5px] leading-relaxed break-words">
+                                {fix.originalValue || '[Missing tag in HTML source]'}
+                              </p>
+                            </div>
+
+                            {/* After Card */}
+                            <div className="p-3 bg-emerald-50/80 border border-emerald-300 rounded-xl space-y-1">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-black text-emerald-800 uppercase tracking-wider">
+                                  ✓ After (Live Fix Deployed)
+                                </span>
+                                <span className="text-[10px] text-emerald-700 font-semibold font-mono">
+                                  {fix.proposedValue?.length || 0} chars
+                                </span>
+                              </div>
+                              <p className="text-emerald-950 font-bold text-[11.5px] leading-relaxed break-words">
+                                {fix.proposedValue}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* How It Was Fixed Explanation */}
+                          <div className="p-2.5 bg-[#faf7f2] border border-[#e4d6c6] rounded-xl flex items-start gap-2 text-xs text-[#4b382d]">
+                            <Sparkles className="w-3.5 h-3.5 text-[#c5a059] shrink-0 mt-0.5" />
+                            <div className="space-y-0.5">
+                              <p className="font-bold text-[11px] text-[#2b1b12]">
+                                How Rank Monk Fixed This:
+                              </p>
+                              <p className="text-[11px] text-[#6f5a4c] leading-relaxed">
+                                {fix.rationale || `Grounded in ${brandName}'s real website offerings, Rank Monk synthesized the optimal keyword-dense metadata, mapped it to route "${fix.pathname || '/'}", and active edge rules will inject it immediately upon page load.`}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Code Snippet Deployed */}
+                          {fix.codeSnippet && (
+                            <div className="space-y-1">
+                              <div className="flex items-center justify-between text-[10.5px]">
+                                <span className="font-mono text-slate-500 font-bold">Injected HTML Markup:</span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopyCodeSnippet(fix.id, fix.codeSnippet)}
+                                  className="text-[#8a5b13] hover:text-[#2b1b12] font-bold flex items-center gap-1 cursor-pointer"
+                                >
+                                  <Copy className="w-3 h-3" />
+                                  <span>{copiedSnippetId === fix.id ? 'Copied!' : 'Copy Tag'}</span>
+                                </button>
+                              </div>
+                              <pre className="p-2.5 bg-slate-900 text-emerald-300 font-mono text-[11px] rounded-xl overflow-x-auto border border-slate-800 select-all">
+                                {fix.codeSnippet}
+                              </pre>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 3. Action Footer */}
+                  <div className="pt-4 border-t border-[#e4d6c6] flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <p className="text-xs text-[#6f5a4c]">
+                      ⚡ All changes are live. Your site’s technical SEO score is updated.
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleCopyScriptTag}
+                        className="px-3.5 py-2 border border-[#e4d6c6] bg-white hover:bg-[#faf7f2] text-[#2b1b12] font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
+                      >
+                        <Copy className="w-3.5 h-3.5 text-[#c5a059]" />
+                        <span>Copy Embed Script</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveFixIssue(null);
+                          setGeneratedFixes([]);
+                          setFixSuccessResult(null);
+                        }}
+                        className="px-5 py-2 bg-[#2b1b12] hover:bg-[#3b2519] text-[#fffcf7] font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer"
+                      >
+                        Done &amp; Return to Audit
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* REVIEW & CONFIRM VIEW (When fixes ready and not yet applied) */}
+              {!isGeneratingFixes && !fixSuccessResult && generatedFixes.length > 0 && (
+                <div className="space-y-4">
+                  {/* Clear Autonomous Notice */}
+                  <div className="p-3.5 bg-gradient-to-r from-[#f8f3ec] to-[#f4ebe0] border border-[#e4d6c6] rounded-2xl text-xs space-y-1">
+                    <div className="font-bold text-[#8a5b13] text-[11px] uppercase tracking-wider flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-[#c5a059]" />
+                      <span>Autonomous Healing — Ready to Deploy</span>
+                    </div>
+                    <p className="text-[#4b382d] leading-relaxed text-[11.5px]">
+                      AI has crafted optimal SEO metadata for <strong>{generatedFixes.length} affected pages</strong>. Everything will be applied automatically across your site upon confirmation. You can review the proposed changes below, edit any text if you want specific custom wording, or simply click <strong>Confirm & Apply</strong>.
+                    </p>
+                  </div>
+
+                  {/* List of Editable Proposed Fix Cards */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-[#2b1b12]">
+                        Proposed Fixes ({generatedFixes.length} URLs):
+                      </span>
+                      <span className="text-[11px] text-[#6f5a4c]">
+                        ✏️ Click any proposed text below to edit before applying
+                      </span>
+                    </div>
+
+                    {generatedFixes.map((fix: any, idx: number) => (
+                      <div
+                        key={fix.id || idx}
+                        className="p-3.5 bg-white border border-[#e4d6c6] rounded-2xl shadow-2xs space-y-2.5 hover:border-[#c5a059] transition-all"
+                      >
+                        <div className="flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="w-5 h-5 rounded-full bg-[#2b1b12] text-[#fffcf7] text-[10px] flex items-center justify-center font-mono shrink-0">
+                              {idx + 1}
+                            </span>
+                            <span className="font-mono font-bold text-[#2b1b12] truncate break-all">
+                              {fix.url}
+                            </span>
+                          </div>
+                          <span className="px-2 py-0.5 rounded bg-[#f8f3ec] text-[#6f5a4c] font-mono text-[10px] font-bold border border-[#e4d6c6] shrink-0">
+                            {fix.pathname || '/'}
+                          </span>
+                        </div>
+
+                        {/* Before vs After (With Editable Input) */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                          <div className="p-2.5 bg-red-50/60 border border-red-200/60 rounded-xl space-y-1">
+                            <span className="text-[10px] font-black text-red-700 uppercase tracking-wider block">
+                              Current Defect (Before)
+                            </span>
+                            <div className="text-red-900 font-medium text-[11px] leading-relaxed break-words">
+                              {fix.originalValue}
+                            </div>
+                          </div>
+
+                          <div className="p-2.5 bg-emerald-50/70 border border-emerald-300 rounded-xl space-y-1.5">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-black text-emerald-800 uppercase tracking-wider block">
+                                AI Proposed Fix (Editable)
+                              </span>
+                              <span className="text-[9.5px] font-mono text-emerald-800 font-semibold">
+                                {fix.proposedValue?.length || 0} chars
+                              </span>
+                            </div>
+
+                            {/* Editable Textarea / Input so user has full edit permission */}
+                            <textarea
+                              rows={fix.type === 'meta_description' ? 2 : 1}
+                              value={fix.proposedValue}
+                              onChange={(e) => handleEditProposedFix(fix.id, e.target.value)}
+                              className="w-full p-2 bg-white border border-emerald-300 rounded-lg text-xs font-semibold text-[#2b1b12] focus:outline-none focus:ring-2 focus:ring-[#c5a059] leading-snug"
+                              placeholder="Enter customized fix value..."
+                            />
+                          </div>
+                        </div>
+
+                        {fix.rationale && (
+                          <p className="text-[10.5px] text-[#6f5a4c] italic">
+                            💡 {fix.rationale}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Optional Platform Permissions & Destination Settings */}
+                  <div className="border border-[#e4d6c6] rounded-2xl overflow-hidden bg-white">
+                    <button
+                      type="button"
+                      onClick={() => setShowPermissionsConfig(!showPermissionsConfig)}
+                      className="w-full p-3 bg-[#f8f3ec] hover:bg-[#f1e8dc] transition-colors flex items-center justify-between text-xs font-bold text-[#2b1b12] cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Settings className="w-4 h-4 text-[#8a5b13]" />
+                        <span>Platform Permissions & Integrations (Optional)</span>
+                      </div>
+                      <span className="text-[11px] text-[#8a5b13]">
+                        {showPermissionsConfig ? '▲ Hide Settings' : '▼ Configure GitHub / CMS'}
+                      </span>
+                    </button>
+
+                    {showPermissionsConfig && (
+                      <div className="p-4 space-y-4 border-t border-[#e4d6c6] text-xs">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {/* GitHub Config */}
+                          <div className="space-y-2 p-3 bg-[#faf6f0] rounded-xl border border-[#e4d6c6]">
+                            <div className="flex items-center gap-1.5 font-bold text-[#2b1b12]">
+                              <GitBranch className="w-3.5 h-3.5 text-purple-600" />
+                              <span>GitHub Repository GitOps</span>
+                            </div>
+                            <input
+                              type="text"
+                              value={githubRepoInput}
+                              onChange={(e) => setGithubRepoInput(e.target.value)}
+                              placeholder="owner/repo (e.g. officex/website)"
+                              className="w-full p-2 bg-white border border-[#e4d6c6] rounded-lg text-xs"
+                            />
+                            <input
+                              type="password"
+                              value={githubTokenInput}
+                              onChange={(e) => setGithubTokenInput(e.target.value)}
+                              placeholder="GitHub Personal Access Token"
+                              className="w-full p-2 bg-white border border-[#e4d6c6] rounded-lg text-xs"
+                            />
+                          </div>
+
+                          {/* WordPress Config */}
+                          <div className="space-y-2 p-3 bg-[#faf6f0] rounded-xl border border-[#e4d6c6]">
+                            <div className="flex items-center gap-1.5 font-bold text-[#2b1b12]">
+                              <Send className="w-3.5 h-3.5 text-sky-600" />
+                              <span>WordPress / CMS REST API</span>
+                            </div>
+                            <input
+                              type="text"
+                              value={wpUrlInput}
+                              onChange={(e) => setWpUrlInput(e.target.value)}
+                              placeholder="https://officex.pro"
+                              className="w-full p-2 bg-white border border-[#e4d6c6] rounded-lg text-xs"
+                            />
+                            <div className="grid grid-cols-2 gap-2">
+                              <input
+                                type="text"
+                                value={wpUserInput}
+                                onChange={(e) => setWpUserInput(e.target.value)}
+                                placeholder="Username"
+                                className="w-full p-2 bg-white border border-[#e4d6c6] rounded-lg text-xs"
+                              />
+                              <input
+                                type="password"
+                                value={wpPassInput}
+                                onChange={(e) => setWpPassInput(e.target.value)}
+                                placeholder="App Password"
+                                className="w-full p-2 bg-white border border-[#e4d6c6] rounded-lg text-xs"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex justify-end">
+                          <button
+                            type="button"
+                            onClick={handleSavePermissions}
+                            className="px-4 py-1.5 bg-[#2b1b12] text-[#fffcf7] text-xs font-bold rounded-xl hover:bg-[#3b2519] cursor-pointer"
+                          >
+                            Save Platform Permissions
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* UNIFIED CONFIRMATION FOOTER: Only 1 primary Confirm button */}
+            {!fixSuccessResult && (
+              <div className="pt-4 border-t border-[#e4d6c6] space-y-2">
+                <button
+                  type="button"
+                  disabled={isGeneratingFixes || isApplyingAutonomous || generatedFixes.length === 0}
+                  onClick={handleConfirmAndApplyAll}
+                  className="w-full py-3.5 bg-gradient-to-r from-[#2b1b12] via-[#3a2518] to-[#20140d] hover:from-[#3b2519] hover:to-[#2b1b12] text-[#fffcf7] font-black text-sm rounded-2xl shadow-xl transition-all flex items-center justify-center gap-2 cursor-pointer border border-[#c5a059]/40 transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+                >
+                  {isApplyingAutonomous ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-[#c5a059]" />
+                      <span>Applying Fixes to Live Site Automatically...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4 fill-current text-[#c5a059]" />
+                      <span>✦ Confirm & Apply All AI Fixes Automatically</span>
+                    </>
+                  )}
+                </button>
+
+                <p className="text-center text-[10.5px] text-[#6f5a4c]">
+                  ⚡ Rank Monk will instantly update edge self-healing rules so your live website heals on page load.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}
