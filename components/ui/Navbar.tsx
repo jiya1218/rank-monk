@@ -74,11 +74,31 @@ export function Navbar({ onOpenConnectModal }: NavbarProps) {
     router.push('/dashboard');
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('rankmonk_user');
-    localStorage.removeItem('rankmonk_active_user_v3');
+  const maskEmail = (email?: string) => {
+    if (!email) return 'Member';
+    const parts = email.split('@');
+    if (parts.length !== 2) return email;
+    const name = parts[0];
+    const domain = parts[1];
+    const maskedName = name.length > 4 ? `${name.slice(0, 3)}•••${name.slice(-2)}` : `${name.slice(0, 1)}•••`;
+    return `${maskedName}@${domain}`;
+  };
+
+  const handleLogout = async () => {
+    try {
+      localStorage.removeItem('rankmonk_user');
+      localStorage.removeItem('rankmonk_active_user_v3');
+      localStorage.removeItem('rankmonk_active_user_v6');
+      localStorage.removeItem('rankmonk_user_session');
+      localStorage.removeItem('rankmonk_active_project');
+      sessionStorage.clear();
+      document.cookie = 'rankmonk_user=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+      await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+    } catch (e) {
+      console.error('Logout error:', e);
+    }
     setUser(null);
-    router.push('/login');
+    window.location.href = '/login';
   };
 
   const navItems = [
@@ -164,7 +184,7 @@ export function Navbar({ onOpenConnectModal }: NavbarProps) {
                           {user.name || 'Rank Monk Member'}
                         </div>
                         <div className="text-[11px] text-[#6f5a4c] truncate">
-                          {user.email || 'user@example.com'}
+                          {maskEmail(user.email)}
                         </div>
                       </div>
 
@@ -267,8 +287,11 @@ export function Navbar({ onOpenConnectModal }: NavbarProps) {
             <div className="border-t border-[#e4d6c6] pt-3">
               {user ? (
                 <div className="space-y-2">
-                  <div className="text-xs text-[#6f5a4c]">
-                    Signed in as <strong className="text-[#2b1b12]">{user.email}</strong>
+                  <div className="flex items-center gap-2 text-xs text-[#6f5a4c]">
+                    <div className="w-5 h-5 rounded-full bg-[#2b1b12] text-[#fffcf7] flex items-center justify-center font-bold text-[10px] shrink-0">
+                      {(user.name || user.email || 'U').charAt(0).toUpperCase()}
+                    </div>
+                    <span>Signed in as <strong className="text-[#2b1b12]">{user.name || maskEmail(user.email)}</strong></span>
                   </div>
                   <button
                     onClick={(e) => {

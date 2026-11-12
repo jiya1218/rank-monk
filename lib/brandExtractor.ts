@@ -300,19 +300,26 @@ export function isColorTooClose(hex1: string, hex2: string): boolean {
 // SITEFIRE 11-TEST GEO SCORE AUDIT MATRIX (AEO & AI SEARCH VISIBILITY ENGINE)
 // ============================================================================
 export function auditPageForGeo(
-  url: string,
-  title: string,
+  url: string = '',
+  title: string = '',
   metaDesc: string = '',
   h1: string = '',
   wordCount: number = 1000,
   schemaTypes: string[] = [],
   pageText: string = ''
 ): { geoScore: number; geoTests: GeoTestResult[] } {
+  const safeTitle = typeof title === 'string' ? title : (title ? String(title) : '');
+  const safeMetaDesc = typeof metaDesc === 'string' ? metaDesc : (metaDesc ? String(metaDesc) : '');
+  const safeH1 = typeof h1 === 'string' ? h1 : (h1 ? String(h1) : '');
+  const safePageText = typeof pageText === 'string' ? pageText : (pageText ? String(pageText) : '');
+  const safeSchemas = Array.isArray(schemaTypes) ? schemaTypes : [];
+  const safeWordCount = typeof wordCount === 'number' && !isNaN(wordCount) ? wordCount : 1000;
+
   const tests: GeoTestResult[] = [];
-  const textSample = `${title} ${metaDesc} ${h1} ${pageText}`.toLowerCase();
+  const textSample = `${safeTitle} ${safeMetaDesc} ${safeH1} ${safePageText}`.toLowerCase();
 
   // 1. Answer-First Structure (Tier 1: 3x weight)
-  const hasDirectAnswer = metaDesc.length >= 40 && !metaDesc.toLowerCase().startsWith('welcome to');
+  const hasDirectAnswer = safeMetaDesc.length >= 40 && !safeMetaDesc.toLowerCase().startsWith('welcome to');
   const t1Score = hasDirectAnswer ? 9.5 : 5.0;
   tests.push({
     name: 'Answer-First Structure',
@@ -328,7 +335,7 @@ export function auditPageForGeo(
   });
 
   // 2. Statistical Density & Hard Data (Tier 1: 3x weight)
-  const hasNumbers = /\b\d+(?:%|\+|x|k|\.\d+)?\b/.test(textSample) || wordCount > 1200;
+  const hasNumbers = /\b\d+(?:%|\+|x|k|\.\d+)?\b/.test(textSample) || safeWordCount > 1200;
   const t2Score = hasNumbers ? 9.0 : 4.5;
   tests.push({
     name: 'Statistical & Proof Density',
@@ -344,7 +351,7 @@ export function auditPageForGeo(
   });
 
   // 3. Verifiable Source Citations (Tier 1: 3x weight)
-  const hasCitations = schemaTypes.length > 0 || wordCount > 1000;
+  const hasCitations = safeSchemas.length > 0 || safeWordCount > 1000;
   const t3Score = hasCitations ? 9.0 : 6.0;
   tests.push({
     name: 'Verifiable Source Citations',
@@ -376,7 +383,7 @@ export function auditPageForGeo(
   });
 
   // 5. Author Attribution & E-E-A-T (Tier 2: 2x weight)
-  const hasAuthor = schemaTypes.some(s => ['Organization', 'Person', 'AboutPage', 'WebSite'].includes(s));
+  const hasAuthor = safeSchemas.some(s => ['Organization', 'Person', 'AboutPage', 'WebSite'].includes(s));
   const t5Score = hasAuthor ? 9.0 : 4.0;
   tests.push({
     name: 'Author Attribution & E-E-A-T',
@@ -392,7 +399,7 @@ export function auditPageForGeo(
   });
 
   // 6. Passage-Length Scannability (Tier 2: 2x weight)
-  const isPassageOptimized = wordCount >= 600 && wordCount <= 3500;
+  const isPassageOptimized = safeWordCount >= 600 && safeWordCount <= 3500;
   const t6Score = isPassageOptimized ? 9.0 : 6.5;
   tests.push({
     name: 'Passage-Length Scannability',
@@ -408,7 +415,7 @@ export function auditPageForGeo(
   });
 
   // 7. Strict Heading Hierarchy (Tier 2: 2x weight)
-  const hasValidH1 = h1 && h1.length >= 5 && h1.length <= 100;
+  const hasValidH1 = safeH1 && safeH1.length >= 5 && safeH1.length <= 100;
   const t7Score = hasValidH1 ? 10.0 : 5.0;
   tests.push({
     name: 'Strict Heading Hierarchy',
@@ -424,7 +431,7 @@ export function auditPageForGeo(
   });
 
   // 8. JSON-LD Structured Data (Tier 3: 1x weight)
-  const hasSchema = schemaTypes.length > 0;
+  const hasSchema = safeSchemas.length > 0;
   const t8Score = hasSchema ? 10.0 : 3.0;
   tests.push({
     name: 'JSON-LD Structured Data',
@@ -434,13 +441,13 @@ export function auditPageForGeo(
     score: t8Score,
     status: t8Score >= 8 ? 'Passed' : 'Failed',
     diagnostic: hasSchema
-      ? `Structured types detected: ${schemaTypes.join(', ')}`
+      ? `Structured types detected: ${safeSchemas.join(', ')}`
       : 'No JSON-LD structured schema detected in page <head>',
     fix: 'Inject Schema.org JSON-LD (FAQPage, Service, Organization, or TechArticle) for direct LLM ingestion.'
   });
 
   // 9. Clean Semantic HTML & Metadata (Tier 3: 1x weight)
-  const hasCleanMeta = title.length >= 30 && title.length <= 65;
+  const hasCleanMeta = safeTitle.length >= 30 && safeTitle.length <= 65;
   const t9Score = hasCleanMeta ? 9.5 : 6.0;
   tests.push({
     name: 'Clean Semantic HTML & Metadata',
@@ -451,12 +458,12 @@ export function auditPageForGeo(
     status: t9Score >= 8 ? 'Passed' : 'Warning',
     diagnostic: hasCleanMeta
       ? 'Title and metadata lengths adhere to search crawler specifications'
-      : `Title length (${title.length} chars) is outside optimal 30-65 range`,
+      : `Title length (${safeTitle.length} chars) is outside optimal 30-65 range`,
     fix: 'Keep title tags between 40-60 characters and meta descriptions between 120-155 characters.'
   });
 
   // 10. Entity Co-occurrence & ICP (Tier 3: 1x weight)
-  const hasEntityClarity = title.includes('—') || title.includes('|') || title.includes('-');
+  const hasEntityClarity = safeTitle.includes('—') || safeTitle.includes('|') || safeTitle.includes('-');
   const t10Score = hasEntityClarity ? 9.0 : 7.0;
   tests.push({
     name: 'Entity Co-occurrence & ICP',

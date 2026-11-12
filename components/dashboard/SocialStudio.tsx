@@ -82,7 +82,15 @@ export function SocialStudio({ project, user, mediaAssets = [], onNavigateToInte
   const [selectedPlatforms, setSelectedPlatforms] = useState<('instagram' | 'facebook' | 'linkedin' | 'twitter')[]>(['instagram']);
   const [postText, setPostText] = useState('');
   const [selectedMediaUrl, setSelectedMediaUrl] = useState('');
-  const [scheduleTime, setScheduleTime] = useState('Tomorrow, 10:30 AM');
+  // Real scheduler default: Tomorrow at 10:00 AM
+  const getDefaultScheduleTime = () => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    d.setHours(10, 0, 0, 0);
+    const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+    return local.toISOString().slice(0, 16);
+  };
+  const [scheduledDateTime, setScheduledDateTime] = useState<string>(getDefaultScheduleTime());
   const [previewPlatform, setPreviewPlatform] = useState<'instagram' | 'facebook' | 'linkedin' | 'twitter'>('instagram');
   const [scheduledPosts, setScheduledPosts] = useState<SocialPost[]>([]);
   const [isPublishing, setIsPublishing] = useState(false);
@@ -98,7 +106,35 @@ export function SocialStudio({ project, user, mediaAssets = [], onNavigateToInte
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // 1. Load Connected Social Accounts & Scheduled Queue from LocalStorage
+  // Sync scheduled posts from server queue
+  const fetchScheduleQueue = async () => {
+    try {
+      const res = await fetch(`/api/social/schedule?email=${encodeURIComponent(user?.email || 'default')}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.queue) && data.queue.length > 0) {
+          const mapped: SocialPost[] = data.queue.map((q: any) => ({
+            id: q.id,
+            platforms: q.platforms || [],
+            text: q.content,
+            imageUrl: q.mediaUrl,
+            scheduledDate: new Date(q.scheduledAt).toLocaleString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true
+            }),
+            status: q.status === 'published' ? 'Published' : q.status === 'failed' ? 'Failed' : 'Scheduled'
+          }));
+          setScheduledPosts(mapped);
+          localStorage.setItem(`rankmonk_social_queue_${user?.email || 'default'}`, JSON.stringify(mapped));
+        }
+      }
+    } catch {}
+  };
+
+  // 1. Load Connected Social Accounts & Scheduled Queue
   useEffect(() => {
     const savedAccounts = localStorage.getItem(`rankmonk_social_accounts_${user?.email || 'default'}`);
     if (savedAccounts) {
@@ -108,27 +144,12 @@ export function SocialStudio({ project, user, mediaAssets = [], onNavigateToInte
     const savedPosts = localStorage.getItem(`rankmonk_social_queue_${user?.email || 'default'}`);
     if (savedPosts) {
       try { setScheduledPosts(JSON.parse(savedPosts)); } catch (e) {}
-    } else {
-      // Default queued posts for demonstration
-      setScheduledPosts([
-        {
-          id: 'sp_1',
-          platforms: ['instagram', 'facebook'],
-          text: `🚀 Setting the new 2026 standard in ${project?.industry || 'autonomous digital operations'}.\n\nExplore how verified authority and AI citation engines drive 10x organic growth. Link in bio! 📲`,
-          imageUrl: mediaAssets[0]?.url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80',
-          scheduledDate: 'Tomorrow at 10:30 AM',
-          status: 'Scheduled'
-        },
-        {
-          id: 'sp_2',
-          platforms: ['linkedin'],
-          text: `Why traditional SEO without Generative Engine Optimization (GEO) only solves half the battle.\n\nA breakdown of entity authority and conversational search visibility in 2026:`,
-          scheduledDate: 'Thursday at 2:15 PM',
-          status: 'Scheduled'
-        }
-      ]);
     }
-  }, [user?.email, project?.industry, mediaAssets]);
+
+    fetchScheduleQueue();
+    const interval = setInterval(fetchScheduleQueue, 30000);
+    return () => clearInterval(interval);
+  }, [user?.email]);
 
   // 2. Listen for Meta OAuth Popup Callback Messages
   useEffect(() => {
@@ -289,25 +310,52 @@ What’s your primary organic focus this quarter? Let us know in the comments be
     }
   };
 
-  // Schedule for later
-  const handleSchedulePost = () => {
+  // Schedule for later with persistent queue API
+  const handleSchedulePost = async () => {
     if (!postText.trim() && !selectedMediaUrl) return;
+
+    const targetAccounts = accounts.filter(a => selectedPlatforms.includes(a.platform as any));
+    const targetDate = new Date(scheduledDateTime);
+    const formattedDate = targetDate.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
 
     const newPost: SocialPost = {
       id: `post_${Date.now()}`,
       platforms: selectedPlatforms,
       text: postText,
       imageUrl: selectedMediaUrl,
-      scheduledDate: scheduleTime,
+      scheduledDate: formattedDate,
       status: 'Scheduled'
     };
 
     const updated = [newPost, ...scheduledPosts];
     setScheduledPosts(updated);
     localStorage.setItem(`rankmonk_social_queue_${user?.email || 'default'}`, JSON.stringify(updated));
+
+    try {
+      await fetch('/api/social/schedule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: user?.email,
+          content: postText,
+          mediaUrl: selectedMediaUrl,
+          platforms: selectedPlatforms,
+          accounts: targetAccounts,
+          scheduledAt: targetDate.toISOString()
+        })
+      });
+      fetchScheduleQueue();
+    } catch {}
+
     setPostText('');
     setSelectedMediaUrl('');
-    showToast(`✓ Post scheduled for ${scheduleTime}!`);
+    showToast(`✓ Post queued for ${formattedDate}! Rank Monk will publish automatically.`);
   };
 
   const igAccount = accounts.find(a => a.platform === 'instagram');
@@ -681,13 +729,14 @@ What’s your primary organic focus this quarter? Let us know in the comments be
           {/* Action Footer: Publish Now & Schedule */}
           <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-3">
             <div className="flex items-center gap-2 w-full sm:w-auto">
-              <Clock className="w-4 h-4 text-[#6f5a4c]" />
+              <Clock className="w-4 h-4 text-[#8a5b13] shrink-0" />
               <input
-                type="text"
-                value={scheduleTime}
-                onChange={(e) => setScheduleTime(e.target.value)}
-                placeholder="e.g. Tomorrow at 10:00 AM"
-                className="p-2 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl text-xs font-semibold text-[#2b1b12] w-48"
+                type="datetime-local"
+                value={scheduledDateTime}
+                onChange={(e) => setScheduledDateTime(e.target.value)}
+                min={new Date().toISOString().slice(0, 16)}
+                className="p-2 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl text-xs font-semibold text-[#2b1b12] focus:outline-none focus:border-[#c5a059] cursor-pointer"
+                title="Select scheduled date and time"
               />
             </div>
 
@@ -965,8 +1014,13 @@ What’s your primary organic focus this quarter? Let us know in the comments be
                   {post.status}
                 </span>
                 <button
-                  onClick={() => {
-                    setScheduledPosts(scheduledPosts.filter(p => p.id !== post.id));
+                  onClick={async () => {
+                    setScheduledPosts(prev => prev.filter(p => p.id !== post.id));
+                    try {
+                      await fetch(`/api/social/schedule?email=${encodeURIComponent(user?.email || 'default')}&id=${encodeURIComponent(post.id)}`, {
+                        method: 'DELETE'
+                      });
+                    } catch {}
                     showToast('Post removed from queue.');
                   }}
                   className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition-colors cursor-pointer"

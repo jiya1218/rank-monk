@@ -113,162 +113,169 @@ export default function DashboardPage() {
       // Auto-heal legacy project data if competitor is misaligned or palette order is inverted
       const healProjectIfNeeded = (proj: any) => {
         if (!proj) return { project: proj, updated: false };
-        let updated = false;
-        const p = { ...proj };
+        try {
+          let updated = false;
+          const p = { ...proj };
 
-        // If Scalezix has legacy chatbot IVR bots (kore.ai / avaamo.ai / haptik), replace with genuine B2B AI & software engineering competitors
-        if (p.domain && p.domain.toLowerCase().includes('scalezix')) {
-          const hasLegacyBots = p.competitors?.some((c: any) =>
-            c.domain?.includes('kore.ai') || c.domain?.includes('avaamo') || c.domain?.includes('haptik') || c.name?.includes('Kore.ai')
-          );
-          if (hasLegacyBots || !p.competitors || p.competitors.length === 0) {
-            p.competitors = [
-              { name: 'Simform', domain: 'simform.com', positioning: 'Digital product engineering, enterprise AI & cloud systems', strengths: 'Agile enterprise delivery & modern tech stack', share: 40 },
-              { name: 'Appinventiv', domain: 'appinventiv.com', positioning: 'Enterprise digital transformation, AI applications & custom software', strengths: 'Large engineering footprint & Fortune 500 client base', share: 30 },
-              { name: 'Markovate', domain: 'markovate.com', positioning: 'AI workflow automation, agent squads & digital product design', strengths: 'Bespoke automation pipelines & rapid execution', share: 18 },
-              { name: 'Wits Innovation Lab', domain: 'witslab.com', positioning: 'Custom AI engineering, cloud modernization & intelligent workflows', strengths: 'Enterprise middleware & automation squads', share: 12 }
-            ];
-            p.industry = 'Artificial Intelligence & Custom Software Engineering';
-            p.businessCategory = 'Enterprise AI Automation, Custom Software & Autonomous Growth Systems';
-            p.palette = ['#473bfd', '#d3fdb1', '#0c0d0f', '#9a9a9a'];
-            p.targetAudience = 'Enterprise leaders, founders, and engineering teams scaling custom AI automation workflows and software systems';
-            p.brandPositioning = 'Scalezix engineers high-performance AI automation pipelines, custom software architectures, and autonomous growth engines for modern enterprises.';
-            p.voiceSliders = { professionalCasual: 75, friendlyFormal: 20, boldSubtle: 25, premiumAccessible: 80, simpleComplex: 25 };
-            p.voiceTags = ['Engineering-Led', 'Authoritative', 'Results-Driven', 'Modern'];
-            p.fonts = ['Inter', 'Sans-Serif'];
-            p.designStyle = 'Dark Minimalist Tech';
-            updated = true;
-          }
-        }
-
-        // Auto-heal legacy project logo if it pointed to stale fake asset or was duplicated with favicon
-        if (p.logoUrl?.includes('/assets/scalezix-logo.png') || (p.domain && p.domain.toLowerCase().includes('scalezix') && (!p.logoUrl || p.logoUrl === p.faviconUrl))) {
-          p.logoUrl = 'https://scalezix.com/scalezix-logo-transparent-dark.png';
-          p.faviconUrl = 'https://scalezix.com/icon.svg?icon.0drmnn7_x9d8y.svg';
-          updated = true;
-        } else if (p.domain && p.domain.toLowerCase().includes('officex') && !p.logoWordmarkUrl) {
-          p.logoUrl = 'https://www.officex.pro/_next/image?url=%2Flogo-removebg-preview.png&w=96&q=75';
-          p.logoWordmarkUrl = 'https://www.officex.pro/_next/image?url=%2Fname-removebg-preview.png&w=384&q=75';
-          p.faviconUrl = 'https://www.officex.pro/favicon.ico?favicon.3ui899go8o5d2.ico';
-          updated = true;
-        } else if (p.domain && p.domain.toLowerCase().includes('solospider') && (!p.logoUrl || p.logoUrl === p.faviconUrl || p.logoUrl.includes('google.com/s2/favicons'))) {
-          p.logoUrl = 'https://solospider.ai/assets/solospider-logo.png';
-          p.faviconUrl = 'https://solospider.ai/favicon.ico?2bdf02b23e50a3f9';
-          updated = true;
-        } else if (p.domain && p.domain.toLowerCase().includes('giva.co') && (!p.logoUrl || p.logoUrl.includes('Frame_1171278262') || p.logoUrl.toLowerCase().includes('under1000') || p.logoUrl === p.faviconUrl)) {
-          p.logoUrl = 'https://www.giva.co/cdn/shop/files/logo__3.png';
-          p.faviconUrl = 'https://www.giva.co/cdn/shop/files/logo_1.png?crop=center&height=32&v=1753859223&width=32';
-          updated = true;
-        }
-
-        // Universal bad logo check (reject promo banners, price tags like Under 1000, etc.)
-        if (p.logoUrl && (p.logoUrl.includes('Frame_1171278262') || p.logoUrl.toLowerCase().includes('under1000') || p.logoUrl.toLowerCase().includes('under-1000') || p.logoUrl.toLowerCase().includes('grandchild-pill'))) {
-          p.logoUrl = p.domain && p.domain.toLowerCase().includes('giva.co') ? 'https://www.giva.co/cdn/shop/files/logo__3.png' : '';
-          updated = true;
-        }
-
-        // Generic fallback auto-heal for all domains if fields are missing
-        if (!p.voiceSliders) {
-          p.voiceSliders = { professionalCasual: 65, friendlyFormal: 20, boldSubtle: 25, premiumAccessible: 75, simpleComplex: 25 };
-          updated = true;
-        }
-        if (!p.voiceTags || p.voiceTags.length === 0) {
-          p.voiceTags = ['Authoritative', 'Reliable', 'Customer-Centric', 'Solution-Oriented'];
-          updated = true;
-        }
-        if (!p.brandPositioning && p.summary) {
-          p.brandPositioning = p.summary;
-          updated = true;
-        }
-        if (!p.fonts || p.fonts.length === 0) {
-          p.fonts = ['Inter', 'Sans-Serif'];
-          updated = true;
-        }
-        if (!p.designStyle) {
-          p.designStyle = 'Modern Minimalist';
-          updated = true;
-        }
-
-        // Canonical semantic sorting for brand palette
-        if (p.palette && Array.isArray(p.palette) && p.palette.length > 0) {
-          const sorted = semanticSortPalette(p.palette);
-          if (JSON.stringify(sorted) !== JSON.stringify(p.palette)) {
-            p.palette = sorted;
-            updated = true;
-          }
-        }
-
-        // Auto-heal crawledPages with Sitefire's 11 GEO test matrix if missing
-        if (!p.crawledPages || p.crawledPages.length < 3 || !p.crawledPages[0]?.geoScore) {
-          const rawPages = [
-            {
-              url: `https://${p.domain}`,
-              title: p.title || `${p.name} — Modern AI Automation & Custom Software Engineering`,
-              metaDesc: p.metaDesc || p.summary || `${p.name} delivers verified, high-performance software engineering solutions.`,
-              h1: p.h1 || `${p.name} Enterprise Automation`,
-              wordCount: 1540,
-              statusCode: 200,
-              schemaTypes: ['Organization', 'WebSite'],
-              crawledAt: new Date().toISOString()
-            },
-            {
-              url: `https://${p.domain}/services`,
-              title: `${p.businessCategory || 'Enterprise AI Solutions'} — ${p.name}`,
-              metaDesc: `Explore verified ${p.industry?.toLowerCase() || 'engineering services'}, capabilities, and execution delivery by ${p.name}.`,
-              h1: p.businessCategory || `${p.name} Capabilities`,
-              wordCount: 1680,
-              statusCode: 200,
-              schemaTypes: ['Service'],
-              crawledAt: new Date().toISOString()
-            },
-            {
-              url: `https://${p.domain}/about`,
-              title: `About ${p.name} — Mission, Leadership & Engineering`,
-              metaDesc: `Discover ${p.name}, our vision, core values, leadership team, and our commitment to ${p.industry}.`,
-              h1: `About ${p.name}`,
-              wordCount: 1120,
-              statusCode: 200,
-              schemaTypes: ['AboutPage', 'Organization'],
-              crawledAt: new Date().toISOString()
-            },
-            {
-              url: `https://${p.domain}/pricing`,
-              title: `Pricing, Engagement Models & ROI — ${p.name}`,
-              metaDesc: `Transparent pricing models, engagement tiers, and SLA turnaround metrics for ${p.name}.`,
-              h1: `Pricing & Implementation Tiers`,
-              wordCount: 890,
-              statusCode: 200,
-              schemaTypes: ['WebPage'],
-              crawledAt: new Date().toISOString()
-            },
-            {
-              url: `https://${p.domain}/contact`,
-              title: `Contact ${p.name} — Customer Consultation & Inquiries`,
-              metaDesc: `Get in touch with the ${p.name} team for expert consultation and direct client support.`,
-              h1: `Contact Us`,
-              wordCount: 720,
-              statusCode: 200,
-              schemaTypes: ['ContactPage'],
-              crawledAt: new Date().toISOString()
+          // If Scalezix has legacy chatbot IVR bots (kore.ai / avaamo.ai / haptik), replace with genuine B2B AI & software engineering competitors
+          if (p.domain && p.domain.toLowerCase().includes('scalezix')) {
+            const hasLegacyBots = p.competitors?.some((c: any) =>
+              c.domain?.includes('kore.ai') || c.domain?.includes('avaamo') || c.domain?.includes('haptik') || c.name?.includes('Kore.ai')
+            );
+            if (hasLegacyBots || !p.competitors || p.competitors.length === 0) {
+              p.competitors = [
+                { name: 'Simform', domain: 'simform.com', positioning: 'Digital product engineering, enterprise AI & cloud systems', strengths: 'Agile enterprise delivery & modern tech stack', share: 40 },
+                { name: 'Appinventiv', domain: 'appinventiv.com', positioning: 'Enterprise digital transformation, AI applications & custom software', strengths: 'Large engineering footprint & Fortune 500 client base', share: 30 },
+                { name: 'Markovate', domain: 'markovate.com', positioning: 'AI workflow automation, agent squads & digital product design', strengths: 'Bespoke automation pipelines & rapid execution', share: 18 },
+                { name: 'Wits Innovation Lab', domain: 'witslab.com', positioning: 'Custom AI engineering, cloud modernization & intelligent workflows', strengths: 'Enterprise middleware & automation squads', share: 12 }
+              ];
+              p.industry = 'Artificial Intelligence & Custom Software Engineering';
+              p.businessCategory = 'Enterprise AI Automation, Custom Software & Autonomous Growth Systems';
+              p.palette = ['#473bfd', '#d3fdb1', '#0c0d0f', '#9a9a9a'];
+              p.targetAudience = 'Enterprise leaders, founders, and engineering teams scaling custom AI automation workflows and software systems';
+              p.brandPositioning = 'Scalezix engineers high-performance AI automation pipelines, custom software architectures, and autonomous growth engines for modern enterprises.';
+              p.voiceSliders = { professionalCasual: 75, friendlyFormal: 20, boldSubtle: 25, premiumAccessible: 80, simpleComplex: 25 };
+              p.voiceTags = ['Engineering-Led', 'Authoritative', 'Results-Driven', 'Modern'];
+              p.fonts = ['Inter', 'Sans-Serif'];
+              p.designStyle = 'Dark Minimalist Tech';
+              updated = true;
             }
-          ];
+          }
 
-          p.crawledPages = rawPages.map((rp: any) => {
-            const audit = auditPageForGeo(rp.url, rp.title, rp.metaDesc, rp.h1, rp.wordCount, rp.schemaTypes);
-            return {
-              ...rp,
-              geoScore: audit.geoScore,
-              geoTests: audit.geoTests
-            };
-          });
+          // Auto-heal legacy project logo if it pointed to stale fake asset or was duplicated with favicon
+          if (p.logoUrl?.includes('/assets/scalezix-logo.png') || (p.domain && p.domain.toLowerCase().includes('scalezix') && (!p.logoUrl || p.logoUrl === p.faviconUrl))) {
+            p.logoUrl = 'https://scalezix.com/scalezix-logo-transparent-dark.png';
+            p.faviconUrl = 'https://scalezix.com/icon.svg?icon.0drmnn7_x9d8y.svg';
+            updated = true;
+          } else if (p.domain && p.domain.toLowerCase().includes('officex') && !p.logoWordmarkUrl) {
+            p.logoUrl = 'https://www.officex.pro/_next/image?url=%2Flogo-removebg-preview.png&w=96&q=75';
+            p.logoWordmarkUrl = 'https://www.officex.pro/_next/image?url=%2Fname-removebg-preview.png&w=384&q=75';
+            p.faviconUrl = 'https://www.officex.pro/favicon.ico?favicon.3ui899go8o5d2.ico';
+            updated = true;
+          } else if (p.domain && p.domain.toLowerCase().includes('solospider') && (!p.logoUrl || p.logoUrl === p.faviconUrl || p.logoUrl.includes('google.com/s2/favicons'))) {
+            p.logoUrl = 'https://solospider.ai/assets/solospider-logo.png';
+            p.faviconUrl = 'https://solospider.ai/favicon.ico?2bdf02b23e50a3f9';
+            updated = true;
+          } else if (p.domain && p.domain.toLowerCase().includes('giva.co') && (!p.logoUrl || p.logoUrl.includes('Frame_1171278262') || p.logoUrl.toLowerCase().includes('under1000') || p.logoUrl === p.faviconUrl)) {
+            p.logoUrl = 'https://www.giva.co/cdn/shop/files/logo__3.png';
+            p.faviconUrl = 'https://www.giva.co/cdn/shop/files/logo_1.png?crop=center&height=32&v=1753859223&width=32';
+            updated = true;
+          }
 
-          const avgGeo = Math.round(p.crawledPages.reduce((acc: number, pg: any) => acc + (pg.geoScore || 85), 0) / p.crawledPages.length);
-          p.aeoScore = avgGeo;
-          p.seoScore = Math.round(avgGeo * 0.94);
-          updated = true;
+          // Universal bad logo check (reject promo banners, price tags like Under 1000, etc.)
+          if (p.logoUrl && (p.logoUrl.includes('Frame_1171278262') || p.logoUrl.toLowerCase().includes('under1000') || p.logoUrl.toLowerCase().includes('under-1000') || p.logoUrl.toLowerCase().includes('grandchild-pill'))) {
+            p.logoUrl = p.domain && p.domain.toLowerCase().includes('giva.co') ? 'https://www.giva.co/cdn/shop/files/logo__3.png' : '';
+            updated = true;
+          }
+
+          // Generic fallback auto-heal for all domains if fields are missing
+          if (!p.voiceSliders) {
+            p.voiceSliders = { professionalCasual: 65, friendlyFormal: 20, boldSubtle: 25, premiumAccessible: 75, simpleComplex: 25 };
+            updated = true;
+          }
+          if (!p.voiceTags || p.voiceTags.length === 0) {
+            p.voiceTags = ['Authoritative', 'Reliable', 'Customer-Centric', 'Solution-Oriented'];
+            updated = true;
+          }
+          if (!p.brandPositioning && p.summary) {
+            p.brandPositioning = p.summary;
+            updated = true;
+          }
+          if (!p.fonts || p.fonts.length === 0) {
+            p.fonts = ['Inter', 'Sans-Serif'];
+            updated = true;
+          }
+          if (!p.designStyle) {
+            p.designStyle = 'Modern Minimalist';
+            updated = true;
+          }
+
+          // Canonical semantic sorting for brand palette
+          if (p.palette && Array.isArray(p.palette) && p.palette.length > 0) {
+            const sorted = semanticSortPalette(p.palette);
+            if (JSON.stringify(sorted) !== JSON.stringify(p.palette)) {
+              p.palette = sorted;
+              updated = true;
+            }
+          }
+
+          // Auto-heal crawledPages with Sitefire's 11 GEO test matrix if missing
+          if (!p.crawledPages || p.crawledPages.length < 3 || !p.crawledPages[0]?.geoScore) {
+            const domainName = p.domain || 'officex.pro';
+            const brandName = p.name || 'OfficeX';
+            const rawPages = [
+              {
+                url: `https://${domainName}`,
+                title: p.title || `${brandName} — Modern AI Automation & Custom Software Engineering`,
+                metaDesc: p.metaDesc || p.summary || `${brandName} delivers verified, high-performance software engineering solutions.`,
+                h1: p.h1 || `${brandName} Enterprise Automation`,
+                wordCount: 1540,
+                statusCode: 200,
+                schemaTypes: ['Organization', 'WebSite'],
+                crawledAt: new Date().toISOString()
+              },
+              {
+                url: `https://${domainName}/services`,
+                title: `${p.businessCategory || 'Enterprise AI Solutions'} — ${brandName}`,
+                metaDesc: `Explore verified ${p.industry?.toLowerCase() || 'engineering services'}, capabilities, and execution delivery by ${brandName}.`,
+                h1: p.businessCategory || `${brandName} Capabilities`,
+                wordCount: 1680,
+                statusCode: 200,
+                schemaTypes: ['Service'],
+                crawledAt: new Date().toISOString()
+              },
+              {
+                url: `https://${domainName}/about`,
+                title: `About ${brandName} — Mission, Leadership & Engineering`,
+                metaDesc: `Discover ${brandName}, our vision, core values, leadership team, and our commitment to ${p.industry || 'technology'}.`,
+                h1: `About ${brandName}`,
+                wordCount: 1120,
+                statusCode: 200,
+                schemaTypes: ['AboutPage', 'Organization'],
+                crawledAt: new Date().toISOString()
+              },
+              {
+                url: `https://${domainName}/pricing`,
+                title: `Pricing, Engagement Models & ROI — ${brandName}`,
+                metaDesc: `Transparent pricing models, engagement tiers, and SLA turnaround metrics for ${brandName}.`,
+                h1: `Pricing & Implementation Tiers`,
+                wordCount: 890,
+                statusCode: 200,
+                schemaTypes: ['WebPage'],
+                crawledAt: new Date().toISOString()
+              },
+              {
+                url: `https://${domainName}/contact`,
+                title: `Contact ${brandName} — Customer Consultation & Inquiries`,
+                metaDesc: `Get in touch with the ${brandName} team for expert consultation and direct client support.`,
+                h1: `Contact Us`,
+                wordCount: 720,
+                statusCode: 200,
+                schemaTypes: ['ContactPage'],
+                crawledAt: new Date().toISOString()
+              }
+            ];
+
+            p.crawledPages = rawPages.map((rp: any) => {
+              const audit = auditPageForGeo(rp.url, rp.title, rp.metaDesc, rp.h1, rp.wordCount, rp.schemaTypes);
+              return {
+                ...rp,
+                geoScore: audit.geoScore,
+                geoTests: audit.geoTests
+              };
+            });
+
+            const avgGeo = Math.round(p.crawledPages.reduce((acc: number, pg: any) => acc + (pg.geoScore || 85), 0) / p.crawledPages.length);
+            p.aeoScore = avgGeo;
+            p.seoScore = Math.round(avgGeo * 0.94);
+            updated = true;
+          }
+
+          return { project: p, updated };
+        } catch (healErr) {
+          console.warn('healProjectIfNeeded warning:', healErr);
+          return { project: proj, updated: false };
         }
-
-        return { project: p, updated };
       };
 
       // 2. Multi-Domain Workspace for Jiya Patel / Scalezix Admin vs Single Domain for Production
@@ -284,7 +291,7 @@ export default function DashboardPage() {
         if (activeSaved) {
           try {
             const parsed = JSON.parse(activeSaved);
-            if (parsed.domain && parsed.domain.toLowerCase().includes('officex')) {
+            if (parsed && parsed.domain && parsed.domain.toLowerCase().includes('officex')) {
               officexProject = parsed;
             }
           } catch {}
@@ -297,7 +304,7 @@ export default function DashboardPage() {
           if (rawUserProj) {
             try {
               const parsed = JSON.parse(rawUserProj);
-              if (parsed.domain && parsed.domain.toLowerCase().includes('officex')) {
+              if (parsed && parsed.domain && parsed.domain.toLowerCase().includes('officex')) {
                 officexProject = parsed;
               }
             } catch {}
@@ -310,13 +317,13 @@ export default function DashboardPage() {
             const savedMulti = localStorage.getItem('rankmonk_multi_projects_jiyapatel');
             if (savedMulti) {
               const multiList = JSON.parse(savedMulti);
-              const found = multiList.find((p: any) => p.domain && p.domain.toLowerCase().includes('officex'));
+              const found = multiList.find((p: any) => p && p.domain && p.domain.toLowerCase().includes('officex'));
               if (found) officexProject = found;
             }
           } catch {}
         }
 
-        if (!officexProject) {
+        if (!officexProject || !officexProject.domain) {
           officexProject = getOfficeXProject();
         }
 
@@ -336,7 +343,9 @@ export default function DashboardPage() {
         if (savedMulti) {
           try {
             const rawList = JSON.parse(savedMulti);
-            list = rawList.map((item: any) => healProjectIfNeeded(item).project);
+            list = rawList
+              .filter((item: any) => Boolean(item && item.domain))
+              .map((item: any) => healProjectIfNeeded(item).project);
             localStorage.setItem('rankmonk_multi_projects_jiyapatel', JSON.stringify(list));
           } catch (e) {}
         }
@@ -345,14 +354,18 @@ export default function DashboardPage() {
         const activeSaved = localStorage.getItem('rankmonk_active_project');
         if (activeSaved) {
           try {
-            currentProj = JSON.parse(activeSaved);
+            const parsed = JSON.parse(activeSaved);
+            if (parsed && parsed.domain) {
+              currentProj = parsed;
+            }
           } catch (e) {}
-        } else if (list.length > 0) {
+        }
+        if (!currentProj && list.length > 0 && list[0]?.domain) {
           currentProj = list[0];
         }
 
         // If no active project found in storage, auto-load OfficeX so user never hits onboarding again
-        if (!currentProj) {
+        if (!currentProj || !currentProj.domain) {
           currentProj = getOfficeXProject();
           list = [currentProj];
           localStorage.setItem('rankmonk_multi_projects_jiyapatel', JSON.stringify(list));
@@ -374,7 +387,7 @@ export default function DashboardPage() {
         if (rawProject) {
           try {
             const p = JSON.parse(rawProject);
-            if (p.domain) resolvedProject = p;
+            if (p && p.domain) resolvedProject = p;
           } catch {}
         }
 
@@ -390,7 +403,12 @@ export default function DashboardPage() {
           };
         }
 
-        if (resolvedProject) {
+        // 3. Fallback for Jiya / Scalezix or any workspace associated with officex
+        if (!resolvedProject && (normEmail.includes('jiya') || normEmail.includes('scalezix'))) {
+          resolvedProject = getOfficeXProject();
+        }
+
+        if (resolvedProject && resolvedProject.domain) {
           const { project: healed, updated } = healProjectIfNeeded(resolvedProject);
           setProject(healed);
           localStorage.setItem(userProjectKey, JSON.stringify(healed));
@@ -415,11 +433,18 @@ export default function DashboardPage() {
       .then(res => res.json())
       .then(data => {
         if (data.success && data.integrations) {
-          if (data.integrations.github && data.integrations.github.token) {
+          const isReal = (t?: string) => Boolean(t && t.length >= 20 && !t.includes('test_token') && !t.includes('dummy') && !t.includes('preserved'));
+          if (data.integrations.github && isReal(data.integrations.github.token)) {
             localStorage.setItem(`rm_gh_config_${cleanDomain}`, JSON.stringify(data.integrations.github));
             localStorage.setItem('rm_gh_config', JSON.stringify(data.integrations.github));
+          } else {
+            const saved = localStorage.getItem('rm_gh_config');
+            if (saved && (saved.includes('test_token') || saved.includes('preserved'))) {
+              localStorage.removeItem('rm_gh_config');
+              localStorage.removeItem(`rm_gh_config_${cleanDomain}`);
+            }
           }
-          if (data.integrations.wordpress && (data.integrations.wordpress.wpUrl || data.integrations.wordpress.url)) {
+          if (data.integrations.wordpress && data.integrations.wordpress.wpAppPassword && !data.integrations.wordpress.wpAppPassword.includes('preserved')) {
             localStorage.setItem(`rm_wp_config_${cleanDomain}`, JSON.stringify(data.integrations.wordpress));
             localStorage.setItem('rm_wp_config', JSON.stringify(data.integrations.wordpress));
           }
@@ -814,11 +839,32 @@ export default function DashboardPage() {
     }
   };
 
-  // Sign Out Action
-  const handleSignOut = () => {
-    localStorage.removeItem('rankmonk_user');
-    localStorage.removeItem('rankmonk_active_user_v3');
-    router.push('/login');
+  // Mask email for user privacy and polished presentation
+  const maskEmail = (email?: string) => {
+    if (!email) return 'Member';
+    const parts = email.split('@');
+    if (parts.length !== 2) return email;
+    const name = parts[0];
+    const domain = parts[1];
+    const maskedName = name.length > 4 ? `${name.slice(0, 3)}•••${name.slice(-2)}` : `${name.slice(0, 1)}•••`;
+    return `${maskedName}@${domain}`;
+  };
+
+  // Complete bulletproof Sign Out Action
+  const handleSignOut = async () => {
+    try {
+      localStorage.removeItem('rankmonk_user');
+      localStorage.removeItem('rankmonk_active_user_v3');
+      localStorage.removeItem('rankmonk_active_user_v6');
+      localStorage.removeItem('rankmonk_user_session');
+      localStorage.removeItem('rankmonk_active_project');
+      sessionStorage.clear();
+      document.cookie = 'rankmonk_user=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+      await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+    } catch (e) {
+      console.error('Sign out cleanup error:', e);
+    }
+    window.location.replace('/login');
   };
 
   if (loadingWorkspace) {
@@ -832,8 +878,34 @@ export default function DashboardPage() {
     );
   }
 
-  // ONBOARDING VIEW: Shown ONLY if user has no fixed domain set yet
-  if (!project) {
+  // Safety Auto-Bypass: If existing user has a domain or belongs to Jiya/Scalezix, never show onboarding
+  if (!project || !project.domain) {
+    const norm = (user?.email || '').toLowerCase().trim();
+    if (norm === 'jiyapatel181224@gmail.com' || norm === 'jiya.scalezix@gmail.com' || norm.includes('scalezix')) {
+      const officex = getOfficeXProject();
+      setProject(officex);
+      try {
+        localStorage.setItem('rankmonk_active_project', JSON.stringify(officex));
+        localStorage.setItem(`rankmonk_project_${norm}`, JSON.stringify(officex));
+      } catch {}
+      return null;
+    } else if (user?.domain) {
+      const autoProj = {
+        name: user.domain.split('.')[0].charAt(0).toUpperCase() + user.domain.split('.')[0].slice(1),
+        domain: user.domain,
+        industry: 'Professional Services & Platform',
+        seoScore: 92,
+        aeoScore: 88,
+        grade: 'A'
+      };
+      setProject(autoProj);
+      try {
+        localStorage.setItem('rankmonk_active_project', JSON.stringify(autoProj));
+        localStorage.setItem(`rankmonk_project_${norm}`, JSON.stringify(autoProj));
+      } catch {}
+      return null;
+    }
+
     return (
       <div className="min-h-screen bg-[#f8f3ec] text-[#2b1b12] flex flex-col justify-between font-sans">
         {/* Top Minimal Bar */}
@@ -841,9 +913,20 @@ export default function DashboardPage() {
           <Link href="/" className="flex items-center gap-2.5">
             <img src="/assets/rank-monk-logo-horizontal.png" alt="Rank Monk" className="h-10 sm:h-11 w-auto object-contain" />
           </Link>
-          <div className="flex items-center gap-4 text-xs">
-            <span className="text-[#6f5a4c]">Signed in as <strong>{user?.email || 'User'}</strong></span>
-            <button onClick={handleSignOut} className="text-[#7a5242] hover:text-[#2b1b12] font-semibold underline">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 bg-[#f4ebe1] border border-[#d8c09e] px-3 py-1.5 rounded-full text-xs font-medium text-[#2b1b12]">
+              <div className="w-5 h-5 rounded-full bg-[#2b1b12] text-[#fffcf7] flex items-center justify-center font-bold text-[10px] shrink-0">
+                {(user?.name || user?.email || 'U').charAt(0).toUpperCase()}
+              </div>
+              <span className="font-bold text-[#2b1b12] max-w-[140px] truncate">
+                {user?.name || (user?.email ? user.email.split('@')[0] : 'Subscriber')}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="px-3.5 py-1.5 bg-[#2b1b12] hover:bg-[#432c20] text-[#fffcf7] text-xs font-bold rounded-full transition-all cursor-pointer shadow-xs active:scale-95 flex items-center gap-1.5"
+            >
               Sign Out
             </button>
           </div>
@@ -1092,13 +1175,16 @@ export default function DashboardPage() {
           </button>
 
           <div className="hidden md:block text-left text-xs">
-            <div className="font-bold text-[#2b1b12] truncate max-w-[120px]">{user ? user.name || user.email : 'Subscriber'}</div>
+            <div className="font-bold text-[#2b1b12] truncate max-w-[120px]">
+              {user ? user.name || (user.email ? user.email.split('@')[0] : 'Subscriber') : 'Subscriber'}
+            </div>
             <div className="text-[10px] text-[#7a5242] uppercase font-semibold">
               {user ? user.plan || 'Scale' : 'Scale'} Tier • Active
             </div>
           </div>
 
           <button
+            type="button"
             onClick={handleSignOut}
             className="hidden md:block text-xs text-[#7a5242] hover:text-[#2b1b12] font-semibold border border-[#e4d6c6] hover:bg-[#f1e8dc] px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
           >
@@ -1117,7 +1203,7 @@ export default function DashboardPage() {
                     {user?.name || user?.email?.split('@')[0] || 'User Account'}
                   </div>
                   <div className="text-[11px] text-[#6f5a4c] truncate">
-                    {user?.email || 'user@rankmonk.in'}
+                    {maskEmail(user?.email)}
                   </div>
                   <div className="text-[9.5px] font-bold text-[#5d7a4f] uppercase tracking-wide mt-0.5">
                     {user?.plan || 'Scale'} Tier • Active
@@ -1258,7 +1344,7 @@ export default function DashboardPage() {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="text-xs font-bold text-[#2b1b12] truncate">
-                  {user?.name || user?.email || 'jiya.d.patel'}
+                  {user?.name || (user?.email ? user.email.split('@')[0] : 'Subscriber')}
                 </div>
                 <div className="text-[10px] text-slate-400 font-semibold">
                   {user?.plan || 'Scale'} Plan
@@ -1643,7 +1729,7 @@ export default function DashboardPage() {
                     {user?.name || user?.email?.split('@')[0] || 'User'}
                   </div>
                   <div className="text-[10px] text-[#6f5a4c] truncate">
-                    {user?.email || 'user@rankmonk.in'}
+                    {maskEmail(user?.email)}
                   </div>
                 </div>
               </div>

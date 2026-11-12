@@ -35,6 +35,7 @@ import {
   CheckCheck,
   Settings
 } from 'lucide-react';
+import { ExpandableText } from '@/components/ui/ExpandableText';
 
 interface SeoAuditWorkspaceProps {
   project: any;
@@ -2113,7 +2114,7 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
                         <td className="p-3.5 font-medium text-slate-800 max-w-[220px]">
                           <div className="flex items-center gap-2">
                             <Globe className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                            <span className="truncate font-mono">{page.url}</span>
+                            <ExpandableText text={page.url} maxChars={35} className="font-mono text-xs text-[#2b1b12]" />
                           </div>
                         </td>
 
@@ -2156,14 +2157,18 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
                           )}
                         </td>
 
-                        <td className="p-3.5 max-w-[180px]">
-                          <div className="font-semibold text-[#2b1b12] truncate">{page.title}</div>
-                          <span className="text-[10px] text-[#6f5a4c]">{page.titleChars || page.title?.length || 0} chars</span>
+                        <td className="p-3.5 max-w-[220px]">
+                          <div className="font-semibold text-[#2b1b12]">
+                            <ExpandableText text={page.title || '—'} maxChars={35} className="font-semibold text-[#2b1b12]" />
+                          </div>
+                          <span className="text-[10px] text-[#6f5a4c] block mt-0.5">{page.titleChars || page.title?.length || 0} chars</span>
                         </td>
 
-                        <td className="p-3.5 max-w-[200px]">
-                          <div className="text-[11px] text-[#6f5a4c] truncate">{page.metaDesc || '—'}</div>
-                          <span className="text-[10px] text-[#6f5a4c]">{page.metaChars || page.metaDesc?.length || 0} chars</span>
+                        <td className="p-3.5 max-w-[240px]">
+                          <div className="text-[11px] text-[#6f5a4c]">
+                            <ExpandableText text={page.metaDesc || '—'} maxChars={40} className="text-[#6f5a4c]" />
+                          </div>
+                          <span className="text-[10px] text-[#6f5a4c] block mt-0.5">{page.metaChars || page.metaDesc?.length || 0} chars</span>
                         </td>
 
                         <td className="p-3.5 font-bold text-[#2b1b12]">

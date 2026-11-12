@@ -35,6 +35,7 @@ import {
   ZoomIn,
   ZoomOut
 } from 'lucide-react';
+import { ExpandableText } from '@/components/ui/ExpandableText';
 
 interface ReportArchiveItem {
   id: string;
@@ -1392,6 +1393,56 @@ export function ReportsWorkspace({ project, user, onNavigateToTab }: ReportsWork
             </table>
           </div>
         </div>
+
+        {/* SECTION: COMPETITOR LANDSCAPE BENCHMARK */}
+        {activeProj?.competitors && activeProj.competitors.length > 0 && (
+          <div className="space-y-2.5 sm:space-y-3 break-inside-avoid">
+            <div className="flex items-center justify-between">
+              <h3 className="font-editorial text-base sm:text-lg font-bold text-[#2b1b12] flex items-center gap-1.5 sm:gap-2">
+                <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 text-[#8c6b2d]" />
+                <span>Competitor Landscape Benchmark ({activeProj.competitors.length} Monitored Competitors)</span>
+              </h3>
+              <span className="text-[10px] sm:text-xs font-mono text-[#6f5a4c]">
+                Live Competitive Intelligence
+              </span>
+            </div>
+
+            <div className="border border-[#e4d6c6] rounded-xl sm:rounded-2xl overflow-x-auto shadow-2xs">
+              <table className="w-full text-left text-xs divide-y divide-[#e4d6c6]">
+                <thead className="bg-[#f8f3ec] text-[#6f5a4c] font-bold text-[10px] sm:text-[11px] uppercase tracking-wider">
+                  <tr>
+                    <th className="py-2.5 px-3">Competitor</th>
+                    <th className="py-2.5 px-3">Domain</th>
+                    <th className="py-2.5 px-3">Positioning &amp; Key Focus</th>
+                    <th className="py-2.5 px-3">Competitive Strength</th>
+                    <th className="py-2.5 px-3 text-right">Est. Share</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#e4d6c6] bg-white text-[11px] sm:text-xs">
+                  {activeProj.competitors.map((comp: any, cIdx: number) => (
+                    <tr key={cIdx} className="hover:bg-[#fbf8f3] transition-colors">
+                      <td className="py-2.5 px-3 font-bold text-[#2b1b12]">
+                        {comp.name}
+                      </td>
+                      <td className="py-2.5 px-3 font-mono text-emerald-800">
+                        {comp.domain}
+                      </td>
+                      <td className="py-2.5 px-3 text-[#6f5a4c] max-w-[240px]">
+                        <ExpandableText text={comp.positioning || '—'} maxChars={35} />
+                      </td>
+                      <td className="py-2.5 px-3 text-[#2b1b12] max-w-[200px]">
+                        <ExpandableText text={comp.strengths || 'Enterprise footprint'} maxChars={30} />
+                      </td>
+                      <td className="py-2.5 px-3 text-right font-mono font-bold text-[#8c6b2d]">
+                        {comp.share ? `${comp.share}%` : '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
         {/* SECTION 5: PRIORITIZED ACTION PLAN */}
         <div className="space-y-2.5 sm:space-y-3 break-inside-avoid">

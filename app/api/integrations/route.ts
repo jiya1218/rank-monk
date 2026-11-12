@@ -23,6 +23,19 @@ function getStoragePath(email: string, domain?: string): string {
   return path.join(baseDir, 'global.json');
 }
 
+// Helper: Check if token is a genuine real token (reject placeholder/test tokens)
+function isRealToken(token?: string): boolean {
+  if (!token || typeof token !== 'string') return false;
+  const s = token.trim();
+  if (s.includes('test') || s.includes('dummy') || s.includes('preserved') || s.includes('example') || s.includes('random') || s.includes('placeholder')) {
+    return false;
+  }
+  const isClassic = /^ghp_[A-Za-z0-9_]{36}$/.test(s);
+  const isFineGrained = /^github_pat_[A-Za-z0-9_]{80,}$/.test(s);
+  const isApp = /^(gho|ghs|ghu)_[A-Za-z0-9_]{30,}$/.test(s);
+  return isClassic || isFineGrained || isApp;
+}
+
 // Helper: Read stored integrations
 function readStoredIntegrations(email: string, domain: string) {
   const result: {
@@ -41,8 +54,8 @@ function readStoredIntegrations(email: string, domain: string) {
   if (fs.existsSync(globalFile)) {
     try {
       const globalData = JSON.parse(fs.readFileSync(globalFile, 'utf8'));
-      if (globalData.github) result.github = globalData.github;
-      if (globalData.wordpress) result.wordpress = globalData.wordpress;
+      if (globalData.github && isRealToken(globalData.github.token)) result.github = globalData.github;
+      if (globalData.wordpress && globalData.wordpress.wpAppPassword && !globalData.wordpress.wpAppPassword.includes('preserved')) result.wordpress = globalData.wordpress;
       if (Array.isArray(globalData.socialAccounts)) result.socialAccounts = globalData.socialAccounts;
     } catch {}
   }
@@ -51,8 +64,8 @@ function readStoredIntegrations(email: string, domain: string) {
   if (fs.existsSync(domainFile)) {
     try {
       const domainData = JSON.parse(fs.readFileSync(domainFile, 'utf8'));
-      if (domainData.github) result.github = domainData.github;
-      if (domainData.wordpress) result.wordpress = domainData.wordpress;
+      if (domainData.github && isRealToken(domainData.github.token)) result.github = domainData.github;
+      if (domainData.wordpress && domainData.wordpress.wpAppPassword && !domainData.wordpress.wpAppPassword.includes('preserved')) result.wordpress = domainData.wordpress;
       if (Array.isArray(domainData.socialAccounts) && domainData.socialAccounts.length > 0) {
         result.socialAccounts = domainData.socialAccounts;
       }
@@ -78,28 +91,6 @@ export async function GET(req: NextRequest) {
 
     const cleanDomain = (domain || '').replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '').toLowerCase();
     const stored = readStoredIntegrations(email, cleanDomain);
-
-    // Also attempt to query Supabase if available
-    try {
-      const supabase = getSupabaseAdmin();
-      const { data: supaInteg } = await supabase
-        .from('workspace_integrations')
-        .select('*')
-        .limit(10);
-
-      if (supaInteg && supaInteg.length > 0) {
-        for (const item of supaInteg) {
-          if (item.platform === 'github' && !stored.github && item.credentials) {
-            stored.github = item.credentials;
-          }
-          if (item.platform === 'wordpress' && !stored.wordpress && item.credentials) {
-            stored.wordpress = item.credentials;
-          }
-        }
-      }
-    } catch (supaErr) {
-      // Supabase query is optional fallback; file storage is primary source of truth
-    }
 
     return NextResponse.json({
       success: true,

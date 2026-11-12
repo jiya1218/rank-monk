@@ -660,80 +660,31 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
               </div>
             </div>
 
-            {/* Smart Suggested Topics: Desktop vertical stack, Mobile native compact dropdown */}
-            <div className="space-y-1 sm:space-y-1.5">
-              {/* MOBILE ONLY: Dropdown to keep section height minimal & fit screen without scrolling */}
-              <div className="block sm:hidden space-y-1">
-                <div className="flex items-center justify-between">
-                  <label className="text-[10px] font-bold text-[#6f5a4c] uppercase tracking-wider flex items-center gap-1">
-                    <span>💡 Suggested Topics</span>
-                  </label>
-                  <span className="text-[9px] text-[#8a5b13] font-bold">Tap to Pick ▾</span>
-                </div>
-                <div className="relative">
-                  <select
-                    value={suggestedTopics.includes(keyword) ? keyword : ''}
-                    onChange={(e) => {
-                      if (e.target.value) setKeyword(e.target.value);
-                    }}
-                    className="w-full px-2.5 py-1.5 text-[11px] font-semibold bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl text-[#2b1b12] focus:outline-none focus:border-[#c5a059] cursor-pointer appearance-none pr-8 truncate"
-                  >
-                    <option value="">-- Choose a Suggested Topic --</option>
-                    {suggestedTopics.map((top, idx) => (
-                      <option key={idx} value={top}>
-                        #{idx + 1}: {top}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="w-3.5 h-3.5 text-[#6f5a4c] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                </div>
+            {/* Smart Suggested Topics Dropdown (Requirement 5) */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-[10.5px] font-bold text-[#6f5a4c] uppercase tracking-wider flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-[#c5a059]" />
+                  <span>Suggested Topics</span>
+                </label>
+                <span className="text-[10px] text-[#8a5b13] font-bold">Pick to Auto-Fill ▾</span>
               </div>
-
-              {/* DESKTOP ONLY: Full interactive vertical topic cards */}
-              <div className="hidden sm:block space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10.5px] font-bold text-[#6f5a4c] uppercase tracking-wider block">
-                    Suggested Topics for {cleanDomain || brandName}
-                  </span>
-                  <span className="text-[10px] text-slate-400">Click to select & configure</span>
-                </div>
-                <div className="space-y-1.5">
-                  {suggestedTopics.map((top, idx) => {
-                    const isSelected = keyword === top;
-                    return (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => setKeyword(top)}
-                        className={`w-full text-left p-2.5 rounded-xl border transition-all flex items-center justify-between group cursor-pointer text-xs ${
-                          isSelected
-                            ? 'border-[#c5a059] bg-[#ebdcc8]/60 text-[#2b1b12] ring-1 ring-[#c5a059]/40 shadow-xs'
-                            : 'border-[#e4d6c6] bg-[#faf6f0] hover:bg-[#ebdcc8]/40 hover:border-[#c5a059]/60 text-[#2b1b12]'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 truncate pr-2">
-                          <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 text-[9px] font-bold ${
-                            isSelected ? 'bg-[#c5a059] text-white' : 'bg-[#e4d6c6]/60 text-[#6f5a4c] group-hover:bg-[#c5a059]/30'
-                          }`}>
-                            {isSelected ? <Check className="w-2.5 h-2.5 stroke-[3]" /> : idx + 1}
-                          </div>
-                          <span className={`text-[11px] truncate ${isSelected ? 'font-bold text-[#2b1b12]' : 'font-medium text-[#4a3528]'}`}>
-                            {top}
-                          </span>
-                        </div>
-                        {isSelected ? (
-                          <span className="text-[9.5px] font-bold bg-[#c5a059]/20 text-[#8a5b13] px-1.5 py-0.5 rounded shrink-0">
-                            Selected ✓
-                          </span>
-                        ) : (
-                          <span className="text-[10px] text-slate-400 group-hover:text-[#2b1b12] shrink-0 font-medium">
-                            Select →
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
+              <div className="relative">
+                <select
+                  value={suggestedTopics.includes(keyword) ? keyword : ''}
+                  onChange={(e) => {
+                    if (e.target.value) setKeyword(e.target.value);
+                  }}
+                  className="w-full px-3 py-2.5 text-xs font-semibold bg-[#f8f3ec] border border-[#e4d6c6] hover:border-[#c5a059] rounded-xl text-[#2b1b12] focus:outline-none focus:ring-2 focus:ring-[#c5a059]/30 focus:border-[#c5a059] cursor-pointer appearance-none pr-9 transition-all shadow-xs"
+                >
+                  <option value="">-- Select a high-converting topic for {cleanDomain || brandName} --</option>
+                  {suggestedTopics.map((top, idx) => (
+                    <option key={idx} value={top}>
+                      #{idx + 1}: {top}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="w-4 h-4 text-[#7a5242] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
             </div>
 

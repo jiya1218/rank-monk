@@ -43,6 +43,7 @@ import {
   GitBranch,
   Settings
 } from 'lucide-react';
+import { ExpandableText } from '@/components/ui/ExpandableText';
 
 interface AeoGeoWorkspaceProps {
   project: any;
@@ -554,13 +555,13 @@ export function AeoGeoWorkspace({ project, user, onNavigateTab }: AeoGeoWorkspac
                       <td className="py-3.5 px-3 text-center font-mono font-bold text-slate-400 text-[11px]">
                         {rowNum}
                       </td>
-                    <td className="py-3.5 px-4 space-y-0.5">
+                    <td className="py-3.5 px-4 space-y-0.5 max-w-[280px]">
                       <div className="font-bold text-[#2b1b12] text-xs leading-snug">
-                        &ldquo;{q.query}&rdquo;
+                        &ldquo;<ExpandableText text={q.query} maxChars={45} className="font-bold text-[#2b1b12]" />&rdquo;
                       </div>
                       {q.intentRationale && (
-                        <div className="text-[11px] text-[#6f5a4c] line-clamp-1">
-                          {q.intentRationale}
+                        <div className="text-[11px] text-[#6f5a4c]">
+                          <ExpandableText text={q.intentRationale} maxChars={50} className="text-[#6f5a4c]" />
                         </div>
                       )}
                     </td>
@@ -869,7 +870,7 @@ export function AeoGeoWorkspace({ project, user, onNavigateTab }: AeoGeoWorkspac
       <div className="bg-white rounded-2xl border border-[#e4d6c6] p-1.5 shadow-xs overflow-x-auto scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <div className="flex items-center gap-1.5 min-w-max">
           {[
-            { id: 'overview', label: 'Overview & Model Radar', icon: BarChart3, badge: `${realOverallScore}% Visibility` },
+            { id: 'overview', label: 'Overview & AI Citations', icon: BarChart3, badge: `${realOverallScore}% Visibility` },
             { id: 'prompts', label: 'Audited Prompts Matrix', icon: Search, badge: `${batchAuditData?.auditedQueries?.length || promptScope} Tested` },
             { id: 'simulator', label: 'Prompt Sandbox & Fan-Outs', icon: Zap, badge: 'Live AI' },
             { id: 'crawler', label: 'AI Bots & Technical GEO', icon: Bot, badge: '6 Crawlers' },
@@ -908,219 +909,178 @@ export function AeoGeoWorkspace({ project, user, onNavigateTab }: AeoGeoWorkspac
       {/* 3. TAB 1: OVERVIEW & MODEL RADAR */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
-          {/* PURE ANIMATED MULTI-MODEL AI SEARCH & GEO RADAR (TangentCore Aesthetic) */}
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1c120c] via-[#241710] to-[#140b06] border border-[#c5a059]/30 p-5 sm:p-8 text-[#fffcf7] shadow-2xl space-y-6">
-            {/* Ambient Animated Glowing Radial Backdrop */}
-            <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#c5a059]/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
-            <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
-
-            {/* Rotating Conical Radar Sweep (Pure CSS animation) */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-30">
-              <div
-                className="w-[340px] h-[340px] sm:w-[520px] sm:h-[520px] rounded-full animate-spin [animation-duration:9s]"
-                style={{
-                  background: 'conic-gradient(from 0deg, transparent 0deg, transparent 270deg, rgba(197, 160, 89, 0.06) 320deg, rgba(197, 160, 89, 0.35) 360deg)'
-                }}
-              />
-            </div>
-
-            {/* Concentric Radar Rings */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
-              <div className="w-[180px] h-[180px] sm:w-[260px] sm:h-[260px] rounded-full border border-dashed border-[#c5a059] animate-spin [animation-duration:30s]" />
-              <div className="absolute w-[280px] h-[280px] sm:w-[420px] sm:h-[420px] rounded-full border border-[#c5a059]/30" />
-            </div>
-
+          {/* CLEAN AI SEARCH & GEO PRESENCE HUB (Requirement 8 - Clean, elegant, no noisy radar animations) */}
+          <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-3xl p-5 sm:p-7 shadow-card space-y-6">
             {/* Header: Scanner Title & Live Pulse Status */}
-            <div className="relative z-10 flex flex-col sm:flex-row justify-between sm:items-center gap-3 pb-4 border-b border-white/10">
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 pb-4 border-b border-[#e4d6c6]">
               <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#c5a059]/15 border border-[#c5a059]/40 text-[#f5deb3] text-[10px] font-black uppercase tracking-widest">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                  <span>Multi-Model Live GEO Radar</span>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#f1e8dc] border border-[#d8c09e] text-[#7a5242] text-[10px] font-black uppercase tracking-wider">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>Generative Search Presence</span>
                 </div>
-                <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight mt-1.5 font-editorial">
-                  Real-Time Generative Search Grounding
+                <h3 className="text-xl sm:text-2xl font-black text-[#2b1b12] tracking-tight mt-1.5 font-editorial">
+                  Multi-Model Generative Citations &amp; Grounding
                 </h3>
-                <p className="text-xs text-[#d6c4b2] max-w-xl">
-                  Continuously auditing conversational citations for <strong className="text-white">{brandName}</strong> across ChatGPT, Gemini, Perplexity, and Claude across <strong>{promptScope} search prompts</strong>.
+                <p className="text-xs text-[#6f5a4c] max-w-xl">
+                  Auditing conversational brand citations and AI search visibility for <strong className="text-[#2b1b12]">{brandName}</strong> across ChatGPT, Gemini, Perplexity, and Claude for <strong>{promptScope} high-intent prompts</strong>.
                 </p>
               </div>
 
               <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-1.5 shrink-0">
                 <span className={`px-3 py-1 rounded-xl text-xs font-black flex items-center gap-1.5 border ${
-                  realOverallScore > 0 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-white/10 text-[#d6c4b2] border-white/20'
+                  realOverallScore > 0 ? 'bg-emerald-50 text-emerald-800 border-emerald-300' : 'bg-[#f8f3ec] text-[#6f5a4c] border-[#e4d6c6]'
                 }`}>
-                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                   <span>{realOverallScore}% Grounding Presence</span>
                 </span>
-                <span className="text-[11px] text-[#c5a059] font-mono">
-                  {cleanDomain} • {totalAudited > 0 ? `${totalAudited} Prompts Evaluated` : 'Audit Pending'}
+                <span className="text-[11px] text-[#7a5242] font-mono font-bold">
+                  {cleanDomain} • {totalAudited > 0 ? `${totalAudited} Prompts Evaluated` : `${promptScope} Prompts Scope`}
                 </span>
               </div>
             </div>
 
-            {/* Center Brand Beacon & 4-Satellite Live Model Pods */}
-            <div className="relative z-10 space-y-4">
-              {/* Central Domain Beacon */}
-              <div className="flex items-center justify-center">
-                <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-white/10 backdrop-blur-md border border-[#c5a059]/40 shadow-xl">
-                  <Globe className="w-4 h-4 text-[#c5a059] animate-pulse" />
-                  <span className="text-xs sm:text-sm font-black text-white tracking-wide">
-                    https://{cleanDomain}
-                  </span>
-                  <span className={`w-2 h-2 rounded-full ${totalAudited > 0 ? (realOverallScore > 0 ? 'bg-emerald-400' : 'bg-amber-400') : 'bg-slate-400'} animate-pulse`} />
-                  <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border ${
-                    totalAudited > 0 && realOverallScore > 40
-                      ? 'text-emerald-300 bg-emerald-950/60 border-emerald-500/30'
-                      : 'text-[#f5deb3] bg-white/10 border-white/20'
+            {/* 4 Connected Satellite Model Cards - 100% Real Live Citation Rates */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              {/* 1. ChatGPT Search */}
+              <div className={`p-4 rounded-2xl bg-white border transition-all space-y-2 shadow-xs ${
+                chatgptPct > 0 ? 'border-emerald-300 hover:border-emerald-500' : 'border-[#e4d6c6]'
+              }`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2.5 h-2.5 rounded-full ${chatgptPct > 0 ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`} />
+                    <span className="text-xs font-black text-[#2b1b12]">ChatGPT Search</span>
+                  </div>
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-black border ${
+                    chatgptPct > 0
+                      ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                      : 'bg-rose-50 text-rose-800 border-rose-200'
                   }`}>
-                    {totalAudited > 0 ? (realOverallScore > 0 ? `${realOverallScore}% Real Citation Rate` : '0% Cited (Gap Identified)') : 'Target Audit Domain'}
+                    {chatgptPct}% Cited
+                  </span>
+                </div>
+                <div className={`text-xs font-bold ${chatgptPct > 0 ? 'text-emerald-700' : 'text-slate-500'}`}>
+                  {chatgptPct > 0 ? `#1 Verified Source (${chatgptCitedCount}/${totalAudited})` : 'Citation Gap (Not Cited)'}
+                </div>
+                <p className="text-[11px] text-[#6f5a4c] leading-relaxed">
+                  {chatgptPct > 0
+                    ? `Extracted from verified domain entity records and crawled footprints across ${chatgptCitedCount} prompt(s).`
+                    : 'No citations detected across tested prompts. Legacy incumbents capture primary category share.'}
+                </p>
+                <div className="pt-1.5 border-t border-[#f1e8dc] flex items-center justify-between text-[10px] text-[#7a5242] font-mono">
+                  <span>SoV: {Number((chatgptPct * 0.38).toFixed(1))}%</span>
+                  <span className={chatgptPct > 0 ? 'text-emerald-700 font-bold' : 'text-slate-400'}>
+                    {chatgptPct > 0 ? '● Live Active' : '○ Gap Recorded'}
                   </span>
                 </div>
               </div>
 
-              {/* 4 Connected Satellite Model Cards - 100% Real Live Citation Rates */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 pt-1">
-                {/* 1. ChatGPT Search */}
-                <div className={`p-4 rounded-2xl bg-white/[0.06] backdrop-blur-md border transition-all space-y-2 group shadow-lg ${
-                  chatgptPct > 0 ? 'border-emerald-500/30 hover:border-emerald-400' : 'border-white/15'
-                }`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className={`w-2.5 h-2.5 rounded-full ${chatgptPct > 0 ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}`} />
-                      <span className="text-xs font-black text-white">ChatGPT Search</span>
-                    </div>
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-black border ${
-                      chatgptPct > 0
-                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                        : 'bg-rose-500/20 text-rose-300 border-rose-500/40'
-                    }`}>
-                      {chatgptPct}% Cited
-                    </span>
+              {/* 2. Google Gemini */}
+              <div className={`p-4 rounded-2xl bg-white border transition-all space-y-2 shadow-xs ${
+                geminiPct > 0 ? 'border-blue-300 hover:border-blue-500' : 'border-[#e4d6c6]'
+              }`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2.5 h-2.5 rounded-full ${geminiPct > 0 ? 'bg-blue-500 animate-pulse' : 'bg-slate-300'}`} />
+                    <span className="text-xs font-black text-[#2b1b12]">Google Gemini</span>
                   </div>
-                  <div className={`text-xs font-bold ${chatgptPct > 0 ? 'text-emerald-300' : 'text-slate-400'}`}>
-                    {chatgptPct > 0 ? `#1 Verified Source (${chatgptCitedCount}/${totalAudited})` : 'Citation Gap (Not Cited)'}
-                  </div>
-                  <p className="text-[11px] text-[#cbd5e1] leading-relaxed">
-                    {chatgptPct > 0
-                      ? `Extracted from verified domain entity records and crawled footprints across ${chatgptCitedCount} prompt(s).`
-                      : 'No citations detected across tested prompts. Legacy incumbents capture primary category share.'}
-                  </p>
-                  <div className="pt-1.5 border-t border-white/10 flex items-center justify-between text-[10px] text-[#94a3b8] font-mono">
-                    <span>SoV: {Number((chatgptPct * 0.38).toFixed(1))}%</span>
-                    <span className={chatgptPct > 0 ? 'text-emerald-400 font-bold' : 'text-slate-400'}>
-                      {chatgptPct > 0 ? '● Live Active' : '○ Gap Recorded'}
-                    </span>
-                  </div>
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-black border ${
+                    geminiPct > 0
+                      ? 'bg-blue-50 text-blue-800 border-blue-300'
+                      : 'bg-rose-50 text-rose-800 border-rose-200'
+                  }`}>
+                    {geminiPct}% Cited
+                  </span>
                 </div>
-
-                {/* 2. Google Gemini */}
-                <div className={`p-4 rounded-2xl bg-white/[0.06] backdrop-blur-md border transition-all space-y-2 group shadow-lg ${
-                  geminiPct > 0 ? 'border-blue-500/30 hover:border-blue-400' : 'border-white/15'
-                }`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className={`w-2.5 h-2.5 rounded-full ${geminiPct > 0 ? 'bg-blue-400 animate-pulse' : 'bg-slate-500'}`} />
-                      <span className="text-xs font-black text-white">Google Gemini</span>
-                    </div>
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-black border ${
-                      geminiPct > 0
-                        ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
-                        : 'bg-rose-500/20 text-rose-300 border-rose-500/40'
-                    }`}>
-                      {geminiPct}% Cited
-                    </span>
-                  </div>
-                  <div className={`text-xs font-bold ${geminiPct > 0 ? 'text-blue-300' : 'text-slate-400'}`}>
-                    {geminiPct > 0 ? `#1 Grounded Authority (${geminiCitedCount}/${totalAudited})` : 'Citation Gap (Not Cited)'}
-                  </div>
-                  <p className="text-[11px] text-[#cbd5e1] leading-relaxed">
-                    {geminiPct > 0
-                      ? `Knowledge Graph anchored with Google Search live web grounding across ${geminiCitedCount} prompt(s).`
-                      : 'Missing Google Search Grounded authority on unbranded searches. Incumbents lead grounding.'}
-                  </p>
-                  <div className="pt-1.5 border-t border-white/10 flex items-center justify-between text-[10px] text-[#94a3b8] font-mono">
-                    <span>SoV: {Number((geminiPct * 0.42).toFixed(1))}%</span>
-                    <span className={geminiPct > 0 ? 'text-blue-400 font-bold' : 'text-slate-400'}>
-                      {geminiPct > 0 ? '● Live Active' : '○ Gap Recorded'}
-                    </span>
-                  </div>
+                <div className={`text-xs font-bold ${geminiPct > 0 ? 'text-blue-700' : 'text-slate-500'}`}>
+                  {geminiPct > 0 ? `#1 Grounded Authority (${geminiCitedCount}/${totalAudited})` : 'Citation Gap (Not Cited)'}
                 </div>
-
-                {/* 3. Perplexity AI */}
-                <div className={`p-4 rounded-2xl bg-white/[0.06] backdrop-blur-md border transition-all space-y-2 group shadow-lg ${
-                  perplexityPct > 0 ? 'border-indigo-500/30 hover:border-indigo-400' : 'border-white/15'
-                }`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className={`w-2.5 h-2.5 rounded-full ${perplexityPct > 0 ? 'bg-indigo-400 animate-pulse' : 'bg-slate-500'}`} />
-                      <span className="text-xs font-black text-white">Perplexity AI</span>
-                    </div>
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-black border ${
-                      perplexityPct > 0
-                        ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40'
-                        : 'bg-rose-500/20 text-rose-300 border-rose-500/40'
-                    }`}>
-                      {perplexityPct}% Cited
-                    </span>
-                  </div>
-                  <div className={`text-xs font-bold ${perplexityPct > 0 ? 'text-indigo-300' : 'text-slate-400'}`}>
-                    {perplexityPct > 0 ? `Direct Footnote [1] (${perplexityCitedCount}/${totalAudited})` : 'Citation Gap (Not Cited)'}
-                  </div>
-                  <p className="text-[11px] text-[#cbd5e1] leading-relaxed">
-                    {perplexityPct > 0
-                      ? `Footnote citations verified from live Sonar index crawls across ${perplexityCitedCount} prompt(s).`
-                      : 'Zero footnote citations detected in Sonar live web crawls on generic searches.'}
-                  </p>
-                  <div className="pt-1.5 border-t border-white/10 flex items-center justify-between text-[10px] text-[#94a3b8] font-mono">
-                    <span>SoV: {Number((perplexityPct * 0.36).toFixed(1))}%</span>
-                    <span className={perplexityPct > 0 ? 'text-indigo-400 font-bold' : 'text-slate-400'}>
-                      {perplexityPct > 0 ? '● Live Active' : '○ Gap Recorded'}
-                    </span>
-                  </div>
+                <p className="text-[11px] text-[#6f5a4c] leading-relaxed">
+                  {geminiPct > 0
+                    ? `Knowledge Graph anchored with Google Search live web grounding across ${geminiCitedCount} prompt(s).`
+                    : 'Missing Google Search Grounded authority on unbranded searches. Incumbents lead grounding.'}
+                </p>
+                <div className="pt-1.5 border-t border-[#f1e8dc] flex items-center justify-between text-[10px] text-[#7a5242] font-mono">
+                  <span>SoV: {Number((geminiPct * 0.42).toFixed(1))}%</span>
+                  <span className={geminiPct > 0 ? 'text-blue-700 font-bold' : 'text-slate-400'}>
+                    {geminiPct > 0 ? '● Live Active' : '○ Gap Recorded'}
+                  </span>
                 </div>
+              </div>
 
-                {/* 4. Claude */}
-                <div className={`p-4 rounded-2xl bg-white/[0.06] backdrop-blur-md border transition-all space-y-2 group shadow-lg ${
-                  claudePct > 0 ? 'border-amber-500/30 hover:border-amber-400' : 'border-white/15'
-                }`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className={`w-2.5 h-2.5 rounded-full ${claudePct > 0 ? 'bg-amber-400 animate-pulse' : 'bg-slate-500'}`} />
-                      <span className="text-xs font-black text-white">Claude</span>
-                    </div>
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-black border ${
-                      claudePct > 0
-                        ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                        : 'bg-rose-500/20 text-rose-300 border-rose-500/40'
-                    }`}>
-                      {claudePct}% Cited
-                    </span>
+              {/* 3. Perplexity AI */}
+              <div className={`p-4 rounded-2xl bg-white border transition-all space-y-2 shadow-xs ${
+                perplexityPct > 0 ? 'border-indigo-300 hover:border-indigo-500' : 'border-[#e4d6c6]'
+              }`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2.5 h-2.5 rounded-full ${perplexityPct > 0 ? 'bg-indigo-500 animate-pulse' : 'bg-slate-300'}`} />
+                    <span className="text-xs font-black text-[#2b1b12]">Perplexity AI</span>
                   </div>
-                  <div className={`text-xs font-bold ${claudePct > 0 ? 'text-amber-300' : 'text-slate-400'}`}>
-                    {claudePct > 0 ? `Enterprise Solution (${claudeCitedCount}/${totalAudited})` : 'Citation Gap (Not Cited)'}
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-black border ${
+                    perplexityPct > 0
+                      ? 'bg-indigo-50 text-indigo-800 border-indigo-300'
+                      : 'bg-rose-50 text-rose-800 border-rose-200'
+                  }`}>
+                    {perplexityPct}% Cited
+                  </span>
+                </div>
+                <div className={`text-xs font-bold ${perplexityPct > 0 ? 'text-indigo-700' : 'text-slate-500'}`}>
+                  {perplexityPct > 0 ? `Direct Footnote [1] (${perplexityCitedCount}/${totalAudited})` : 'Citation Gap (Not Cited)'}
+                </div>
+                <p className="text-[11px] text-[#6f5a4c] leading-relaxed">
+                  {perplexityPct > 0
+                    ? `Footnote citations verified from live Sonar index crawls across ${perplexityCitedCount} prompt(s).`
+                    : 'Zero footnote citations detected in Sonar live web crawls on generic searches.'}
+                </p>
+                <div className="pt-1.5 border-t border-[#f1e8dc] flex items-center justify-between text-[10px] text-[#7a5242] font-mono">
+                  <span>SoV: {Number((perplexityPct * 0.36).toFixed(1))}%</span>
+                  <span className={perplexityPct > 0 ? 'text-indigo-700 font-bold' : 'text-slate-400'}>
+                    {perplexityPct > 0 ? '● Live Active' : '○ Gap Recorded'}
+                  </span>
+                </div>
+              </div>
+
+              {/* 4. Claude */}
+              <div className={`p-4 rounded-2xl bg-white border transition-all space-y-2 shadow-xs ${
+                claudePct > 0 ? 'border-amber-300 hover:border-amber-500' : 'border-[#e4d6c6]'
+              }`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2.5 h-2.5 rounded-full ${claudePct > 0 ? 'bg-amber-500 animate-pulse' : 'bg-slate-300'}`} />
+                    <span className="text-xs font-black text-[#2b1b12]">Claude 3.5</span>
                   </div>
-                  <p className="text-[11px] text-[#cbd5e1] leading-relaxed">
-                    {claudePct > 0
-                      ? `Semantic structure recognized in high-level operational workflows across ${claudeCitedCount} prompt(s).`
-                      : 'No semantic entity mentions synthesized in Claude comparative evaluations.'}
-                  </p>
-                  <div className="pt-1.5 border-t border-white/10 flex items-center justify-between text-[10px] text-[#94a3b8] font-mono">
-                    <span>SoV: {Number((claudePct * 0.28).toFixed(1))}%</span>
-                    <span className={claudePct > 0 ? 'text-amber-400 font-bold' : 'text-slate-400'}>
-                      {claudePct > 0 ? '● Live Active' : '○ Gap Recorded'}
-                    </span>
-                  </div>
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-black border ${
+                    claudePct > 0
+                      ? 'bg-amber-50 text-amber-800 border-amber-300'
+                      : 'bg-rose-50 text-rose-800 border-rose-200'
+                  }`}>
+                    {claudePct}% Cited
+                  </span>
+                </div>
+                <div className={`text-xs font-bold ${claudePct > 0 ? 'text-amber-700' : 'text-slate-500'}`}>
+                  {claudePct > 0 ? `Enterprise Solution (${claudeCitedCount}/${totalAudited})` : 'Citation Gap (Not Cited)'}
+                </div>
+                <p className="text-[11px] text-[#6f5a4c] leading-relaxed">
+                  {claudePct > 0
+                    ? `Semantic structure recognized in high-level operational workflows across ${claudeCitedCount} prompt(s).`
+                    : 'No semantic entity mentions synthesized in Claude comparative evaluations.'}
+                </p>
+                <div className="pt-1.5 border-t border-[#f1e8dc] flex items-center justify-between text-[10px] text-[#7a5242] font-mono">
+                  <span>SoV: {Number((claudePct * 0.28).toFixed(1))}%</span>
+                  <span className={claudePct > 0 ? 'text-amber-700 font-bold' : 'text-slate-400'}>
+                    {claudePct > 0 ? '● Live Active' : '○ Gap Recorded'}
+                  </span>
                 </div>
               </div>
             </div>
 
             {/* Live Model Check Status Ticker */}
-            <div className="relative z-10 p-3 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-between text-xs text-[#d6c4b2]">
+            <div className="p-3 rounded-2xl bg-[#f8f3ec] border border-[#e4d6c6] flex items-center justify-between text-xs text-[#6f5a4c]">
               <div className="flex items-center gap-2">
                 <Terminal className="w-3.5 h-3.5 text-[#c5a059]" />
                 <span className="font-mono text-[11px]">
                   {loadingBatchAudit ? (
-                    <span className="text-amber-300 animate-pulse font-bold">
+                    <span className="text-[#8a5b13] animate-pulse font-bold">
                       ⚡ Live Scanning {promptScope} prompts across Gemini, ChatGPT, Perplexity &amp; Claude...
                     </span>
                   ) : (
@@ -1130,7 +1090,7 @@ export function AeoGeoWorkspace({ project, user, onNavigateTab }: AeoGeoWorkspac
                   )}
                 </span>
               </div>
-              <span className="text-[10px] font-mono text-[#c5a059] hidden sm:inline">
+              <span className="text-[10px] font-mono text-[#7a5242] hidden sm:inline">
                 Avg Latency: 1.1s
               </span>
             </div>

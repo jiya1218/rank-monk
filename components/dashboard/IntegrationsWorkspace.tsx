@@ -238,7 +238,7 @@ export function IntegrationsWorkspace({
     token: '',
     repo: '',
     branch: 'main',
-    folderPath: cleanDomain.includes('officex') ? 'content/resources' : 'content/blogs'
+    folderPath: 'content/blogs'
   });
   const [wpConfig, setWpConfig] = useState({
     wpUrl: '',
@@ -250,6 +250,25 @@ export function IntegrationsWorkspace({
   const [showGithubGuide, setShowGithubGuide] = useState(true);
   const [showWpGuide, setShowWpGuide] = useState(true);
 
+  // Helper: check if token is genuine personal access token
+  const isRealToken = (t?: string): boolean => {
+    if (!t || typeof t !== 'string') return false;
+    const s = t.trim();
+    if (s.includes('test') || s.includes('dummy') || s.includes('preserved') || s.includes('example') || s.includes('random') || s.includes('placeholder')) {
+      return false;
+    }
+    const isClassic = /^ghp_[A-Za-z0-9_]{36}$/.test(s);
+    const isFineGrained = /^github_pat_[A-Za-z0-9_]{80,}$/.test(s);
+    const isApp = /^(gho|ghs|ghu)_[A-Za-z0-9_]{30,}$/.test(s);
+    return isClassic || isFineGrained || isApp;
+  };
+
+  const isRealWpPassword = (p?: string): boolean => {
+    if (!p || typeof p !== 'string') return false;
+    const s = p.trim();
+    return s.length >= 8 && !s.includes('preserved') && !s.includes('dummy');
+  };
+
   // Sync GitHub and WP from localStorage AND Cloud Server
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -257,26 +276,41 @@ export function IntegrationsWorkspace({
       const savedGh = localStorage.getItem(`rm_gh_config_${cleanDomain}`) || localStorage.getItem('rm_gh_config');
       if (savedGh) {
         const parsed = JSON.parse(savedGh);
+        if (parsed.token && !isRealToken(parsed.token)) {
+          // Clear dummy / test tokens
+          localStorage.removeItem(`rm_gh_config_${cleanDomain}`);
+          localStorage.removeItem('rm_gh_config');
+          parsed.token = '';
+        }
         if (parsed.repo) parsed.repo = normalizeRepoName(parsed.repo);
-        setGithubConfig(prev => ({
-          ...prev,
-          ...parsed,
-          token: parsed.token || '',
-          repo: parsed.repo || '',
-          branch: parsed.branch || 'main',
-          folderPath: parsed.folderPath || prev.folderPath || (cleanDomain.includes('officex') ? 'content/resources' : 'content/blogs')
-        }));
+        if (isRealToken(parsed.token)) {
+          setGithubConfig(prev => ({
+            ...prev,
+            ...parsed,
+            token: parsed.token || '',
+            repo: parsed.repo || '',
+            branch: parsed.branch || 'main',
+            folderPath: parsed.folderPath || prev.folderPath || 'content/blogs'
+          }));
+        }
       }
       const savedWp = localStorage.getItem(`rm_wp_config_${cleanDomain}`) || localStorage.getItem('rm_wp_config');
       if (savedWp) {
         const parsed = JSON.parse(savedWp);
-        setWpConfig(prev => ({
-          ...prev,
-          ...parsed,
-          wpUrl: parsed.wpUrl || parsed.url || '',
-          wpUsername: parsed.wpUsername || parsed.username || '',
-          wpAppPassword: parsed.wpAppPassword || parsed.appPassword || ''
-        }));
+        if (parsed.wpAppPassword && !isRealWpPassword(parsed.wpAppPassword)) {
+          localStorage.removeItem(`rm_wp_config_${cleanDomain}`);
+          localStorage.removeItem('rm_wp_config');
+          parsed.wpAppPassword = '';
+        }
+        if (isRealWpPassword(parsed.wpAppPassword)) {
+          setWpConfig(prev => ({
+            ...prev,
+            ...parsed,
+            wpUrl: parsed.wpUrl || parsed.url || '',
+            wpUsername: parsed.wpUsername || parsed.username || '',
+            wpAppPassword: parsed.wpAppPassword || ''
+          }));
+        }
       }
     } catch {}
 
@@ -287,7 +321,7 @@ export function IntegrationsWorkspace({
         .then(res => res.json())
         .then(data => {
           if (data.success && data.integrations) {
-            if (data.integrations.github && data.integrations.github.token) {
+            if (data.integrations.github && isRealToken(data.integrations.github.token)) {
               const gh = data.integrations.github;
               if (gh.repo) gh.repo = normalizeRepoName(gh.repo);
               setGithubConfig(prev => ({
@@ -296,19 +330,19 @@ export function IntegrationsWorkspace({
                 token: gh.token || '',
                 repo: gh.repo || '',
                 branch: gh.branch || 'main',
-                folderPath: gh.folderPath || prev.folderPath || (cleanDomain.includes('officex') ? 'content/resources' : 'content/blogs')
+                folderPath: gh.folderPath || prev.folderPath || 'content/blogs'
               }));
               localStorage.setItem(`rm_gh_config_${cleanDomain}`, JSON.stringify(gh));
               localStorage.setItem('rm_gh_config', JSON.stringify(gh));
             }
-            if (data.integrations.wordpress && (data.integrations.wordpress.wpUrl || data.integrations.wordpress.url)) {
+            if (data.integrations.wordpress && isRealWpPassword(data.integrations.wordpress.wpAppPassword)) {
               const wp = data.integrations.wordpress;
               setWpConfig(prev => ({
                 ...prev,
                 ...wp,
                 wpUrl: wp.wpUrl || wp.url || '',
                 wpUsername: wp.wpUsername || wp.username || '',
-                wpAppPassword: wp.wpAppPassword || wp.appPassword || ''
+                wpAppPassword: wp.wpAppPassword || ''
               }));
               localStorage.setItem(`rm_wp_config_${cleanDomain}`, JSON.stringify(wp));
               localStorage.setItem('rm_wp_config', JSON.stringify(wp));
@@ -328,8 +362,8 @@ export function IntegrationsWorkspace({
     return normalizeRepoName(githubConfig.repo);
   }, [githubConfig.repo]);
 
-  const isGithubConnected = Boolean(githubConfig.token && cleanRepoName);
-  const isWpConnected = Boolean(wpConfig.wpUrl && wpConfig.wpUsername && wpConfig.wpAppPassword);
+  const isGithubConnected = Boolean(isRealToken(githubConfig.token) && cleanRepoName);
+  const isWpConnected = Boolean(wpConfig.wpUrl && wpConfig.wpUsername && isRealWpPassword(wpConfig.wpAppPassword));
 
   const connectedStats = useMemo(() => {
     let count = 0;
@@ -379,7 +413,7 @@ export function IntegrationsWorkspace({
   };
 
   const handleDisconnectGithub = () => {
-    setGithubConfig({ token: '', repo: '', branch: 'main', folderPath: cleanDomain.includes('officex') ? 'content/resources' : 'content/blogs' });
+    setGithubConfig({ token: '', repo: '', branch: 'main', folderPath: 'content/blogs' });
     try {
       localStorage.removeItem(`rm_gh_config_${cleanDomain}`);
       localStorage.removeItem('rm_gh_config');
@@ -659,209 +693,6 @@ export function IntegrationsWorkspace({
               <ArrowRight className="w-3.5 h-3.5 text-[#c5a059]" />
             </button>
           )}
-        </div>
-      </div>
-
-      {/* Active Integrations Summary Hub */}
-      <div className="p-3.5 sm:p-5 bg-gradient-to-r from-[#fbf8f3] via-[#f7f0e4] to-[#f4ebe0] border border-[#d6be96]/60 rounded-2xl shadow-2xs space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#e4d6c6]/60 pb-2">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs font-black uppercase tracking-wider text-[#8c6b2d]">
-              Live Connection Status &amp; Credentials
-            </span>
-          </div>
-          <span className="text-[11px] text-[#6f5a4c] font-medium">
-            ⚡ Click any channel to test connection, manage credentials, or disconnect
-          </span>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5">
-          {/* GitHub Status Tile */}
-          <button
-            type="button"
-            onClick={() => setActiveModal('github')}
-            className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-1.5 ${
-              isGithubConnected
-                ? 'bg-emerald-50/90 border-emerald-300 hover:bg-emerald-100 shadow-2xs'
-                : 'bg-white border-[#e4d6c6] hover:bg-[#ebdcc8]'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-[#2b1b12]">
-                <GithubIcon className="w-3.5 h-3.5 shrink-0" />
-                <span>GitHub</span>
-              </div>
-              {isGithubConnected ? (
-                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-emerald-600 text-white font-black text-[9px] uppercase tracking-wider">
-                  ● LIVE
-                </span>
-              ) : (
-                <span className="text-[9.5px] font-bold text-[#8c6b2d] bg-[#c5a059]/15 px-1.5 py-0.5 rounded">
-                  + Setup
-                </span>
-              )}
-            </div>
-            <div className="font-mono text-[10.5px] truncate font-bold text-emerald-950">
-              {isGithubConnected ? cleanRepoName : 'Not Connected'}
-            </div>
-          </button>
-
-          {/* WordPress Status Tile */}
-          <button
-            type="button"
-            onClick={() => setActiveModal('wordpress')}
-            className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-1.5 ${
-              isWpConnected
-                ? 'bg-blue-50/90 border-blue-300 hover:bg-blue-100 shadow-2xs'
-                : 'bg-white border-[#e4d6c6] hover:bg-[#ebdcc8]'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-[#2b1b12]">
-                <Globe className="w-3.5 h-3.5 text-[#21759b] shrink-0" />
-                <span>WordPress</span>
-              </div>
-              {isWpConnected ? (
-                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-blue-600 text-white font-black text-[9px] uppercase tracking-wider">
-                  ● LIVE
-                </span>
-              ) : (
-                <span className="text-[9.5px] font-bold text-[#8c6b2d] bg-[#c5a059]/15 px-1.5 py-0.5 rounded">
-                  + Connect
-                </span>
-              )}
-            </div>
-            <div className="font-mono text-[10.5px] truncate font-bold text-blue-950">
-              {isWpConnected ? wpConfig.wpUrl.replace(/^https?:\/\//, '').split('/')[0] : 'Not Connected'}
-            </div>
-          </button>
-
-          {/* Instagram Status Tile */}
-          <button
-            type="button"
-            onClick={() => {
-              if (igAccount) setActiveCategory('social');
-              else handleConnectMeta();
-            }}
-            className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-1.5 ${
-              igAccount
-                ? 'bg-pink-50/90 border-pink-300 hover:bg-pink-100 shadow-2xs'
-                : 'bg-white border-[#e4d6c6] hover:bg-[#ebdcc8]'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-[#2b1b12]">
-                <InstagramIcon className="w-3.5 h-3.5 text-[#fd1d1d] shrink-0" />
-                <span>Instagram</span>
-              </div>
-              {igAccount ? (
-                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-pink-600 text-white font-black text-[9px] uppercase tracking-wider">
-                  ● LIVE
-                </span>
-              ) : (
-                <span className="text-[9.5px] font-bold text-[#8c6b2d] bg-[#c5a059]/15 px-1.5 py-0.5 rounded">
-                  + Connect
-                </span>
-              )}
-            </div>
-            <div className="text-[10.5px] truncate font-bold text-pink-950">
-              {igAccount ? (igAccount.username ? `@${igAccount.username}` : igAccount.name) : 'Not Connected'}
-            </div>
-          </button>
-
-          {/* Facebook Status Tile */}
-          <button
-            type="button"
-            onClick={() => {
-              if (fbAccount) setActiveCategory('social');
-              else handleConnectMeta();
-            }}
-            className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-1.5 ${
-              fbAccount
-                ? 'bg-blue-50/90 border-blue-300 hover:bg-blue-100 shadow-2xs'
-                : 'bg-white border-[#e4d6c6] hover:bg-[#ebdcc8]'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-[#2b1b12]">
-                <FacebookIcon className="w-3.5 h-3.5 text-[#1877f2] shrink-0" />
-                <span>Facebook</span>
-              </div>
-              {fbAccount ? (
-                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-blue-600 text-white font-black text-[9px] uppercase tracking-wider">
-                  ● LIVE
-                </span>
-              ) : (
-                <span className="text-[9.5px] font-bold text-[#8c6b2d] bg-[#c5a059]/15 px-1.5 py-0.5 rounded">
-                  + Connect
-                </span>
-              )}
-            </div>
-            <div className="text-[10.5px] truncate font-bold text-blue-950">
-              {fbAccount ? fbAccount.name : 'Not Connected'}
-            </div>
-          </button>
-
-          {/* LinkedIn Status Tile */}
-          <button
-            type="button"
-            onClick={() => setActiveModal('linkedin')}
-            className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-1.5 ${
-              liAccount
-                ? 'bg-sky-50/90 border-sky-300 hover:bg-sky-100 shadow-2xs'
-                : 'bg-white border-[#e4d6c6] hover:bg-[#ebdcc8]'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-[#2b1b12]">
-                <LinkedinIcon className="w-3.5 h-3.5 text-[#0077b5] shrink-0" />
-                <span>LinkedIn</span>
-              </div>
-              {liAccount ? (
-                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-[#0077b5] text-white font-black text-[9px] uppercase tracking-wider">
-                  ● LIVE
-                </span>
-              ) : (
-                <span className="text-[9.5px] font-bold text-[#8c6b2d] bg-[#c5a059]/15 px-1.5 py-0.5 rounded">
-                  + Connect
-                </span>
-              )}
-            </div>
-            <div className="text-[10.5px] truncate font-bold text-sky-950">
-              {liAccount ? liAccount.name : 'Not Connected'}
-            </div>
-          </button>
-
-          {/* X (Twitter) Status Tile */}
-          <button
-            type="button"
-            onClick={() => setActiveModal('twitter')}
-            className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-1.5 ${
-              twAccount
-                ? 'bg-neutral-100 border-neutral-300 hover:bg-neutral-200 shadow-2xs'
-                : 'bg-white border-[#e4d6c6] hover:bg-[#ebdcc8]'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-[#2b1b12]">
-                <TwitterIcon className="w-3.5 h-3.5 text-black shrink-0" />
-                <span>X (Twitter)</span>
-              </div>
-              {twAccount ? (
-                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-black text-white font-black text-[9px] uppercase tracking-wider">
-                  ● LIVE
-                </span>
-              ) : (
-                <span className="text-[9.5px] font-bold text-[#8c6b2d] bg-[#c5a059]/15 px-1.5 py-0.5 rounded">
-                  + Connect
-                </span>
-              )}
-            </div>
-            <div className="text-[10.5px] truncate font-bold text-neutral-900">
-              {twAccount ? (twAccount.username || twAccount.name) : 'Not Connected'}
-            </div>
-          </button>
         </div>
       </div>
 
