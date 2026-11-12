@@ -18,7 +18,9 @@ import {
   Globe,
   ExternalLink,
   ChevronRight,
-  ShieldCheck
+  ShieldCheck,
+  X,
+  BookOpen
 } from 'lucide-react';
 
 // Interactive click-to-expand text helper for table cells (Requirement 4)
@@ -44,6 +46,8 @@ interface DashboardOverviewProps {
 
 export function DashboardOverview({ project, user, onNavigateTab }: DashboardOverviewProps) {
   const [gscModalOpen, setGscModalOpen] = useState(false);
+  const [showGscGuide, setShowGscGuide] = useState(true);
+  const [showAdvancedGsc, setShowAdvancedGsc] = useState(false);
   const [gscConnected, setGscConnected] = useState(false);
   const [connectingGsc, setConnectingGsc] = useState(false);
   const [gscData, setGscData] = useState<{
@@ -847,23 +851,74 @@ export function DashboardOverview({ project, user, onNavigateTab }: DashboardOve
       {/* Google Search Console Connection Modal */}
       {gscModalOpen && (
         <div className="fixed inset-0 z-[999999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white border border-[#e4d6c6] rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-4 animate-fade-in text-left">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-[#f1e8dc] text-[#c5a059] border border-[#d8c09e] rounded-2xl flex items-center justify-center text-xl font-bold shadow-sm shrink-0">
-                <Globe className="w-6 h-6" />
+          <div className="bg-white border border-[#e4d6c6] rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 sm:p-7 shadow-2xl space-y-4 animate-fade-in text-left">
+            {/* Modal Header */}
+            <div className="flex items-start justify-between gap-3 pb-3 border-b border-[#e4d6c6]">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 bg-[#f1e8dc] text-[#c5a059] border border-[#d8c09e] rounded-2xl flex items-center justify-center text-lg font-bold shadow-sm shrink-0">
+                  <Globe className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-[#2b1b12]">Connect Google Search Console</h3>
+                  <p className="text-xs text-[#6f5a4c]">
+                    Live traffic &amp; SERP impressions for <strong>{project?.domain}</strong>
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-[#2b1b12]">Connect Google Search Console</h3>
-                <p className="text-xs text-[#6f5a4c]">
-                  Stream real-time organic visits, SERP impressions, and keywords for <strong>{project?.domain}</strong>.
-                </p>
-              </div>
+
+              {/* Close Button */}
+              <button
+                type="button"
+                onClick={() => setGscModalOpen(false)}
+                className="p-1 rounded-xl text-slate-400 hover:text-black hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
-            <form onSubmit={handleConnectGsc} className="space-y-3 pt-1">
+            {/* Prominent User Guide Toggle Button */}
+            <div className="flex items-center justify-between p-3 bg-purple-50 border border-purple-200 rounded-2xl">
+              <div className="flex items-center gap-2 text-xs font-bold text-purple-900">
+                <BookOpen className="w-4 h-4 text-purple-700" />
+                <span>How to connect in 3 simple steps</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowGscGuide(!showGscGuide)}
+                className="text-xs font-bold text-purple-700 hover:text-purple-900 underline cursor-pointer"
+              >
+                {showGscGuide ? 'Hide Guide ▲' : 'View Guide ▼'}
+              </button>
+            </div>
+
+            {/* Expandable Visual Step-by-Step Guide */}
+            {showGscGuide && (
+              <div className="p-4 bg-[#fbf8f3] border border-[#e4d6c6] rounded-2xl space-y-2.5 text-xs text-[#2b1b12]">
+                <div className="flex items-start gap-2.5">
+                  <span className="w-5 h-5 rounded-full bg-[#2b1b12] text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">1</span>
+                  <p className="text-[#6f5a4c]">
+                    Open <a href="https://search.google.com/search-console" target="_blank" rel="noreferrer" className="text-indigo-600 font-bold underline">Google Search Console ↗</a> and select your property.
+                  </p>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <span className="w-5 h-5 rounded-full bg-[#2b1b12] text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">2</span>
+                  <p className="text-[#6f5a4c]">
+                    Go to <strong>Settings ⚙️</strong> (bottom left) → <strong>Users and permissions</strong> → Click <strong>Add user</strong>.
+                  </p>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <span className="w-5 h-5 rounded-full bg-[#2b1b12] text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">3</span>
+                  <p className="text-[#6f5a4c]">
+                    Enter email: <code className="bg-white px-1.5 py-0.5 rounded border border-[#e4d6c6] font-mono text-[11px] text-[#2b1b12] font-bold">service@rankmonk.in</code> with Permission <strong>Full</strong>, then click Save below.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <form onSubmit={handleConnectGsc} className="space-y-3.5 pt-1">
               <div>
                 <label className="block text-[11px] font-bold text-[#2b1b12] uppercase tracking-wider mb-1">
-                  Search Console Property URL / Domain
+                  Your Search Console Property URL
                 </label>
                 <input
                   type="text"
@@ -873,24 +928,35 @@ export function DashboardOverview({ project, user, onNavigateTab }: DashboardOve
                   className="w-full px-3.5 py-2.5 bg-[#f8f3ec] border border-[#e4d6c6] focus:border-[#2b1b12] rounded-xl text-xs text-[#2b1b12] font-mono outline-none"
                 />
                 <span className="text-[10px] text-[#6f5a4c] mt-0.5 block">
-                  Format: <code className="bg-[#f1e8dc] px-1 py-0.5 rounded">sc-domain:{cleanDomain || 'domain.com'}</code> or full URL <code className="bg-[#f1e8dc] px-1 py-0.5 rounded">https://{cleanDomain || 'domain.com'}/</code>
+                  Example: <code className="bg-[#f1e8dc] px-1 py-0.5 rounded text-[10px]">sc-domain:{cleanDomain || 'domain.com'}</code> or <code className="bg-[#f1e8dc] px-1 py-0.5 rounded text-[10px]">https://{cleanDomain || 'domain.com'}/</code>
                 </span>
               </div>
 
-              <div>
-                <label className="block text-[11px] font-bold text-[#2b1b12] uppercase tracking-wider mb-1">
-                  Google Service Account JSON Key (Optional if OAuth configured)
-                </label>
-                <textarea
-                  rows={4}
-                  placeholder={`{\n  "type": "service_account",\n  "client_email": "rankmonk@project.iam.gserviceaccount.com",\n  "private_key": "-----BEGIN PRIVATE KEY-----..."\n}`}
-                  value={gscServiceAccountJson}
-                  onChange={(e) => setGscServiceAccountJson(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-[#f8f3ec] border border-[#e4d6c6] focus:border-[#2b1b12] rounded-xl text-[11px] text-[#2b1b12] font-mono outline-none resize-none"
-                />
-                <span className="text-[10px] text-[#6f5a4c] mt-0.5 block">
-                  Add the Service Account client_email as a User in your Google Search Console settings.
-                </span>
+              {/* Advanced Service Account Option (Hidden by default so not messy) */}
+              <div className="border border-[#e4d6c6] rounded-2xl p-3 bg-white">
+                <button
+                  type="button"
+                  onClick={() => setShowAdvancedGsc(!showAdvancedGsc)}
+                  className="w-full flex items-center justify-between text-left text-xs font-bold text-[#6f5a4c] hover:text-[#2b1b12] cursor-pointer"
+                >
+                  <span>Advanced: Custom Google Service Account Key (Optional)</span>
+                  <span className="text-[11px]">{showAdvancedGsc ? '▲' : '▼'}</span>
+                </button>
+
+                {showAdvancedGsc && (
+                  <div className="mt-2.5 pt-2.5 border-t border-slate-100 space-y-1.5">
+                    <p className="text-[10px] text-[#6f5a4c]">
+                      Paste your Google Cloud Service Account JSON key if you use custom Google Cloud project credentials.
+                    </p>
+                    <textarea
+                      rows={3}
+                      placeholder={`{\n  "type": "service_account",\n  "client_email": "...",\n  "private_key": "..."\n}`}
+                      value={gscServiceAccountJson}
+                      onChange={(e) => setGscServiceAccountJson(e.target.value)}
+                      className="w-full px-3 py-2 bg-[#f8f3ec] border border-[#e4d6c6] focus:border-[#2b1b12] rounded-xl text-[10px] text-[#2b1b12] font-mono outline-none resize-none"
+                    />
+                  </div>
+                )}
               </div>
 
               {gscError && (
@@ -899,14 +965,14 @@ export function DashboardOverview({ project, user, onNavigateTab }: DashboardOve
                 </div>
               )}
 
-              <div className="p-3 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl text-[11px] text-[#6f5a4c] flex items-start gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-[11px] text-emerald-900 flex items-start gap-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
                 <span>
-                  <strong>Strict Real Data Policy:</strong> Rank Monk only displays genuine Google Search Console metrics. Zero fake data is simulated.
+                  <strong>Strict Real Data Policy:</strong> Rank Monk only displays genuine Google Search Console metrics. If clicks or impressions are 0, it strictly displays 0.
                 </span>
               </div>
 
-              <div className="flex gap-3 pt-2">
+              <div className="flex gap-3 pt-1">
                 <button
                   type="button"
                   onClick={() => setGscModalOpen(false)}
