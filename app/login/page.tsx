@@ -100,7 +100,7 @@ function LoginForm() {
                 role: 'owner',
                 plan: 'scale',
                 paid: true,
-                domain: activeProj?.domain || '',
+                domain: activeProj?.domain || 'officex.pro',
                 createdAt: new Date().toISOString()
               };
             }
@@ -112,6 +112,8 @@ function LoginForm() {
         throw new Error('No account found with this email. Please create an account first.');
       }
 
+      const normEmail = email.toLowerCase().trim();
+
       // Preserve existing active project domain if available
       try {
         const activeProjRaw = localStorage.getItem('rankmonk_active_project');
@@ -120,6 +122,9 @@ function LoginForm() {
           if (proj?.domain) {
             loggedInUser.domain = proj.domain;
           }
+        }
+        if (!loggedInUser.domain && (normEmail === 'jiya.scalezix@gmail.com' || normEmail === 'jiyapatel181224@gmail.com' || normEmail.includes('scalezix'))) {
+          loggedInUser.domain = 'officex.pro';
         }
       } catch {}
 

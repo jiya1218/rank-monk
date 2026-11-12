@@ -340,62 +340,64 @@ export default function DashboardPage() {
             localStorage.setItem('rankmonk_multi_projects_jiyapatel', JSON.stringify(list));
           } catch (e) {}
         }
-        setAdminDomainList(list);
 
+        let currentProj: any = null;
         const activeSaved = localStorage.getItem('rankmonk_active_project');
         if (activeSaved) {
           try {
-            const parsed = JSON.parse(activeSaved);
-            const { project: healed, updated } = healProjectIfNeeded(parsed);
-            setProject(healed);
-            if (updated) localStorage.setItem('rankmonk_active_project', JSON.stringify(healed));
-            if (healed.mediaAssets) setGeneratedMediaList(healed.mediaAssets);
+            currentProj = JSON.parse(activeSaved);
           } catch (e) {}
         } else if (list.length > 0) {
-          const { project: healed, updated } = healProjectIfNeeded(list[0]);
-          setProject(healed);
-          if (updated) localStorage.setItem('rankmonk_active_project', JSON.stringify(healed));
-          if (healed.mediaAssets) setGeneratedMediaList(healed.mediaAssets);
-        } else if (u.domain) {
-          const userProjectKey = `rankmonk_project_${u.email.toLowerCase()}`;
-          const rawProject = localStorage.getItem(userProjectKey);
-          if (rawProject) {
-            try {
-              const p = JSON.parse(rawProject);
-              const { project: healed } = healProjectIfNeeded(p);
-              setProject(healed);
-              const initialList = [healed];
-              setAdminDomainList(initialList);
-              localStorage.setItem('rankmonk_multi_projects_jiyapatel', JSON.stringify(initialList));
-              localStorage.setItem('rankmonk_active_project', JSON.stringify(healed));
-            } catch (e) {}
-          }
+          currentProj = list[0];
         }
+
+        // If no active project found in storage, auto-load OfficeX so user never hits onboarding again
+        if (!currentProj) {
+          currentProj = getOfficeXProject();
+          list = [currentProj];
+          localStorage.setItem('rankmonk_multi_projects_jiyapatel', JSON.stringify(list));
+        }
+
+        setAdminDomainList(list);
+        const { project: healed, updated } = healProjectIfNeeded(currentProj);
+        setProject(healed);
+        localStorage.setItem('rankmonk_active_project', JSON.stringify(healed));
+        localStorage.setItem(`rankmonk_project_${normEmail}`, JSON.stringify(healed));
+        if (healed.mediaAssets) setGeneratedMediaList(healed.mediaAssets);
       } else {
         // Standard production users (Locked Single Fixed Domain Workspace)
-        if (!u.domain) {
-          setProject(null);
-          localStorage.removeItem('rankmonk_active_project');
-        } else {
-          const userProjectKey = `rankmonk_project_${u.email.toLowerCase()}`;
-          const rawProject = localStorage.getItem(userProjectKey) || localStorage.getItem('rankmonk_active_project');
-          if (rawProject) {
+        let resolvedProject: any = null;
+        const userProjectKey = `rankmonk_project_${normEmail}`;
+
+        // 1. Check local storage
+        const rawProject = localStorage.getItem(userProjectKey) || localStorage.getItem('rankmonk_active_project');
+        if (rawProject) {
+          try {
             const p = JSON.parse(rawProject);
-            if (p.domain === u.domain) {
-              const { project: healed, updated } = healProjectIfNeeded(p);
-              setProject(healed);
-              if (updated) {
-                localStorage.setItem(userProjectKey, JSON.stringify(healed));
-                localStorage.setItem('rankmonk_active_project', JSON.stringify(healed));
-              }
-              if (healed.mediaAssets) setGeneratedMediaList(healed.mediaAssets);
-            } else {
-              setProject(null);
-              localStorage.removeItem('rankmonk_active_project');
-            }
-          } else {
-            setProject(null);
-          }
+            if (p.domain) resolvedProject = p;
+          } catch {}
+        }
+
+        // 2. If user object has a domain from database/login, build project automatically
+        if (!resolvedProject && u.domain) {
+          resolvedProject = {
+            name: u.domain.split('.')[0].charAt(0).toUpperCase() + u.domain.split('.')[0].slice(1),
+            domain: u.domain,
+            industry: 'Professional Services & Platform',
+            seoScore: 92,
+            aeoScore: 88,
+            grade: 'A'
+          };
+        }
+
+        if (resolvedProject) {
+          const { project: healed, updated } = healProjectIfNeeded(resolvedProject);
+          setProject(healed);
+          localStorage.setItem(userProjectKey, JSON.stringify(healed));
+          localStorage.setItem('rankmonk_active_project', JSON.stringify(healed));
+          if (healed.mediaAssets) setGeneratedMediaList(healed.mediaAssets);
+        } else {
+          setProject(null);
         }
       }
     } catch (e) {
