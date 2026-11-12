@@ -102,7 +102,23 @@ export function IntegrationsWorkspace({
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // 1. Sync accounts from LocalStorage
+  // Helper: Persist social accounts to cloud backend
+  const syncSocialAccountsToCloud = (accountsList: SocialAccount[]) => {
+    if (user?.email || cleanDomain) {
+      fetch('/api/integrations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: user?.email || 'default',
+          domain: cleanDomain,
+          platform: 'social',
+          config: accountsList
+        })
+      }).catch(() => {});
+    }
+  };
+
+  // 1. Sync accounts from LocalStorage and Cloud Server
   const loadAccounts = () => {
     const saved = localStorage.getItem(`rankmonk_social_accounts_${user?.email || 'default'}`);
     if (saved) {
@@ -111,6 +127,19 @@ export function IntegrationsWorkspace({
       } catch (e) {}
     } else {
       setAccounts([]);
+    }
+
+    // Cloud fetch
+    if (user?.email || cleanDomain) {
+      fetch(`/api/integrations?email=${encodeURIComponent(user?.email || '')}&domain=${encodeURIComponent(cleanDomain)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && Array.isArray(data.integrations?.socialAccounts) && data.integrations.socialAccounts.length > 0) {
+            setAccounts(data.integrations.socialAccounts);
+            localStorage.setItem(`rankmonk_social_accounts_${user?.email || 'default'}`, JSON.stringify(data.integrations.socialAccounts));
+          }
+        })
+        .catch(() => {});
     }
   };
 
@@ -221,20 +250,48 @@ export function IntegrationsWorkspace({
   const [showGithubGuide, setShowGithubGuide] = useState(true);
   const [showWpGuide, setShowWpGuide] = useState(true);
 
-  // Sync GitHub and WP from localStorage
+  // Sync GitHub and WP from localStorage AND Cloud Server
   useEffect(() => {
     if (typeof window === 'undefined') return;
     try {
-      const savedGh = localStorage.getItem(`rm_gh_config_${cleanDomain}`);
+      const savedGh = localStorage.getItem(`rm_gh_config_${cleanDomain}`) || localStorage.getItem('rm_gh_config');
       if (savedGh) {
         const parsed = JSON.parse(savedGh);
         if (parsed.repo) parsed.repo = normalizeRepoName(parsed.repo);
         setGithubConfig(parsed);
       }
-      const savedWp = localStorage.getItem(`rm_wp_config_${cleanDomain}`);
+      const savedWp = localStorage.getItem(`rm_wp_config_${cleanDomain}`) || localStorage.getItem('rm_wp_config');
       if (savedWp) setWpConfig(JSON.parse(savedWp));
     } catch {}
-  }, [cleanDomain]);
+
+    // Cloud Database Persistence: Load integrations preserved under user's email
+    const userEmail = user?.email;
+    if (userEmail || cleanDomain) {
+      fetch(`/api/integrations?email=${encodeURIComponent(userEmail || '')}&domain=${encodeURIComponent(cleanDomain)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.integrations) {
+            if (data.integrations.github && data.integrations.github.token) {
+              const gh = data.integrations.github;
+              if (gh.repo) gh.repo = normalizeRepoName(gh.repo);
+              setGithubConfig(gh);
+              localStorage.setItem(`rm_gh_config_${cleanDomain}`, JSON.stringify(gh));
+              localStorage.setItem('rm_gh_config', JSON.stringify(gh));
+            }
+            if (data.integrations.wordpress && data.integrations.wordpress.wpUrl) {
+              setWpConfig(data.integrations.wordpress);
+              localStorage.setItem(`rm_wp_config_${cleanDomain}`, JSON.stringify(data.integrations.wordpress));
+              localStorage.setItem('rm_wp_config', JSON.stringify(data.integrations.wordpress));
+            }
+            if (Array.isArray(data.integrations.socialAccounts) && data.integrations.socialAccounts.length > 0) {
+              setAccounts(data.integrations.socialAccounts);
+              localStorage.setItem(`rankmonk_social_accounts_${userEmail || 'default'}`, JSON.stringify(data.integrations.socialAccounts));
+            }
+          }
+        })
+        .catch(() => {});
+    }
+  }, [cleanDomain, user?.email]);
 
   const cleanRepoName = useMemo(() => {
     if (!githubConfig.repo) return '';
@@ -272,7 +329,21 @@ export function IntegrationsWorkspace({
     setGithubConfig(sanitized);
     try {
       localStorage.setItem(`rm_gh_config_${cleanDomain}`, JSON.stringify(sanitized));
-      showToast('✅ GitHub GitOps settings saved and connected!');
+      localStorage.setItem('rm_gh_config', JSON.stringify(sanitized));
+
+      // Persist to Cloud Backend so it's remembered on any device/login
+      fetch('/api/integrations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: user?.email || 'default',
+          domain: cleanDomain,
+          platform: 'github',
+          config: sanitized
+        })
+      }).catch(() => {});
+
+      showToast('✅ GitHub GitOps connected & permanently preserved on your account!');
       setActiveModal('none');
     } catch {}
   };
@@ -281,6 +352,18 @@ export function IntegrationsWorkspace({
     setGithubConfig({ token: '', repo: '', branch: 'main', folderPath: cleanDomain.includes('officex') ? 'content/resources' : 'content/blogs' });
     try {
       localStorage.removeItem(`rm_gh_config_${cleanDomain}`);
+      localStorage.removeItem('rm_gh_config');
+
+      fetch('/api/integrations', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: user?.email || 'default',
+          domain: cleanDomain,
+          platform: 'github'
+        })
+      }).catch(() => {});
+
       showToast('✓ GitHub integration disconnected.');
     } catch {}
   };
@@ -293,7 +376,20 @@ export function IntegrationsWorkspace({
     }
     try {
       localStorage.setItem(`rm_wp_config_${cleanDomain}`, JSON.stringify(wpConfig));
-      showToast('✅ WordPress integration saved and connected!');
+      localStorage.setItem('rm_wp_config', JSON.stringify(wpConfig));
+
+      fetch('/api/integrations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: user?.email || 'default',
+          domain: cleanDomain,
+          platform: 'wordpress',
+          config: wpConfig
+        })
+      }).catch(() => {});
+
+      showToast('✅ WordPress integration connected & permanently preserved on your account!');
       setActiveModal('none');
     } catch {}
   };
@@ -302,6 +398,18 @@ export function IntegrationsWorkspace({
     setWpConfig({ wpUrl: '', wpUsername: '', wpAppPassword: '' });
     try {
       localStorage.removeItem(`rm_wp_config_${cleanDomain}`);
+      localStorage.removeItem('rm_wp_config');
+
+      fetch('/api/integrations', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: user?.email || 'default',
+          domain: cleanDomain,
+          platform: 'wordpress'
+        })
+      }).catch(() => {});
+
       showToast('✓ WordPress integration disconnected.');
     } catch {}
   };

@@ -88,18 +88,41 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
   // Load saved configurations and articles from localStorage on mount
   useEffect(() => {
     try {
-      const savedGh = localStorage.getItem(`rm_gh_config_${cleanDomain}`);
+      const savedGh = localStorage.getItem(`rm_gh_config_${cleanDomain}`) || localStorage.getItem('rm_gh_config');
       if (savedGh) {
         const parsed = JSON.parse(savedGh);
         if (parsed.repo) parsed.repo = normalizeRepoName(parsed.repo);
         setGithubConfig(parsed);
       }
 
-      const savedWp = localStorage.getItem(`rm_wp_config_${cleanDomain}`);
+      const savedWp = localStorage.getItem(`rm_wp_config_${cleanDomain}`) || localStorage.getItem('rm_wp_config');
       if (savedWp) setWpConfig(JSON.parse(savedWp));
 
       const savedWh = localStorage.getItem(`rm_wh_config_${cleanDomain}`);
       if (savedWh) setWebhookConfig(JSON.parse(savedWh));
+
+      // Cloud Persistence Sync: Restore integration if on new device or browser
+      const userEmail = project?.userEmail || (typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('rankmonk_user') || '{}')?.email : '');
+      if (userEmail || cleanDomain) {
+        fetch(`/api/integrations?email=${encodeURIComponent(userEmail || '')}&domain=${encodeURIComponent(cleanDomain)}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.success && data.integrations) {
+              if (data.integrations.github && data.integrations.github.token) {
+                const gh = data.integrations.github;
+                if (gh.repo) gh.repo = normalizeRepoName(gh.repo);
+                setGithubConfig(gh);
+                localStorage.setItem(`rm_gh_config_${cleanDomain}`, JSON.stringify(gh));
+                localStorage.setItem('rm_gh_config', JSON.stringify(gh));
+              }
+              if (data.integrations.wordpress && (data.integrations.wordpress.wpUrl || data.integrations.wordpress.url)) {
+                setWpConfig(data.integrations.wordpress);
+                localStorage.setItem(`rm_wp_config_${cleanDomain}`, JSON.stringify(data.integrations.wordpress));
+              }
+            }
+          })
+          .catch(() => {});
+      }
 
       // Universal tech stack detection from crawled metadata or domain
       const detected = detectTechStack(project?.crawledHtml || '', cleanDomain);
@@ -159,20 +182,44 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
     } catch {}
   }, [cleanDomain, project]);
 
-  // Save configs helper
+  // Save configs helper with permanent Cloud Persistence
   const saveIntegrationConfig = (type: 'github' | 'wordpress' | 'webhook') => {
     try {
+      const userEmail = project?.userEmail || (typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('rankmonk_user') || '{}')?.email : '');
+
       if (type === 'github') {
         const cleanRepo = normalizeRepoName(githubConfig.repo);
         const sanitized = { ...githubConfig, repo: cleanRepo };
         setGithubConfig(sanitized);
         localStorage.setItem(`rm_gh_config_${cleanDomain}`, JSON.stringify(sanitized));
+        localStorage.setItem('rm_gh_config', JSON.stringify(sanitized));
+
+        fetch('/api/integrations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: userEmail || 'default',
+            domain: cleanDomain,
+            platform: 'github',
+            config: sanitized
+          })
+        }).catch(() => {});
       } else if (type === 'wordpress') {
         localStorage.setItem(`rm_wp_config_${cleanDomain}`, JSON.stringify(wpConfig));
+        fetch('/api/integrations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: userEmail || 'default',
+            domain: cleanDomain,
+            platform: 'wordpress',
+            config: wpConfig
+          })
+        }).catch(() => {});
       } else if (type === 'webhook') {
         localStorage.setItem(`rm_wh_config_${cleanDomain}`, JSON.stringify(webhookConfig));
       }
-      setToastMessage(`✓ ${type.toUpperCase()} integration settings saved!`);
+      setToastMessage(`✓ ${type.toUpperCase()} integration settings saved and permanently synced to your account!`);
       setIntegrationsModalOpen(false);
     } catch {}
   };

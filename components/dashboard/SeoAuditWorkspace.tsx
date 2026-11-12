@@ -138,15 +138,44 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
         setGithubTokenInput(parsed.token || '');
         setGithubRepoInput(parsed.repo || '');
       }
-      const wp = localStorage.getItem(`rm_wp_config_${cleanDomain}`);
+      const wp = localStorage.getItem(`rm_wp_config_${cleanDomain}`) || localStorage.getItem('rm_wp_config');
       if (wp) {
         const parsed = JSON.parse(wp);
-        setHasWpConfig(Boolean(parsed.url));
-        setWpUrlInput(parsed.url || '');
-        setWpUserInput(parsed.username || '');
-        setWpPassInput(parsed.appPassword || '');
+        setHasWpConfig(Boolean(parsed.url || parsed.wpUrl));
+        setWpUrlInput(parsed.url || parsed.wpUrl || '');
+        setWpUserInput(parsed.username || parsed.wpUsername || '');
+        setWpPassInput(parsed.appPassword || parsed.wpAppPassword || '');
       }
     } catch (e) {}
+
+    // Cloud Database Persistence: Sync integrations preserved for user's account
+    const userEmail = project?.userEmail || (typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('rankmonk_user') || '{}')?.email : '');
+    if (userEmail || cleanDomain) {
+      fetch(`/api/integrations?email=${encodeURIComponent(userEmail || '')}&domain=${encodeURIComponent(cleanDomain)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.integrations) {
+            if (data.integrations.github && data.integrations.github.token) {
+              const gh = data.integrations.github;
+              setHasGithubConfig(Boolean(gh.token && gh.repo));
+              setGithubTokenInput(gh.token || '');
+              setGithubRepoInput(gh.repo || '');
+              localStorage.setItem(`rm_gh_config_${cleanDomain}`, JSON.stringify(gh));
+              localStorage.setItem('rm_gh_config', JSON.stringify(gh));
+            }
+            if (data.integrations.wordpress && (data.integrations.wordpress.wpUrl || data.integrations.wordpress.url)) {
+              const wp = data.integrations.wordpress;
+              setHasWpConfig(true);
+              setWpUrlInput(wp.wpUrl || wp.url || '');
+              setWpUserInput(wp.wpUsername || wp.username || '');
+              setWpPassInput(wp.wpAppPassword || wp.appPassword || '');
+              localStorage.setItem(`rm_wp_config_${cleanDomain}`, JSON.stringify(wp));
+              localStorage.setItem('rm_wp_config', JSON.stringify(wp));
+            }
+          }
+        })
+        .catch(() => {});
+    }
 
     fetchPlatformDetection();
 
@@ -344,22 +373,52 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
 
   // Save specific edit permissions (GitHub / WordPress)
   const handleSavePermissions = () => {
+    const userEmail = project?.userEmail || (typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('rankmonk_user') || '{}')?.email : '');
+
     if (githubRepoInput && githubTokenInput) {
-      localStorage.setItem(`rm_gh_config_${cleanDomain}`, JSON.stringify({
+      const ghObj = {
         token: githubTokenInput,
         repo: githubRepoInput
-      }));
+      };
+      localStorage.setItem(`rm_gh_config_${cleanDomain}`, JSON.stringify(ghObj));
+      localStorage.setItem('rm_gh_config', JSON.stringify(ghObj));
       setHasGithubConfig(true);
+
+      fetch('/api/integrations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: userEmail || 'default',
+          domain: cleanDomain,
+          platform: 'github',
+          config: ghObj
+        })
+      }).catch(() => {});
     }
+
     if (wpUrlInput) {
-      localStorage.setItem(`rm_wp_config_${cleanDomain}`, JSON.stringify({
+      const wpObj = {
         url: wpUrlInput,
         username: wpUserInput,
         appPassword: wpPassInput
-      }));
+      };
+      localStorage.setItem(`rm_wp_config_${cleanDomain}`, JSON.stringify(wpObj));
+      localStorage.setItem('rm_wp_config', JSON.stringify(wpObj));
       setHasWpConfig(true);
+
+      fetch('/api/integrations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: userEmail || 'default',
+          domain: cleanDomain,
+          platform: 'wordpress',
+          config: wpObj
+        })
+      }).catch(() => {});
     }
-    showToast('✓ Platform integration saved successfully!');
+
+    showToast('✓ Platform integration saved and permanently preserved on your account!');
     setShowPermissionsConfig(false);
   };
 

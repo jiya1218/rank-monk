@@ -405,6 +405,30 @@ export default function DashboardPage() {
     }
   }, [router]);
 
+  // Cloud Persistence Sync: Auto-restore user's integrations on login / project switch
+  useEffect(() => {
+    if (!user?.email || !project?.domain) return;
+    const cleanDomain = project.domain.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '').toLowerCase();
+    fetch(`/api/integrations?email=${encodeURIComponent(user.email)}&domain=${encodeURIComponent(cleanDomain)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.integrations) {
+          if (data.integrations.github && data.integrations.github.token) {
+            localStorage.setItem(`rm_gh_config_${cleanDomain}`, JSON.stringify(data.integrations.github));
+            localStorage.setItem('rm_gh_config', JSON.stringify(data.integrations.github));
+          }
+          if (data.integrations.wordpress && (data.integrations.wordpress.wpUrl || data.integrations.wordpress.url)) {
+            localStorage.setItem(`rm_wp_config_${cleanDomain}`, JSON.stringify(data.integrations.wordpress));
+            localStorage.setItem('rm_wp_config', JSON.stringify(data.integrations.wordpress));
+          }
+          if (Array.isArray(data.integrations.socialAccounts) && data.integrations.socialAccounts.length > 0) {
+            localStorage.setItem(`rankmonk_social_accounts_${user.email}`, JSON.stringify(data.integrations.socialAccounts));
+          }
+        }
+      })
+      .catch(() => {});
+  }, [user?.email, project?.domain]);
+
   // Handle Onboarding Fixed Domain Initialization
   const handleInitializeDomain = async (e: React.FormEvent) => {
     e.preventDefault();
