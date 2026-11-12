@@ -100,7 +100,7 @@ function LoginForm() {
                 role: 'owner',
                 plan: 'scale',
                 paid: true,
-                domain: activeProj?.domain || 'officex.pro',
+                domain: activeProj?.domain || '',
                 createdAt: new Date().toISOString()
               };
             }
@@ -122,9 +122,6 @@ function LoginForm() {
           if (proj?.domain) {
             loggedInUser.domain = proj.domain;
           }
-        }
-        if (!loggedInUser.domain && (normEmail === 'jiya.scalezix@gmail.com' || normEmail === 'jiyapatel181224@gmail.com' || normEmail.includes('scalezix'))) {
-          loggedInUser.domain = 'officex.pro';
         }
       } catch {}
 

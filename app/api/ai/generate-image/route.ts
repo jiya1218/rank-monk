@@ -1016,9 +1016,9 @@ export async function POST(req: Request) {
     const {
       prompt,
       ratio = '1:1',
-      brandName = 'Scalezix',
-      domain = 'scalezix.com',
-      industry = 'Autonomous Growth',
+      brandName = '',
+      domain = '',
+      industry = 'Autonomous Growth & Technology',
       geminiApiKey = '',
       style = 'auto',
       referenceImage,
@@ -1047,10 +1047,7 @@ export async function POST(req: Request) {
         const parsed = new URL(extractedUrl);
         resolvedDomain = parsed.hostname.replace(/^www\./, '');
         const rawName = resolvedDomain.split('.')[0];
-        resolvedBrand = rawName.charAt(0).toUpperCase() + rawName.slice(1);
-        if (resolvedDomain.toLowerCase().includes('scalezix')) {
-          resolvedBrand = 'Scalezix';
-        }
+        resolvedBrand = brandName.trim() || (rawName.charAt(0).toUpperCase() + rawName.slice(1));
 
         const siteRes = await fetch(extractedUrl, {
           headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },

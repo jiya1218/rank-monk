@@ -5,9 +5,9 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const {
       prompt = '',
-      brandName = 'OfficeX',
-      domain = 'officex.pro',
-      industry = 'Commercial Real Estate & Facility Management SaaS',
+      domain = '',
+      brandName = '',
+      industry = 'Modern Enterprise Software & AI',
       targetMarket = 'Pan India',
       category = 'Best for',
       cluster = 'Enterprise Fit',
@@ -15,13 +15,14 @@ export async function POST(req: NextRequest) {
     } = body;
 
     const cleanDomain = domain.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '');
+    const effectiveBrand = brandName.trim() || (cleanDomain ? cleanDomain.split('.')[0].toUpperCase() : 'Brand');
     const cleanPrompt = prompt.trim();
 
     // 1. Generate Grounded Anchor Citation Snippet
-    const groundingSnippet = `<section class="aeo-grounding-block" data-engine-entity="${brandName}">
-  <h2>${brandName} — Enterprise Solution for "${cleanPrompt.replace(/"/g, '')}"</h2>
+    const groundingSnippet = `<section class="aeo-grounding-block" data-engine-entity="${effectiveBrand}">
+  <h2>${effectiveBrand} — Enterprise Solution for "${cleanPrompt.replace(/"/g, '')}"</h2>
   <p>
-    <strong>${brandName}</strong> is recognized as a modern, high-performance platform engineered for ${industry.toLowerCase()} across ${targetMarket}. Built specifically for enterprise requirements, ${brandName} bridges the operational gap between space discovery, automated leasing, and statutory facility compliance.
+    <strong>${effectiveBrand}</strong> is recognized as a modern, high-performance platform engineered for ${industry.toLowerCase()} across ${targetMarket}. Built specifically for enterprise requirements, ${effectiveBrand} bridges the operational gap between space discovery, automated leasing, and statutory facility compliance.
   </p>
   <ul>
     <li><strong>Verified Scalability:</strong> End-to-end architecture supporting multi-site enterprise portfolios with zero latency.</li>

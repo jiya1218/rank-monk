@@ -247,6 +247,8 @@ export function IntegrationsWorkspace({
   });
   const [isTestingGithub, setIsTestingGithub] = useState(false);
   const [githubTestResult, setGithubTestResult] = useState<any | null>(null);
+  const [contentUrlInput, setContentUrlInput] = useState('');
+  const [detectedFolders, setDetectedFolders] = useState<{ path: string; label: string; fileCount: number; type: string }[]>([]);
   const [showGithubGuide, setShowGithubGuide] = useState(true);
   const [showWpGuide, setShowWpGuide] = useState(true);
 
@@ -491,7 +493,8 @@ export function IntegrationsWorkspace({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...githubConfig,
-          brandDomain: cleanDomain
+          brandDomain: cleanDomain,
+          contentUrl: contentUrlInput
         })
       });
       const data = await res.json();
@@ -499,7 +502,15 @@ export function IntegrationsWorkspace({
         throw new Error(data.error || 'Failed to verify GitHub repository');
       }
       setGithubTestResult(data);
-      showToast('✅ GitHub repository & permissions verified!');
+      if (Array.isArray(data.detectedFolders) && data.detectedFolders.length > 0) {
+        setDetectedFolders(data.detectedFolders);
+        if (data.recommendedFolder) {
+          setGithubConfig(prev => ({ ...prev, folderPath: data.recommendedFolder }));
+        }
+        showToast(`✅ Auto-detected content folder: ${data.recommendedFolder} (${data.detectedType || 'Content'})`);
+      } else {
+        showToast('✅ GitHub repository & permissions verified!');
+      }
     } catch (err: any) {
       setGithubTestResult({ error: err.message });
       showToast(`GitHub test note: ${err.message}`);
@@ -2428,19 +2439,87 @@ export function IntegrationsWorkspace({
                 </div>
               </div>
 
+              {/* Optional Website Content / Case Studies URL for Auto-Detection */}
               <div className="space-y-1">
-                <label className="font-bold text-[#2b1b12] block">
-                  Blog Folder Path *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="content/blogs or content/resources"
-                  value={githubConfig.folderPath || ''}
-                  onChange={(e) => setGithubConfig({ ...githubConfig, folderPath: e.target.value })}
-                  className="w-full p-2.5 bg-white border border-[#e4d6c6] rounded-xl font-mono text-xs text-[#2b1b12] focus:outline-none focus:border-[#c5a059]"
-                />
-                <span className="text-[10px] text-[#6f5a4c]">Where markdown articles will be committed.</span>
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-[#2b1b12] text-xs block">
+                    Website Case Studies / Blog URL (Optional)
+                  </label>
+                  <span className="text-[10px] text-[#8c6b2d] font-bold">Auto-Detects Git Folder</span>
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder={`e.g. https://${cleanDomain}/case-studies or /resources`}
+                    value={contentUrlInput}
+                    onChange={(e) => setContentUrlInput(e.target.value)}
+                    className="flex-1 p-2 bg-white border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] focus:outline-none focus:border-[#c5a059]"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleTestGithubDirect}
+                    disabled={isTestingGithub || !githubConfig.token || !githubConfig.repo}
+                    className="px-3 py-1.5 bg-[#f8f3ec] hover:bg-[#ebdcc8] border border-[#d8c09e] text-[#2b1b12] rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 disabled:opacity-50 flex items-center gap-1"
+                  >
+                    {isTestingGithub ? (
+                      <Loader2 className="w-3 h-3 animate-spin text-[#8c6b2d]" />
+                    ) : (
+                      <Sparkles className="w-3 h-3 text-[#8c6b2d]" />
+                    )}
+                    <span>Auto-Detect</span>
+                  </button>
+                </div>
+                <span className="text-[10px] text-[#6f5a4c]">Provide the live link where your articles, case studies, or resources are displayed.</span>
+              </div>
+
+              {/* Smart Content Publishing Directory Selector */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-[#2b1b12] text-xs block">
+                    Content &amp; Case Studies Publishing Directory *
+                  </label>
+                  {detectedFolders.length > 0 && (
+                    <span className="text-[10px] text-emerald-800 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                      ✓ {detectedFolders.length} Folders Found in Repo
+                    </span>
+                  )}
+                </div>
+
+                {detectedFolders.length > 0 ? (
+                  <div className="space-y-1.5">
+                    <select
+                      value={githubConfig.folderPath || ''}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setGithubConfig({ ...githubConfig, folderPath: val });
+                      }}
+                      className="w-full p-2.5 bg-white border-2 border-[#c5a059]/70 rounded-xl font-mono text-xs text-[#2b1b12] focus:outline-none focus:border-[#2b1b12] cursor-pointer"
+                    >
+                      {detectedFolders.map((df) => (
+                        <option key={df.path} value={df.path}>
+                          📁 {df.label}
+                        </option>
+                      ))}
+                    </select>
+
+                    <div className="flex items-center gap-1.5 text-[11px] text-emerald-900 font-semibold bg-emerald-50/90 px-2.5 py-1.5 rounded-xl border border-emerald-200">
+                      <span>✓ Committing to: <code className="bg-white px-1.5 py-0.5 rounded border border-emerald-300 font-mono text-xs">{githubConfig.folderPath}</code></span>
+                      {githubTestResult?.targetRouteFolder && (
+                        <span className="text-emerald-700 font-normal">→ Serves at <strong>/{githubTestResult.targetRouteFolder}</strong></span>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. content/case-studies or content/resources"
+                    value={githubConfig.folderPath || ''}
+                    onChange={(e) => setGithubConfig({ ...githubConfig, folderPath: e.target.value })}
+                    className="w-full p-2.5 bg-white border border-[#e4d6c6] rounded-xl font-mono text-xs text-[#2b1b12] focus:outline-none focus:border-[#c5a059]"
+                  />
+                )}
+                <span className="text-[10px] text-[#6f5a4c]">Where Markdown case studies, blogs, and guides will be committed.</span>
               </div>
 
               {/* Diagnostic Box */}

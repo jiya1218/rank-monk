@@ -41,7 +41,10 @@ interface PlatformDetectionResult {
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const domain = searchParams.get('domain') || 'officex.pro';
+    const domain = searchParams.get('domain') || '';
+    if (!domain) {
+      return NextResponse.json({ success: false, error: 'Domain parameter is required' }, { status: 400 });
+    }
     const cleanDomain = domain.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '');
 
     const detectedSignals: string[] = [];
@@ -121,14 +124,12 @@ export async function GET(req: NextRequest) {
         }
       }
     } catch (e) {
-      // In isolated environments, fallback to domain heuristic
-      if (cleanDomain.includes('officex')) {
-        detectedPlatform = 'Next.js (React Framework)';
-        platformType = 'git_framework';
-        recommendedIntegration = 'github';
-        description = 'Next.js web application. Changes, redirects, and schema can be committed to GitHub or applied instantly via Edge Script.';
-        detectedSignals.push('Modern React / Next.js client hydration');
-      }
+      // In isolated environments or offline sandbox, provide universal web framework defaults
+      detectedPlatform = 'Modern Web Framework (Next.js / React / Static)';
+      platformType = 'git_framework';
+      recommendedIntegration = 'github';
+      description = 'Modern web application. Changes, redirects, and schema can be committed to GitHub or applied instantly via Edge Script.';
+      detectedSignals.push('Modern frontend web architecture');
     }
 
     const recommendedLabels: Record<string, string> = {

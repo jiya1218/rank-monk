@@ -5,8 +5,8 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const {
-      domain = 'officex.pro',
-      brandName = 'OfficeX',
+      domain = '',
+      brandName = '',
       industry = 'Technology Platform',
       summary = '',
       targetMarket = 'Pan India',
@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     } = body || {};
 
     const cleanDomain = domain.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '');
-    const cleanBrand = brandName.trim() || 'Brand';
+    const cleanBrand = brandName.trim() || (cleanDomain ? cleanDomain.split('.')[0].toUpperCase() : 'Brand');
 
     const token = process.env.AWS_BEARER_TOKEN_BEDROCK || process.env.VITE_BEDROCK_API_KEY;
 

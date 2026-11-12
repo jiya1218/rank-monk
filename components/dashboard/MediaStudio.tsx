@@ -54,15 +54,15 @@ const FORMATS = [
 
 const DEFAULT_DEMO_ASSETS = [
   {
-    id: 'officex_services_poster_sq',
+    id: 'services_poster_sq',
     url: '/generated-media/officex_services_poster.png',
     rawImageUrl: '/generated-media/diwali_masterpiece_ultra.jpg',
-    headline: 'Intelligent Space & Facility Operations',
-    subheadline: 'The enterprise operating system to streamline commercial leases, automate maintenance, and maximize workspace utilization.',
-    badge: 'ENTERPRISE CRE & FM PLATFORM',
-    cta: 'Explore OfficeX Solutions ↗',
-    caption: '🏢 Transforming modern commercial spaces and facility operations. Explore how OfficeX empowers enterprise operators to streamline leases, automate maintenance, and maximize workspace utilization.\n\n✓ Space Management: Dynamic desk allocation & heatmaps\n✓ Facility Operations: Predictive IoT maintenance & dispatch\n✓ Lease Administration: End-to-end tenant contracts & billing\n✓ Asset & ESG Analytics: Carbon reporting & telemetry\n\nVisit https://officex.pro to schedule a platform walk-through.',
-    hashtags: ['#OfficeX', '#CommercialRealEstate', '#FacilityManagement', '#PropTech', '#EnterpriseSaaS'],
+    headline: 'Autonomous Digital & Enterprise Operations',
+    subheadline: 'The operating system to streamline workflows, scale search citations, and maximize digital growth.',
+    badge: 'ENTERPRISE PLATFORM',
+    cta: 'Explore Solutions ↗',
+    caption: '🚀 Transforming modern operations and digital presence. Empower your team with autonomous search intelligence, automated content pipelines, and unified analytics.',
+    hashtags: ['#Enterprise', '#Innovation', '#DigitalGrowth', '#AEO'],
     ratio: '1:1',
     format: 'Square',
     postStyle: 'services_showcase',
@@ -70,15 +70,15 @@ const DEFAULT_DEMO_ASSETS = [
     created_at: new Date().toISOString()
   },
   {
-    id: 'officex_services_poster_story',
+    id: 'services_poster_story',
     url: '/generated-media/officex_services_poster_story.png',
     rawImageUrl: '/generated-media/diwali_story_masterpiece_ultra.jpg',
-    headline: 'Intelligent Space & Facility Operations',
-    subheadline: 'The enterprise operating system to streamline commercial leases, automate maintenance workflows, and optimize workspace density.',
-    badge: 'ENTERPRISE CRE & FM PLATFORM',
-    cta: 'Explore OfficeX Solutions ↗',
-    caption: '🏢 Mobile Story Creative: Streamline your enterprise facilities and lease contracts seamlessly with OfficeX. Tap link in bio to learn more! 🚀',
-    hashtags: ['#OfficeX', '#StoryCreative', '#CommercialRealEstate', '#PropTech'],
+    headline: 'Autonomous Digital & Enterprise Operations',
+    subheadline: 'The operating system to streamline workflows, scale search citations, and maximize digital growth.',
+    badge: 'ENTERPRISE PLATFORM',
+    cta: 'Explore Solutions ↗',
+    caption: '📱 Mobile Story Creative: Streamline your enterprise operations and citations seamlessly. Tap link in bio to learn more! 🚀',
+    hashtags: ['#Innovation', '#StoryCreative', '#Enterprise'],
     ratio: '9:16',
     format: 'Story',
     postStyle: 'services_showcase',
@@ -86,35 +86,35 @@ const DEFAULT_DEMO_ASSETS = [
     created_at: new Date().toISOString()
   },
   {
-    id: 'diwali_festive_poster_sq',
+    id: 'festive_poster_sq',
     url: '/generated-media/diwali_festive_poster_square.png',
     rawImageUrl: '/generated-media/diwali_masterpiece_ultra.jpg',
-    headline: 'Happy Diwali Warmest Wishes',
-    subheadline: 'May the divine lights of Diwali illuminate your journey with boundless prosperity, peace, and enduring success. Warm festive greetings from OfficeX.',
-    badge: 'SHUBH DEEPAVALI',
-    cta: 'Warm Wishes from OfficeX ✦',
-    caption: '🪔 Wishing you and your loved ones a joyous and prosperous Diwali! May this festival of lights illuminate new opportunities and endless growth. ✨\n\nWarm wishes from the OfficeX team.',
-    hashtags: ['#HappyDiwali', '#FestivalOfLights', '#DiwaliCelebration', '#OfficeX', '#CommercialRealEstate'],
+    headline: 'Happy Celebrations Warmest Wishes',
+    subheadline: 'May the festive season illuminate your journey with boundless prosperity, peace, and enduring success.',
+    badge: 'FESTIVE GREETINGS',
+    cta: 'Warm Wishes ✦',
+    caption: '✨ Wishing you and your loved ones a joyful and prosperous celebration! May new opportunities and growth illuminate the journey ahead.',
+    hashtags: ['#Celebration', '#FestiveSeason', '#Growth', '#Prosperity'],
     ratio: '1:1',
     format: 'Square',
     postStyle: 'festive_greeting',
-    engine: 'AWS Bedrock Stability Ultra 8K + Luxury Festive Poster',
+    engine: 'AI Generative Media Studio 8K Ultra',
     created_at: new Date().toISOString()
   },
   {
-    id: 'diwali_festive_poster_story',
+    id: 'festive_poster_story',
     url: '/generated-media/diwali_festive_poster_story.png',
     rawImageUrl: '/generated-media/diwali_story_masterpiece_ultra.jpg',
-    headline: 'Happy Diwali Warmest Wishes',
-    subheadline: 'May the divine lights of Diwali illuminate your journey with boundless prosperity, peace, and enduring success. Warm festive greetings from OfficeX.',
-    badge: 'FESTIVAL OF LIGHTS',
-    cta: 'Warm Wishes from OfficeX ✦',
-    caption: '✨ A sparkling Diwali from the OfficeX family! Celebrating modern workspaces, shared prosperity, and luminous journeys ahead. 🪔',
-    hashtags: ['#HappyDiwali', '#StoryCreative', '#OfficeX', '#FestivalOfLights'],
+    headline: 'Happy Celebrations Warmest Wishes',
+    subheadline: 'May the festive season illuminate your journey with boundless prosperity, peace, and enduring success.',
+    badge: 'FESTIVE GREETINGS',
+    cta: 'Warm Wishes ✦',
+    caption: '✨ Warm festive greetings from our team! Celebrating shared prosperity and luminous journeys ahead. 🌟',
+    hashtags: ['#Celebrations', '#StoryCreative', '#FestiveSeason'],
     ratio: '9:16',
     format: 'Story',
     postStyle: 'festive_greeting',
-    engine: 'AWS Bedrock Stability Ultra 8K + Luxury Festive Story Poster',
+    engine: 'AI Generative Media Studio (Vertical Story)',
     created_at: new Date().toISOString()
   }
 ];
@@ -126,11 +126,12 @@ export function MediaStudio({
   onGenerateMedia,
   onPushToSocialQueue
 }: MediaStudioProps) {
-  const brandName = project?.name || 'OfficeX';
-  const brandDomain = project?.domain || 'officex.pro';
-  const industry = project?.industry || 'Commercial Real Estate & Facility Management SaaS';
+  const brandDomain = project?.domain || '';
+  const cleanDomain = brandDomain.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '');
+  const brandName = project?.name || (cleanDomain ? cleanDomain.split('.')[0].toUpperCase() : 'Our Brand');
+  const industry = project?.industry || 'Modern Digital Transformation & Software';
 
-  const [prompt, setPrompt] = useState('i need post for marketing of my services that i provide in officex');
+  const [prompt, setPrompt] = useState(`Promote our core ${industry.toLowerCase()} services and highlight key business benefits`);
   const [activeFormat, setActiveFormat] = useState('1:1');
   const [selectedTheme, setSelectedTheme] = useState<'auto' | 'light' | 'dark'>('auto');
   const [generating, setGenerating] = useState(false);
@@ -314,7 +315,7 @@ export function MediaStudio({
                   rows={4}
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
-                  placeholder="Enter your prompt (e.g. 'i need post for marketing of my services that i provide in officex' or 'happy diwali festival greeting for officex'). AI will autonomously understand and generate the exact visual and layout."
+                  placeholder="Enter your prompt (e.g. 'i need post for marketing of our services' or 'festive holiday greeting'). AI will autonomously understand and generate the exact visual and layout."
                   className="w-full rounded-xl border border-[#e4d6c6] bg-[#faf8f5] p-3.5 text-xs text-[#2b1b12] font-medium focus:border-[#2b1b12] focus:bg-white focus:outline-none leading-relaxed transition-all resize-none shadow-2xs"
                 />
               </div>
@@ -334,13 +335,13 @@ export function MediaStudio({
                     type="button"
                     onClick={() => {
                       setActiveFormat(f.id);
-                      if (activeAsset?.id?.startsWith('officex_services_poster')) {
+                      if (activeAsset?.id?.startsWith('services_poster') || activeAsset?.id?.startsWith('officex_services_poster')) {
                         if (f.id === '9:16') {
                           setActiveAsset(DEFAULT_DEMO_ASSETS[1]);
                         } else {
                           setActiveAsset(DEFAULT_DEMO_ASSETS[0]);
                         }
-                      } else if (activeAsset?.id?.startsWith('diwali_festive_poster')) {
+                      } else if (activeAsset?.id?.startsWith('festive_poster') || activeAsset?.id?.startsWith('diwali_festive_poster')) {
                         if (f.id === '9:16') {
                           setActiveAsset(DEFAULT_DEMO_ASSETS[3]);
                         } else {

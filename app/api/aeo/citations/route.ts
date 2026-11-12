@@ -18,10 +18,10 @@ interface CitationSource {
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const domain = searchParams.get('domain') || 'officex.pro';
-    const brandName = searchParams.get('brand') || 'OfficeX';
-    const industry = searchParams.get('industry') || 'Commercial Real Estate & Facility Management SaaS';
+    const domain = searchParams.get('domain') || '';
     const cleanDomain = domain.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '');
+    const brandName = searchParams.get('brand') || (cleanDomain ? cleanDomain.split('.')[0].toUpperCase() : 'Brand');
+    const industry = searchParams.get('industry') || 'Modern Enterprise Software & AI';
     const cleanBrand = brandName.trim() || 'Brand';
 
     const token = process.env.AWS_BEARER_TOKEN_BEDROCK || process.env.VITE_BEDROCK_API_KEY;

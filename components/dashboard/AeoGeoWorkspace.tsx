@@ -54,10 +54,10 @@ interface AeoGeoWorkspaceProps {
 type AeoSubTab = 'overview' | 'prompts' | 'simulator' | 'crawler' | 'citations' | 'opportunities' | 'llmstxt';
 
 export function AeoGeoWorkspace({ project, user, onNavigateTab }: AeoGeoWorkspaceProps) {
-  const brandName = project?.name || 'OfficeX';
-  const brandDomain = project?.domain || 'officex.pro';
+  const brandDomain = project?.domain || '';
   const cleanDomain = brandDomain.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '');
-  const industry = project?.industry || 'Commercial Real Estate & Facility Management SaaS';
+  const brandName = project?.name || (cleanDomain ? cleanDomain.split('.')[0].toUpperCase() : 'Brand');
+  const industry = project?.industry || 'Modern Digital Transformation & Software';
   const targetMarket = project?.targetMarket || 'Pan India';
 
   const [activeTab, setActiveTab] = useState<AeoSubTab>('overview');

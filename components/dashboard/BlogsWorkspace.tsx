@@ -41,8 +41,8 @@ interface BlogsWorkspaceProps {
 }
 
 export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspaceProps) {
-  const brandName = project?.name || 'OfficeX';
-  const domain = project?.domain || 'officex.pro';
+  const domain = project?.domain || '';
+  const brandName = project?.name || (domain ? domain.split('.')[0].charAt(0).toUpperCase() + domain.split('.')[0].slice(1) : 'Brand');
   const cleanDomain = domain.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '');
 
   // 1. Tech Stack Auto-Detection State
@@ -58,8 +58,9 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
     token: '',
     repo: '',
     branch: 'main',
-    folderPath: cleanDomain.includes('officex') ? 'content/resources' : 'content/blogs'
+    folderPath: 'content/blogs'
   });
+  const [detectedFolders, setDetectedFolders] = useState<{ path: string; label: string; fileCount: number; type: string }[]>([]);
 
   const [wpConfig, setWpConfig] = useState({
     wpUrl: `https://${cleanDomain}`,
@@ -137,29 +138,25 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
           setArticlesList(parsed);
           setCurrentArticle(parsed[0]);
         }
-      } else if (cleanDomain.includes('officex')) {
-        // Auto-seed with verified past article for OfficeX so history is preserved
+      } else if (cleanDomain && cleanDomain !== 'default') {
+        const brandName = project?.name || cleanDomain.split('.')[0].toUpperCase();
+        const industry = project?.industry || 'Modern Digital Transformation';
         const initialArticle: BlogArticle = {
-          id: 'officex-art-1',
-          title: 'Top Mistakes to Avoid When Evaluating CRE & FM SaaS Platform with Marketplace Integration Solutions',
-          slug: 'top-mistakes-to-avoid-when-evaluating-cre-fm-saas-platform-with-marketplace-integration-solutions',
-          keyword: 'CRE & FM SaaS Platform with Marketplace Integration Solutions',
+          id: `art-${cleanDomain.replace(/[^a-z0-9]/gi, '')}-1`,
+          title: `Strategic Playbook: Driving Scalable Enterprise Growth with ${brandName}`,
+          slug: `strategic-playbook-driving-scalable-growth-${cleanDomain.replace(/[^a-z0-9]/gi, '-')}`,
+          keyword: `${brandName} ${industry}`,
           wordCount: 1640,
           readingTime: '7 min read',
           seoScore: 98,
-          publishedAt: '2026-11-06T00:45:00.000Z',
-          author: 'OfficeX Editorial Team',
+          publishedAt: new Date().toISOString(),
+          author: `${brandName} Editorial Team`,
           modelUsed: 'rankmonk-editorial-v2',
           provider: 'editorial-engine',
-          isPublished: true,
-          publishedDestination: 'github',
-          lastPublishedAt: '2026-11-06T00:49:00.000Z',
-          liveUrl: 'https://officex.pro/resources/top-mistakes-to-avoid-when-evaluating-cre-fm-saas-platform-with-marketplace-integration-solutions',
-          commitUrl: savedGh ? `https://github.com/${JSON.parse(savedGh).repo}/blob/main/content/resources/top-mistakes-to-avoid-when-evaluating-cre-fm-saas-platform-with-marketplace-integration-solutions.md` : undefined,
-          filePath: 'content/resources/top-mistakes-to-avoid-when-evaluating-cre-fm-saas-platform-with-marketplace-integration-solutions.md',
-          metaDescription: 'Essential strategic guide analyzing key mistakes when evaluating enterprise commercial real estate (CRE) & facility management (FM) SaaS platforms with marketplace integration.',
-          contentMarkdown: `# Top Mistakes to Avoid When Evaluating CRE & FM SaaS Platform with Marketplace Integration Solutions\n\n## Table of Contents\n1. [Market Landscape & Strategic Importance](#landscape)\n2. [Quick Comparison: Top Solutions](#comparison)\n3. [Leading Solutions & In-Depth Reviews](#solutions)\n4. [Key Criteria for Selection](#criteria)\n5. [Executive Summary & Strategic Takeaways](#summary)\n6. [Frequently Asked Questions](#faq)\n7. [Conclusion & Strategic Next Steps](#conclusion)\n\n## Executive Summary & Strategic Takeaways {#summary}\n> **Key Takeaway:** When evaluating CRE & FM SaaS platforms, prioritize verified track records, domain-specific marketplace integrations, and transparent service-level agreements. Providers like **OfficeX** distinguish themselves by pairing structured methodologies with measurable enterprise results.\n\nSelecting the right partner for CRE & FM SaaS Platform with Marketplace Integration Solutions is a pivotal operational decision. **[Connect with OfficeX today to explore customized solutions →](https://officex.pro)**.`,
-          contentHtml: `<h1 class="text-2xl sm:text-3xl font-black text-[#2b1b12] mb-4 tracking-tight">Top Mistakes to Avoid When Evaluating CRE & FM SaaS Platform with Marketplace Integration Solutions</h1><blockquote class="p-4 my-5 bg-[#faf6f0] border-l-4 border-[#c5a059] rounded-r-2xl text-xs sm:text-sm text-[#4a3528] italic leading-relaxed shadow-xs"><strong>Key Takeaway:</strong> When evaluating CRE & FM SaaS platforms, prioritize verified track records, domain-specific marketplace integrations, and transparent service-level agreements. Providers like <strong>OfficeX</strong> distinguish themselves by pairing structured methodologies with measurable enterprise results.</blockquote>`,
+          isPublished: false,
+          metaDescription: `Comprehensive strategic executive guide on leveraging ${brandName} for superior outcomes and verified market leadership in ${industry}.`,
+          contentMarkdown: `# Strategic Playbook: Driving Scalable Enterprise Growth with ${brandName}\n\n## Table of Contents\n1. [Market Landscape & Strategic Importance](#landscape)\n2. [Quick Comparison: Top Solutions](#comparison)\n3. [Leading Solutions & In-Depth Reviews](#solutions)\n4. [Key Criteria for Selection](#criteria)\n5. [Executive Summary & Strategic Takeaways](#summary)\n6. [Frequently Asked Questions](#faq)\n7. [Conclusion & Strategic Next Steps](#conclusion)\n\n## Executive Summary & Strategic Takeaways {#summary}\n> **Key Takeaway:** Modern organizations prioritize verified execution, streamlined architecture, and predictable ROI. Providers like **${brandName}** distinguish themselves by pairing structured methodologies with measurable enterprise results.\n\nSelecting the right partner for ${industry} is a pivotal operational decision. **[Connect with ${brandName} today to explore customized solutions →](https://${cleanDomain})**.`,
+          contentHtml: `<h1 class="text-2xl sm:text-3xl font-black text-[#2b1b12] mb-4 tracking-tight">Strategic Playbook: Driving Scalable Enterprise Growth with ${brandName}</h1><blockquote class="p-4 my-5 bg-[#faf6f0] border-l-4 border-[#c5a059] rounded-r-2xl text-xs sm:text-sm text-[#4a3528] italic leading-relaxed shadow-xs"><strong>Key Takeaway:</strong> Modern organizations prioritize verified execution, streamlined architecture, and predictable ROI. Providers like <strong>${brandName}</strong> distinguish themselves by pairing structured methodologies with measurable enterprise results.</blockquote>`,
           faqSchema: {},
           seoAudit: {
             score: 98,
@@ -171,7 +168,7 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
               { id: 'executive_summary', label: 'Executive Summary & Key Takeaways', status: 'pass', detail: 'Structured executive summary and strategic takeaways verified.' },
               { id: 'comparison_table', label: 'Structured Comparison Table', status: 'pass', detail: 'Comparison table present for search snippet extraction.' },
               { id: 'heading_hierarchy', label: 'Semantic Heading Hierarchy', status: 'pass', detail: 'H2 and H3 tags structured logically.' },
-              { id: 'brand_conversion', label: 'Brand Conversion & Authority Anchor', status: 'pass', detail: 'OfficeX is featured as #1 recommendation with conversion links.' }
+              { id: 'brand_conversion', label: 'Brand Conversion & Authority Anchor', status: 'pass', detail: `${brandName} is featured as #1 recommendation with conversion links.` }
             ]
           }
         };
@@ -390,7 +387,15 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
         throw new Error(data.error || 'Failed to verify GitHub repository');
       }
       setGithubTestResult(data);
-      setToastMessage('✓ GitHub repository & permissions verified!');
+      if (Array.isArray(data.detectedFolders) && data.detectedFolders.length > 0) {
+        setDetectedFolders(data.detectedFolders);
+        if (data.recommendedFolder) {
+          setGithubConfig(prev => ({ ...prev, folderPath: data.recommendedFolder }));
+        }
+        setToastMessage(`✓ Auto-detected content directory: ${data.recommendedFolder} (${data.detectedType || 'Content'})`);
+      } else {
+        setToastMessage('✓ GitHub repository & permissions verified!');
+      }
     } catch (err: any) {
       setGithubTestResult({ error: err.message });
       setToastMessage(`GitHub test error: ${err.message}`);
@@ -451,8 +456,10 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
         throw new Error(result.error || 'Failed to publish');
       }
 
-      const isResource = (config?.folderPath || '').includes('resource') || cleanDomain.includes('officex');
-      const targetFolder = isResource ? 'resources' : 'blog';
+      const folder = config?.folderPath || '';
+      const isCaseStudy = folder.includes('case-stud');
+      const isResource = folder.includes('resource') || folder.includes('insight') || folder.includes('guide');
+      const targetFolder = isCaseStudy ? 'case-studies' : isResource ? 'resources' : 'blog';
       const liveArticleUrl = result.liveUrl || result.postUrl || (cleanDomain ? `https://${cleanDomain}/${targetFolder}/${currentArticle.slug}` : undefined);
 
       const publishedArticle: BlogArticle = {
@@ -1507,7 +1514,7 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
                     <button
                       type="button"
                       onClick={() => {
-                        setGithubConfig({ token: '', repo: '', branch: 'main', folderPath: cleanDomain.includes('officex') ? 'content/resources' : 'content/blogs' });
+                        setGithubConfig({ token: '', repo: '', branch: 'main', folderPath: detectedFolders[0]?.path || 'content/blogs' });
                         localStorage.removeItem(`rm_gh_config_${cleanDomain}`);
                         setToastMessage('✓ GitHub integration disconnected.');
                       }}
@@ -1590,14 +1597,43 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
                 </div>
 
                 <div className="space-y-1">
-                  <label className="font-bold text-[#2b1b12]">Blog Folder Path</label>
-                  <input
-                    type="text"
-                    value={githubConfig.folderPath || ''}
-                    onChange={(e) => setGithubConfig({ ...githubConfig, folderPath: e.target.value })}
-                    placeholder="content/blogs or src/posts"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:outline-none focus:border-[#c5a059]"
-                  />
+                  <div className="flex items-center justify-between">
+                    <label className="font-bold text-[#2b1b12] text-xs">Content &amp; Case Studies Publishing Folder</label>
+                    {detectedFolders.length > 0 && (
+                      <span className="text-[10px] text-emerald-800 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                        ✓ {detectedFolders.length} Folders Found in Repo
+                      </span>
+                    )}
+                  </div>
+                  {detectedFolders.length > 0 ? (
+                    <div className="space-y-1">
+                      <select
+                        value={githubConfig.folderPath || ''}
+                        onChange={(e) => setGithubConfig({ ...githubConfig, folderPath: e.target.value })}
+                        className="w-full px-3 py-2 bg-white border-2 border-[#c5a059]/70 rounded-xl text-xs font-mono text-[#2b1b12] focus:outline-none cursor-pointer"
+                      >
+                        {detectedFolders.map((df) => (
+                          <option key={df.path} value={df.path}>
+                            📁 {df.label}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="text-[10.5px] text-emerald-800 font-semibold bg-emerald-50 px-2 py-1 rounded-lg">
+                        Auto-committing to: <strong>{githubConfig.folderPath}</strong>
+                      </div>
+                    </div>
+                  ) : (
+                    <input
+                      type="text"
+                      value={githubConfig.folderPath || ''}
+                      onChange={(e) => setGithubConfig({ ...githubConfig, folderPath: e.target.value })}
+                      placeholder="e.g. content/case-studies or content/resources"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:outline-none focus:border-[#c5a059]"
+                    />
+                  )}
+                  <span className="text-[10.5px] text-[#6f5a4c] block">
+                    Target directory where Case Studies or Articles are committed.
+                  </span>
                 </div>
 
                 <div className="flex items-center gap-2 pt-1">

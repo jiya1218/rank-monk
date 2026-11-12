@@ -75,11 +75,11 @@ function buildDynamicOpportunitiesFallback(cleanBrand: string, cleanDomain: stri
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const domain = searchParams.get('domain') || 'officex.pro';
-    const brandName = searchParams.get('brand') || 'OfficeX';
+    const domain = searchParams.get('domain') || '';
+    const cleanDomain = domain.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '');
+    const brandName = searchParams.get('brand') || (cleanDomain ? cleanDomain.split('.')[0].toUpperCase() : 'Brand');
     const industry = searchParams.get('industry') || 'Technology Platform';
 
-    const cleanDomain = domain.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '');
     const cleanBrand = brandName.trim() || 'Brand';
 
     const token = process.env.AWS_BEARER_TOKEN_BEDROCK || process.env.VITE_BEDROCK_API_KEY;

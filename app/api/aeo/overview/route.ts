@@ -4,12 +4,12 @@ import { BedrockRuntimeClient, ConverseCommand } from '@aws-sdk/client-bedrock-r
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const domain = searchParams.get('domain') || 'officex.pro';
-    const brandName = searchParams.get('brand') || 'OfficeX';
-    const industry = searchParams.get('industry') || 'Commercial Real Estate & Facility Management SaaS';
+    const domain = searchParams.get('domain') || '';
+    const cleanDomain = domain.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '');
+    const brandName = searchParams.get('brand') || (cleanDomain ? cleanDomain.split('.')[0].toUpperCase() : 'Brand');
+    const industry = searchParams.get('industry') || 'Modern Enterprise Software & AI';
     const targetMarket = searchParams.get('market') || 'Pan India';
 
-    const cleanDomain = domain.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '');
     const cleanBrand = brandName.trim() || 'Brand';
 
     // 1. Call AI Model to dynamically assess AEO/GEO visibility for this specific brand & industry

@@ -113,9 +113,9 @@ export function ReportsWorkspace({ project, user, onNavigateToTab }: ReportsWork
   }, [project, user?.email]);
 
   const activeProj = liveProject || project || {};
-  const brandName = activeProj?.name || 'OfficeX';
-  const domain = activeProj?.domain || 'officex.pro';
+  const domain = activeProj?.domain || '';
   const cleanDomain = domain.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '');
+  const brandName = activeProj?.name || (cleanDomain ? cleanDomain.split('.')[0].toUpperCase() : 'Brand');
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -286,7 +286,7 @@ export function ReportsWorkspace({ project, user, onNavigateToTab }: ReportsWork
       },
       {
         url: `https://${cleanDomain}/pricing`,
-        title: 'OfficeX Pricing, Subscription Plans & Enterprise Quotation Calculator — Workspaces, Simplified', // title > 65 chars
+        title: `${brandName} Pricing, Subscription Plans & Enterprise Quotation Calculator — Solutions, Simplified`, // title > 65 chars
         metaDesc: '', // missing meta description
         h1: 'Pricing Plans',
         statusCode: 200,
@@ -296,7 +296,7 @@ export function ReportsWorkspace({ project, user, onNavigateToTab }: ReportsWork
       },
       {
         url: `https://${cleanDomain}/contact`,
-        title: 'Contact OfficeX Support & Enterprise Sales Team',
+        title: `Contact ${brandName} Support & Enterprise Sales Team`,
         metaDesc: 'Connect with our CRE & FM technology advisors for platform demonstrations.',
         h1: 'Get in Touch',
         statusCode: 200,

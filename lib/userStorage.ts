@@ -84,7 +84,7 @@ export function getUserByEmail(email: string): any | null {
       role: 'owner',
       plan: 'scale',
       paid: true,
-      domain: 'officex.pro',
+      domain: '',
       created_at: '2026-11-02T19:24:20.656Z',
       paymentId: norm === 'jiyapatel181224@gmail.com' ? 'pay_TvRDKP4RqnGVc8' : 'pay_scalezix_active',
       couponUsed: 'RANKMONK001'

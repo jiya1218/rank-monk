@@ -91,6 +91,7 @@ export function Navbar({ onOpenConnectModal }: NavbarProps) {
       localStorage.removeItem('rankmonk_active_user_v6');
       localStorage.removeItem('rankmonk_user_session');
       localStorage.removeItem('rankmonk_active_project');
+      localStorage.removeItem('rankmonk_client_accounts');
       sessionStorage.clear();
       document.cookie = 'rankmonk_user=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
       await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
@@ -291,7 +292,7 @@ export function Navbar({ onOpenConnectModal }: NavbarProps) {
                     <div className="w-5 h-5 rounded-full bg-[#2b1b12] text-[#fffcf7] flex items-center justify-center font-bold text-[10px] shrink-0">
                       {(user.name || user.email || 'U').charAt(0).toUpperCase()}
                     </div>
-                    <span>Signed in as <strong className="text-[#2b1b12]">{user.name || maskEmail(user.email)}</strong></span>
+                    <span>Signed in as <strong className="text-[#2b1b12]">{user.name && !user.name.includes('@') ? user.name : maskEmail(user.email)}</strong></span>
                   </div>
                   <button
                     onClick={(e) => {

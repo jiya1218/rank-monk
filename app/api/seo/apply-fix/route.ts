@@ -6,8 +6,8 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const {
-      domain = 'officex.pro',
-      brandName = 'OfficeX',
+      domain = '',
+      brandName = (domain ? domain.replace(/^(https?:\/\/)?(www\.)?/, '').split('.')[0].toUpperCase() : 'Brand'),
       channel, // 'script' | 'github' | 'cms' | 'auto'
       fixes = [],
       githubConfig,

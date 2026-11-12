@@ -4,7 +4,7 @@ import { testGitHubRepo } from '@/lib/blogEngine';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { token, repo, branch, folderPath, brandDomain } = body;
+    const { token, repo, branch, folderPath, brandDomain, contentUrl } = body;
 
     if (!token || !repo) {
       return NextResponse.json(
@@ -18,7 +18,8 @@ export async function POST(req: NextRequest) {
       repo,
       branch: branch || 'main',
       folderPath: folderPath || 'content/blogs',
-      brandDomain: brandDomain || ''
+      brandDomain: brandDomain || '',
+      contentUrl: contentUrl || ''
     });
 
     return NextResponse.json(report);

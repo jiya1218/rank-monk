@@ -39,6 +39,8 @@ export interface BlogArticle {
   commitSha?: string;
   filePath?: string;
   lastPublishedAt?: string;
+  category?: string;
+  contentType?: string;
 }
 
 export interface TechStackDetection {
@@ -716,8 +718,9 @@ ${article.contentMarkdown}
   let scaffoldedRoute: string | null = null;
   let frameworkDetected = 'custom';
   try {
-    const isResource = cleanFolder.includes('resource') || cleanFolder.includes('case-stud');
-    const targetRouteFolder = isResource ? 'resources' : 'blog';
+    const isCaseStudy = cleanFolder.includes('case-stud') || (article.category && article.category.toLowerCase().includes('case'));
+    const isResource = cleanFolder.includes('resource') || isCaseStudy;
+    const targetRouteFolder = isCaseStudy ? 'case-studies' : (isResource ? 'resources' : 'blog');
 
     let appBase: 'src/app' | 'app' | null = null;
 
@@ -999,13 +1002,15 @@ export async function testGitHubRepo({
   repo,
   branch = 'main',
   folderPath = 'content/blogs',
-  brandDomain = ''
+  brandDomain = '',
+  contentUrl = ''
 }: {
   token: string;
   repo: string;
   branch?: string;
   folderPath?: string;
   brandDomain?: string;
+  contentUrl?: string;
 }) {
   const cleanRepo = repo.replace(/^(https?:\/\/)?github\.com\//, '').replace(/\/$/, '');
   const cleanFolder = folderPath.replace(/^\/+|\/+$/g, '');
@@ -1048,7 +1053,106 @@ export async function testGitHubRepo({
   const repoData = await repoRes.json();
   const defaultBranch = repoData.default_branch || 'main';
 
-  // 3. Detect Framework & App Structure
+  // 3. Scan Entire Repository Tree to Auto-Discover Content & Case Studies Folders
+  const detectedFolders: { path: string; label: string; fileCount: number; type: string }[] = [];
+  let recommendedFolder = cleanFolder;
+  let detectedType = 'General Content';
+  let matchedByUrl = false;
+
+  try {
+    const treeRes = await fetch(`https://api.github.com/repos/${cleanRepo}/git/trees/${branch || defaultBranch}?recursive=1`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json', 'User-Agent': 'RankMonk-GitOps/2.0' }
+    });
+
+    if (treeRes.ok) {
+      const treeData = await treeRes.json();
+      const treeList: { path: string; type: string }[] = Array.isArray(treeData.tree) ? treeData.tree : [];
+      
+      const folderCounts: Record<string, number> = {};
+
+      for (const item of treeList) {
+        if (item.type === 'blob') {
+          const lower = item.path.toLowerCase();
+          if (lower.endsWith('.md') || lower.endsWith('.mdx') || lower.endsWith('.markdown')) {
+            const lastSlash = item.path.lastIndexOf('/');
+            if (lastSlash > 0) {
+              const dir = item.path.substring(0, lastSlash);
+              if (!dir.includes('node_modules') && !dir.includes('.github')) {
+                folderCounts[dir] = (folderCounts[dir] || 0) + 1;
+              }
+            }
+          }
+        }
+      }
+
+      for (const [folder, count] of Object.entries(folderCounts)) {
+        let type = 'Blogs';
+        const fl = folder.toLowerCase();
+        if (fl.includes('case-stud') || fl.includes('case_stud') || fl.includes('casestud')) type = 'Case Studies';
+        else if (fl.includes('resource')) type = 'Resources';
+        else if (fl.includes('insight')) type = 'Insights';
+        else if (fl.includes('article')) type = 'Articles';
+        else if (fl.includes('doc')) type = 'Docs';
+
+        detectedFolders.push({
+          path: folder,
+          label: `${folder} (${count} ${count === 1 ? 'file' : 'files'} • ${type})`,
+          fileCount: count,
+          type
+        });
+      }
+
+      // 4. Match against Website URL if provided
+      const urlHint = (contentUrl || brandDomain || '').toLowerCase();
+      if (urlHint.includes('case-stud') || urlHint.includes('casestud')) {
+        const found = detectedFolders.find(df => df.path.toLowerCase().includes('case-stud') || df.path.toLowerCase().includes('casestud'));
+        if (found) {
+          recommendedFolder = found.path;
+          detectedType = 'Case Studies';
+          matchedByUrl = true;
+        } else {
+          recommendedFolder = 'content/case-studies';
+          detectedType = 'Case Studies';
+          matchedByUrl = true;
+        }
+      } else if (urlHint.includes('resource')) {
+        const found = detectedFolders.find(df => df.path.toLowerCase().includes('resource'));
+        if (found) {
+          recommendedFolder = found.path;
+          detectedType = 'Resources';
+          matchedByUrl = true;
+        } else {
+          recommendedFolder = 'content/resources';
+          detectedType = 'Resources';
+          matchedByUrl = true;
+        }
+      } else if (urlHint.includes('insight')) {
+        const found = detectedFolders.find(df => df.path.toLowerCase().includes('insight'));
+        if (found) {
+          recommendedFolder = found.path;
+          detectedType = 'Insights';
+          matchedByUrl = true;
+        }
+      }
+
+      // If no URL match, prioritize folders with case studies or highest file count
+      if (!matchedByUrl && detectedFolders.length > 0) {
+        detectedFolders.sort((a, b) => b.fileCount - a.fileCount);
+        const caseStudyFolder = detectedFolders.find(df => df.type === 'Case Studies');
+        if (caseStudyFolder) {
+          recommendedFolder = caseStudyFolder.path;
+          detectedType = 'Case Studies';
+        } else {
+          recommendedFolder = detectedFolders[0].path;
+          detectedType = detectedFolders[0].type;
+        }
+      }
+    }
+  } catch (treeErr) {
+    console.warn('Repository tree auto-detect warning:', treeErr);
+  }
+
+  // 5. Detect Framework & App Structure
   let framework = 'Custom Frontend / Static';
   let appRoot: 'src/app' | 'app' | null = null;
 
@@ -1069,9 +1173,10 @@ export async function testGitHubRepo({
     }
   }
 
-  // 4. Check Dynamic Reader Route
-  const isResource = cleanFolder.includes('resource') || cleanFolder.includes('case-stud');
-  const targetRouteFolder = isResource ? 'resources' : 'blog';
+  // 6. Check Dynamic Reader Route (case-studies, resources, or blog)
+  const isCaseStudy = recommendedFolder.includes('case-stud') || detectedType === 'Case Studies';
+  const isResource = recommendedFolder.includes('resource') || detectedType === 'Resources';
+  const targetRouteFolder = isCaseStudy ? 'case-studies' : (isResource ? 'resources' : 'blog');
   let readerRoutePath: string | null = null;
   let readerRouteExists = false;
 
@@ -1094,7 +1199,11 @@ export async function testGitHubRepo({
     selectedBranch: branch || defaultBranch,
     hasWritePermission: repoData.permissions?.push !== false,
     framework,
-    folderPath: cleanFolder,
+    folderPath: recommendedFolder,
+    detectedFolders,
+    recommendedFolder,
+    detectedType,
+    matchedByUrl,
     readerRoutePath,
     readerRouteExists,
     targetRouteFolder,

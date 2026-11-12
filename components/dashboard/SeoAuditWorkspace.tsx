@@ -2743,7 +2743,7 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
                                   type="text"
                                   value={githubRepoInput}
                                   onChange={(e) => setGithubRepoInput(e.target.value)}
-                                  placeholder="owner/repo (e.g. scalezix/officex)"
+                                  placeholder="owner/repo (e.g. acme/website)"
                                   className="w-full p-2 bg-[#faf7f2] border border-[#e4d6c6] rounded-lg text-xs"
                                 />
                                 <input
