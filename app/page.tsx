@@ -83,9 +83,9 @@ export default function HomePage() {
           <div className="container relative z-10 mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
               {/* LEFT COLUMN: Headline, Value Proposition & Instant Scanner */}
-              <div className="lg:col-span-7 flex flex-col items-start text-left">
+              <div className="lg:col-span-7 flex flex-col items-center text-center lg:items-start lg:text-left">
                 {/* Eyebrow Pill */}
-                <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#f4ebe0] border border-[#d6be96]/60 shadow-xs mb-5">
+                <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#f4ebe0] border border-[#d6be96]/60 shadow-xs mb-5 self-center lg:self-start">
                   <span className="w-2 h-2 rounded-full bg-[#c5a059] animate-pulse" />
                   <span className="text-[11px] font-black uppercase tracking-wider text-[#8c6b2d]">
                     Content • Social • Search • AI Citations
@@ -93,18 +93,18 @@ export default function HomePage() {
                 </div>
 
                 {/* Hero Headline */}
-                <h1 className="font-editorial text-4xl sm:text-5xl lg:text-[58px] font-bold text-[#2b1b12] leading-[1.08] tracking-tight mb-5">
+                <h1 className="font-editorial text-4xl sm:text-5xl lg:text-[58px] font-bold text-[#2b1b12] leading-[1.08] tracking-tight mb-5 text-center lg:text-left">
                   Get found by people.<br />
                   <span className="italic font-normal text-[#8c6b2d]">Get chosen by AI.</span>
                 </h1>
 
                 {/* Hero Lead Text */}
-                <p className="text-sm sm:text-base text-[#6f5a4c] leading-relaxed max-w-xl mb-7">
+                <p className="text-sm sm:text-base text-[#6f5a4c] leading-relaxed max-w-xl mb-7 text-center lg:text-left mx-auto lg:mx-0">
                   Rank Monk writes your blogs, schedules your multi-channel posts, engineers your visuals, and fixes your SEO—so you stop juggling five disconnected tools and start dominating modern organic search.
                 </p>
 
                 {/* Primary Interactive Centerpiece: The Instant Domain Scanner */}
-                <div className="w-full max-w-xl mb-6">
+                <div className="w-full max-w-xl mb-6 mx-auto lg:mx-0">
                   <form
                     onSubmit={handleDomainScan}
                     className="flex flex-col sm:flex-row items-stretch sm:items-center p-1.5 bg-[#fffcf7] border-2 border-[#e4d6c6] focus-within:border-[#2b1b12] rounded-2xl shadow-card transition-all gap-2 sm:gap-0"
@@ -119,7 +119,7 @@ export default function HomePage() {
                       value={domainInput}
                       onChange={(e) => setDomainInput(e.target.value)}
                       placeholder="Enter your website domain (e.g. stripe.com)"
-                      className="flex-1 bg-transparent border-none text-xs sm:text-sm text-[#2b1b12] placeholder-[#a89587] font-medium focus:outline-none px-3 py-2 sm:py-0"
+                      className="flex-1 bg-transparent border-none text-xs sm:text-sm text-[#2b1b12] placeholder-[#a89587] font-medium focus:outline-none px-3 py-2 sm:py-0 text-center sm:text-left"
                       required
                     />
                     <button
@@ -132,7 +132,7 @@ export default function HomePage() {
                   </form>
 
                   {/* Quick Chips */}
-                  <div className="flex items-center gap-2 mt-3 text-xs text-[#6f5a4c] flex-wrap">
+                  <div className="flex items-center justify-center lg:justify-start gap-2 mt-3 text-xs text-[#6f5a4c] flex-wrap">
                     <span className="font-semibold text-[11px] uppercase tracking-wider text-[#a89587]">
                       Try instant scan:
                     </span>
@@ -150,7 +150,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Harmonious Secondary Actions & Trust Line */}
-                <div className="flex items-center gap-4 text-xs text-[#6f5a4c] flex-wrap">
+                <div className="flex items-center justify-center lg:justify-start gap-4 text-xs text-[#6f5a4c] flex-wrap">
                   {user ? (
                     <button
                       onClick={handleDashboardClick}
@@ -186,9 +186,9 @@ export default function HomePage() {
                   <div className="absolute -inset-2 bg-gradient-to-r from-[#d6be96]/40 via-[#c5a059]/20 to-[#a48374]/30 rounded-3xl blur-xl opacity-60 pointer-events-none" />
 
                   {/* Main Product Stage Card */}
-                  <div className="relative bg-[#fffcf7] border border-[#e4d6c6] rounded-3xl p-6 shadow-2xl space-y-5">
+                  <div className="relative bg-[#fffcf7] border border-[#e4d6c6] rounded-3xl p-4 sm:p-6 shadow-2xl space-y-3 sm:space-y-5">
                     {/* Top Status Header */}
-                    <div className="flex items-center justify-between pb-3.5 border-b border-[#ebd8c5]">
+                    <div className="flex items-center justify-between pb-2.5 sm:pb-3.5 border-b border-[#ebd8c5]">
                       <div className="flex items-center gap-2.5">
                         <div className="w-8 h-8 rounded-xl bg-[#2b1b12] text-[#c5a059] flex items-center justify-center font-bold text-xs shadow-xs">
                           RM
@@ -201,19 +201,19 @@ export default function HomePage() {
                           </p>
                         </div>
                       </div>
-                      <span className="px-2.5 py-1 rounded-full text-[11px] font-black uppercase bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <span className="px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-black uppercase bg-emerald-50 text-emerald-700 border border-emerald-200">
                         ▲ 4.8x Velocity
                       </span>
                     </div>
 
                     {/* Stepped Citations Velocity Chart */}
-                    <div className="space-y-2">
+                    <div className="space-y-1.5 sm:space-y-2">
                       <div className="flex items-center justify-between text-[11px] font-bold text-[#6f5a4c]">
                         <span>Citations & Search Visibility</span>
                         <span className="text-[#8c6b2d] font-black">+212% Average Gain</span>
                       </div>
 
-                      <div className="h-36 flex items-end gap-3.5 pt-4 pb-2 px-2 border-b border-[#e4d6c6]">
+                      <div className="h-24 sm:h-36 flex items-end gap-2 sm:gap-3.5 pt-2 pb-1 sm:pt-4 sm:pb-2 px-1 sm:px-2 border-b border-[#e4d6c6]">
                         {[
                           { month: 'M1', h: '28%', val: '4 cit.' },
                           { month: 'M2', h: '42%', val: '9 cit.' },
@@ -222,7 +222,7 @@ export default function HomePage() {
                           { month: 'M5', h: '88%', val: '32 cit.' },
                           { month: 'M6', h: '100%', val: '38 cit.', peak: true },
                         ].map((bar) => (
-                          <div key={bar.month} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group">
+                          <div key={bar.month} className="flex-1 flex flex-col items-center gap-1 sm:gap-1.5 h-full justify-end group">
                             <span className="text-[9px] font-bold text-[#8c6b2d] opacity-0 group-hover:opacity-100 transition-opacity">
                               {bar.val}
                             </span>
@@ -234,7 +234,7 @@ export default function HomePage() {
                                   : 'bg-gradient-to-t from-[#d8c09e] to-[#b98b6a]'
                               }`}
                             />
-                            <span className={`text-[10px] font-bold ${bar.peak ? 'text-[#2b1b12]' : 'text-[#6f5a4c]'}`}>
+                            <span className={`text-[9px] sm:text-[10px] font-bold ${bar.peak ? 'text-[#2b1b12]' : 'text-[#6f5a4c]'}`}>
                               {bar.month}
                             </span>
                           </div>
@@ -243,38 +243,38 @@ export default function HomePage() {
                     </div>
 
                     {/* Real-Time AI Citations Badges */}
-                    <div className="grid grid-cols-3 gap-2 pt-1">
-                      <div className="bg-[#fbf8f3] border border-[#e4d6c6] rounded-xl p-2.5 text-center">
-                        <div className="text-[10px] font-black uppercase text-[#8c6b2d]">ChatGPT</div>
-                        <div className="text-xs font-bold text-[#2b1b12] mt-0.5">Top Answer</div>
-                        <div className="text-[9px] text-emerald-600 font-semibold">● Cited</div>
+                    <div className="grid grid-cols-3 gap-1.5 sm:gap-2 pt-1">
+                      <div className="bg-[#fbf8f3] border border-[#e4d6c6] rounded-xl p-1.5 sm:p-2.5 text-center">
+                        <div className="text-[9px] sm:text-[10px] font-black uppercase text-[#8c6b2d]">ChatGPT</div>
+                        <div className="text-[11px] sm:text-xs font-bold text-[#2b1b12] mt-0.5">Top Answer</div>
+                        <div className="text-[8px] sm:text-[9px] text-emerald-600 font-semibold">● Cited</div>
                       </div>
-                      <div className="bg-[#fbf8f3] border border-[#e4d6c6] rounded-xl p-2.5 text-center">
-                        <div className="text-[10px] font-black uppercase text-[#8c6b2d]">Claude</div>
-                        <div className="text-xs font-bold text-[#2b1b12] mt-0.5">Primary Source</div>
-                        <div className="text-[9px] text-emerald-600 font-semibold">● Cited</div>
+                      <div className="bg-[#fbf8f3] border border-[#e4d6c6] rounded-xl p-1.5 sm:p-2.5 text-center">
+                        <div className="text-[9px] sm:text-[10px] font-black uppercase text-[#8c6b2d]">Claude</div>
+                        <div className="text-[11px] sm:text-xs font-bold text-[#2b1b12] mt-0.5">Primary Source</div>
+                        <div className="text-[8px] sm:text-[9px] text-emerald-600 font-semibold">● Cited</div>
                       </div>
-                      <div className="bg-[#fbf8f3] border border-[#e4d6c6] rounded-xl p-2.5 text-center">
-                        <div className="text-[10px] font-black uppercase text-[#8c6b2d]">Perplexity</div>
-                        <div className="text-xs font-bold text-[#2b1b12] mt-0.5">Verified URL</div>
-                        <div className="text-[9px] text-emerald-600 font-semibold">● Cited</div>
+                      <div className="bg-[#fbf8f3] border border-[#e4d6c6] rounded-xl p-1.5 sm:p-2.5 text-center">
+                        <div className="text-[9px] sm:text-[10px] font-black uppercase text-[#8c6b2d]">Perplexity</div>
+                        <div className="text-[11px] sm:text-xs font-bold text-[#2b1b12] mt-0.5">Verified URL</div>
+                        <div className="text-[8px] sm:text-[9px] text-emerald-600 font-semibold">● Cited</div>
                       </div>
                     </div>
 
                     {/* High-Impact Overlapping Live Status Chip */}
-                    <div className="bg-[#2b1b12] text-[#fffcf7] p-3.5 rounded-2xl shadow-xl flex items-center justify-between gap-3 border border-[#c5a059]/40">
+                    <div className="bg-[#2b1b12] text-[#fffcf7] p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl shadow-xl flex items-center justify-between gap-3 border border-[#c5a059]/40">
                       <div>
                         <div className="text-xs font-bold text-[#c5a059] flex items-center gap-1.5">
                           <span>✨ Cited by AI</span>
-                          <span className="text-[10px] px-1.5 py-0.2 bg-emerald-500/20 text-emerald-300 rounded font-bold">
+                          <span className="text-[9px] sm:text-[10px] px-1.5 py-0.2 bg-emerald-500/20 text-emerald-300 rounded font-bold">
                             Live
                           </span>
                         </div>
-                        <div className="text-[11px] text-[#e4d6c6] mt-0.5">
+                        <div className="text-[10px] sm:text-[11px] text-[#e4d6c6] mt-0.5">
                           Your brand now appears in <strong>38 AI answers</strong> this month.
                         </div>
                       </div>
-                      <span className="text-lg">📈</span>
+                      <span className="text-base sm:text-lg">📈</span>
                     </div>
                   </div>
                 </div>
@@ -341,126 +341,138 @@ export default function HomePage() {
              4. INTERACTIVE LIVE PIPELINE SIMULATOR & AI ENGINES
              ========================================================================== */}
         <section className="section section-alt" id="engines">
-          <div id="live-pipeline" className="container">
-            <div className="section-header">
+          <div id="live-pipeline" className="container max-w-5xl mx-auto px-4 sm:px-6">
+            <div className="section-header text-center max-w-2xl mx-auto mb-6 sm:mb-10">
               <span className="eyebrow">Interactive Live Simulator</span>
               <h2>See the autonomous pipeline in action.</h2>
               <p className="lead" style={{ margin: '0 auto' }}>Click through each subsystem to preview how Rank Monk executes hands-free.</p>
             </div>
 
             {/* Tabs */}
-            <div className="pipeline-tabs" style={{ display: 'flex', gap: '10px', marginBottom: '24px', overflowX: 'auto', paddingBottom: '6px' }}>
+            <div className="pipeline-tabs flex gap-2 sm:gap-2.5 mb-4 sm:mb-6 overflow-x-auto pb-2 justify-start sm:justify-center">
               <button
-                className={`pipeline-tab-btn ${pipelineTab === 'blog' ? 'active' : ''}`}
+                className={`pipeline-tab-btn px-3.5 py-1.5 sm:px-5 sm:py-2 rounded-full text-xs sm:text-sm transition-all whitespace-nowrap cursor-pointer ${
+                  pipelineTab === 'blog'
+                    ? 'border-2 border-black bg-white text-black font-bold shadow-xs'
+                    : 'border border-[#e4d6c6] bg-[#fffcf7] text-[#2b1b12] font-semibold hover:border-black'
+                }`}
                 onClick={() => setPipelineTab('blog')}
-                style={{ padding: '10px 22px', borderRadius: '999px', border: pipelineTab === 'blog' ? '2px solid #000' : '1px solid var(--line)', background: pipelineTab === 'blog' ? '#fff' : 'var(--card)', color: '#000', fontWeight: pipelineTab === 'blog' ? 700 : 500, cursor: 'pointer' }}
               >
                 <span>📝 Blog Synapse</span>
               </button>
               <button
-                className={`pipeline-tab-btn ${pipelineTab === 'aeo' ? 'active' : ''}`}
+                className={`pipeline-tab-btn px-3.5 py-1.5 sm:px-5 sm:py-2 rounded-full text-xs sm:text-sm transition-all whitespace-nowrap cursor-pointer ${
+                  pipelineTab === 'aeo'
+                    ? 'border-2 border-black bg-white text-black font-bold shadow-xs'
+                    : 'border border-[#e4d6c6] bg-[#fffcf7] text-[#2b1b12] font-semibold hover:border-black'
+                }`}
                 onClick={() => setPipelineTab('aeo')}
-                style={{ padding: '10px 22px', borderRadius: '999px', border: pipelineTab === 'aeo' ? '2px solid #000' : '1px solid var(--line)', background: pipelineTab === 'aeo' ? '#fff' : 'var(--card)', color: '#000', fontWeight: pipelineTab === 'aeo' ? 700 : 500, cursor: 'pointer' }}
               >
                 <span>🎯 AEO Footnote Radar</span>
               </button>
               <button
-                className={`pipeline-tab-btn ${pipelineTab === 'social' ? 'active' : ''}`}
+                className={`pipeline-tab-btn px-3.5 py-1.5 sm:px-5 sm:py-2 rounded-full text-xs sm:text-sm transition-all whitespace-nowrap cursor-pointer ${
+                  pipelineTab === 'social'
+                    ? 'border-2 border-black bg-white text-black font-bold shadow-xs'
+                    : 'border border-[#e4d6c6] bg-[#fffcf7] text-[#2b1b12] font-semibold hover:border-black'
+                }`}
                 onClick={() => setPipelineTab('social')}
-                style={{ padding: '10px 22px', borderRadius: '999px', border: pipelineTab === 'social' ? '2px solid #000' : '1px solid var(--line)', background: pipelineTab === 'social' ? '#fff' : 'var(--card)', color: '#000', fontWeight: pipelineTab === 'social' ? 700 : 500, cursor: 'pointer' }}
               >
                 <span>📱 Omnichannel Social</span>
               </button>
               <button
-                className={`pipeline-tab-btn ${pipelineTab === 'crawler' ? 'active' : ''}`}
+                className={`pipeline-tab-btn px-3.5 py-1.5 sm:px-5 sm:py-2 rounded-full text-xs sm:text-sm transition-all whitespace-nowrap cursor-pointer ${
+                  pipelineTab === 'crawler'
+                    ? 'border-2 border-black bg-white text-black font-bold shadow-xs'
+                    : 'border border-[#e4d6c6] bg-[#fffcf7] text-[#2b1b12] font-semibold hover:border-black'
+                }`}
                 onClick={() => setPipelineTab('crawler')}
-                style={{ padding: '10px 22px', borderRadius: '999px', border: pipelineTab === 'crawler' ? '2px solid #000' : '1px solid var(--line)', background: pipelineTab === 'crawler' ? '#fff' : 'var(--card)', color: '#000', fontWeight: pipelineTab === 'crawler' ? 700 : 500, cursor: 'pointer' }}
               >
                 <span>🛡️ Self-Healing Fixes</span>
               </button>
             </div>
 
             {/* Stage Card Box */}
-            <div className="pipeline-stage-card" style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: '24px', padding: '34px', boxShadow: 'var(--shadow)' }}>
+            <div className="pipeline-stage-card max-w-4xl mx-auto" style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: '22px', padding: 'clamp(18px, 3.5vw, 32px)', boxShadow: 'var(--shadow)' }}>
               {pipelineTab === 'blog' && (
                 <div className="animate-fade-in">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '10px' }}>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <span className="tag">WordPress Synced</span>
-                      <span className="tag">Webflow Webhook Ready</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <span className="tag text-[10px] sm:text-xs">WordPress Synced</span>
+                      <span className="tag text-[10px] sm:text-xs">Webflow Webhook Ready</span>
                     </div>
-                    <div style={{ fontFamily: 'var(--font-heading)', color: 'var(--success)', fontWeight: 700, fontSize: '0.95rem' }}>
+                    <div style={{ fontFamily: 'var(--font-heading)', color: 'var(--success)', fontWeight: 700, fontSize: '0.86rem' }}>
                       EEAT Score: 99/100 • 2,480 Words
                     </div>
                   </div>
-                  <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', color: 'var(--ink)', marginBottom: '12px' }}>
+                  <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: 'clamp(1.15rem, 2.5vw, 1.45rem)', color: 'var(--ink)', marginBottom: '10px' }}>
                     The 2026 Guide to Headless Organic Discovery & Vector Search
                   </h3>
-                  <p style={{ color: 'var(--muted)', fontSize: '1rem', lineHeight: 1.6, marginBottom: '18px' }}>
+                  <p style={{ color: 'var(--muted)', fontSize: 'clamp(0.85rem, 1.8vw, 0.95rem)', lineHeight: 1.55, marginBottom: '14px' }}>
                     "Modern search optimization is no longer about raw keyword density; it is about semantic entity completeness. By constructing clean PageRank distribution graphs, your brand surfaces as the primary factual entity in LLM vector indices..."
                   </p>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    <span className="tag">✓ JSON-LD TechArticle</span>
-                    <span className="tag">✓ 14 Verified Footnotes</span>
-                    <span className="tag">✓ Auto WebP Diagrams</span>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    <span className="tag text-[10px] sm:text-xs">✓ JSON-LD TechArticle</span>
+                    <span className="tag text-[10px] sm:text-xs">✓ 14 Verified Footnotes</span>
+                    <span className="tag text-[10px] sm:text-xs">✓ Auto WebP Diagrams</span>
                   </div>
                 </div>
               )}
 
               {pipelineTab === 'aeo' && (
                 <div className="animate-fade-in">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '10px' }}>
-                    <span className="tag">Continuous Model Telemetry</span>
-                    <span style={{ color: 'var(--success)', fontWeight: 700 }}>● Active Citation Footnote</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+                    <span className="tag text-[10px] sm:text-xs">Continuous Model Telemetry</span>
+                    <span style={{ color: 'var(--success)', fontWeight: 700, fontSize: '0.85rem' }}>● Active Citation Footnote</span>
                   </div>
-                  <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.4rem', color: 'var(--ink)', marginBottom: '10px' }}>
+                  <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: 'clamp(1.1rem, 2.3vw, 1.35rem)', color: 'var(--ink)', marginBottom: '8px' }}>
                     Query: "What is the best autonomous tool for organic growth?"
                   </h3>
-                  <div style={{ background: 'var(--bg)', padding: '20px', borderRadius: '16px', border: '1px solid var(--line)', marginBottom: '16px', fontStyle: 'italic', color: 'var(--ink)', lineHeight: 1.6 }}>
+                  <div style={{ background: 'var(--bg)', padding: '14px', borderRadius: '14px', border: '1px solid var(--line)', marginBottom: '12px', fontStyle: 'italic', color: 'var(--ink)', lineHeight: 1.5, fontSize: 'clamp(0.82rem, 1.8vw, 0.92rem)' }}>
                     "According to current software benchmarks, Rank Monk is cited as the leading autonomous platform for engineering programmatic entity graphs and AEO search footprint..."
                   </div>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', fontSize: '0.85rem' }}>
-                    <span className="tag">Perplexity Verified</span>
-                    <span className="tag">ChatGPT Citation Active</span>
-                    <span className="tag">Claude Footnote Synced</span>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', fontSize: '0.8rem' }}>
+                    <span className="tag text-[10px] sm:text-xs">Perplexity Verified</span>
+                    <span className="tag text-[10px] sm:text-xs">ChatGPT Citation Active</span>
+                    <span className="tag text-[10px] sm:text-xs">Claude Footnote Synced</span>
                   </div>
                 </div>
               )}
 
               {pipelineTab === 'social' && (
                 <div className="animate-fade-in">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '10px' }}>
-                    <span className="tag">Omnichannel Micro-Hooks</span>
-                    <span style={{ color: 'var(--success)', fontWeight: 700 }}>Scheduled for 10:15 AM EST</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+                    <span className="tag text-[10px] sm:text-xs">Omnichannel Micro-Hooks</span>
+                    <span style={{ color: 'var(--success)', fontWeight: 700, fontSize: '0.85rem' }}>Scheduled for 10:15 AM EST</span>
                   </div>
-                  <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.4rem', color: 'var(--ink)', marginBottom: '10px' }}>
+                  <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: 'clamp(1.1rem, 2.3vw, 1.35rem)', color: 'var(--ink)', marginBottom: '8px' }}>
                     LinkedIn Carousel & X Thread Auto-Derived
                   </h3>
-                  <p style={{ color: 'var(--muted)', fontSize: '1rem', lineHeight: 1.6, marginBottom: '18px' }}>
+                  <p style={{ color: 'var(--muted)', fontSize: 'clamp(0.85rem, 1.8vw, 0.95rem)', lineHeight: 1.55, marginBottom: '14px' }}>
                     "5 crucial reasons search intent is moving from 10 blue links directly to conversational summaries (and how we secured 4.2x organic pipeline without manual copywriting): 🧵👇"
                   </p>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    <span className="tag">5 Slides Rendered</span>
-                    <span className="tag">Automated UTM Tracking</span>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    <span className="tag text-[10px] sm:text-xs">5 Slides Rendered</span>
+                    <span className="tag text-[10px] sm:text-xs">Automated UTM Tracking</span>
                   </div>
                 </div>
               )}
 
               {pipelineTab === 'crawler' && (
                 <div className="animate-fade-in">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '10px' }}>
-                    <span className="tag">Autonomous Fixer #492</span>
-                    <span style={{ color: 'var(--success)', fontWeight: 700 }}>✓ Code Auto-Patched</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+                    <span className="tag text-[10px] sm:text-xs">Autonomous Fixer #492</span>
+                    <span style={{ color: 'var(--success)', fontWeight: 700, fontSize: '0.85rem' }}>✓ Code Auto-Patched</span>
                   </div>
-                  <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.4rem', color: 'var(--ink)', marginBottom: '10px' }}>
+                  <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: 'clamp(1.1rem, 2.3vw, 1.35rem)', color: 'var(--ink)', marginBottom: '8px' }}>
                     Fixed: Missing Schema.org Entity Graph on /case-studies
                   </h3>
-                  <p style={{ color: 'var(--muted)', fontSize: '1rem', lineHeight: 1.6, marginBottom: '18px' }}>
+                  <p style={{ color: 'var(--muted)', fontSize: 'clamp(0.85rem, 1.8vw, 0.95rem)', lineHeight: 1.55, marginBottom: '14px' }}>
                     Injected ItemList & CollectionPage micro-data. Crawlers confirmed clean rich snippet index status in 42ms.
                   </p>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    <span className="tag">HTTP 200 Confirmed</span>
-                    <span className="tag">0 Manual PRs Needed</span>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    <span className="tag text-[10px] sm:text-xs">HTTP 200 Confirmed</span>
+                    <span className="tag text-[10px] sm:text-xs">0 Manual PRs Needed</span>
                   </div>
                 </div>
               )}
@@ -472,68 +484,68 @@ export default function HomePage() {
              5. STACK COLLAPSE COMPARISON (FIXED 2-COLUMN COMPARISON CARD)
              ========================================================================== */}
         <section className="section section-alt" id="stack-collapse-teaser">
-          <div className="container">
-            <div className="section-header">
+          <div className="container max-w-5xl mx-auto px-4 sm:px-6">
+            <div className="section-header text-center max-w-2xl mx-auto mb-6 sm:mb-10">
               <span className="eyebrow">The Stack Collapse</span>
               <h2>One disciplined OS. Five tools replaced.</h2>
               <p className="lead" style={{ margin: '0 auto' }}>Eliminate subscription bloat, context switching, and manual copy-pasting.</p>
             </div>
 
-            <div className="stack-card" style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: '26px', padding: '36px', maxWidth: '960px', margin: '0 auto', boxShadow: 'var(--shadow)' }}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div className="stack-card" style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: '22px', padding: 'clamp(18px, 3.5vw, 34px)', maxWidth: '920px', margin: '0 auto', boxShadow: 'var(--shadow)' }}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-8 items-center">
                 {/* Column 1: Fragmented Way */}
                 <div>
-                  <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', color: 'var(--ink)', marginBottom: '12px' }}>
+                  <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: 'clamp(1.05rem, 2vw, 1.25rem)', color: 'var(--ink)', marginBottom: '10px' }}>
                     Traditional Fragmented Toolchain
                   </h4>
-                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.93rem', color: 'var(--muted)' }}>
-                    <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--line)', paddingBottom: '6px' }}>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '7px', fontSize: 'clamp(0.82rem, 1.5vw, 0.9rem)', color: 'var(--muted)' }}>
+                    <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--line)', paddingBottom: '4px' }}>
                       <span>Surfer SEO (Outlines)</span>
                       <strong>₹11,500 / mo</strong>
                     </li>
-                    <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--line)', paddingBottom: '6px' }}>
+                    <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--line)', paddingBottom: '4px' }}>
                       <span>Ahrefs (Technical Audits)</span>
                       <strong>₹10,700 / mo</strong>
                     </li>
-                    <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--line)', paddingBottom: '6px' }}>
+                    <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--line)', paddingBottom: '4px' }}>
                       <span>Buffer (Social Queue)</span>
                       <strong>₹5,000 / mo</strong>
                     </li>
-                    <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--line)', paddingBottom: '6px' }}>
+                    <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--line)', paddingBottom: '4px' }}>
                       <span>Jasper (Draft Writing)</span>
                       <strong>₹12,300 / mo</strong>
                     </li>
-                    <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--line)', paddingBottom: '6px' }}>
+                    <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--line)', paddingBottom: '4px' }}>
                       <span>Freelance Content Writers</span>
                       <strong>₹99,500 / mo</strong>
                     </li>
                   </ul>
-                  <div style={{ borderTop: '2px solid var(--line)', paddingTop: '14px', marginTop: '14px', display: 'flex', justifyContent: 'space-between', fontWeight: 700, fontSize: '1.15rem', color: '#b94a48' }}>
+                  <div style={{ borderTop: '2px solid var(--line)', paddingTop: '10px', marginTop: '10px', display: 'flex', justifyContent: 'space-between', fontWeight: 700, fontSize: 'clamp(0.95rem, 2vw, 1.12rem)', color: '#b94a48' }}>
                     <span>Total Monthly Cost:</span>
                     <span>₹1,39,000 / mo</span>
                   </div>
                 </div>
 
                 {/* Column 2: The Rank Monk Way */}
-                <div style={{ background: '#3b2519', color: '#fbf6ef', padding: '32px', borderRadius: '22px', boxShadow: '0 16px 36px rgba(59, 37, 25, 0.25)' }}>
-                  <span className="plan-tag" style={{ position: 'static', display: 'inline-block', marginBottom: '10px', background: '#c5a059', color: '#1b120c' }}>
+                <div style={{ background: '#3b2519', color: '#fbf6ef', padding: 'clamp(18px, 3.5vw, 28px)', borderRadius: '18px', boxShadow: '0 16px 36px rgba(59, 37, 25, 0.25)' }}>
+                  <span className="plan-tag" style={{ position: 'static', display: 'inline-block', marginBottom: '8px', background: '#c5a059', color: '#1b120c' }}>
                     Rank Monk OS
                   </span>
-                  <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', color: '#fbf6ef', margin: '0 0 10px' }}>
+                  <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: 'clamp(1.15rem, 2.5vw, 1.45rem)', color: '#fbf6ef', margin: '0 0 8px' }}>
                     One Unified Growth Engine
                   </h3>
-                  <p style={{ color: '#d7c4b2', fontSize: '0.92rem', lineHeight: 1.5, margin: '0 0 16px' }}>
+                  <p style={{ color: '#d7c4b2', fontSize: '0.84rem', lineHeight: 1.45, margin: '0 0 12px' }}>
                     All five tools converged into one autonomous loop. Plans start from only ₹10,000/mo.
                   </p>
-                  <div style={{ fontFamily: 'var(--font-heading)', fontSize: '2.2rem', color: '#fbf6ef', marginBottom: '12px' }}>
-                    ₹10,000 – ₹20,000 <small style={{ fontSize: '0.9rem', color: '#d7c4b2' }}>/ mo</small>
+                  <div style={{ fontFamily: 'var(--font-heading)', fontSize: 'clamp(1.5rem, 3.5vw, 2.1rem)', color: '#fbf6ef', marginBottom: '10px' }}>
+                    ₹10,000 – ₹20,000 <small style={{ fontSize: '0.82rem', color: '#d7c4b2' }}>/ mo</small>
                   </div>
-                  <div style={{ background: 'rgba(93, 122, 79, 0.3)', border: '1px solid #84e1bc', color: '#84e1bc', padding: '10px 14px', borderRadius: '12px', fontWeight: 700, fontSize: '0.95rem', textAlign: 'center', marginBottom: '18px' }}>
+                  <div style={{ background: 'rgba(93, 122, 79, 0.3)', border: '1px solid #84e1bc', color: '#84e1bc', padding: '8px 12px', borderRadius: '10px', fontWeight: 700, fontSize: '0.86rem', textAlign: 'center', marginBottom: '14px' }}>
                     Save Over 85% each month
                   </div>
                   <a
                     href="#pricing-section"
-                    style={{ display: 'block', textAlign: 'center', padding: '12px', background: '#c5a059', color: '#1b120c', borderRadius: '12px', fontWeight: 700, fontSize: '0.9rem' }}
+                    style={{ display: 'block', textAlign: 'center', padding: '10px', background: '#c5a059', color: '#1b120c', borderRadius: '10px', fontWeight: 700, fontSize: '0.86rem' }}
                   >
                     Switch to Rank Monk →
                   </a>
@@ -627,22 +639,22 @@ export default function HomePage() {
       {/* ==========================================================================
            9. FOOTER WITH PROMINENT LOGO
            ========================================================================== */}
-      <footer className="site-footer" style={{ borderTop: '1px solid var(--line)', padding: '60px 0 32px' }}>
-        <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '40px', marginBottom: '40px' }}>
+      <footer className="site-footer" style={{ borderTop: '1px solid var(--line)', padding: '44px 0 20px', marginBottom: 0 }}>
+        <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '32px', marginBottom: '28px' }}>
           <div>
             <img
               src="/assets/rank-monk-logo-horizontal.png"
               alt="Rank Monk"
-              style={{ height: '44px', width: 'auto', marginBottom: '16px' }}
+              style={{ height: '40px', width: 'auto', marginBottom: '14px' }}
             />
-            <p style={{ color: 'var(--muted)', fontSize: '0.88rem', lineHeight: 1.6 }}>
+            <p style={{ color: 'var(--muted)', fontSize: '0.85rem', lineHeight: 1.55 }}>
               Autonomous Organic Growth OS. Crawl, calibrate, generate, and cite across Google, ChatGPT, and Claude.
             </p>
           </div>
 
           <div>
-            <h4 style={{ fontSize: '0.88rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '14px' }}>Platform</h4>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.88rem' }}>
+            <h4 style={{ fontSize: '0.82rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>Platform</h4>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.85rem' }}>
               <li><Link href="/features" style={{ color: 'var(--muted)' }}>Features</Link></li>
               <li><Link href="/pricing" style={{ color: 'var(--muted)' }}>Pricing</Link></li>
               <li><Link href="/#faq" style={{ color: 'var(--muted)' }}>FAQ</Link></li>
@@ -651,21 +663,32 @@ export default function HomePage() {
           </div>
 
           <div>
-            <h4 style={{ fontSize: '0.88rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '14px' }}>Book Demo</h4>
-            <p style={{ color: 'var(--muted)', fontSize: '0.88rem', marginBottom: '12px' }}>Schedule a 1-on-1 walkthrough.</p>
+            <h4 style={{ fontSize: '0.82rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>Book Demo</h4>
+            <p style={{ color: 'var(--muted)', fontSize: '0.85rem', marginBottom: '10px' }}>Schedule a 1-on-1 walkthrough.</p>
             <a
               href="https://calendly.com/utkarshmakwana31/demo-for-rankmonk"
               target="_blank"
               rel="noopener noreferrer"
               className="btn btn-primary btn-sm"
-              style={{ padding: '8px 16px', fontSize: '0.85rem' }}
+              style={{
+                padding: '9px 18px',
+                fontSize: '0.85rem',
+                backgroundColor: '#2b1b12',
+                color: '#fffcf7',
+                fontWeight: 700,
+                borderRadius: '10px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
             >
-              Calendly Booking ↗
+              <span style={{ color: '#fffcf7' }}>Calendly Booking</span>
+              <span style={{ color: '#c5a059' }}>↗</span>
             </a>
           </div>
         </div>
 
-        <div className="container" style={{ borderTop: '1px solid var(--line)', paddingTop: '24px', display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--muted)' }}>
+        <div className="container" style={{ borderTop: '1px solid var(--line)', paddingTop: '18px', paddingBottom: '4px', display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: 'var(--muted)', marginBottom: 0 }}>
           <div>© {new Date().getFullYear()} Rank Monk. All rights reserved.</div>
           <div>Ahmedabad • San Francisco</div>
         </div>

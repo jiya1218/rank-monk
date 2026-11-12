@@ -239,15 +239,16 @@ export function Navbar({ onOpenConnectModal }: NavbarProps) {
                 >
                   Book Demo
                 </a>
+                {/* On mobile, keep header uncluttered by hiding Sign In (accessible in mobile menu) */}
                 <Link
                   href="/login"
-                  className="text-xs sm:text-sm font-semibold text-[#2b1b12] hover:text-[#7a5242] px-2.5 py-2 transition-colors"
+                  className="hidden md:inline-flex text-xs sm:text-sm font-semibold text-[#2b1b12] hover:text-[#7a5242] px-2.5 py-2 transition-colors"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/signup"
-                  className="bg-[#2b1b12] hover:bg-[#3b2519] text-[#fffcf7] px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-1.5"
+                  className="bg-[#2b1b12] hover:bg-[#3b2519] text-[#fffcf7] px-3 py-1.5 sm:px-5 sm:py-2.5 rounded-xl font-bold text-xs shadow-sm transition-all flex items-center gap-1.5 shrink-0"
                 >
                   <span>Start Free</span>
                   <span className="text-[#c5a059]">⚡</span>

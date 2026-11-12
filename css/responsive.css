@@ -1335,8 +1335,8 @@
      FOOTER ERGONOMICS
      ======================================================================== */
   .site-footer {
-    padding-top: 40px;
-    padding-bottom: calc(var(--mobile-bottom-bar-h) + 24px);
+    padding-top: 36px;
+    padding-bottom: 24px;
   }
 
   .footer-cols-grid {
@@ -2033,12 +2033,12 @@
 
   .plan {
     flex: 0 0 86% !important;
-    min-width: 270px !important;
-    max-width: 310px !important;
+    min-width: 260px !important;
+    max-width: 300px !important;
     scroll-snap-align: center !important;
     box-sizing: border-box !important;
-    padding: 26px 18px !important;
-    border-radius: 20px !important;
+    padding: 18px 16px !important;
+    border-radius: 18px !important;
     box-shadow: 0 6px 20px rgba(43, 27, 18, 0.05) !important;
     display: flex !important;
     flex-direction: column !important;
@@ -2052,30 +2052,33 @@
   }
 
   .plan .price {
-    font-size: 2.5rem !important;
-    line-height: 1 !important;
-    margin: 8px 0 4px !important;
+    font-size: 1.85rem !important;
+    line-height: 1.1 !important;
+    margin: 4px 0 2px !important;
   }
 
   .plan p {
-    font-size: 0.88rem !important;
-    margin-bottom: 10px !important;
+    font-size: 0.8rem !important;
+    margin-bottom: 8px !important;
+    line-height: 1.35 !important;
   }
 
   .plan ul {
-    margin: 10px 0 14px !important;
+    margin: 6px 0 10px !important;
     padding: 0 !important;
   }
 
   .plan li {
-    padding: 6px 0 6px 22px !important;
-    font-size: 0.86rem !important;
+    padding: 3.5px 0 3.5px 18px !important;
+    font-size: 0.78rem !important;
+    line-height: 1.3 !important;
   }
 
   .plan .btn {
-    min-height: 44px !important;
-    font-size: 0.92rem !important;
-    margin-top: 12px !important;
+    min-height: 38px !important;
+    font-size: 0.84rem !important;
+    margin-top: 8px !important;
+    padding: 8px 14px !important;
     width: 100% !important;
     justify-content: center !important;
     text-align: center !important;
@@ -2298,7 +2301,7 @@
 
   /* Footer on Mobile - Compact, Balanced, Perfect Ergonomics */
   .site-footer {
-    padding: 36px 0 calc(var(--mobile-bottom-bar-h, 60px) + 28px) !important;
+    padding: 32px 0 24px !important;
     background: var(--bg-alt) !important;
     border-top: 1px solid var(--line) !important;
   }

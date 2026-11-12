@@ -200,3 +200,22 @@ body::before, body::after {
     padding: 16px 20px !important;
   }
 }
+
+/* Explicit high-contrast button styling in footer */
+.site-footer a.btn,
+.site-footer a.btn-primary,
+.site-footer .btn-primary {
+  color: #fffcf7 !important;
+  background-color: #2b1b12 !important;
+  border-color: #2b1b12 !important;
+  font-weight: 700 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.site-footer a.btn:hover,
+.site-footer a.btn-primary:hover,
+.site-footer .btn-primary:hover {
+  background-color: #3d271a !important;
+  color: #c5a059 !important;
+}
