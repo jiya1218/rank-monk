@@ -39,6 +39,7 @@ interface MediaStudioProps {
     ratio: string;
     formatName: string;
     style: string;
+    theme?: string;
     referenceImage?: string;
   }) => Promise<any>;
   onPushToSocialQueue: (asset: any) => void;
@@ -131,6 +132,7 @@ export function MediaStudio({
 
   const [prompt, setPrompt] = useState('i need post for marketing of my services that i provide in officex');
   const [activeFormat, setActiveFormat] = useState('1:1');
+  const [selectedTheme, setSelectedTheme] = useState<'auto' | 'light' | 'dark'>('auto');
   const [generating, setGenerating] = useState(false);
   const [activeAsset, setActiveAsset] = useState<any>(
     mediaAssets && mediaAssets.length > 0 ? mediaAssets[0] : DEFAULT_DEMO_ASSETS[0]
@@ -218,6 +220,7 @@ export function MediaStudio({
         ratio: activeFormat,
         formatName: selectedFormatObj.name,
         style: 'auto',
+        theme: selectedTheme,
         referenceImage: referenceImage || undefined
       });
       if (newAsset) {
@@ -361,7 +364,37 @@ export function MediaStudio({
               </div>
             </div>
 
-            {/* Step 3: Optional Style Reference File */}
+            {/* Step 3: Background Theme Selector */}
+            <div className="pt-2 border-t border-slate-100">
+              <div className="flex items-center justify-between text-xs mb-1.5">
+                <span className="font-bold text-[#2b1b12]">3. BACKGROUND THEME</span>
+                <span className="text-[10px] text-[#8a5b13] font-semibold">
+                  {selectedTheme === 'auto' ? 'Auto from prompt' : selectedTheme === 'light' ? 'Ivory / White Light' : 'Midnight Dark'}
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-1.5">
+                {[
+                  { id: 'auto', label: '✦ Auto' },
+                  { id: 'light', label: '☀️ Light' },
+                  { id: 'dark', label: '🌙 Dark' }
+                ].map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => setSelectedTheme(t.id as any)}
+                    className={`py-1.5 px-2 text-xs font-bold rounded-xl border transition-all cursor-pointer text-center ${
+                      selectedTheme === t.id
+                        ? 'bg-[#2b1b12] text-white border-[#2b1b12] shadow-2xs'
+                        : 'bg-white text-[#4a3528] border-[#e4d6c6] hover:bg-[#faf7f2]'
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Step 4: Optional Style Reference File */}
             <div className="pt-2 border-t border-slate-100">
               {referenceImage ? (
                 <div className="flex items-center justify-between p-2.5 border border-[#c5a059] rounded-xl bg-[#fffcf7]">

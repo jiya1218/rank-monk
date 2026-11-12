@@ -64,15 +64,33 @@ interface EeatCategory {
   improve: string[];
 }
 
+interface TechnicalChecklistItem {
+  id: string;
+  label: string;
+  present: boolean;
+  desc: string;
+}
+
+interface RemediationStep {
+  title: string;
+  desc: string;
+  tag: string;
+}
+
 interface EeatAnalysisResponse {
   success: boolean;
   domain: string;
-  url: string;
+  url?: string;
   brandName: string;
+  siteType?: string;
+  siteTypeLabel?: string;
   industryCategory: string;
-  timestamp: string;
+  businessSummary?: string;
+  timestamp?: string;
   crawledPagesCount: number;
   checklist: TechnicalChecklist;
+  technicalChecklist?: TechnicalChecklistItem[];
+  remediationSteps?: RemediationStep[];
   scores: {
     experience: number;
     expertise: number;
@@ -80,7 +98,9 @@ interface EeatAnalysisResponse {
     trust: number;
   };
   overallScore: number;
+  grade?: string;
   qualityTier: string;
+  whyThisScore?: string;
   categories: {
     experience: EeatCategory;
     expertise: EeatCategory;
@@ -140,7 +160,7 @@ export default function EeatAnalyzerPage() {
     setAnalyzing(true);
     setError(null);
 
-    const cleanInput = targetDomain.trim();
+    const cleanInput = targetDomain.trim().replace(/^https?:\/\//i, '').replace(/\/+$/, '');
 
     try {
       const res = await fetch(`/api/eeat-analysis?url=${encodeURIComponent(cleanInput)}`);
@@ -277,23 +297,27 @@ export default function EeatAnalyzerPage() {
     );
   };
 
-  // Convert checklist to array for filtering
-  const checklistItems = result ? [
-    { id: 'ssl', label: 'SSL / TLS Encryption (HTTPS)', present: result.checklist.ssl, desc: 'Secure transport layer encryption protecting visitors.' },
-    { id: 'aboutUs', label: 'About Us / Company Transparency', present: result.checklist.aboutUs, desc: 'Dedicated about or company page proving organizational existence.' },
-    { id: 'contactDetails', label: 'Direct Business Contact Info', present: result.checklist.contactDetails, desc: 'Accessible phone, email, or physical location info.' },
-    { id: 'socialLinks', label: 'Verified Social Footprint', present: result.checklist.socialLinks, desc: 'Linked presence across LinkedIn, X/Twitter, YouTube, etc.' },
-    { id: 'organizationSchema', label: 'Schema.org JSON-LD Structured Data', present: result.checklist.organizationSchema, desc: 'Machine-readable semantic Organization entity declared to search engines.' },
-    { id: 'authorCredentials', label: 'Author Bylines & Bio Credentials', present: result.checklist.authorCredentials, desc: 'Identifiable subject matter authors on published insights.' },
-    { id: 'linkedin', label: 'LinkedIn Corporate Entity', present: result.checklist.linkedin, desc: 'Verified company profile with employee scale and corporate footprint.' },
-    { id: 'g2', label: 'G2 Directory Profile', present: result.checklist.g2, desc: 'Independent customer review validation for software & service credibility.' },
-    { id: 'capterra', label: 'Capterra Catalog Listing', present: result.checklist.capterra, desc: 'Verified software and vendor directory listing.' },
-    { id: 'reddit', label: 'Organic Reddit Discussion Footprint', present: result.checklist.reddit, desc: 'Organic third-party recommendations and community mentions.' },
-    { id: 'crunchbase', label: 'Crunchbase Entity Registration', present: result.checklist.crunchbase, desc: 'Corporate registry verifying company establishment and operations.' },
-    { id: 'trustpilot', label: 'Trustpilot / Public Review Footprint', present: result.checklist.trustpilot, desc: 'Open public customer sentiment and star ratings.' },
-    { id: 'termsPrivacy', label: 'Published Terms & Privacy Policies', present: result.checklist.termsPrivacy, desc: 'Transparent legal documentation, data handling, and disclosures.' },
-    { id: 'metaSecurity', label: 'Canonical & Responsive Viewport', present: result.checklist.metaSecurity, desc: 'Modern technical crawl directives and responsive standards.' }
-  ] : [];
+  // Convert checklist to array for filtering (uses tailored 14 technical signals from API if available)
+  const checklistItems: TechnicalChecklistItem[] = result
+    ? (result.technicalChecklist && result.technicalChecklist.length > 0)
+      ? result.technicalChecklist
+      : [
+          { id: 'ssl', label: 'SSL / TLS Encryption (HTTPS)', present: result.checklist.ssl, desc: 'Secure transport layer encryption protecting visitors.' },
+          { id: 'aboutUs', label: 'About Us / Company Transparency', present: result.checklist.aboutUs, desc: 'Dedicated about or company page proving organizational existence.' },
+          { id: 'contactDetails', label: 'Direct Business Contact Info', present: result.checklist.contactDetails, desc: 'Accessible phone, email, or physical location info.' },
+          { id: 'socialLinks', label: 'Verified Social Footprint', present: result.checklist.socialLinks, desc: 'Linked presence across LinkedIn, X/Twitter, YouTube, etc.' },
+          { id: 'organizationSchema', label: 'Schema.org JSON-LD Structured Data', present: result.checklist.organizationSchema, desc: 'Machine-readable semantic Organization entity declared to search engines.' },
+          { id: 'authorCredentials', label: 'Author Bylines & Bio Credentials', present: result.checklist.authorCredentials, desc: 'Identifiable subject matter authors on published insights.' },
+          { id: 'linkedin', label: 'LinkedIn Corporate Entity', present: result.checklist.linkedin, desc: 'Verified company profile with employee scale and corporate footprint.' },
+          { id: 'g2', label: 'G2 Directory Profile', present: result.checklist.g2, desc: 'Independent customer review validation for software & service credibility.' },
+          { id: 'capterra', label: 'Capterra Catalog Listing', present: result.checklist.capterra, desc: 'Verified software and vendor directory listing.' },
+          { id: 'reddit', label: 'Organic Reddit Discussion Footprint', present: result.checklist.reddit, desc: 'Organic third-party recommendations and community mentions.' },
+          { id: 'crunchbase', label: 'Crunchbase Entity Registration', present: result.checklist.crunchbase, desc: 'Corporate registry verifying company establishment and operations.' },
+          { id: 'trustpilot', label: 'Trustpilot / Public Review Footprint', present: result.checklist.trustpilot, desc: 'Open public customer sentiment and star ratings.' },
+          { id: 'termsPrivacy', label: 'Published Terms & Privacy Policies', present: result.checklist.termsPrivacy, desc: 'Transparent legal documentation, data handling, and disclosures.' },
+          { id: 'metaSecurity', label: 'Canonical & Responsive Viewport', present: result.checklist.metaSecurity, desc: 'Modern technical crawl directives and responsive standards.' }
+        ]
+    : [];
 
   const filteredChecklist = checklistItems.filter((item) => {
     if (checklistFilter === 'present') return item.present;
@@ -367,7 +391,19 @@ export default function EeatAnalyzerPage() {
                     type="text"
                     placeholder="yourdomain.com"
                     value={urlInput}
-                    onChange={(e) => setUrlInput(e.target.value)}
+                    onPaste={(e) => {
+                      const text = e.clipboardData.getData('text');
+                      if (/^https?:\/\//i.test(text)) {
+                        e.preventDefault();
+                        const clean = text.replace(/^https?:\/\//i, '').replace(/\/+$/, '');
+                        setUrlInput(clean);
+                      }
+                    }}
+                    onChange={(e) => {
+                      let val = e.target.value;
+                      val = val.replace(/^https?:\/\//i, '');
+                      setUrlInput(val);
+                    }}
                     disabled={analyzing}
                     className="w-full bg-transparent ml-1 text-xs sm:text-sm font-bold text-[#2b1b12] placeholder-[#6f5a4c]/50 focus:outline-none"
                   />
@@ -414,9 +450,20 @@ export default function EeatAnalyzerPage() {
 
             {/* Error banner */}
             {error && (
-              <div className="mt-4 p-3.5 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-800 font-semibold flex items-center justify-between shadow-xs">
-                <span>{error}</span>
-                <button onClick={() => setError(null)} className="font-bold text-rose-900 cursor-pointer">✕</button>
+              <div className="mt-4 p-4 sm:p-5 bg-rose-50 border-2 border-rose-300 rounded-2xl text-xs text-rose-900 space-y-2.5 shadow-sm animate-fade-in text-left">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 font-black text-rose-800 text-sm">
+                    <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                    <span>Real Live Crawl Status</span>
+                  </div>
+                  <button onClick={() => setError(null)} className="font-bold text-rose-900 cursor-pointer">✕</button>
+                </div>
+                <p className="text-xs text-rose-900 font-medium leading-relaxed">
+                  {error}
+                </p>
+                <div className="text-[11px] bg-white/80 p-2.5 rounded-xl border border-rose-200 text-[#4b382d] leading-relaxed">
+                  💡 <strong>Why does this happen?</strong> Rank Monk executes <strong>100% real live network crawls</strong> and refuses to serve pre-fed fake mock data. When enterprise platforms (like Zomato) deploy strict Cloudflare / Akamai bot challenges (HTTP 403), automated scraping is actively rejected.
+                </div>
               </div>
             )}
           </div>
@@ -529,8 +576,13 @@ export default function EeatAnalyzerPage() {
                 </span>
               </div>
               <p className="text-xs text-[#6f5a4c]">
-                Crawl completed across {result.crawledPagesCount} pages • Industry Category: <strong className="text-[#2b1b12] capitalize">{result.industryCategory.replace('_', ' ')}</strong>
+                Crawl completed across {result.crawledPagesCount} pages • Industry Category: <strong className="text-[#2b1b12]">{result.siteTypeLabel || result.industryCategory.replace('_', ' ')}</strong>
               </p>
+              {result.businessSummary && (
+                <p className="text-[11px] text-[#6f5a4c]/90 pt-0.5 max-w-2xl">
+                  {result.businessSummary}
+                </p>
+              )}
             </div>
 
             {/* Actions */}
@@ -598,11 +650,26 @@ export default function EeatAnalyzerPage() {
               {/* Overall Score Master Hero Card */}
               <div className="bg-gradient-to-br from-[#2b1b12] via-[#3a2518] to-[#1c120b] text-[#fffcf7] rounded-3xl p-6 sm:p-7 shadow-md border border-[#c5a059]/40 relative overflow-hidden flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="space-y-1.5">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#c5a059]/20 text-[#c5a059] border border-[#c5a059]/30">
                       OVERALL QUALITY TIER
                     </span>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    {result.grade && (
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                        result.grade.startsWith('A')
+                          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                          : result.grade === 'B'
+                          ? 'bg-teal-500/20 text-teal-300 border-teal-500/30'
+                          : result.grade === 'C'
+                          ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                          : result.grade === 'D'
+                          ? 'bg-orange-500/20 text-orange-300 border-orange-500/30'
+                          : 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                      }`}>
+                        Grade {result.grade}
+                      </span>
+                    )}
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-white/10 text-[#fffcf7] border border-white/20">
                       {result.qualityTier}
                     </span>
                   </div>
@@ -610,7 +677,7 @@ export default function EeatAnalyzerPage() {
                     {result.brandName} E-E-A-T Score
                   </h4>
                   <p className="text-xs text-[#e4d6c6]/80 max-w-md">
-                    Composite quality score judged against Google Search Quality Rater Guidelines and LLM context ingestion criteria.
+                    Composite quality score judged against Google Search Quality Rater Guidelines (Trust 40%, Experience 20%, Expertise 20%, Authority 20%).
                   </p>
                 </div>
 
@@ -623,6 +690,18 @@ export default function EeatAnalyzerPage() {
                   </span>
                 </div>
               </div>
+
+              {/* Why This Score Card (Google Quality Rater Guidance) */}
+              {result.whyThisScore && (
+                <div className="p-4 bg-white rounded-2xl border border-[#e4d6c6] shadow-xs space-y-1.5">
+                  <span className="font-black text-[10.5px] uppercase tracking-wider text-[#8a5b13] flex items-center gap-1.5">
+                    <span>💡 Why this score?</span>
+                  </span>
+                  <p className="text-xs text-[#4b382d] leading-relaxed">
+                    {result.whyThisScore}
+                  </p>
+                </div>
+              )}
 
               {/* 4 Pillars 2x2 Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
@@ -902,7 +981,7 @@ export default function EeatAnalyzerPage() {
           </div>
 
           {/* 7. Actionable Executive Remediation Roadmap */}
-          <div className="bg-[#fffcf7] rounded-3xl border-2 border-[#2b1b12] p-6 sm:p-8 shadow-md space-y-4">
+          <div className="bg-[#fffcf7] rounded-3xl border-2 border-[#2b1b12] p-6 sm:p-8 shadow-md space-y-4 print:break-before-page print:break-inside-avoid">
             <div className="flex flex-col sm:flex-row justify-between sm:items-center border-b border-[#e4d6c6] pb-4 gap-2">
               <div>
                 <h3 className="font-editorial text-lg sm:text-2xl font-bold text-[#2b1b12] flex items-center gap-2">
@@ -926,30 +1005,33 @@ export default function EeatAnalyzerPage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 pt-2">
-              {[
-                {
-                  title: result.checklist.organizationSchema
-                    ? 'Expand Schema to Service & FAQPage JSON-LD'
-                    : 'Deploy Organization & Service JSON-LD',
-                  desc: result.checklist.organizationSchema
-                    ? 'Organization schema is verified. Now add granular Service, Offer, and FAQPage JSON-LD schemas to dominate AI answer engines.'
-                    : 'Declare entity types, founding credentials, contact points, and service catalogs directly in the HTML head.',
-                  tag: 'Technical Schema'
-                },
-                { title: 'Publish Quantified Case Studies', desc: 'Add 2–3 client operational success stories with verified metrics to prove hands-on Experience.', tag: 'Experience Proof' },
-                { title: 'Add Verified Author Bylines', desc: 'Include named author credentials and links to LinkedIn profiles on all educational articles to satisfy Expertise.', tag: 'Author Authority' },
-                { title: 'Secure G2 & Capterra Profiles', desc: 'Claim and optimize your brand profiles on independent software directories to anchor AI model grounding.', tag: 'Third-Party Trust' },
-                { title: 'Publish Standard llms.txt File', desc: 'Expose a canonical llms.txt file at your domain root (https://domain/llms.txt) to prevent AI hallucinations.', tag: 'AEO Protocol' },
-                {
-                  title: result.checklist.termsPrivacy
-                    ? 'Footer Corporate Governance Details'
-                    : 'Transparent Legal Disclosures',
-                  desc: result.checklist.termsPrivacy
-                    ? 'Terms & Privacy are verified. Ensure registered physical corporate address and company registration numbers are clear site-wide.'
-                    : 'Ensure physical corporate address, Terms of Service, and Privacy Policy links are in the site-wide footer.',
-                  tag: 'Trust Compliance'
-                }
-              ].map((act, i) => (
+              {(result.remediationSteps && result.remediationSteps.length > 0
+                ? result.remediationSteps
+                : [
+                    {
+                      title: result.checklist.organizationSchema
+                        ? 'Expand Schema to Service & FAQPage JSON-LD'
+                        : 'Deploy Organization & Product JSON-LD',
+                      desc: result.checklist.organizationSchema
+                        ? 'Organization schema is verified. Now add granular Service, Product, Offer, and FAQPage JSON-LD schemas to dominate AI answer engines.'
+                        : 'Declare entity types, founding credentials, contact points, and product/service catalogs directly in the HTML head.',
+                      tag: 'Technical Schema'
+                    },
+                    { title: 'Publish Quantified Case Studies & Proof', desc: 'Add 2–3 customer operational success stories with verified metrics to prove hands-on Experience.', tag: 'Experience Proof' },
+                    { title: 'Add Verified Author & Creator Bylines', desc: 'Include named author credentials and links to LinkedIn profiles on published resources to satisfy Expertise.', tag: 'Author Authority' },
+                    { title: 'Claim Third-Party Verified Profiles', desc: 'Claim and optimize your brand profiles on independent review platforms (Trustpilot or Google Reviews) to anchor AI search grounding.', tag: 'Third-Party Trust' },
+                    { title: 'Publish Standard llms.txt File', desc: 'Expose a canonical llms.txt file at your domain root (https://domain/llms.txt) to prevent generative AI hallucinations.', tag: 'AEO Protocol' },
+                    {
+                      title: result.checklist.termsPrivacy
+                        ? 'Footer Corporate Governance Details'
+                        : 'Transparent Legal Disclosures',
+                      desc: result.checklist.termsPrivacy
+                        ? 'Terms & Privacy are verified. Ensure registered physical corporate address and company registration numbers are clear site-wide.'
+                        : 'Ensure physical corporate address, Terms of Service, and Privacy Policy links are in the site-wide footer.',
+                      tag: 'Trust Compliance'
+                    }
+                  ]
+              ).map((act, i) => (
                 <div key={i} className="p-4 bg-white rounded-2xl border border-[#e4d6c6] shadow-xs space-y-2 flex flex-col justify-between">
                   <div className="space-y-1">
                     <span className="text-[9.5px] font-black uppercase tracking-wider text-[#8a5b13] px-2 py-0.5 rounded bg-[#f8f3ec] border border-[#e4d6c6] inline-block">

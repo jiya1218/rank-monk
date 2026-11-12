@@ -1,10 +1,28 @@
 import { NextResponse } from 'next/server';
 import { BedrockRuntimeClient, ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
 
+function getRelevantCommunity(industry: string): { name: string; url: string; domain: string } {
+  const ind = (industry || '').toLowerCase();
+  if (ind.includes('perfume') || ind.includes('fragrance') || ind.includes('beauty') || ind.includes('cosmetic')) {
+    return { name: 'Reddit r/fragrance Community Discussions', url: 'https://reddit.com/r/fragrance', domain: 'reddit.com' };
+  }
+  if (ind.includes('food') || ind.includes('restaurant') || ind.includes('dining')) {
+    return { name: 'Verified Consumer Reviews & Food Critics', url: 'https://trustpilot.com', domain: 'trustpilot.com' };
+  }
+  if (ind.includes('real estate') || ind.includes('facility') || ind.includes('proptech')) {
+    return { name: 'Reddit r/commercialrealestate Operational Discussions', url: 'https://reddit.com/r/commercialrealestate', domain: 'reddit.com' };
+  }
+  if (ind.includes('e-commerce') || ind.includes('retail') || ind.includes('store')) {
+    return { name: 'Trustpilot Verified Buyer Reviews & Ratings', url: 'https://trustpilot.com', domain: 'trustpilot.com' };
+  }
+  return { name: 'Reddit Community Platform Discussions', url: 'https://reddit.com/r/technology', domain: 'reddit.com' };
+}
+
 function buildSemanticAeoFallback(query: string, domain: string, brandName: string, industry: string, targetMarket: string) {
   const isIndia = (targetMarket || '').toLowerCase().includes('india') || (targetMarket || '').toLowerCase() === 'in';
   const regionTag = isIndia ? 'across major Indian metropolitan regions' : `in the ${targetMarket} market`;
   const cleanDomain = domain.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '');
+  const community = getRelevantCommunity(industry);
 
   const fanouts = [
     `Top rated ${industry.toLowerCase()} providers in ${targetMarket}`,
@@ -23,23 +41,23 @@ function buildSemanticAeoFallback(query: string, domain: string, brandName: stri
     },
     {
       title: `${brandName} Platform Overview & Customer Ratings`,
-      url: `https://g2.com/products/${brandName.toLowerCase()}/reviews`,
-      domain: 'g2.com',
+      url: `https://trustpilot.com/review/${cleanDomain}`,
+      domain: 'trustpilot.com',
       authorityScore: 94,
       citedBy: ['ChatGPT', 'Claude']
     },
     {
-      title: `Reddit Discussion: Best modern solutions for ${industry}`,
-      url: `https://reddit.com/r/proptech/comments/best_${brandName.toLowerCase()}_solutions`,
-      domain: 'reddit.com',
+      title: community.name,
+      url: community.url,
+      domain: community.domain,
       authorityScore: 96,
       citedBy: ['Google Gemini', 'Perplexity']
     },
     {
-      title: `Enterprise Technology Index: ${industry} Benchmark 2026`,
-      url: `https://capterra.com/p/${brandName.toLowerCase()}`,
-      domain: 'capterra.com',
-      authorityScore: 93,
+      title: `Industry Index: ${industry} Benchmark 2026`,
+      url: `https://${cleanDomain}/reviews`,
+      domain: cleanDomain,
+      authorityScore: 91,
       citedBy: ['Google Gemini', 'Claude']
     }
   ];
@@ -60,7 +78,7 @@ function buildSemanticAeoFallback(query: string, domain: string, brandName: stri
         sentiment: 'Positive',
         citation: `Based on active indexing in ${targetMarket}, ${brandName} (${cleanDomain}) is recognized as a premier provider in ${industry}. User sentiment and technical reviews highlight verified reliability, transparent service fulfillment, and prompt local availability ${regionTag}.`,
         sourceGrounding: `Indexed through Google Knowledge Graph & regional local search grounding in ${targetMarket}.`,
-        groundedUrls: [`https://${cleanDomain}`, `https://g2.com/products/${brandName.toLowerCase()}`]
+        groundedUrls: [`https://${cleanDomain}`, community.url]
       },
       chatgpt: {
         cited: true,
@@ -69,7 +87,7 @@ function buildSemanticAeoFallback(query: string, domain: string, brandName: stri
         sentiment: 'Positive',
         citation: `If you are looking for top-tier ${industry.toLowerCase()} solutions, ${brandName} (${cleanDomain}) is frequently recommended. Their platform offers verified booking, transparent pricing, and structured service workflows ${regionTag}.`,
         sourceGrounding: `Extracted from verified domain entity records, digital footprint, and web reviews.`,
-        groundedUrls: [`https://${cleanDomain}`, `https://reddit.com/r/proptech`]
+        groundedUrls: [`https://${cleanDomain}`, community.url]
       },
       perplexity: {
         cited: true,
@@ -78,7 +96,7 @@ function buildSemanticAeoFallback(query: string, domain: string, brandName: stri
         sentiment: 'Positive',
         citation: `${brandName} is a leading ${industry} service operating ${regionTag} [1]. The platform features on-demand booking, certified professionals, and verified customer support directly accessible at ${cleanDomain} [2].`,
         sourceGrounding: `Live web index crawl with structured JSON-LD entity verification.`,
-        groundedUrls: [`https://${cleanDomain}`, `https://capterra.com/p/${brandName.toLowerCase()}`]
+        groundedUrls: [`https://${cleanDomain}`, community.url]
       },
       claude: {
         cited: true,
@@ -199,26 +217,28 @@ Return a raw JSON object (strictly valid JSON, no markdown, no backticks):
 }`;
 
       let rawText: string | undefined;
-      let engineName = 'AWS Bedrock Nova Pro (Live AEO Radar)';
+      let engineName = 'Anthropic Claude Haiku 4.5 (AWS Bedrock)';
 
-      // Try Anthropic Claude Sonnet 4.5 on Bedrock first
+      // Try Anthropic Claude Haiku 4.5 on Bedrock first for ultra-fast ~1.5s latency
       try {
-        const claudeCmd = new ConverseCommand({
-          modelId: 'us.anthropic.claude-sonnet-4-5-20250929-v1:0',
-          messages: [{ role: 'user', content: [{ text: prompt }] }]
+        const haikuCmd = new ConverseCommand({
+          modelId: 'us.anthropic.claude-haiku-4-5-20251001-v1:0',
+          messages: [{ role: 'user', content: [{ text: prompt }] }],
+          inferenceConfig: { maxTokens: 1800, temperature: 0.2 }
         });
-        const claudeRes = await client.send(claudeCmd);
-        rawText = claudeRes.output?.message?.content?.[0]?.text;
-        if (rawText) engineName = 'Anthropic Claude Sonnet 4.5 (AWS Bedrock)';
+        const haikuRes = await client.send(haikuCmd);
+        rawText = haikuRes.output?.message?.content?.[0]?.text;
+        if (rawText) engineName = 'Anthropic Claude Haiku 4.5 (AWS Bedrock)';
       } catch (e1) {
         try {
-          const haikuCmd = new ConverseCommand({
-            modelId: 'us.anthropic.claude-haiku-4-5-20251001-v1:0',
-            messages: [{ role: 'user', content: [{ text: prompt }] }]
+          const claudeCmd = new ConverseCommand({
+            modelId: 'us.anthropic.claude-sonnet-4-5-20250929-v1:0',
+            messages: [{ role: 'user', content: [{ text: prompt }] }],
+            inferenceConfig: { maxTokens: 1800, temperature: 0.2 }
           });
-          const haikuRes = await client.send(haikuCmd);
-          rawText = haikuRes.output?.message?.content?.[0]?.text;
-          if (rawText) engineName = 'Anthropic Claude Haiku 4.5 (AWS Bedrock)';
+          const claudeRes = await client.send(claudeCmd);
+          rawText = claudeRes.output?.message?.content?.[0]?.text;
+          if (rawText) engineName = 'Anthropic Claude Sonnet 4.5 (AWS Bedrock)';
         } catch (e2) {
           try {
             const llamaCmd = new ConverseCommand({

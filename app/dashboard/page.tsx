@@ -658,6 +658,7 @@ export default function DashboardPage() {
     ratio: string;
     formatName: string;
     style: string;
+    theme?: string;
     referenceImage?: string;
   }) => {
     const res = await fetch('/api/ai/generate-image', {
@@ -668,6 +669,7 @@ export default function DashboardPage() {
         ratio: params.ratio,
         formatName: params.formatName,
         style: params.style,
+        theme: params.theme,
         referenceImage: params.referenceImage,
         brandName: project?.name || 'Your Brand',
         domain: project?.domain || '',
