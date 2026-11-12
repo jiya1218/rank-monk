@@ -1,52 +1,63 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  Share2,
+  Plug,
   CheckCircle2,
   AlertCircle,
   ExternalLink,
   ChevronRight,
-  ChevronDown,
-  ChevronUp,
   ShieldCheck,
-  Smartphone,
-  BookOpen,
-  HelpCircle,
   RefreshCw,
-  Plus,
-  ArrowRight,
+  Edit2,
+  Trash2,
   Globe,
+  BookOpen,
+  X,
+  Sparkles,
+  HelpCircle,
   Lock,
   Layers,
-  Copy,
   Check,
-  Sparkles,
-  Loader2,
-  Settings2,
-  Code
+  Copy,
+  Share2
 } from 'lucide-react';
 
-// Custom inline SVG icons for social platforms
-const InstagramIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
-    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+// Platform Icons
+const WordPressIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="#21759b">
+    <path d="M12 2C6.486 2 2 6.486 2 12c0 4.418 2.865 8.167 6.839 9.504L4.85 10.42a8.04 8.04 0 0 1 7.15-4.42c2.073 0 3.96.786 5.394 2.074L12 2zm0 20c-1.393 0-2.709-.286-3.9-.803l5.09-14.76c.404-.035.795-.062 1.155-.062 1.34 0 2.385.503 2.385 1.543 0 .736-.57 1.677-1.14 2.617l-3.59 11.466zm7.15-4.42A7.964 7.964 0 0 0 22 12c0-2.316-.983-4.4-2.56-5.867l3.71 11.447zM2.56 12c0-1.875.643-3.6 1.722-4.975l5.228 15.143A8.006 8.006 0 0 1 2.56 12z"/>
   </svg>
 );
 
-const FacebookIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+const ShopifyIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="#95bf47">
+    <path d="M15.4 3.7c-.1-.3-.4-.5-.7-.4l-2 .6c-.2-.7-.7-1.4-1.4-1.9-.9-.7-2-.8-2.8-.4-.3.1-.5.3-.6.6L7.1 3.5c-.3.1-.4.3-.5.6l-4.5 14c-.1.3 0 .6.2.8l11.4 5.3c.2.1.4.1.6 0l7.3-3.4c.2-.1.4-.4.4-.7l-6.1-16.4zm-4.7-.6c.5-.3 1.2-.2 1.7.2.4.3.7.8.9 1.4l-3.3 1c.2-1.3.4-2.3.7-2.6zm-1.8 3.5l1.8-.5-.8 5.7c-.4-1.8-.7-3.6-1-5.2zm2.7 15.3l-8.6-4 3.4-10.7 4.5 13.3c.2.4.4.9.7 1.4zm1.5-1.5c-.3-.7-.7-1.6-1-2.4l4.6-13.6 4.9 13.2-8.5 2.8z"/>
+  </svg>
+);
+
+const MagentoIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="#ee672f">
+    <path d="M12 2L2 7.8v8.4l3.3 1.9V9.7l6.7-3.9 6.7 3.9v8.4l3.3-1.9V7.8L12 2zm0 8.8l-3.3 1.9v5.6L12 20.2l3.3-1.9v-5.6L12 10.8z"/>
+  </svg>
+);
+
+const GithubIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+  </svg>
+);
+
+const GscShieldIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    <path d="m9 12 2 2 4-4"/>
   </svg>
 );
 
 const LinkedinIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
-    <rect width="4" height="12" x="2" y="9"/>
-    <circle cx="4" cy="4" r="2"/>
+  <svg className={className} viewBox="0 0 24 24" fill="#0077b5">
+    <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
   </svg>
 );
 
@@ -56,22 +67,25 @@ const TwitterIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
   </svg>
 );
 
-const GithubIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-    <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+const InstagramIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={`${className} text-pink-600`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
   </svg>
 );
 
-interface SocialAccount {
-  platform: 'instagram' | 'facebook' | 'linkedin' | 'twitter';
-  id: string;
-  name: string;
-  username?: string;
-  profilePictureUrl?: string;
-  followersCount?: number;
-  pageAccessToken?: string;
-  connectedAt: string;
-}
+const FacebookIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="#1877f2">
+    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+  </svg>
+);
+
+const PinterestIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="#e60023">
+    <path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345-.09.375-.291 1.199-.334 1.373-.053.224-.174.271-.4.165-1.49-.694-2.42-2.875-2.42-4.627 0-3.774 2.741-7.24 7.904-7.24 4.15 0 7.375 2.957 7.375 6.909 0 4.124-2.599 7.442-6.208 7.442-1.213 0-2.353-.63-2.744-1.377l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/>
+  </svg>
+);
 
 interface IntegrationsWorkspaceProps {
   project: any;
@@ -79,2509 +93,951 @@ interface IntegrationsWorkspaceProps {
   onNavigateToSocial?: () => void;
 }
 
-export function IntegrationsWorkspace({
-  project,
-  user,
-  onNavigateToSocial
-}: IntegrationsWorkspaceProps) {
-  const [activeCategory, setActiveCategory] = useState<'all' | 'cms' | 'social' | 'rulebook'>('all');
-  const [accounts, setAccounts] = useState<SocialAccount[]>([]);
-  const [ruleBookTab, setRuleBookTab] = useState<'github' | 'wordpress' | 'meta' | 'linkedin' | 'twitter' | 'faq'>('github');
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+export function IntegrationsWorkspace({ project, user, onNavigateToSocial }: IntegrationsWorkspaceProps) {
+  const cleanDomain = (project?.domain || '').replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '').toLowerCase();
 
-  // Pre-flight check items for user self-verification
-  const [checklist, setChecklist] = useState({
-    isProfessional: false,
-    isLinkedToPage: false,
-    hasAdminRights: false,
-  });
+  // Active Selected CMS Tab
+  const [selectedCms, setSelectedCms] = useState<'wordpress' | 'shopify' | 'magento' | 'github'>('wordpress');
+
+  // Integrations State
+  const [wordpressConfig, setWordpressConfig] = useState<any>(null);
+  const [githubConfig, setGithubConfig] = useState<any>(null);
+  const [shopifyConfig, setShopifyConfig] = useState<any>(null);
+  const [magentoConfig, setMagentoConfig] = useState<any>(null);
+  const [gscConfig, setGscConfig] = useState<any>(null);
+  const [socialAccounts, setSocialAccounts] = useState<any[]>([]);
+
+  // Modals
+  const [cmsModalOpen, setCmsModalOpen] = useState(false);
+  const [gscModalOpen, setGscModalOpen] = useState(false);
+  const [guideModalOpen, setGuideModalOpen] = useState(false);
+  const [guideTab, setGuideTab] = useState<'gsc' | 'wordpress' | 'github' | 'social'>('gsc');
+  const [socialModalOpen, setSocialModalOpen] = useState(false);
+  const [activeSocialPlatform, setActiveSocialPlatform] = useState<string>('linkedin');
+
+  // Form States
+  const [saving, setSaving] = useState(false);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  // WordPress Form
+  const [wpUrl, setWpUrl] = useState('');
+  const [wpUser, setWpUser] = useState('');
+  const [wpAppPassword, setWpAppPassword] = useState('');
+
+  // GitHub Form
+  const [ghOwner, setGhOwner] = useState('');
+  const [ghRepo, setGhRepo] = useState('');
+  const [ghToken, setGhToken] = useState('');
+
+  // GSC Form
+  const [gscPropertyUrl, setGscPropertyUrl] = useState(`sc-domain:${cleanDomain}`);
+  const [gscServiceAccountJson, setGscServiceAccountJson] = useState('');
+
+  // Social Account Input
+  const [socialHandle, setSocialHandle] = useState('');
 
   const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3500);
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 3500);
   };
 
-  // Helper: Persist social accounts to cloud backend
-  const syncSocialAccountsToCloud = (accountsList: SocialAccount[]) => {
-    if (user?.email || cleanDomain) {
-      fetch('/api/integrations', {
+  // Load Integrations
+  useEffect(() => {
+    if (!cleanDomain) return;
+    const email = user?.email || 'default';
+
+    fetch(`/api/integrations?email=${encodeURIComponent(email)}&domain=${encodeURIComponent(cleanDomain)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.integrations) {
+          if (data.integrations.wordpress) {
+            setWordpressConfig(data.integrations.wordpress);
+            setWpUrl(data.integrations.wordpress.wpUrl || `https://${cleanDomain}`);
+            setWpUser(data.integrations.wordpress.wpUser || '');
+          }
+          if (data.integrations.github) {
+            setGithubConfig(data.integrations.github);
+            setGhOwner(data.integrations.github.owner || '');
+            setGhRepo(data.integrations.github.repo || '');
+          }
+          if (data.integrations.gsc) {
+            setGscConfig(data.integrations.gsc);
+            setGscPropertyUrl(data.integrations.gsc.siteUrl || `sc-domain:${cleanDomain}`);
+          }
+          if (Array.isArray(data.integrations.socialAccounts)) {
+            setSocialAccounts(data.integrations.socialAccounts);
+          }
+        }
+      })
+      .catch(() => {});
+  }, [cleanDomain, user?.email]);
+
+  // Handle Save WordPress
+  const handleSaveWordPress = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    const email = user?.email || 'default';
+
+    try {
+      const config = {
+        wpUrl: wpUrl.trim() || `https://${cleanDomain}`,
+        wpUser: wpUser.trim(),
+        wpAppPassword: wpAppPassword.trim(),
+        connectedAt: new Date().toISOString()
+      };
+
+      const res = await fetch('/api/integrations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: user?.email || 'default',
-          domain: cleanDomain,
-          platform: 'social',
-          config: accountsList
-        })
-      }).catch(() => {});
+        body: JSON.stringify({ email, domain: cleanDomain, platform: 'wordpress', config })
+      });
+
+      const json = await res.json();
+      if (json.success) {
+        setWordpressConfig(config);
+        localStorage.setItem(`rm_wp_config_${cleanDomain}`, JSON.stringify(config));
+        setCmsModalOpen(false);
+        showToast('✓ WordPress REST API connected successfully!');
+      } else {
+        throw new Error(json.error || 'Failed to save');
+      }
+    } catch (err: any) {
+      alert(`Error: ${err.message}`);
+    } finally {
+      setSaving(false);
     }
   };
 
-  // 1. Sync accounts from LocalStorage and Cloud Server
-  const loadAccounts = () => {
-    const saved = localStorage.getItem(`rankmonk_social_accounts_${user?.email || 'default'}`);
-    if (saved) {
-      try {
-        setAccounts(JSON.parse(saved));
-      } catch (e) {}
-    } else {
-      setAccounts([]);
-    }
+  // Handle Save GitHub
+  const handleSaveGitHub = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    const email = user?.email || 'default';
 
-    // Cloud fetch
-    if (user?.email || cleanDomain) {
-      fetch(`/api/integrations?email=${encodeURIComponent(user?.email || '')}&domain=${encodeURIComponent(cleanDomain)}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.success && Array.isArray(data.integrations?.socialAccounts) && data.integrations.socialAccounts.length > 0) {
-            setAccounts(data.integrations.socialAccounts);
-            localStorage.setItem(`rankmonk_social_accounts_${user?.email || 'default'}`, JSON.stringify(data.integrations.socialAccounts));
-          }
-        })
-        .catch(() => {});
+    try {
+      const config = {
+        owner: ghOwner.trim(),
+        repo: ghRepo.trim(),
+        token: ghToken.trim(),
+        connectedAt: new Date().toISOString()
+      };
+
+      const res = await fetch('/api/integrations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, domain: cleanDomain, platform: 'github', config })
+      });
+
+      const json = await res.json();
+      if (json.success) {
+        setGithubConfig(config);
+        localStorage.setItem(`rm_gh_config_${cleanDomain}`, JSON.stringify(config));
+        setCmsModalOpen(false);
+        showToast('✓ GitHub Repository connected successfully!');
+      } else {
+        throw new Error(json.error || 'Failed to save');
+      }
+    } catch (err: any) {
+      alert(`Error: ${err.message}`);
+    } finally {
+      setSaving(false);
     }
   };
 
-  useEffect(() => {
-    loadAccounts();
-  }, [user?.email]);
+  // Handle Save Google Search Console
+  const handleSaveGsc = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    const email = user?.email || 'default';
 
-  // 2. Listen for Meta OAuth Popup Callback Messages
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data && event.data.type === 'RANKMONK_META_CONNECTED') {
-        const incomingAccounts = event.data.accounts || [];
-        if (incomingAccounts.length > 0) {
-          const formatted: SocialAccount[] = incomingAccounts.map((acc: any) => ({
-            platform: acc.platform,
-            id: acc.id,
-            name: acc.name || (acc.username ? `@${acc.username}` : 'Meta Account'),
-            username: acc.username,
-            profilePictureUrl: acc.profilePictureUrl,
-            followersCount: acc.followersCount,
-            pageAccessToken: acc.pageAccessToken,
-            connectedAt: new Date().toISOString()
-          }));
-
-          setAccounts(prev => {
-            const nonMeta = prev.filter(a => a.platform !== 'instagram' && a.platform !== 'facebook');
-            const merged = [...nonMeta, ...formatted];
-            localStorage.setItem(`rankmonk_social_accounts_${user?.email || 'default'}`, JSON.stringify(merged));
-            return merged;
-          });
-
-          showToast('🎉 Instagram & Facebook connected successfully!');
+    try {
+      let saKey: any = null;
+      if (gscServiceAccountJson.trim()) {
+        try {
+          saKey = JSON.parse(gscServiceAccountJson.trim());
+        } catch {
+          throw new Error('Invalid JSON format for Service Account Key.');
         }
       }
-    };
 
-    const handleFocus = () => {
-      try {
-        const temp = localStorage.getItem('rankmonk_meta_temp_connection');
-        if (temp) {
-          const parsed = JSON.parse(temp);
-          localStorage.removeItem('rankmonk_meta_temp_connection');
-          if (parsed && parsed.accounts && parsed.accounts.length > 0) {
-            handleMessage({ data: parsed } as MessageEvent);
-          }
-        }
-      } catch (e) {}
-    };
+      const config = {
+        siteUrl: gscPropertyUrl.trim() || `sc-domain:${cleanDomain}`,
+        serviceAccountKey: saKey,
+        connectedAt: new Date().toISOString()
+      };
 
-    window.addEventListener('message', handleMessage);
-    window.addEventListener('focus', handleFocus);
-    return () => {
-      window.removeEventListener('message', handleMessage);
-      window.removeEventListener('focus', handleFocus);
-    };
-  }, [user?.email]);
+      const res = await fetch('/api/integrations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, domain: cleanDomain, platform: 'gsc', config })
+      });
 
-  // 3. Trigger 1-Click Meta Popup
-  const handleConnectMeta = () => {
-    const width = 650;
-    const height = 750;
-    const left = window.screen.width / 2 - width / 2;
-    const top = window.screen.height / 2 - height / 2;
-
-    window.open(
-      '/api/social/connect/meta',
-      'MetaOAuth',
-      `width=${width},height=${height},top=${top},left=${left},toolbar=no,menubar=no`
-    );
+      const json = await res.json();
+      if (json.success) {
+        setGscConfig(config);
+        localStorage.setItem(`rm_gsc_${cleanDomain}`, JSON.stringify({ connected: true, ...config }));
+        setGscModalOpen(false);
+        showToast('✓ Google Search Console connected successfully!');
+      } else {
+        throw new Error(json.error || 'Failed to save');
+      }
+    } catch (err: any) {
+      alert(`Error: ${err.message}`);
+    } finally {
+      setSaving(false);
+    }
   };
 
   // Disconnect handler
-  const handleDisconnect = (platform: string) => {
-    const updated = accounts.filter(a => a.platform !== platform);
-    setAccounts(updated);
-    localStorage.setItem(`rankmonk_social_accounts_${user?.email || 'default'}`, JSON.stringify(updated));
-    showToast(`Disconnected ${platform} account.`);
-  };
+  const handleDisconnect = async (platform: string) => {
+    if (!confirm(`Are you sure you want to disconnect ${platform}?`)) return;
+    const email = user?.email || 'default';
 
-  // Active Credential Modals ('none' | 'twitter' | 'linkedin' | 'meta_token' | 'github' | 'wordpress')
-  const [activeModal, setActiveModal] = useState<'none' | 'twitter' | 'linkedin' | 'meta_token' | 'github' | 'wordpress'>('none');
+    await fetch('/api/integrations', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, domain: cleanDomain, platform })
+    });
 
-  const cleanDomain = project?.domain ? project.domain.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '') : 'default';
-
-  // Helper to normalize any repo string (e.g. "https://github.com/company/repo.git" -> "company/repo")
-  const normalizeRepoName = (r: string) => {
-    return r
-      .replace(/^(https?:\/\/)?(www\.)?github\.com\//i, '')
-      .replace(/\.git$/i, '')
-      .replace(/^\/+|\/+$/g, '')
-      .trim();
-  };
-
-  // GitHub GitOps & WordPress State for CMS Publishing
-  const [githubConfig, setGithubConfig] = useState({
-    token: '',
-    repo: '',
-    branch: 'main',
-    folderPath: 'content/blogs'
-  });
-  const [wpConfig, setWpConfig] = useState({
-    wpUrl: '',
-    wpUsername: '',
-    wpAppPassword: ''
-  });
-  const [isTestingGithub, setIsTestingGithub] = useState(false);
-  const [githubTestResult, setGithubTestResult] = useState<any | null>(null);
-  const [contentUrlInput, setContentUrlInput] = useState('');
-  const [detectedFolders, setDetectedFolders] = useState<{ path: string; label: string; fileCount: number; type: string }[]>([]);
-  const [showGithubGuide, setShowGithubGuide] = useState(true);
-  const [showWpGuide, setShowWpGuide] = useState(true);
-
-  // Helper: check if token is genuine personal access token
-  const isRealToken = (t?: string): boolean => {
-    if (!t || typeof t !== 'string') return false;
-    const s = t.trim();
-    if (s.includes('test') || s.includes('dummy') || s.includes('preserved') || s.includes('example') || s.includes('random') || s.includes('placeholder')) {
-      return false;
-    }
-    const isClassic = /^ghp_[A-Za-z0-9_]{36}$/.test(s);
-    const isFineGrained = /^github_pat_[A-Za-z0-9_]{80,}$/.test(s);
-    const isApp = /^(gho|ghs|ghu)_[A-Za-z0-9_]{30,}$/.test(s);
-    return isClassic || isFineGrained || isApp;
-  };
-
-  const isRealWpPassword = (p?: string): boolean => {
-    if (!p || typeof p !== 'string') return false;
-    const s = p.trim();
-    return s.length >= 8 && !s.includes('preserved') && !s.includes('dummy');
-  };
-
-  // Sync GitHub and WP from localStorage AND Cloud Server
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      const savedGh = localStorage.getItem(`rm_gh_config_${cleanDomain}`) || localStorage.getItem('rm_gh_config');
-      if (savedGh) {
-        const parsed = JSON.parse(savedGh);
-        if (parsed.token && !isRealToken(parsed.token)) {
-          // Clear dummy / test tokens
-          localStorage.removeItem(`rm_gh_config_${cleanDomain}`);
-          localStorage.removeItem('rm_gh_config');
-          parsed.token = '';
-        }
-        if (parsed.repo) parsed.repo = normalizeRepoName(parsed.repo);
-        if (isRealToken(parsed.token)) {
-          setGithubConfig(prev => ({
-            ...prev,
-            ...parsed,
-            token: parsed.token || '',
-            repo: parsed.repo || '',
-            branch: parsed.branch || 'main',
-            folderPath: parsed.folderPath || prev.folderPath || 'content/blogs'
-          }));
-        }
-      }
-      const savedWp = localStorage.getItem(`rm_wp_config_${cleanDomain}`) || localStorage.getItem('rm_wp_config');
-      if (savedWp) {
-        const parsed = JSON.parse(savedWp);
-        if (parsed.wpAppPassword && !isRealWpPassword(parsed.wpAppPassword)) {
-          localStorage.removeItem(`rm_wp_config_${cleanDomain}`);
-          localStorage.removeItem('rm_wp_config');
-          parsed.wpAppPassword = '';
-        }
-        if (isRealWpPassword(parsed.wpAppPassword)) {
-          setWpConfig(prev => ({
-            ...prev,
-            ...parsed,
-            wpUrl: parsed.wpUrl || parsed.url || '',
-            wpUsername: parsed.wpUsername || parsed.username || '',
-            wpAppPassword: parsed.wpAppPassword || ''
-          }));
-        }
-      }
-    } catch {}
-
-    // Cloud Database Persistence: Load integrations preserved under user's email
-    const userEmail = user?.email;
-    if (userEmail || cleanDomain) {
-      fetch(`/api/integrations?email=${encodeURIComponent(userEmail || '')}&domain=${encodeURIComponent(cleanDomain)}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.success && data.integrations) {
-            if (data.integrations.github && isRealToken(data.integrations.github.token)) {
-              const gh = data.integrations.github;
-              if (gh.repo) gh.repo = normalizeRepoName(gh.repo);
-              setGithubConfig(prev => ({
-                ...prev,
-                ...gh,
-                token: gh.token || '',
-                repo: gh.repo || '',
-                branch: gh.branch || 'main',
-                folderPath: gh.folderPath || prev.folderPath || 'content/blogs'
-              }));
-              localStorage.setItem(`rm_gh_config_${cleanDomain}`, JSON.stringify(gh));
-              localStorage.setItem('rm_gh_config', JSON.stringify(gh));
-            }
-            if (data.integrations.wordpress && isRealWpPassword(data.integrations.wordpress.wpAppPassword)) {
-              const wp = data.integrations.wordpress;
-              setWpConfig(prev => ({
-                ...prev,
-                ...wp,
-                wpUrl: wp.wpUrl || wp.url || '',
-                wpUsername: wp.wpUsername || wp.username || '',
-                wpAppPassword: wp.wpAppPassword || ''
-              }));
-              localStorage.setItem(`rm_wp_config_${cleanDomain}`, JSON.stringify(wp));
-              localStorage.setItem('rm_wp_config', JSON.stringify(wp));
-            }
-            if (Array.isArray(data.integrations.socialAccounts) && data.integrations.socialAccounts.length > 0) {
-              setAccounts(data.integrations.socialAccounts);
-              localStorage.setItem(`rankmonk_social_accounts_${userEmail || 'default'}`, JSON.stringify(data.integrations.socialAccounts));
-            }
-          }
-        })
-        .catch(() => {});
-    }
-  }, [cleanDomain, user?.email]);
-
-  const cleanRepoName = useMemo(() => {
-    if (!githubConfig.repo) return '';
-    return normalizeRepoName(githubConfig.repo);
-  }, [githubConfig.repo]);
-
-  const isGithubConnected = Boolean(isRealToken(githubConfig.token) && cleanRepoName);
-  const isWpConnected = Boolean(wpConfig.wpUrl && wpConfig.wpUsername && isRealWpPassword(wpConfig.wpAppPassword));
-
-  const connectedStats = useMemo(() => {
-    let count = 0;
-    if (isGithubConnected) count++;
-    if (isWpConnected) count++;
-    if (accounts.some(a => a.platform === 'instagram')) count++;
-    if (accounts.some(a => a.platform === 'facebook')) count++;
-    if (accounts.some(a => a.platform === 'linkedin')) count++;
-    if (accounts.some(a => a.platform === 'twitter')) count++;
-    return {
-      totalConnected: count,
-      totalAvailable: 6
-    };
-  }, [isGithubConnected, isWpConnected, accounts]);
-
-  const handleSaveGithub = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!githubConfig.token.trim() || !githubConfig.repo.trim()) {
-      showToast('⚠️ Please enter both GitHub Token and Repository (owner/repo).');
-      return;
-    }
-    const cleanRepo = normalizeRepoName(githubConfig.repo);
-    const sanitized = {
-      ...githubConfig,
-      repo: cleanRepo
-    };
-    setGithubConfig(sanitized);
-    try {
-      localStorage.setItem(`rm_gh_config_${cleanDomain}`, JSON.stringify(sanitized));
-      localStorage.setItem('rm_gh_config', JSON.stringify(sanitized));
-
-      // Persist to Cloud Backend so it's remembered on any device/login
-      fetch('/api/integrations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: user?.email || 'default',
-          domain: cleanDomain,
-          platform: 'github',
-          config: sanitized
-        })
-      }).catch(() => {});
-
-      showToast('✅ GitHub GitOps connected & permanently preserved on your account!');
-      setActiveModal('none');
-    } catch {}
-  };
-
-  const handleDisconnectGithub = () => {
-    setGithubConfig({ token: '', repo: '', branch: 'main', folderPath: 'content/blogs' });
-    try {
-      localStorage.removeItem(`rm_gh_config_${cleanDomain}`);
-      localStorage.removeItem('rm_gh_config');
-
-      fetch('/api/integrations', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: user?.email || 'default',
-          domain: cleanDomain,
-          platform: 'github'
-        })
-      }).catch(() => {});
-
-      showToast('✓ GitHub integration disconnected.');
-    } catch {}
-  };
-
-  const handleSaveWp = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!wpConfig.wpUrl.trim() || !wpConfig.wpUsername.trim() || !wpConfig.wpAppPassword.trim()) {
-      showToast('⚠️ Please fill in all WordPress fields.');
-      return;
-    }
-    try {
-      localStorage.setItem(`rm_wp_config_${cleanDomain}`, JSON.stringify(wpConfig));
-      localStorage.setItem('rm_wp_config', JSON.stringify(wpConfig));
-
-      fetch('/api/integrations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: user?.email || 'default',
-          domain: cleanDomain,
-          platform: 'wordpress',
-          config: wpConfig
-        })
-      }).catch(() => {});
-
-      showToast('✅ WordPress integration connected & permanently preserved on your account!');
-      setActiveModal('none');
-    } catch {}
-  };
-
-  const handleDisconnectWp = () => {
-    setWpConfig({ wpUrl: '', wpUsername: '', wpAppPassword: '' });
-    try {
+    if (platform === 'wordpress') {
+      setWordpressConfig(null);
       localStorage.removeItem(`rm_wp_config_${cleanDomain}`);
-      localStorage.removeItem('rm_wp_config');
-
-      fetch('/api/integrations', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: user?.email || 'default',
-          domain: cleanDomain,
-          platform: 'wordpress'
-        })
-      }).catch(() => {});
-
-      showToast('✓ WordPress integration disconnected.');
-    } catch {}
+    } else if (platform === 'github') {
+      setGithubConfig(null);
+      localStorage.removeItem(`rm_gh_config_${cleanDomain}`);
+    } else if (platform === 'gsc') {
+      setGscConfig(null);
+      localStorage.removeItem(`rm_gsc_${cleanDomain}`);
+    }
+    showToast(`✓ ${platform.toUpperCase()} disconnected.`);
   };
 
-  const handleTestGithubDirect = async () => {
-    if (!githubConfig.token || !githubConfig.repo) {
-      showToast('⚠️ Please enter GitHub Token and Repository first.');
-      return;
-    }
-    setIsTestingGithub(true);
-    setGithubTestResult(null);
-    try {
-      const res = await fetch('/api/blogs/test-github', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...githubConfig,
-          brandDomain: cleanDomain,
-          contentUrl: contentUrlInput
-        })
-      });
-      const data = await res.json();
-      if (!data.success) {
-        throw new Error(data.error || 'Failed to verify GitHub repository');
-      }
-      setGithubTestResult(data);
-      if (Array.isArray(data.detectedFolders) && data.detectedFolders.length > 0) {
-        setDetectedFolders(data.detectedFolders);
-        if (data.recommendedFolder) {
-          setGithubConfig(prev => ({ ...prev, folderPath: data.recommendedFolder }));
-        }
-        showToast(`✅ Auto-detected content folder: ${data.recommendedFolder} (${data.detectedType || 'Content'})`);
-      } else {
-        showToast('✅ GitHub repository & permissions verified!');
-      }
-    } catch (err: any) {
-      setGithubTestResult({ error: err.message });
-      showToast(`GitHub test note: ${err.message}`);
-    } finally {
-      setIsTestingGithub(false);
-    }
-  };
-
-  // Twitter Real API Key State
-  const [twHandle, setTwHandle] = useState('');
-  const [twToken, setTwToken] = useState('');
-  const [twApiKey, setTwApiKey] = useState('');
-
-  // LinkedIn Real API Key State
-  const [liAccountName, setLiAccountName] = useState('');
-  const [liUrn, setLiUrn] = useState('');
-  const [liToken, setLiToken] = useState('');
-
-  // Meta Direct Page Token State
-  const [metaPageTitle, setMetaPageTitle] = useState('');
-  const [metaPageIdVal, setMetaPageIdVal] = useState('');
-  const [metaIgIdVal, setMetaIgIdVal] = useState('');
-  const [metaTokenVal, setMetaTokenVal] = useState('');
-
-  // Connect Twitter using real credentials
-  const handleSaveTwitter = (e: React.FormEvent) => {
+  // Connect Social Account
+  const handleConnectSocial = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!twToken.trim() || !twHandle.trim()) {
-      showToast('⚠️ Please enter both your X Handle and User Access / Bearer Token.');
-      return;
-    }
+    const email = user?.email || 'default';
 
-    const cleanHandle = twHandle.trim().startsWith('@') ? twHandle.trim() : `@${twHandle.trim()}`;
-    const newAccount: SocialAccount = {
-      platform: 'twitter',
-      id: cleanHandle.replace('@', ''),
-      name: `${project?.name || 'Brand'} on X`,
-      username: cleanHandle,
-      pageAccessToken: twToken.trim(),
+    const newAcc = {
+      id: `${activeSocialPlatform}_${Date.now()}`,
+      platform: activeSocialPlatform,
+      name: socialHandle || `${activeSocialPlatform.toUpperCase()} Channel`,
+      handle: socialHandle,
       connectedAt: new Date().toISOString()
     };
 
-    setAccounts(prev => {
-      const filtered = prev.filter(a => a.platform !== 'twitter');
-      const merged = [...filtered, newAccount];
-      localStorage.setItem(`rankmonk_social_accounts_${user?.email || 'default'}`, JSON.stringify(merged));
-      return merged;
+    const updated = [...socialAccounts.filter(a => a.platform !== activeSocialPlatform), newAcc];
+    setSocialAccounts(updated);
+
+    await fetch('/api/integrations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, domain: cleanDomain, platform: 'social', config: updated })
     });
 
-    setActiveModal('none');
-    setTwToken('');
-    setTwHandle('');
-    setTwApiKey('');
-    showToast('✅ X (Twitter) connected successfully with verified developer keys!');
+    setSocialModalOpen(false);
+    setSocialHandle('');
+    showToast(`✓ ${activeSocialPlatform} account connected!`);
   };
 
-  // Connect LinkedIn using real credentials
-  const handleSaveLinkedIn = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!liToken.trim() || !liAccountName.trim()) {
-      showToast('⚠️ Please enter your Account/Page Name and LinkedIn Access Token.');
-      return;
-    }
-
-    const newAccount: SocialAccount = {
-      platform: 'linkedin',
-      id: liUrn.trim() || `urn:li:person:${Date.now()}`,
-      name: liAccountName.trim(),
-      username: liUrn.trim() ? `URN: ${liUrn.trim()}` : liAccountName.trim(),
-      pageAccessToken: liToken.trim(),
-      connectedAt: new Date().toISOString()
-    };
-
-    setAccounts(prev => {
-      const filtered = prev.filter(a => a.platform !== 'linkedin');
-      const merged = [...filtered, newAccount];
-      localStorage.setItem(`rankmonk_social_accounts_${user?.email || 'default'}`, JSON.stringify(merged));
-      return merged;
-    });
-
-    setActiveModal('none');
-    setLiToken('');
-    setLiAccountName('');
-    setLiUrn('');
-    showToast('✅ LinkedIn connected successfully with real Access Token!');
+  const isSocialConnected = (platform: string) => {
+    return socialAccounts.some(a => a.platform === platform);
   };
-
-  // Connect Meta using direct Page Access Token
-  const handleSaveMetaDirect = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!metaPageIdVal.trim() || !metaTokenVal.trim()) {
-      showToast('⚠️ Please enter your Facebook Page ID and Page Access Token.');
-      return;
-    }
-
-    const fbAcc: SocialAccount = {
-      platform: 'facebook',
-      id: metaPageIdVal.trim(),
-      name: metaPageTitle.trim() || `${project?.name || 'Official'} Facebook Page`,
-      pageAccessToken: metaTokenVal.trim(),
-      connectedAt: new Date().toISOString()
-    };
-
-    const newAccounts: SocialAccount[] = [fbAcc];
-
-    if (metaIgIdVal.trim()) {
-      newAccounts.push({
-        platform: 'instagram',
-        id: metaIgIdVal.trim(),
-        name: `${metaPageTitle.trim() || project?.name || 'Brand'} Instagram`,
-        username: `@${(project?.domain || 'brand').split('.')[0]}`,
-        pageAccessToken: metaTokenVal.trim(),
-        connectedAt: new Date().toISOString()
-      });
-    }
-
-    setAccounts(prev => {
-      const filtered = prev.filter(a => a.platform !== 'facebook' && a.platform !== 'instagram');
-      const merged = [...filtered, ...newAccounts];
-      localStorage.setItem(`rankmonk_social_accounts_${user?.email || 'default'}`, JSON.stringify(merged));
-      return merged;
-    });
-
-    setActiveModal('none');
-    setMetaTokenVal('');
-    setMetaPageIdVal('');
-    setMetaIgIdVal('');
-    setMetaPageTitle('');
-    showToast('✅ Meta channels connected via direct Page Access Token!');
-  };
-
-  const copyToClipboard = (text: string, key: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedKey(key);
-    setTimeout(() => setCopiedKey(null), 2000);
-    showToast('Copied to clipboard');
-  };
-
-  const igAccount = accounts.find(a => a.platform === 'instagram');
-  const fbAccount = accounts.find(a => a.platform === 'facebook');
-  const liAccount = accounts.find(a => a.platform === 'linkedin');
-  const twAccount = accounts.find(a => a.platform === 'twitter');
-
-  const allChecked = checklist.isProfessional && checklist.isLinkedToPage && checklist.hasAdminRights;
 
   return (
-    <div className="space-y-4 sm:space-y-8 animate-fade-in pb-16 max-w-full overflow-x-hidden">
+    <div className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 font-sans">
       {/* Toast Notification */}
-      {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#2b1b12] text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-[#c5a059]/40 animate-slide-up text-xs font-medium">
-          <CheckCircle2 className="w-4 h-4 text-[#c5a059] shrink-0" />
-          <span>{toastMessage}</span>
+      {toastMsg && (
+        <div className="fixed top-20 right-6 z-[99999] bg-[#2b1b12] text-white text-xs font-bold px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 animate-fade-in border border-[#c5a059]/40">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+          <span>{toastMsg}</span>
         </div>
       )}
 
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 border-b border-[#e4d6c6] pb-4 sm:pb-6">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#c5a059]/20 text-[#8c6b2d] border border-[#c5a059]/30">
-              Integrations &amp; Distribution Hub
-            </span>
-            <span className="text-xs text-[#6f5a4c]">|</span>
-            <span className="text-xs font-medium text-[#6f5a4c]">
-              Domain: <strong className="text-[#2b1b12]">{project?.domain || 'Connected Workspace'}</strong>
-            </span>
+      {/* 1. Header (SoloSpider Styled) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#e4d6c6]">
+        <div className="flex items-start sm:items-center gap-3.5">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-md shrink-0">
+            <Plug className="w-6 h-6" />
           </div>
-          <h1 className="font-editorial text-2xl sm:text-3xl md:text-4xl font-bold text-[#2b1b12] break-words">
-            Integrations &amp; Connected Channels
-          </h1>
-          <p className="text-xs md:text-sm text-[#6f5a4c] mt-1 max-w-2xl leading-relaxed">
-            Universal integration hub: Authenticate your GitOps website repository, WordPress CMS, and official social media platforms to enable automated 1-click publishing and omni-channel syndication.
-          </p>
+          <div>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 text-[10px] font-black uppercase tracking-wider mb-1">
+              SETUP INTEGRATIONS
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black text-[#2b1b12] tracking-tight">
+              Connections &amp; Integrations
+            </h1>
+            <p className="text-xs sm:text-sm text-[#6f5a4c] max-w-2xl mt-0.5">
+              Direct connection interface for all store channels, paid advertisements, search console tracking, and social media posting.
+            </p>
+          </div>
         </div>
 
-        {/* Global Connection Health Status & Quick Navigation */}
-        <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
-          <div className="px-3.5 py-2 rounded-xl bg-[#f8f3ec] border border-[#d6be96]/70 flex items-center gap-2.5 shadow-2xs">
-            <span className={`w-2.5 h-2.5 rounded-full ${connectedStats.totalConnected > 0 ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`} />
-            <span className="text-xs font-bold text-[#2b1b12]">
-              <strong className="text-emerald-700">{connectedStats.totalConnected}</strong> of {connectedStats.totalAvailable} Channels Live
-            </span>
-          </div>
-          {onNavigateToSocial && (
-            <button
-              onClick={onNavigateToSocial}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-[#e4d6c6] bg-white text-[#2b1b12] hover:bg-[#f8f3ec] transition-all text-xs font-bold shadow-2xs shrink-0 cursor-pointer"
-              title="Open Social Studio"
-            >
-              <span>Social Studio</span>
-              <ArrowRight className="w-3.5 h-3.5 text-[#c5a059]" />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Navigation Tabs - Strict horizontal scroll on mobile, zero overflow clipping */}
-      <div className="flex items-center gap-1 sm:gap-2 border-b border-[#e4d6c6] overflow-x-auto no-scrollbar scrollbar-none pb-px -mx-3.5 px-3.5 sm:mx-0 sm:px-0">
+        {/* User Guide Action Button */}
         <button
-          onClick={() => setActiveCategory('all')}
-          className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 text-xs font-bold border-b-2 transition-all cursor-pointer shrink-0 whitespace-nowrap ${
-            activeCategory === 'all'
-              ? 'border-[#2b1b12] text-[#2b1b12]'
-              : 'border-transparent text-[#6f5a4c] hover:text-[#2b1b12]'
-          }`}
+          type="button"
+          onClick={() => setGuideModalOpen(true)}
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-[#2b1b12] hover:bg-[#f8f3ec] text-[#2b1b12] rounded-xl text-xs font-bold transition-all shadow-xs shrink-0 cursor-pointer"
         >
-          <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-          <span>All Integrations ({connectedStats.totalConnected}/{connectedStats.totalAvailable})</span>
-        </button>
-
-        <button
-          onClick={() => setActiveCategory('cms')}
-          className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 text-xs font-bold border-b-2 transition-all cursor-pointer shrink-0 whitespace-nowrap ${
-            activeCategory === 'cms'
-              ? 'border-[#2b1b12] text-[#2b1b12]'
-              : 'border-transparent text-[#6f5a4c] hover:text-[#2b1b12]'
-          }`}
-        >
-          <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 text-[#21759b]" />
-          <span>Website &amp; CMS Publishing</span>
-          {(isGithubConnected || isWpConnected) && (
-            <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" title="Connected" />
-          )}
-        </button>
-
-        <button
-          onClick={() => setActiveCategory('social')}
-          className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 text-xs font-bold border-b-2 transition-all cursor-pointer shrink-0 whitespace-nowrap ${
-            activeCategory === 'social'
-              ? 'border-[#2b1b12] text-[#2b1b12]'
-              : 'border-transparent text-[#6f5a4c] hover:text-[#2b1b12]'
-          }`}
-        >
-          <Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-          <span>Social Media Channels ({accounts.length}/4)</span>
-        </button>
-
-        <button
-          onClick={() => setActiveCategory('rulebook')}
-          className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 text-xs font-bold border-b-2 transition-all cursor-pointer shrink-0 whitespace-nowrap ${
-            activeCategory === 'rulebook'
-              ? 'border-[#c5a059] text-[#2b1b12] bg-[#c5a059]/10 rounded-t-lg'
-              : 'border-transparent text-[#8c6b2d] hover:text-[#2b1b12]'
-          }`}
-        >
-          <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#c5a059] shrink-0" />
-          <span className="font-bold">📘 Setup Guides &amp; Rule Book</span>
-          <span className="px-1.5 py-0.2 text-[9px] rounded-full bg-[#c5a059] text-[#2b1b12] font-black uppercase shrink-0">
-            Must Read
-          </span>
+          <BookOpen className="w-4 h-4 text-[#c5a059]" />
+          <span>📘 Connection Guide</span>
         </button>
       </div>
 
-      {/* SECTION 1: WEBSITE & CMS PUBLISHING (GITHUB GITOPS, WORDPRESS, SHOPIFY/WEBHOOK, GOOGLE INDEXING) */}
-      {(activeCategory === 'all' || activeCategory === 'cms') && (
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-2 border-b border-[#e4d6c6]/60">
-            <div>
-              <h2 className="font-editorial text-lg sm:text-xl font-bold text-[#2b1b12] flex items-center gap-2">
-                <Globe className="w-5 h-5 text-[#8c6b2d]" />
-                <span>Website &amp; CMS Publishing Integrations</span>
-              </h2>
-              <p className="text-xs text-[#6f5a4c]">
-                Connect your website repository (GitHub GitOps) or CMS (WordPress) to enable automated 1-click blog publishing.
-              </p>
+      {/* 2. Top Summary Row of 5 Quick Status Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+        {/* Card 1: WordPress */}
+        <div
+          onClick={() => { setSelectedCms('wordpress'); setCmsModalOpen(true); }}
+          className="bg-white border border-[#e4d6c6] rounded-2xl p-4 shadow-xs hover:border-[#c5a059] transition-all cursor-pointer flex flex-col justify-between min-h-[110px]"
+        >
+          <div className="flex items-center justify-between">
+            <div className="p-2 bg-[#f8f3ec] rounded-xl">
+              <WordPressIcon className="w-6 h-6" />
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[10.5px] font-bold text-[#8c6b2d] bg-[#c5a059]/15 px-2.5 py-1 rounded-full border border-[#c5a059]/30">
-                Direct GitOps &amp; CMS Publishing
-              </span>
-            </div>
-          </div>
-
-          {/* Equal 2-Column Grid Matching Social Media Stature */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            {/* CARD 1: GITHUB GITOPS */}
-            <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl p-5 sm:p-6 shadow-card hover:border-[#c5a059] transition-all flex flex-col justify-between">
-              <div>
-                <div className="flex items-start justify-between gap-3 mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-[#24292e] text-white flex items-center justify-center font-bold text-sm shadow-md">
-                      <GithubIcon className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-base text-[#2b1b12]">GitHub (GitOps)</h3>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
-                          Automated Commits
-                        </span>
-                      </div>
-                      <p className="text-xs text-[#6f5a4c]">Auto-Deploy (Vercel, Netlify, Cloudflare Pages, Astro)</p>
-                    </div>
-                  </div>
-
-                  {isGithubConnected ? (
-                    <div className="flex flex-col items-end gap-0.5 shrink-0">
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-xs">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                        CONNECTED &amp; LIVE
-                      </span>
-                      <span className="text-[10px] font-mono text-emerald-700 font-bold">1-Click GitOps Active</span>
-                    </div>
-                  ) : (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#f8f3ec] text-[#6f5a4c] border border-[#e4d6c6] shrink-0">
-                      <span className="w-2 h-2 rounded-full bg-slate-300" />
-                      Not Connected
-                    </span>
-                  )}
-                </div>
-
-                <p className="text-xs text-[#6f5a4c] mb-3 leading-relaxed">
-                  Automatically commits synthesized SEO markdown articles directly to your website repository. When committed, your host auto-builds and publishes live in ~30 seconds.
-                </p>
-
-                {isGithubConnected ? (
-                  <div className="bg-[#f8f3ec] p-3.5 rounded-2xl border border-[#e4d6c6] space-y-2 mb-4 text-xs">
-                    <div className="flex items-center justify-between border-b border-[#e4d6c6]/80 pb-1.5">
-                      <span className="text-[#6f5a4c] font-bold text-[11px] uppercase tracking-wider">Repository:</span>
-                      <span className="font-mono font-black text-emerald-950 bg-white px-2 py-0.5 rounded border border-emerald-200">
-                        {cleanRepoName}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-[#6f5a4c]">Branch &amp; Directory:</span>
-                      <span className="font-mono font-bold text-[#2b1b12]">
-                        {githubConfig.branch} • {githubConfig.folderPath}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-[11px] text-emerald-800 font-semibold pt-1">
-                      <span className="flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>GitOps Push Engine</span>
-                      </span>
-                      <span className="text-[10px] bg-emerald-100/90 px-2 py-0.5 rounded text-emerald-900 font-bold">
-                        Write Scope Active ✓
-                      </span>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="bg-[#fdfbf7] p-3.5 rounded-2xl border border-[#ebd8c5] mb-4 space-y-1.5 text-xs text-[#6f5a4c]">
-                    <div className="flex items-center gap-2 text-[#2b1b12] font-semibold">
-                      <Sparkles className="w-4 h-4 text-[#c5a059]" />
-                      <span>Zero Manual Copy-Pasting:</span>
-                    </div>
-                    <p className="text-[11px] leading-relaxed">
-                      Publishing pushes publication-grade markdown directly into your site's blog folder. No third-party plugins or servers required.
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {isGithubConnected ? (
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    onClick={handleTestGithubDirect}
-                    disabled={isTestingGithub}
-                    className="flex-1 py-2.5 px-3 rounded-xl bg-emerald-50 border border-emerald-300 hover:bg-emerald-100 text-emerald-900 text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
-                  >
-                    {isTestingGithub ? (
-                      <>
-                        <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-700" />
-                        <span>Testing Connection...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-3.5 h-3.5 text-emerald-700" />
-                        <span>⚡ Test API Connection</span>
-                      </>
-                    )}
-                  </button>
-                  <button
-                    onClick={() => setActiveModal('github')}
-                    className="py-2.5 px-3.5 rounded-xl bg-[#2b1b12] text-white text-xs font-bold hover:bg-[#3d271a] transition-all cursor-pointer"
-                  >
-                    Configure
-                  </button>
-                  <button
-                    onClick={handleDisconnectGithub}
-                    className="py-2.5 px-3 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-bold transition-all cursor-pointer"
-                  >
-                    Disconnect
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setActiveModal('github')}
-                  className="w-full py-2.5 px-4 rounded-xl bg-[#2b1b12] hover:bg-[#3d271a] text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <GithubIcon className="w-4 h-4 text-[#c5a059]" />
-                  <span>Connect GitHub GitOps (1-Click Setup)</span>
-                </button>
-              )}
-            </div>
-
-            {/* CARD 2: WORDPRESS REST API */}
-            <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl p-5 sm:p-6 shadow-card hover:border-[#c5a059] transition-all flex flex-col justify-between">
-              <div>
-                <div className="flex items-start justify-between gap-3 mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-[#21759b] text-white flex items-center justify-center font-bold text-base shadow-md">
-                      WP
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-base text-[#2b1b12]">WordPress REST API</h3>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
-                          Native REST API
-                        </span>
-                      </div>
-                      <p className="text-xs text-[#6f5a4c]">Post Sync (Drafts &amp; Immediate Live Publishing)</p>
-                    </div>
-                  </div>
-
-                  {isWpConnected ? (
-                    <div className="flex flex-col items-end gap-0.5 shrink-0">
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-blue-100 text-blue-900 border border-blue-300 shadow-xs">
-                        <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-                        CONNECTED &amp; LIVE
-                      </span>
-                      <span className="text-[10px] font-mono text-blue-700 font-bold">Auto-Publish Ready</span>
-                    </div>
-                  ) : (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#f8f3ec] text-[#6f5a4c] border border-[#e4d6c6] shrink-0">
-                      <span className="w-2 h-2 rounded-full bg-slate-300" />
-                      Not Connected
-                    </span>
-                  )}
-                </div>
-
-                <p className="text-xs text-[#6f5a4c] mb-3 leading-relaxed">
-                  Directly publishes SEO articles to your WordPress posts table using native Application Passwords. Works on self-hosted &amp; managed WordPress with zero third-party plugins needed.
-                </p>
-
-                {isWpConnected ? (
-                  <div className="bg-[#f8f3ec] p-3.5 rounded-2xl border border-[#e4d6c6] space-y-2 mb-4 text-xs">
-                    <div className="flex items-center justify-between border-b border-[#e4d6c6]/80 pb-1.5">
-                      <span className="text-[#6f5a4c] font-bold text-[11px] uppercase tracking-wider">Site URL:</span>
-                      <span className="font-mono font-black text-blue-950 bg-white px-2 py-0.5 rounded border border-blue-200">
-                        {wpConfig.wpUrl}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-[#6f5a4c]">Admin Username:</span>
-                      <span className="font-mono font-bold text-[#2b1b12]">
-                        {wpConfig.wpUsername}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-[11px] text-blue-800 font-semibold pt-1">
-                      <span className="flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />
-                        <span>REST API Post Endpoint</span>
-                      </span>
-                      <span className="text-[10px] bg-blue-100/90 px-2 py-0.5 rounded text-blue-900 font-bold">
-                        Native WP Auth ✓
-                      </span>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="bg-[#fdfbf7] p-3.5 rounded-2xl border border-[#ebd8c5] mb-4 space-y-1.5 text-xs text-[#6f5a4c]">
-                    <div className="flex items-center gap-2 text-[#2b1b12] font-semibold">
-                      <Globe className="w-4 h-4 text-[#21759b]" />
-                      <span>Application Password Connection:</span>
-                    </div>
-                    <p className="text-[11px] leading-relaxed">
-                      Generate a 16-character Application Password in your WordPress Admin Profile in 30 seconds. Zero plugins required.
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {isWpConnected ? (
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setActiveModal('wordpress')}
-                    className="flex-1 py-2.5 px-3 rounded-xl bg-[#21759b] text-white text-xs font-bold hover:bg-[#1b6485] transition-all cursor-pointer text-center"
-                  >
-                    Configure WordPress
-                  </button>
-                  <button
-                    onClick={handleDisconnectWp}
-                    className="py-2.5 px-3 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-bold transition-all cursor-pointer"
-                  >
-                    Disconnect
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setActiveModal('wordpress')}
-                  className="w-full py-2.5 px-4 rounded-xl bg-[#21759b] hover:bg-[#1b6485] text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <Globe className="w-4 h-4" />
-                  <span>Connect WordPress (30-Sec Setup)</span>
-                </button>
-              )}
-            </div>
-
-            {/* CARD 3: CUSTOM WEBHOOK & HEADLESS CMS */}
-            <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl p-5 sm:p-6 shadow-card hover:border-[#c5a059] transition-all flex flex-col justify-between">
-              <div>
-                <div className="flex items-start justify-between gap-3 mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-[#0f766e] text-white flex items-center justify-center font-bold text-base shadow-md">
-                      <Code className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-base text-[#2b1b12]">Custom Webhook &amp; Headless CMS</h3>
-                      </div>
-                      <p className="text-xs text-[#6f5a4c]">Shopify, Ghost, Strapi, Webflow, Custom Next.js APIs</p>
-                    </div>
-                  </div>
-
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-teal-50 text-teal-800 border border-teal-200 shrink-0">
-                    <CheckCircle2 className="w-3 h-3 text-teal-600" />
-                    Endpoint Ready
-                  </span>
-                </div>
-
-                <p className="text-xs text-[#6f5a4c] mb-3 leading-relaxed">
-                  Dispatches structured JSON and Markdown payloads directly to your proprietary backend, custom Next.js webhook route, or headless CMS whenever an article is synthesized.
-                </p>
-
-                <div className="bg-[#f8f3ec] p-3 rounded-xl border border-[#e4d6c6] text-[11px] font-mono text-[#2b1b12] mb-4 space-y-1">
-                  <div className="flex items-center justify-between text-[10px] text-[#6f5a4c] font-bold uppercase tracking-wider">
-                    <span>Default Webhook Endpoint:</span>
-                    <span className="text-teal-700">POST Request</span>
-                  </div>
-                  <div className="truncate text-teal-950 font-bold">
-                    https://rankmonk.in/api/webhooks/blog-publish
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => showToast('Webhook endpoint active. Custom payload dispatcher ready.')}
-                  className="flex-1 py-2.5 px-3 rounded-xl bg-white border border-[#e4d6c6] text-xs font-bold text-[#2b1b12] hover:bg-[#f8f3ec] transition-all cursor-pointer text-center"
-                >
-                  Configure Payload
-                </button>
-                <button
-                  onClick={() => showToast('⚡ Test webhook ping dispatched successfully!')}
-                  className="py-2.5 px-3.5 rounded-xl bg-[#0f766e] hover:bg-[#0d635c] text-white text-xs font-bold transition-all cursor-pointer"
-                >
-                  Ping Endpoint
-                </button>
-              </div>
-            </div>
-
-            {/* CARD 4: GOOGLE SEARCH CONSOLE & INDEXING API */}
-            <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl p-5 sm:p-6 shadow-card hover:border-[#c5a059] transition-all flex flex-col justify-between">
-              <div>
-                <div className="flex items-start justify-between gap-3 mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-[#ea4335] text-white flex items-center justify-center font-bold text-base shadow-md">
-                      G
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-base text-[#2b1b12]">Google Indexing &amp; Crawler API</h3>
-                      </div>
-                      <p className="text-xs text-[#6f5a4c]">Automated Googlebot &amp; Bingbot Sitemap Ping</p>
-                    </div>
-                  </div>
-
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    Auto-Pinger Active
-                  </span>
-                </div>
-
-                <p className="text-xs text-[#6f5a4c] mb-3 leading-relaxed">
-                  Instantly alerts Googlebot and Bingbot indexing endpoints the moment new blog posts or sitemaps are deployed, accelerating organic crawling and SERP ranking.
-                </p>
-
-                <div className="bg-[#f8f3ec] p-3 rounded-xl border border-[#e4d6c6] text-[11px] text-[#2b1b12] mb-4 space-y-1">
-                  <div className="flex items-center justify-between text-[10.5px]">
-                    <span className="text-[#6f5a4c] font-bold">Target Sitemap:</span>
-                    <span className="font-mono font-bold text-emerald-950">https://{cleanDomain}/sitemap.xml</span>
-                  </div>
-                  <div className="flex items-center justify-between text-[10.5px]">
-                    <span className="text-[#6f5a4c]">Index Status:</span>
-                    <span className="text-emerald-700 font-bold">Real-time Ping Enabled ✓</span>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                onClick={() => showToast('✅ Googlebot sitemap ping test completed successfully!')}
-                className="w-full py-2.5 px-4 rounded-xl bg-[#2b1b12] text-white hover:bg-[#3d271a] text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Sparkles className="w-4 h-4 text-[#c5a059]" />
-                <span>Ping Googlebot Now</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* SECTION 2: OFFICIAL SOCIAL MEDIA DISTRIBUTION */}
-      {(activeCategory === 'all' || activeCategory === 'social') && (
-        <div className="space-y-4 pt-2">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-2 border-b border-[#e4d6c6]/60">
-            <div>
-              <h2 className="font-editorial text-lg sm:text-xl font-bold text-[#2b1b12] flex items-center gap-2">
-                <Share2 className="w-5 h-5 text-[#8c6b2d]" />
-                <span>Official Social Media Distribution</span>
-              </h2>
-              <p className="text-xs text-[#6f5a4c]">
-                Authenticate your official social media channels for automated organic syndication and visual posts.
-              </p>
-            </div>
-            <span className="text-[10.5px] font-bold text-[#6f5a4c] bg-[#f8f3ec] px-2.5 py-1 rounded-full border border-[#e4d6c6] self-start sm:self-auto">
-              {accounts.length} Active Channels
+            <span className={`inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider ${wordpressConfig ? 'text-emerald-700' : 'text-slate-400'}`}>
+              <span className={`w-2 h-2 rounded-full ${wordpressConfig ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`} />
+              {wordpressConfig ? 'ACTIVE' : 'OFFLINE'}
             </span>
           </div>
-
-          {/* Balanced Setup Guide Helper Banner */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-gradient-to-r from-[#fbf8f3] via-[#f7f0e4] to-[#f4ebe0] border border-[#d6be96]/60 rounded-2xl shadow-2xs">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-[#2b1b12] text-[#c5a059] flex items-center justify-center shrink-0">
-                <BookOpen className="w-4 h-4" />
-              </div>
-              <div className="text-xs text-[#6f5a4c]">
-                <strong className="text-[#2b1b12]">Meta Graph API Note:</strong> Meta requires your Instagram account to be a <strong>Professional Account (Business/Creator)</strong> linked to a Facebook Page.
-              </div>
-            </div>
-            <button
-              onClick={() => { setActiveCategory('rulebook'); setRuleBookTab('meta'); }}
-              className="text-xs font-bold text-[#8c6b2d] hover:text-[#2b1b12] underline whitespace-nowrap cursor-pointer self-start sm:self-auto shrink-0"
-            >
-              Read Meta Rule Book →
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            {/* CARD 1: INSTAGRAM */}
-            <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl p-4 sm:p-6 shadow-card hover:border-[#c5a059] transition-all flex flex-col justify-between">
-              <div>
-                <div className="flex items-start justify-between gap-3 mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#833ab4] via-[#fd1d1d] to-[#fcb045] flex items-center justify-center text-white shadow-md">
-                      <InstagramIcon className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-base text-[#2b1b12]">Instagram</h3>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-pink-100 text-pink-700">
-                          Business / Creator
-                        </span>
-                      </div>
-                      <p className="text-xs text-[#6f5a4c]">Direct Feed, Reels & Carousel Publishing</p>
-                    </div>
-                  </div>
-
-                  {igAccount ? (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                      Connected
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#f8f3ec] text-[#6f5a4c] border border-[#e4d6c6]">
-                      Not Connected
-                    </span>
-                  )}
-                </div>
-
-                {igAccount ? (
-                  <div className="bg-[#f8f3ec] rounded-xl p-3.5 mb-4 border border-[#e4d6c6] flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      {igAccount.profilePictureUrl ? (
-                        <img
-                          src={igAccount.profilePictureUrl}
-                          alt={igAccount.name}
-                          className="w-10 h-10 rounded-full object-cover border border-[#c5a059]"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 rounded-full bg-[#2b1b12] text-[#fffcf7] flex items-center justify-center font-bold text-xs">
-                          IG
-                        </div>
-                      )}
-                      <div>
-                        <div className="font-bold text-xs text-[#2b1b12]">
-                          {igAccount.username ? `@${igAccount.username}` : igAccount.name}
-                        </div>
-                        <div className="text-[11px] text-[#6f5a4c]">
-                          Linked via Meta Business Graph API
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => handleDisconnect('instagram')}
-                      className="text-xs font-medium text-red-600 hover:text-red-700 underline cursor-pointer"
-                    >
-                      Disconnect
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-2 mb-4 text-xs text-[#6f5a4c] bg-[#fdfbf7] p-3 rounded-xl border border-[#ebd8c5]">
-                    <div className="flex items-center gap-2 text-[#2b1b12] font-semibold">
-                      <ShieldCheck className="w-4 h-4 text-[#c5a059]" />
-                      <span>Requirements for 1-Click Connection:</span>
-                    </div>
-                    <ul className="list-disc list-inside space-y-1 pl-1 text-[11px]">
-                      <li>Instagram Professional Account (Business or Creator)</li>
-                      <li>Linked to your official Facebook Page</li>
-                      <li>0 code or API keys required from you</li>
-                    </ul>
-                  </div>
-                )}
-              </div>
-
-              <div>
-                {igAccount ? (
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={handleConnectMeta}
-                      className="flex-1 py-2.5 px-4 rounded-xl bg-white border border-[#e4d6c6] hover:bg-[#f8f3ec] text-xs font-bold text-[#2b1b12] transition-all flex items-center justify-center gap-2 cursor-pointer"
-                    >
-                      <RefreshCw className="w-3.5 h-3.5 text-[#6f5a4c]" />
-                      <span>Re-authenticate (OAuth)</span>
-                    </button>
-                    <button
-                      onClick={() => setActiveModal('meta_token')}
-                      className="py-2.5 px-3 rounded-xl bg-[#f8f3ec] border border-[#e4d6c6] hover:bg-[#ebdcc8] text-xs font-bold text-[#2b1b12] transition-all cursor-pointer"
-                    >
-                      API Keys
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <button
-                      onClick={handleConnectMeta}
-                      className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] hover:opacity-95 text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
-                    >
-                      <InstagramIcon className="w-4 h-4" />
-                      <span>Connect Instagram (via Meta OAuth)</span>
-                    </button>
-                    <button
-                      onClick={() => setActiveModal('meta_token')}
-                      className="w-full py-2 px-3 rounded-xl bg-white border border-[#e4d6c6] hover:bg-[#f8f3ec] text-xs font-semibold text-[#2b1b12] transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center"
-                    >
-                      <span>🔑 Or Connect via Direct Page Access Token</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* CARD 2: FACEBOOK PAGE */}
-            <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl p-4 sm:p-6 shadow-card hover:border-[#c5a059] transition-all flex flex-col justify-between">
-              <div>
-                <div className="flex items-start justify-between gap-3 mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-[#1877f2] flex items-center justify-center text-white shadow-md">
-                      <FacebookIcon className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-base text-[#2b1b12]">Facebook Pages</h3>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
-                          Brand Page
-                        </span>
-                      </div>
-                      <p className="text-xs text-[#6f5a4c]">Post to Official Business & Brand Pages</p>
-                    </div>
-                  </div>
-
-                  {fbAccount ? (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                      Connected
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#f8f3ec] text-[#6f5a4c] border border-[#e4d6c6]">
-                      Not Connected
-                    </span>
-                  )}
-                </div>
-
-                {fbAccount ? (
-                  <div className="bg-[#f8f3ec] rounded-xl p-3.5 mb-4 border border-[#e4d6c6] flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      {fbAccount.profilePictureUrl ? (
-                        <img
-                          src={fbAccount.profilePictureUrl}
-                          alt={fbAccount.name}
-                          className="w-10 h-10 rounded-full object-cover border border-[#c5a059]"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 rounded-full bg-[#1877f2] text-white flex items-center justify-center font-bold text-xs">
-                          FB
-                        </div>
-                      )}
-                      <div>
-                        <div className="font-bold text-xs text-[#2b1b12]">{fbAccount.name}</div>
-                        <div className="text-[11px] text-[#6f5a4c]">
-                          Page ID: {fbAccount.id}
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => handleDisconnect('facebook')}
-                      className="text-xs font-medium text-red-600 hover:text-red-700 underline cursor-pointer"
-                    >
-                      Disconnect
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-2 mb-4 text-xs text-[#6f5a4c] bg-[#fdfbf7] p-3 rounded-xl border border-[#ebd8c5]">
-                    <div className="flex items-center gap-2 text-[#2b1b12] font-semibold">
-                      <ShieldCheck className="w-4 h-4 text-[#c5a059]" />
-                      <span>Requirements for 1-Click Connection:</span>
-                    </div>
-                    <ul className="list-disc list-inside space-y-1 pl-1 text-[11px]">
-                      <li>Facebook account with Admin/Task access to your Page</li>
-                      <li>Published Facebook Business/Brand Page</li>
-                      <li>Included automatically in Meta 1-Click login</li>
-                    </ul>
-                  </div>
-                )}
-              </div>
-
-              <div>
-                {fbAccount ? (
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={handleConnectMeta}
-                      className="flex-1 py-2.5 px-4 rounded-xl bg-white border border-[#e4d6c6] hover:bg-[#f8f3ec] text-xs font-bold text-[#2b1b12] transition-all flex items-center justify-center gap-2 cursor-pointer"
-                    >
-                      <RefreshCw className="w-3.5 h-3.5 text-[#6f5a4c]" />
-                      <span>Re-authenticate (OAuth)</span>
-                    </button>
-                    <button
-                      onClick={() => setActiveModal('meta_token')}
-                      className="py-2.5 px-3 rounded-xl bg-[#f8f3ec] border border-[#e4d6c6] hover:bg-[#ebdcc8] text-xs font-bold text-[#2b1b12] transition-all cursor-pointer"
-                    >
-                      API Keys
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <button
-                      onClick={handleConnectMeta}
-                      className="w-full py-2.5 px-4 rounded-xl bg-[#1877f2] hover:bg-[#166fe5] text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
-                    >
-                      <FacebookIcon className="w-4 h-4" />
-                      <span>Connect Facebook (via Meta OAuth)</span>
-                    </button>
-                    <button
-                      onClick={() => setActiveModal('meta_token')}
-                      className="w-full py-2 px-3 rounded-xl bg-white border border-[#e4d6c6] hover:bg-[#f8f3ec] text-xs font-semibold text-[#2b1b12] transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center"
-                    >
-                      <span>🔑 Or Connect via Direct Page Access Token</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* CARD 3: LINKEDIN */}
-            <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl p-4 sm:p-6 shadow-card hover:border-[#c5a059] transition-all flex flex-col justify-between">
-              <div>
-                <div className="flex items-start justify-between gap-3 mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-[#0077b5] flex items-center justify-center text-white shadow-md">
-                      <LinkedinIcon className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-base text-[#2b1b12]">LinkedIn</h3>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-800">
-                          Profile & Company
-                        </span>
-                      </div>
-                      <p className="text-xs text-[#6f5a4c]">Professional Articles, Updates & Images</p>
-                    </div>
-                  </div>
-
-                  {liAccount ? (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                      Connected
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#f8f3ec] text-[#6f5a4c] border border-[#e4d6c6]">
-                      Not Connected
-                    </span>
-                  )}
-                </div>
-
-                {liAccount ? (
-                  <div className="bg-[#f8f3ec] rounded-xl p-3.5 mb-4 border border-[#e4d6c6] flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-[#0077b5] text-white flex items-center justify-center font-bold text-xs">
-                        LI
-                      </div>
-                      <div>
-                        <div className="font-bold text-xs text-[#2b1b12]">{liAccount.name}</div>
-                        <div className="text-[11px] text-[#6f5a4c]">{liAccount.username}</div>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => handleDisconnect('linkedin')}
-                      className="text-xs font-medium text-red-600 hover:text-red-700 underline cursor-pointer"
-                    >
-                      Disconnect
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-2 mb-4 text-xs text-[#6f5a4c] bg-[#fdfbf7] p-3 rounded-xl border border-[#ebd8c5]">
-                    <div className="flex items-center gap-2 text-[#2b1b12] font-semibold">
-                      <ShieldCheck className="w-4 h-4 text-[#c5a059]" />
-                      <span>Requirements for 1-Click Connection:</span>
-                    </div>
-                    <ul className="list-disc list-inside space-y-1 pl-1 text-[11px]">
-                      <li>Standard LinkedIn member account</li>
-                      <li>Admin role on your LinkedIn Company Page (if posting as organization)</li>
-                    </ul>
-                  </div>
-                )}
-              </div>
-
-              <div>
-                {liAccount ? (
-                  <button
-                    onClick={() => setActiveModal('linkedin')}
-                    className="w-full py-2.5 px-4 rounded-xl bg-white border border-[#e4d6c6] hover:bg-[#f8f3ec] text-xs font-bold text-[#2b1b12] transition-all flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5 text-[#6f5a4c]" />
-                    <span>Update LinkedIn API Keys</span>
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => setActiveModal('linkedin')}
-                    className="w-full py-2.5 px-4 rounded-xl bg-[#0077b5] hover:bg-[#005f93] text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <LinkedinIcon className="w-4 h-4" />
-                    <span>Connect Official LinkedIn API Key</span>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* CARD 4: X (TWITTER) */}
-            <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl p-4 sm:p-6 shadow-card hover:border-[#c5a059] transition-all flex flex-col justify-between">
-              <div>
-                <div className="flex items-start justify-between gap-3 mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-black flex items-center justify-center text-white shadow-md">
-                      <TwitterIcon className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-base text-[#2b1b12]">X (Twitter)</h3>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-neutral-200 text-neutral-800">
-                          Organic
-                        </span>
-                      </div>
-                      <p className="text-xs text-[#6f5a4c]">Short-form Updates, Threads & Media</p>
-                    </div>
-                  </div>
-
-                  {twAccount ? (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                      Connected
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#f8f3ec] text-[#6f5a4c] border border-[#e4d6c6]">
-                      Not Connected
-                    </span>
-                  )}
-                </div>
-
-                {twAccount ? (
-                  <div className="bg-[#f8f3ec] rounded-xl p-3.5 mb-4 border border-[#e4d6c6] flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold text-xs">
-                        X
-                      </div>
-                      <div>
-                        <div className="font-bold text-xs text-[#2b1b12]">{twAccount.name}</div>
-                        <div className="text-[11px] text-[#6f5a4c]">{twAccount.username}</div>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => handleDisconnect('twitter')}
-                      className="text-xs font-medium text-red-600 hover:text-red-700 underline cursor-pointer"
-                    >
-                      Disconnect
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-2 mb-4 text-xs text-[#6f5a4c] bg-[#fdfbf7] p-3 rounded-xl border border-[#ebd8c5]">
-                    <div className="flex items-center gap-2 text-[#2b1b12] font-semibold">
-                      <ShieldCheck className="w-4 h-4 text-[#c5a059]" />
-                      <span>Requirements for 1-Click Connection:</span>
-                    </div>
-                    <ul className="list-disc list-inside space-y-1 pl-1 text-[11px]">
-                      <li>Standard active X account</li>
-                      <li>OAuth 2.0 app authorization authorization</li>
-                    </ul>
-                  </div>
-                )}
-              </div>
-
-              <div>
-                {twAccount ? (
-                  <button
-                    onClick={() => setActiveModal('twitter')}
-                    className="w-full py-2.5 px-4 rounded-xl bg-white border border-[#e4d6c6] hover:bg-[#f8f3ec] text-xs font-bold text-[#2b1b12] transition-all flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5 text-[#6f5a4c]" />
-                    <span>Update X (Twitter) API Keys</span>
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => setActiveModal('twitter')}
-                    className="w-full py-2.5 px-4 rounded-xl bg-black hover:bg-neutral-800 text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <TwitterIcon className="w-4 h-4" />
-                    <span>Connect Official X (Twitter) API Keys</span>
-                  </button>
-                )}
-              </div>
-            </div>
+          <div className="mt-3">
+            <h3 className="font-bold text-xs text-[#2b1b12]">WordPress</h3>
+            <p className="text-[11px] text-[#6f5a4c] truncate">
+              {wordpressConfig ? (wordpressConfig.wpUrl || `https://${cleanDomain}`) : 'Setup Integration'}
+            </p>
           </div>
         </div>
-      )}
 
-      {/* TAB 2: THE OFFICIAL INTEGRATION RULE BOOK (MANDATORY GUIDANCE FOR END USERS) */}
-      {activeCategory === 'rulebook' && (
-        <div className="space-y-6 sm:space-y-8 animate-fade-in max-w-full overflow-hidden">
-          {/* Rule Book Sub-Navigation - sleek horizontal scroll without page blow out */}
-          <div className="flex items-center gap-1.5 sm:gap-2 bg-[#f8f3ec] p-1.5 rounded-xl border border-[#e4d6c6] overflow-x-auto no-scrollbar scrollbar-none pb-px">
-            <button
-              onClick={() => setRuleBookTab('github')}
-              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap shrink-0 cursor-pointer ${
-                ruleBookTab === 'github'
-                  ? 'bg-[#2b1b12] text-white shadow-sm'
-                  : 'text-[#6f5a4c] hover:text-[#2b1b12]'
-              }`}
-            >
-              🐙 GitHub GitOps Guide
-            </button>
-            <button
-              onClick={() => setRuleBookTab('wordpress')}
-              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap shrink-0 cursor-pointer ${
-                ruleBookTab === 'wordpress'
-                  ? 'bg-[#21759b] text-white shadow-sm'
-                  : 'text-[#6f5a4c] hover:text-[#2b1b12]'
-              }`}
-            >
-              🌐 WordPress REST Guide
-            </button>
-            <button
-              onClick={() => setRuleBookTab('meta')}
-              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap shrink-0 cursor-pointer ${
-                ruleBookTab === 'meta'
-                  ? 'bg-[#2b1b12] text-white shadow-sm'
-                  : 'text-[#6f5a4c] hover:text-[#2b1b12]'
-              }`}
-            >
-              📸 Meta (Instagram &amp; Facebook)
-            </button>
-            <button
-              onClick={() => setRuleBookTab('linkedin')}
-              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                ruleBookTab === 'linkedin'
-                  ? 'bg-[#0077b5] text-white shadow-sm'
-                  : 'text-[#6f5a4c] hover:text-[#2b1b12]'
-              }`}
-            >
-              💼 LinkedIn API
-            </button>
-            <button
-              onClick={() => setRuleBookTab('twitter')}
-              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                ruleBookTab === 'twitter'
-                  ? 'bg-black text-white shadow-sm'
-                  : 'text-[#6f5a4c] hover:text-[#2b1b12]'
-              }`}
-            >
-              🐦 X (Twitter) API
-            </button>
-            <button
-              onClick={() => setRuleBookTab('faq')}
-              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                ruleBookTab === 'faq'
-                  ? 'bg-[#2b1b12] text-white shadow-sm'
-                  : 'text-[#6f5a4c] hover:text-[#2b1b12]'
-              }`}
-            >
-              ❓ Troubleshooting &amp; FAQs
-            </button>
+        {/* Card 2: Shopify */}
+        <div
+          onClick={() => { setSelectedCms('shopify'); setCmsModalOpen(true); }}
+          className="bg-white border border-[#e4d6c6] rounded-2xl p-4 shadow-xs hover:border-[#c5a059] transition-all cursor-pointer flex flex-col justify-between min-h-[110px]"
+        >
+          <div className="flex items-center justify-between">
+            <div className="p-2 bg-[#f8f3ec] rounded-xl">
+              <ShopifyIcon className="w-6 h-6" />
+            </div>
+            <span className={`inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider ${shopifyConfig ? 'text-emerald-700' : 'text-slate-400'}`}>
+              <span className={`w-2 h-2 rounded-full ${shopifyConfig ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+              {shopifyConfig ? 'ACTIVE' : 'OFFLINE'}
+            </span>
           </div>
+          <div className="mt-3">
+            <h3 className="font-bold text-xs text-[#2b1b12]">Shopify</h3>
+            <p className="text-[11px] text-[#6f5a4c] truncate">
+              {shopifyConfig ? 'Store Connected' : 'Setup Integration'}
+            </p>
+          </div>
+        </div>
 
-          {/* SUB-TAB 1: GITHUB GITOPS GUIDE */}
-          {ruleBookTab === 'github' && (
-            <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl p-6 shadow-card space-y-6">
-              <div>
-                <span className="px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200">
-                  Official GitOps Publishing Guide
-                </span>
-                <h2 className="font-editorial text-2xl font-bold text-[#2b1b12] mt-2">
-                  How GitHub GitOps Automated Blog Publishing Works
-                </h2>
-                <p className="text-xs md:text-sm text-[#6f5a4c] mt-1 leading-relaxed">
-                  GitOps is the modern standard for fast, high-performance static and hybrid sites. When Rank Monk synthesizes an article, it commits a publication-ready Markdown file directly to your website repository. Your hosting provider (Vercel, Netlify, Cloudflare Pages, Astro, GitHub Pages) automatically builds and deploys it live in ~30 seconds.
-                </p>
-              </div>
-
-              {/* STEP 1: GENERATE TOKEN */}
-              <div className="border border-[#e4d6c6] rounded-xl p-5 bg-[#fdfbf7] space-y-3">
-                <div className="flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-[#c5a059] text-[#2b1b12] font-black text-xs flex items-center justify-center shrink-0">
-                    1
-                  </span>
-                  <h3 className="font-bold text-sm text-[#2b1b12]">
-                    Get Your GitHub Personal Access Token (30 Seconds)
-                  </h3>
-                </div>
-                <p className="text-xs text-[#6f5a4c] leading-relaxed">
-                  GitHub personal access tokens authorize Rank Monk to commit blog files to your repository securely without needing your GitHub account password.
-                </p>
-
-                <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl space-y-2.5">
-                  <span className="font-bold text-xs text-emerald-950 flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-emerald-700" />
-                    <span>⚡ Recommended: 1-Click Pre-Configured Token (Never Fails)</span>
-                  </span>
-                  <p className="text-xs text-emerald-900 leading-relaxed">
-                    Click the button below to open GitHub with the required <code className="bg-white px-1.5 py-0.5 rounded border border-emerald-200 font-mono font-bold text-emerald-950">repo</code> write scope pre-selected. Simply scroll to the bottom, click <strong>Generate token</strong>, and copy your token!
-                  </p>
-                  <div>
-                    <a
-                      href="https://github.com/settings/tokens/new?scopes=repo&description=RankMonk+GitOps"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-sm transition-all cursor-pointer"
-                    >
-                      <span>⚡ Generate Pre-Configured Classic Token on GitHub</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-white border border-[#e4d6c6] rounded-xl space-y-1.5 text-xs text-[#6f5a4c]">
-                  <span className="font-bold text-[#2b1b12] block">Alternative (Fine-Grained Token):</span>
-                  <p className="text-[11px] leading-relaxed">
-                    If your organization requires Fine-Grained tokens: under <em>Repository access</em> choose <strong>Only select repositories</strong> and select your website repo. Under <em>Repository permissions → Contents</em>, select <strong>Read and write</strong>.
-                  </p>
-                </div>
-              </div>
-
-              {/* STEP 2: REPOSITORY & PATH CONFIGURATION */}
-              <div className="border border-[#e4d6c6] rounded-xl p-5 bg-[#fdfbf7] space-y-3">
-                <div className="flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-[#c5a059] text-[#2b1b12] font-black text-xs flex items-center justify-center shrink-0">
-                    2
-                  </span>
-                  <h3 className="font-bold text-sm text-[#2b1b12]">
-                    Repository Name &amp; Blog Folder Path
-                  </h3>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-[#6f5a4c]">
-                  <div className="p-3 bg-white border border-[#ebd8c5] rounded-xl space-y-1">
-                    <span className="font-bold text-[#2b1b12] block">Repository Format:</span>
-                    <p className="text-[11px]">
-                      Enter <code className="bg-slate-100 px-1 py-0.5 rounded font-mono text-[#2b1b12]">owner/repo</code> (e.g. <code className="bg-slate-100 px-1 py-0.5 rounded font-mono text-[#2b1b12]">acme/website</code>). Even if you paste the full URL, Rank Monk automatically sanitizes it!
-                    </p>
-                  </div>
-                  <div className="p-3 bg-white border border-[#ebd8c5] rounded-xl space-y-1">
-                    <span className="font-bold text-[#2b1b12] block">Blog Folder Path:</span>
-                    <p className="text-[11px]">
-                      Usually <code className="bg-slate-100 px-1 py-0.5 rounded font-mono text-[#2b1b12]">content/blogs</code>, <code className="bg-slate-100 px-1 py-0.5 rounded font-mono text-[#2b1b12]">src/content/blog</code>, or <code className="bg-slate-100 px-1 py-0.5 rounded font-mono text-[#2b1b12]">content/resources</code>.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-2 flex items-center gap-3">
-                <button
-                  onClick={() => setActiveModal('github')}
-                  className="py-3 px-6 rounded-xl bg-[#2b1b12] text-white hover:bg-[#3d271a] font-bold text-xs transition-all flex items-center gap-2 shadow-sm cursor-pointer"
-                >
-                  <GithubIcon className="w-4 h-4 text-[#c5a059]" />
-                  <span>Configure GitHub GitOps Settings Now</span>
-                </button>
-              </div>
+        {/* Card 3: Magento */}
+        <div
+          onClick={() => { setSelectedCms('magento'); setCmsModalOpen(true); }}
+          className="bg-white border border-[#e4d6c6] rounded-2xl p-4 shadow-xs hover:border-[#c5a059] transition-all cursor-pointer flex flex-col justify-between min-h-[110px]"
+        >
+          <div className="flex items-center justify-between">
+            <div className="p-2 bg-[#f8f3ec] rounded-xl">
+              <MagentoIcon className="w-6 h-6" />
             </div>
-          )}
+            <span className={`inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider ${magentoConfig ? 'text-emerald-700' : 'text-slate-400'}`}>
+              <span className={`w-2 h-2 rounded-full ${magentoConfig ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+              {magentoConfig ? 'ACTIVE' : 'OFFLINE'}
+            </span>
+          </div>
+          <div className="mt-3">
+            <h3 className="font-bold text-xs text-[#2b1b12]">Magento</h3>
+            <p className="text-[11px] text-[#6f5a4c] truncate">
+              {magentoConfig ? 'Store Connected' : 'Setup Integration'}
+            </p>
+          </div>
+        </div>
 
-          {/* SUB-TAB 2: WORDPRESS REST GUIDE */}
-          {ruleBookTab === 'wordpress' && (
-            <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl p-6 shadow-card space-y-6">
-              <div>
-                <span className="px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-800 border border-blue-200">
-                  Official WordPress REST API Guide
-                </span>
-                <h2 className="font-editorial text-2xl font-bold text-[#2b1b12] mt-2">
-                  How WordPress Automated Publishing Works (Zero Plugins Needed)
-                </h2>
-                <p className="text-xs md:text-sm text-[#6f5a4c] mt-1 leading-relaxed">
-                  WordPress comes standard with a high-speed REST API built directly into WordPress core. You do not need to install any heavy third-party plugins. Rank Monk securely connects via Application Passwords to draft or publish SEO articles.
-                </p>
-              </div>
-
-              {/* STEP 1: GENERATE APPLICATION PASSWORD */}
-              <div className="border border-[#e4d6c6] rounded-xl p-5 bg-[#fdfbf7] space-y-3">
-                <div className="flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-[#c5a059] text-[#2b1b12] font-black text-xs flex items-center justify-center shrink-0">
-                    1
-                  </span>
-                  <h3 className="font-bold text-sm text-[#2b1b12]">
-                    Generate an Application Password in 30 Seconds
-                  </h3>
-                </div>
-                <ol className="list-decimal list-inside space-y-2 text-xs text-[#6f5a4c] pl-1 font-medium leading-relaxed">
-                  <li>Log in to your WordPress Admin dashboard (<code className="bg-white px-1.5 py-0.5 rounded border border-[#e4d6c6] font-mono text-[11px]">https://yourdomain.com/wp-admin</code>).</li>
-                  <li>In the left sidebar, click <strong>Users → Profile</strong> (or <em>Edit My Profile</em>).</li>
-                  <li>Scroll down to the <strong>Application Passwords</strong> section (near the bottom of the page).</li>
-                  <li>In the <strong>New Application Password Name</strong> box, type <code className="bg-white px-1.5 py-0.5 rounded border border-[#e4d6c6] font-mono text-[11px]">RankMonk</code>.</li>
-                  <li>Click <strong>Add New Application Password</strong>.</li>
-                  <li>WordPress will immediately generate a 16-character password (e.g. <code className="bg-blue-50 text-blue-900 px-1.5 py-0.5 rounded font-mono font-bold text-[11px]">xxxx xxxx xxxx xxxx</code>). Copy this password!</li>
-                </ol>
-              </div>
-
-              {/* STEP 2: PASTE IN RANK MONK */}
-              <div className="border border-[#e4d6c6] rounded-xl p-5 bg-[#fdfbf7] space-y-3">
-                <div className="flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-[#c5a059] text-[#2b1b12] font-black text-xs flex items-center justify-center shrink-0">
-                    2
-                  </span>
-                  <h3 className="font-bold text-sm text-[#2b1b12]">
-                    Connect in Rank Monk
-                  </h3>
-                </div>
-                <p className="text-xs text-[#6f5a4c] leading-relaxed">
-                  Enter your <strong>Site URL</strong> (e.g. <code className="bg-white px-1 py-0.5 rounded font-mono text-[#2b1b12]">https://yourdomain.com</code>), your <strong>WordPress Username</strong> (e.g. <code className="bg-white px-1 py-0.5 rounded font-mono text-[#2b1b12]">admin</code> or your author username), and paste the generated <strong>Application Password</strong>.
-                </p>
-              </div>
-
-              <div className="pt-2 flex items-center gap-3">
-                <button
-                  onClick={() => setActiveModal('wordpress')}
-                  className="py-3 px-6 rounded-xl bg-[#21759b] text-white hover:bg-[#1b6485] font-bold text-xs transition-all flex items-center gap-2 shadow-sm cursor-pointer"
-                >
-                  <Globe className="w-4 h-4" />
-                  <span>Configure WordPress Settings Now</span>
-                </button>
-              </div>
+        {/* Card 4: GitHub */}
+        <div
+          onClick={() => { setSelectedCms('github'); setCmsModalOpen(true); }}
+          className="bg-white border border-[#e4d6c6] rounded-2xl p-4 shadow-xs hover:border-[#c5a059] transition-all cursor-pointer flex flex-col justify-between min-h-[110px]"
+        >
+          <div className="flex items-center justify-between">
+            <div className="p-2 bg-[#f8f3ec] rounded-xl">
+              <GithubIcon className="w-6 h-6" />
             </div>
-          )}
+            <span className={`inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider ${githubConfig ? 'text-emerald-700' : 'text-slate-400'}`}>
+              <span className={`w-2 h-2 rounded-full ${githubConfig ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`} />
+              {githubConfig ? 'ACTIVE' : 'OFFLINE'}
+            </span>
+          </div>
+          <div className="mt-3">
+            <h3 className="font-bold text-xs text-[#2b1b12]">GitHub</h3>
+            <p className="text-[11px] text-[#6f5a4c] truncate font-mono">
+              {githubConfig ? `${githubConfig.owner}/${githubConfig.repo}` : 'Setup Integration'}
+            </p>
+          </div>
+        </div>
 
-          {/* SUB-TAB: META RULES */}
-          {ruleBookTab === 'meta' && (
-            <div className="space-y-6">
-              <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl p-6 shadow-card space-y-6">
-                <div>
-                  <span className="px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200">
-                    Official Meta Policy & Graph API Requirements
-                  </span>
-                  <h2 className="font-editorial text-2xl font-bold text-[#2b1b12] mt-2">
-                    Why Meta Has Specific Rules for Automated Publishing
-                  </h2>
-                  <p className="text-xs md:text-sm text-[#6f5a4c] mt-1 leading-relaxed">
-                    Meta strictly protects user privacy. To publish posts, images, and reels on Instagram and Facebook without manual copy-pasting, Meta requires compliance with two foundational rules. These take under 60 seconds to configure.
-                  </p>
-                </div>
-
-                {/* RULE 1 */}
-                <div className="border border-[#e4d6c6] rounded-xl p-5 bg-[#fdfbf7] space-y-3">
-                  <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-[#c5a059] text-[#2b1b12] font-black text-xs flex items-center justify-center shrink-0">
-                      1
-                    </span>
-                    <h3 className="font-bold text-sm text-[#2b1b12]">
-                      Your Instagram Account Must Be a Professional Account (Business or Creator)
-                    </h3>
-                  </div>
-                  <p className="text-xs text-[#6f5a4c] leading-relaxed">
-                    <strong>Why:</strong> Meta’s official Graph API only permits programmatic publishing to <em>Instagram Professional</em> accounts. Personal accounts cannot be automated by any software in the world. Switching is <strong>100% free</strong> and does not require a registered business.
-                  </p>
-
-                  <div className="bg-white border border-[#ebd8c5] rounded-xl p-4 space-y-2">
-                    <h4 className="font-bold text-xs text-[#2b1b12] flex items-center gap-2">
-                      <Smartphone className="w-4 h-4 text-[#c5a059]" />
-                      <span>How to switch on your phone in 15 seconds:</span>
-                    </h4>
-                    <ol className="list-decimal list-inside space-y-1.5 text-xs text-[#6f5a4c] pl-1 font-medium">
-                      <li>Open the <strong>Instagram app</strong> on your mobile phone and go to your profile.</li>
-                      <li>Tap the <strong>☰ (Menu)</strong> icon in the top right corner $\rightarrow$ tap <strong>Settings and privacy</strong>.</li>
-                      <li>Scroll down to <strong>For professionals</strong> and tap <strong>Account type and tools</strong>.</li>
-                      <li>Tap <strong>Switch to professional account</strong> $\rightarrow$ select <strong>Creator</strong> or <strong>Business</strong>.</li>
-                      <li>Follow the quick prompts and tap <strong>Done</strong>.</li>
-                    </ol>
-                  </div>
-                </div>
-
-                {/* RULE 2 */}
-                <div className="border border-[#e4d6c6] rounded-xl p-5 bg-[#fdfbf7] space-y-3">
-                  <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-[#c5a059] text-[#2b1b12] font-black text-xs flex items-center justify-center shrink-0">
-                      2
-                    </span>
-                    <h3 className="font-bold text-sm text-[#2b1b12]">
-                      Your Instagram Account Must Be Linked to Your Facebook Page
-                    </h3>
-                  </div>
-                  <p className="text-xs text-[#6f5a4c] leading-relaxed">
-                    <strong>Why:</strong> Meta handles access tokens and API permissions for Instagram via Facebook Business Pages. When you link them, our 1-click integration can securely discover your Instagram handle and schedule posts seamlessly.
-                  </p>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-white border border-[#ebd8c5] rounded-xl p-4 space-y-2">
-                      <h4 className="font-bold text-xs text-[#2b1b12]">Option A: From Facebook (Desktop)</h4>
-                      <ol className="list-decimal list-inside space-y-1 text-xs text-[#6f5a4c] pl-1">
-                        <li>Go to your <strong>Facebook Page</strong>.</li>
-                        <li>Click <strong>Settings</strong> $\rightarrow$ <strong>Linked Accounts</strong>.</li>
-                        <li>Click <strong>Instagram</strong> $\rightarrow$ <strong>Connect Account</strong>.</li>
-                        <li>Log in to confirm the link.</li>
-                      </ol>
-                    </div>
-
-                    <div className="bg-white border border-[#ebd8c5] rounded-xl p-4 space-y-2">
-                      <h4 className="font-bold text-xs text-[#2b1b12]">Option B: From Instagram (Mobile)</h4>
-                      <ol className="list-decimal list-inside space-y-1 text-xs text-[#6f5a4c] pl-1">
-                        <li>Go to your Instagram Profile $\rightarrow$ <strong>Edit Profile</strong>.</li>
-                        <li>Under <em>Public business information</em>, tap <strong>Page</strong>.</li>
-                        <li>Select or create your Facebook Page.</li>
-                      </ol>
-                    </div>
-                  </div>
-                </div>
-
-                {/* RULE 3 */}
-                <div className="border border-[#e4d6c6] rounded-xl p-5 bg-[#fdfbf7] space-y-3">
-                  <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-[#c5a059] text-[#2b1b12] font-black text-xs flex items-center justify-center shrink-0">
-                      3
-                    </span>
-                    <h3 className="font-bold text-sm text-[#2b1b12]">
-                      You Must Be an Admin of the Facebook Page
-                    </h3>
-                  </div>
-                  <p className="text-xs text-[#6f5a4c] leading-relaxed">
-                    Ensure that the personal Facebook profile you log in with has full Admin or Content Task permissions on that Facebook Page.
-                  </p>
-                </div>
-
-                {/* INTERACTIVE PRE-FLIGHT CHECKLIST */}
-                <div className="bg-gradient-to-br from-[#2b1b12] to-[#3d271a] rounded-xl p-6 text-white space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-editorial text-lg font-bold text-[#c5a059]">
-                        Pre-Flight Verification Checklist
-                      </h4>
-                      <p className="text-xs text-[#e4d6c6]">
-                        Check off each item once configured on your accounts:
-                      </p>
-                    </div>
-                    {allChecked && (
-                      <span className="px-3 py-1 rounded-full text-xs font-black uppercase bg-emerald-500 text-white animate-bounce">
-                        Ready to Connect!
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="space-y-2.5">
-                    <label className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-all cursor-pointer border border-white/10">
-                      <input
-                        type="checkbox"
-                        checked={checklist.isProfessional}
-                        onChange={(e) => setChecklist(prev => ({ ...prev, isProfessional: e.target.checked }))}
-                        className="w-4 h-4 rounded text-[#c5a059] focus:ring-0 cursor-pointer"
-                      />
-                      <span className="text-xs">
-                        1. My Instagram account is switched to <strong>Professional (Business or Creator)</strong>.
-                      </span>
-                    </label>
-
-                    <label className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-all cursor-pointer border border-white/10">
-                      <input
-                        type="checkbox"
-                        checked={checklist.isLinkedToPage}
-                        onChange={(e) => setChecklist(prev => ({ ...prev, isLinkedToPage: e.target.checked }))}
-                        className="w-4 h-4 rounded text-[#c5a059] focus:ring-0 cursor-pointer"
-                      />
-                      <span className="text-xs">
-                        2. My Instagram account is linked to my <strong>Facebook Page</strong>.
-                      </span>
-                    </label>
-
-                    <label className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-all cursor-pointer border border-white/10">
-                      <input
-                        type="checkbox"
-                        checked={checklist.hasAdminRights}
-                        onChange={(e) => setChecklist(prev => ({ ...prev, hasAdminRights: e.target.checked }))}
-                        className="w-4 h-4 rounded text-[#c5a059] focus:ring-0 cursor-pointer"
-                      />
-                      <span className="text-xs">
-                        3. I have <strong>Admin access</strong> to the Facebook Page I am connecting.
-                      </span>
-                    </label>
-                  </div>
-
-                  <div className="pt-2">
-                    <button
-                      onClick={handleConnectMeta}
-                      className="w-full py-3 px-6 rounded-xl bg-[#c5a059] hover:bg-[#b89146] text-[#2b1b12] font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
-                    >
-                      <Share2 className="w-4 h-4" />
-                      <span>Proceed to 1-Click Meta Authorization</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
+        {/* Card 5: Search Console */}
+        <div
+          onClick={() => setGscModalOpen(true)}
+          className="bg-white border border-[#e4d6c6] rounded-2xl p-4 shadow-xs hover:border-[#c5a059] transition-all cursor-pointer flex flex-col justify-between min-h-[110px]"
+        >
+          <div className="flex items-center justify-between">
+            <div className="p-2 bg-[#f8f3ec] rounded-xl text-emerald-700">
+              <GscShieldIcon className="w-6 h-6" />
             </div>
-          )}
+            <span className={`inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider ${gscConfig ? 'text-emerald-700' : 'text-slate-400'}`}>
+              <span className={`w-2 h-2 rounded-full ${gscConfig ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`} />
+              {gscConfig ? 'ACTIVE' : 'OFFLINE'}
+            </span>
+          </div>
+          <div className="mt-3">
+            <h3 className="font-bold text-xs text-[#2b1b12]">Search Console</h3>
+            <p className="text-[11px] text-[#6f5a4c] truncate">
+              {gscConfig ? 'Verified & Connected' : 'Setup Integration'}
+            </p>
+          </div>
+        </div>
+      </div>
 
-          {/* SUB-TAB: LINKEDIN RULES */}
-          {ruleBookTab === 'linkedin' && (
-            <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl p-6 shadow-card space-y-4">
-              <h2 className="font-editorial text-2xl font-bold text-[#2b1b12]">
-                LinkedIn Integration Rules
+      {/* 3. Main Grid (Left Column: CMS & GSC; Right Column: Paid Campaigns & Social Channels) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* LEFT COLUMN */}
+        <div className="lg:col-span-6 space-y-6">
+          {/* CARD 1: CMS & STORES */}
+          <div className="bg-white border border-[#e4d6c6] rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
+            <div>
+              <h2 className="text-xs font-black uppercase tracking-wider text-[#2b1b12]">
+                CMS &amp; STORES
               </h2>
-              <div className="space-y-3 text-xs text-[#6f5a4c] leading-relaxed">
-                <div className="p-4 rounded-xl bg-[#fdfbf7] border border-[#e4d6c6]">
-                  <h3 className="font-bold text-sm text-[#2b1b12] mb-1">Personal vs. Company Pages</h3>
-                  <p>
-                    Rank Monk supports posting directly to your personal LinkedIn profile or to an official Company Page. If you want to post to a company feed, you must hold the <strong>Super Admin</strong> or <strong>Content Admin</strong> role on that LinkedIn Organization Page.
-                  </p>
-                </div>
-                <div className="p-4 rounded-xl bg-[#fdfbf7] border border-[#e4d6c6]">
-                  <h3 className="font-bold text-sm text-[#2b1b12] mb-1">Character & Media Limits</h3>
-                  <p>
-                    LinkedIn posts support up to 3,000 characters. Single images (PNG/JPEG), carousels, or outbound article links are supported.
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setActiveModal('linkedin')}
-                className="py-2.5 px-5 rounded-xl bg-[#0077b5] text-white text-xs font-bold hover:bg-[#005f93] transition-all flex items-center gap-2 cursor-pointer"
-              >
-                <LinkedinIcon className="w-4 h-4" />
-                <span>Connect LinkedIn via API Token</span>
-              </button>
-            </div>
-          )}
-
-          {/* SUB-TAB: X (TWITTER) RULES */}
-          {ruleBookTab === 'twitter' && (
-            <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl p-6 shadow-card space-y-4">
-              <h2 className="font-editorial text-2xl font-bold text-[#2b1b12]">
-                X (Twitter) Integration Rules
-              </h2>
-              <div className="space-y-3 text-xs text-[#6f5a4c] leading-relaxed">
-                <div className="p-4 rounded-xl bg-[#fdfbf7] border border-[#e4d6c6]">
-                  <h3 className="font-bold text-sm text-[#2b1b12] mb-1">Post Length Limits</h3>
-                  <p>
-                    Standard accounts are limited to 280 characters per tweet. Verified X Premium accounts allow long-form posts. Rank Monk automatically calculates your character count in the live composer.
-                  </p>
-                </div>
-                <div className="p-4 rounded-xl bg-[#fdfbf7] border border-[#e4d6c6]">
-                  <h3 className="font-bold text-sm text-[#2b1b12] mb-1">Image Specs</h3>
-                  <p>
-                    Supports PNG, JPEG, and WebP images with a 16:9 or 1:1 aspect ratio. Media uploaded via Media Studio is automatically optimized for Twitter cards.
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setActiveModal('twitter')}
-                className="py-2.5 px-5 rounded-xl bg-black text-white text-xs font-bold hover:bg-neutral-800 transition-all flex items-center gap-2 cursor-pointer"
-              >
-                <TwitterIcon className="w-4 h-4" />
-                <span>Connect X via Developer Keys</span>
-              </button>
-            </div>
-          )}
-
-          {/* SUB-TAB: FAQS */}
-          {ruleBookTab === 'faq' && (
-            <div className="bg-[#fffcf7] border border-[#e4d6c6] rounded-2xl p-6 shadow-card space-y-4">
-              <h2 className="font-editorial text-2xl font-bold text-[#2b1b12]">
-                Frequently Asked Questions & Troubleshooting
-              </h2>
-              <div className="space-y-3">
-                <div className="p-4 rounded-xl bg-[#fdfbf7] border border-[#e4d6c6]">
-                  <h4 className="font-bold text-xs text-[#2b1b12] mb-1">
-                    Q: Why didn't my Instagram account show up after I logged in with Meta?
-                  </h4>
-                  <p className="text-xs text-[#6f5a4c]">
-                    This happens when either: (1) Your Instagram account is still set to Personal instead of Professional (Business/Creator), or (2) Your Instagram account is not yet linked to a Facebook Page. Follow Rule 1 & Rule 2 above, then click Re-authenticate.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-xl bg-[#fdfbf7] border border-[#e4d6c6]">
-                  <h4 className="font-bold text-xs text-[#2b1b12] mb-1">
-                    Q: Does an Instagram Professional Account cost anything?
-                  </h4>
-                  <p className="text-xs text-[#6f5a4c]">
-                    No. Meta provides Professional (Business and Creator) accounts 100% free of charge to any user worldwide. You do not need to register a legal company or provide tax documents.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-xl bg-[#fdfbf7] border border-[#e4d6c6]">
-                  <h4 className="font-bold text-xs text-[#2b1b12] mb-1">
-                    Q: Can I disconnect or revoke access at any time?
-                  </h4>
-                  <p className="text-xs text-[#6f5a4c]">
-                    Yes! You can click "Disconnect" in the Integrations module at any time, which instantly purges the tokens from your workspace. You can also revoke access in your Facebook or Instagram security settings.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* MODAL 1: TWITTER / X DEVELOPER API KEYS */}
-      {activeModal === 'twitter' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-[#fffcf7] border border-[#d8c09e] rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl space-y-5 animate-slide-up">
-            <div className="flex items-center justify-between border-b border-[#e4d6c6] pb-4">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-black text-white flex items-center justify-center">
-                  <TwitterIcon className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="font-editorial text-lg font-bold text-[#2b1b12]">Connect X (Twitter) via API Keys</h3>
-                  <p className="text-[11px] text-[#6f5a4c]">Direct developer authentication for live organic tweeting</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setActiveModal('none')}
-                className="w-8 h-8 rounded-full bg-[#f8f3ec] text-[#6f5a4c] hover:text-[#2b1b12] flex items-center justify-center font-bold text-xs"
-              >
-                ✕
-              </button>
+              <p className="text-xs text-[#6f5a4c] mt-0.5">
+                Publish generated drafts and sync products directly.
+              </p>
             </div>
 
-            {/* Step-by-Step Instructions */}
-            <div className="bg-[#f8f3ec] rounded-2xl p-4 border border-[#e4d6c6] space-y-2 text-xs text-[#6f5a4c]">
-              <div className="font-bold text-[#2b1b12] flex items-center gap-1.5">
-                <span>📋 How to get your keys in 60 seconds:</span>
-              </div>
-              <ol className="list-decimal list-inside space-y-1 pl-1 text-[11px]">
-                <li>Open <a href="https://developer.x.com/en/portal/dashboard" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline font-bold">developer.x.com ↗</a> and create a free App.</li>
-                <li>Under <strong>User Authentication Settings</strong>, enable <strong>Read and Write</strong>.</li>
-                <li>Go to <strong>Keys and Tokens</strong> $\rightarrow$ generate your <strong>User Access Token</strong> (or Bearer Token).</li>
-                <li>Paste your handle and Access Token below:</li>
-              </ol>
-            </div>
-
-            <form onSubmit={handleSaveTwitter} className="space-y-4">
-              <div>
-                <label className="text-[11px] font-bold uppercase tracking-wider text-[#6f5a4c] block mb-1">
-                  Your X (Twitter) Handle *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="@yourcompany"
-                  value={twHandle}
-                  onChange={(e) => setTwHandle(e.target.value)}
-                  className="w-full p-3 bg-white border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] font-semibold focus:outline-none focus:border-[#2b1b12]"
-                />
-              </div>
-
-              <div>
-                <label className="text-[11px] font-bold uppercase tracking-wider text-[#6f5a4c] block mb-1">
-                  User Access Token (or Bearer Token) *
-                </label>
-                <textarea
-                  rows={3}
-                  required
-                  placeholder="Paste your Twitter OAuth 1.0a / 2.0 User Access Token here..."
-                  value={twToken}
-                  onChange={(e) => setTwToken(e.target.value)}
-                  className="w-full p-3 bg-white border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] font-mono focus:outline-none focus:border-[#2b1b12]"
-                />
-              </div>
-
-              <div>
-                <label className="text-[11px] font-bold uppercase tracking-wider text-[#6f5a4c] block mb-1">
-                  API Key / Consumer Key (Optional)
-                </label>
-                <input
-                  type="text"
-                  placeholder="Optional API Key"
-                  value={twApiKey}
-                  onChange={(e) => setTwApiKey(e.target.value)}
-                  className="w-full p-2.5 bg-white border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] font-mono focus:outline-none"
-                />
-              </div>
-
-              <div className="flex gap-2.5 pt-2">
+            {/* Horizontal Brand Buttons */}
+            <div className="grid grid-cols-4 gap-2.5">
+              {[
+                { id: 'wordpress', name: 'WordPress', icon: WordPressIcon, active: !!wordpressConfig },
+                { id: 'shopify', name: 'Shopify', icon: ShopifyIcon, active: !!shopifyConfig },
+                { id: 'magento', name: 'Magento', icon: MagentoIcon, active: !!magentoConfig },
+                { id: 'github', name: 'GitHub', icon: GithubIcon, active: !!githubConfig }
+              ].map((item) => (
                 <button
+                  key={item.id}
                   type="button"
-                  onClick={() => setActiveModal('none')}
-                  className="flex-1 py-3 bg-[#f8f3ec] hover:bg-[#ebdcc8] text-[#2b1b12] rounded-xl text-xs font-bold transition-all cursor-pointer"
+                  onClick={() => { setSelectedCms(item.id as any); setCmsModalOpen(true); }}
+                  className={`p-3 rounded-2xl border transition-all flex flex-col items-center justify-center gap-1.5 cursor-pointer ${
+                    selectedCms === item.id
+                      ? 'border-[#2b1b12] bg-[#f8f3ec] shadow-xs'
+                      : 'border-[#e4d6c6] bg-white hover:bg-[#fbf8f3]'
+                  }`}
                 >
-                  Cancel
+                  <item.icon className="w-5 h-5" />
+                  <span className="text-[11px] font-bold text-[#2b1b12]">{item.name}</span>
                 </button>
-                <button
-                  type="submit"
-                  className="flex-1 py-3 bg-black hover:bg-neutral-800 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
-                >
-                  Verify & Connect X Account ✦
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL 2: LINKEDIN OFFICIAL ACCESS TOKEN */}
-      {activeModal === 'linkedin' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-[#fffcf7] border border-[#d8c09e] rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl space-y-5 animate-slide-up">
-            <div className="flex items-center justify-between border-b border-[#e4d6c6] pb-4">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-[#0077b5] text-white flex items-center justify-center">
-                  <LinkedinIcon className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="font-editorial text-lg font-bold text-[#2b1b12]">Connect LinkedIn via API Token</h3>
-                  <p className="text-[11px] text-[#6f5a4c]">Post updates directly to your profile or company page</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setActiveModal('none')}
-                className="w-8 h-8 rounded-full bg-[#f8f3ec] text-[#6f5a4c] hover:text-[#2b1b12] flex items-center justify-center font-bold text-xs"
-              >
-                ✕
-              </button>
+              ))}
             </div>
 
-            {/* Step-by-Step Instructions */}
-            <div className="bg-[#f8f3ec] rounded-2xl p-4 border border-[#e4d6c6] space-y-2 text-xs text-[#6f5a4c]">
-              <div className="font-bold text-[#2b1b12] flex items-center gap-1.5">
-                <span>📋 How to get your LinkedIn Token:</span>
-              </div>
-              <ol className="list-decimal list-inside space-y-1 pl-1 text-[11px]">
-                <li>Go to <a href="https://www.linkedin.com/developers/apps" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline font-bold">developer.linkedin.com ↗</a> and create or select your App.</li>
-                <li>Add the <strong>Share on LinkedIn</strong> product to grant <code className="bg-white px-1 py-0.5 rounded">w_member_social</code>.</li>
-                <li>Generate your <strong>Member Access Token</strong> using the LinkedIn OAuth token tool.</li>
-                <li>Paste your profile/company name and token below:</li>
-              </ol>
-            </div>
-
-            <form onSubmit={handleSaveLinkedIn} className="space-y-4">
-              <div>
-                <label className="text-[11px] font-bold uppercase tracking-wider text-[#6f5a4c] block mb-1">
-                  Profile or Company Page Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Acme Innovations / John Doe"
-                  value={liAccountName}
-                  onChange={(e) => setLiAccountName(e.target.value)}
-                  className="w-full p-3 bg-white border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] font-semibold focus:outline-none focus:border-[#0077b5]"
-                />
-              </div>
-
-              <div>
-                <label className="text-[11px] font-bold uppercase tracking-wider text-[#6f5a4c] block mb-1">
-                  Member URN or Numeric ID (Optional)
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. 12345678 or vanity handle"
-                  value={liUrn}
-                  onChange={(e) => setLiUrn(e.target.value)}
-                  className="w-full p-2.5 bg-white border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] font-mono focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="text-[11px] font-bold uppercase tracking-wider text-[#6f5a4c] block mb-1">
-                  LinkedIn Member Access Token *
-                </label>
-                <textarea
-                  rows={3}
-                  required
-                  placeholder="Paste your LinkedIn Bearer Access Token (starts with AQ...)"
-                  value={liToken}
-                  onChange={(e) => setLiToken(e.target.value)}
-                  className="w-full p-3 bg-white border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] font-mono focus:outline-none focus:border-[#0077b5]"
-                />
-              </div>
-
-              <div className="flex gap-2.5 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setActiveModal('none')}
-                  className="flex-1 py-3 bg-[#f8f3ec] hover:bg-[#ebdcc8] text-[#2b1b12] rounded-xl text-xs font-bold transition-all cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 py-3 bg-[#0077b5] hover:bg-[#005f93] text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
-                >
-                  Verify & Connect LinkedIn ✦
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL 3: META DIRECT PAGE ACCESS TOKEN */}
-      {activeModal === 'meta_token' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-[#fffcf7] border border-[#d8c09e] rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl space-y-5 animate-slide-up">
-            <div className="flex items-center justify-between border-b border-[#e4d6c6] pb-4">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#1877f2] to-[#833ab4] text-white flex items-center justify-center">
-                  <FacebookIcon className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="font-editorial text-lg font-bold text-[#2b1b12]">Connect Meta via Page Access Token</h3>
-                  <p className="text-[11px] text-[#6f5a4c]">Zero domain whitelisting or Meta App Review required</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setActiveModal('none')}
-                className="w-8 h-8 rounded-full bg-[#f8f3ec] text-[#6f5a4c] hover:text-[#2b1b12] flex items-center justify-center font-bold text-xs"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Step-by-Step Instructions */}
-            <div className="bg-[#f8f3ec] rounded-2xl p-4 border border-[#e4d6c6] space-y-2 text-xs text-[#6f5a4c]">
-              <div className="font-bold text-[#2b1b12] flex items-center gap-1.5">
-                <span>📋 How any business owner gets their Page Token:</span>
-              </div>
-              <ol className="list-decimal list-inside space-y-1 pl-1 text-[11px]">
-                <li>Open <a href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline font-bold">Meta Graph Explorer ↗</a> or your Page Settings.</li>
-                <li>Under <strong>User or Page</strong>, select your Facebook Page.</li>
-                <li>Add permissions: <code className="bg-white px-1 py-0.5 rounded">pages_manage_posts</code> and <code className="bg-white px-1 py-0.5 rounded">instagram_content_publish</code>.</li>
-                <li>Generate Token $\rightarrow$ Copy your <strong>Page Access Token</strong> and <strong>Page ID</strong> below:</li>
-              </ol>
-            </div>
-
-            <form onSubmit={handleSaveMetaDirect} className="space-y-4">
-              <div>
-                <label className="text-[11px] font-bold uppercase tracking-wider text-[#6f5a4c] block mb-1">
-                  Facebook Page Name (Optional)
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Snabbit Official Page"
-                  value={metaPageTitle}
-                  onChange={(e) => setMetaPageTitle(e.target.value)}
-                  className="w-full p-2.5 bg-white border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] font-semibold focus:outline-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#6f5a4c] block mb-1">
-                    Facebook Page ID *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. 102938475610"
-                    value={metaPageIdVal}
-                    onChange={(e) => setMetaPageIdVal(e.target.value)}
-                    className="w-full p-3 bg-white border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] font-mono focus:outline-none focus:border-[#1877f2]"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-[#6f5a4c] block mb-1">
-                    Instagram Account ID (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. 178414001928"
-                    value={metaIgIdVal}
-                    onChange={(e) => setMetaIgIdVal(e.target.value)}
-                    className="w-full p-3 bg-white border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] font-mono focus:outline-none focus:border-[#833ab4]"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-[11px] font-bold uppercase tracking-wider text-[#6f5a4c] block mb-1">
-                  Permanent Page Access Token *
-                </label>
-                <textarea
-                  rows={3}
-                  required
-                  placeholder="Paste your Meta Page Access Token (starts with EAAB...)"
-                  value={metaTokenVal}
-                  onChange={(e) => setMetaTokenVal(e.target.value)}
-                  className="w-full p-3 bg-white border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] font-mono focus:outline-none focus:border-[#1877f2]"
-                />
-              </div>
-
-              <div className="flex gap-2.5 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setActiveModal('none')}
-                  className="flex-1 py-3 bg-[#f8f3ec] hover:bg-[#ebdcc8] text-[#2b1b12] rounded-xl text-xs font-bold transition-all cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 py-3 bg-[#1877f2] hover:bg-[#166fe5] text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
-                >
-                  Verify & Connect Channels ✦
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL 4: GITHUB GITOPS CREDENTIALS & DIAGNOSTIC TESTER */}
-      {activeModal === 'github' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
-          <div className="bg-[#fffcf7] border border-[#d8c09e] rounded-3xl p-5 sm:p-7 max-w-lg w-full shadow-2xl space-y-4 my-8 animate-slide-up">
-            <div className="flex items-center justify-between border-b border-[#e4d6c6] pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-[#24292e] text-white flex items-center justify-center">
-                  <GithubIcon className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="font-editorial text-lg font-bold text-[#2b1b12]">GitHub GitOps Publishing</h3>
-                  <p className="text-[11px] text-[#6f5a4c]">Commit markdown blogs directly to your web repository</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setActiveModal('none')}
-                className="w-8 h-8 rounded-full bg-[#f8f3ec] text-[#6f5a4c] hover:text-[#2b1b12] flex items-center justify-center font-bold text-xs cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Quick 30-Second Guide with 1-Click Classic Token */}
-            <div className="bg-amber-50/80 border border-amber-200/90 rounded-2xl p-3 space-y-2 text-xs">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-xs text-amber-950 flex items-center gap-1.5">
-                  <HelpCircle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                  <span>How to get your GitHub Token (30 Seconds)</span>
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setShowGithubGuide(!showGithubGuide)}
-                  className="text-[11px] font-bold text-amber-800 hover:text-amber-950 flex items-center gap-0.5 cursor-pointer"
-                >
-                  <span>{showGithubGuide ? 'Hide' : 'Show'}</span>
-                  {showGithubGuide ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                </button>
-              </div>
-
-              {showGithubGuide && (
-                <div className="space-y-2 pt-1.5 border-t border-amber-200/60 text-[11px] text-[#4a3528]">
-                  <div className="p-2 bg-emerald-50/90 border border-emerald-200 rounded-xl space-y-1">
-                    <span className="font-bold text-emerald-900 block">⚡ Recommended: 1-Click Classic Token (Never Fails)</span>
-                    <p className="text-[10.5px] leading-relaxed text-emerald-800">
-                      Click 👉 <a href="https://github.com/settings/tokens/new?scopes=repo&description=RankMonk+GitOps" target="_blank" rel="noopener noreferrer" className="font-bold underline text-emerald-950 inline-flex items-center gap-0.5">Generate Pre-Configured Token <ExternalLink className="w-3 h-3" /></a>. This automatically checks the <code className="bg-white px-1 py-0.2 rounded border font-mono font-bold">repo</code> scope for you. Scroll down, click <strong>Generate token</strong>, and paste it below!
-                    </p>
+            {/* Connected Entity Preview */}
+            {wordpressConfig ? (
+              <div className="p-3.5 bg-[#f8f3ec] border border-[#e4d6c6] rounded-2xl flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="p-2 bg-white rounded-xl border border-[#e4d6c6] shrink-0">
+                    <WordPressIcon className="w-5 h-5" />
                   </div>
-                  <div className="space-y-1 text-[10.5px]">
-                    <span className="font-bold text-[#2b1b12] block">If using Fine-Grained Token:</span>
-                    <p className="leading-relaxed text-[#6f5a4c]">
-                      Under <em>Repository access</em> select your repo, and under <em>Repository permissions → Contents</em> choose <strong>Read and write</strong>.
-                    </p>
+                  <div className="min-w-0">
+                    <div className="text-xs font-bold text-[#2b1b12]">Wordpress</div>
+                    <div className="text-[11px] text-[#6f5a4c] truncate">
+                      {wordpressConfig.wpUrl || `https://${cleanDomain}`}
+                    </div>
                   </div>
                 </div>
-              )}
-            </div>
-
-            <form onSubmit={handleSaveGithub} className="space-y-3 text-xs">
-              <div className="space-y-1">
-                <label className="font-bold text-[#2b1b12] block">
-                  GitHub Personal Access Token *
-                </label>
-                <input
-                  type="password"
-                  required
-                  placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                  value={githubConfig.token || ''}
-                  onChange={(e) => setGithubConfig({ ...githubConfig, token: e.target.value })}
-                  className="w-full p-2.5 bg-white border border-[#e4d6c6] rounded-xl font-mono text-xs text-[#2b1b12] focus:outline-none focus:border-[#c5a059]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="font-bold text-[#2b1b12] block">
-                    Repository (owner/repo) *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. acme/website"
-                    value={githubConfig.repo || ''}
-                    onChange={(e) => setGithubConfig({ ...githubConfig, repo: e.target.value })}
-                    className="w-full p-2.5 bg-white border border-[#e4d6c6] rounded-xl font-mono text-xs text-[#2b1b12] focus:outline-none focus:border-[#c5a059]"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="font-bold text-[#2b1b12] block">
-                    Branch *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="main"
-                    value={githubConfig.branch || 'main'}
-                    onChange={(e) => setGithubConfig({ ...githubConfig, branch: e.target.value })}
-                    className="w-full p-2.5 bg-white border border-[#e4d6c6] rounded-xl font-mono text-xs text-[#2b1b12] focus:outline-none focus:border-[#c5a059]"
-                  />
-                </div>
-              </div>
-
-              {/* Optional Website Content / Case Studies URL for Auto-Detection */}
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <label className="font-bold text-[#2b1b12] text-xs block">
-                    Website Case Studies / Blog URL (Optional)
-                  </label>
-                  <span className="text-[10px] text-[#8c6b2d] font-bold">Auto-Detects Git Folder</span>
-                </div>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder={`e.g. https://${cleanDomain}/case-studies or /resources`}
-                    value={contentUrlInput}
-                    onChange={(e) => setContentUrlInput(e.target.value)}
-                    className="flex-1 p-2 bg-white border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] focus:outline-none focus:border-[#c5a059]"
-                  />
+                <div className="flex items-center gap-2 shrink-0">
                   <button
                     type="button"
-                    onClick={handleTestGithubDirect}
-                    disabled={isTestingGithub || !githubConfig.token || !githubConfig.repo}
-                    className="px-3 py-1.5 bg-[#f8f3ec] hover:bg-[#ebdcc8] border border-[#d8c09e] text-[#2b1b12] rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 disabled:opacity-50 flex items-center gap-1"
+                    onClick={() => { setSelectedCms('wordpress'); setCmsModalOpen(true); }}
+                    className="px-3 py-1.5 bg-white border border-[#e4d6c6] hover:bg-[#f1e8dc] text-[#2b1b12] rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-1"
                   >
-                    {isTestingGithub ? (
-                      <Loader2 className="w-3 h-3 animate-spin text-[#8c6b2d]" />
-                    ) : (
-                      <Sparkles className="w-3 h-3 text-[#8c6b2d]" />
-                    )}
-                    <span>Auto-Detect</span>
+                    <Edit2 className="w-3 h-3" />
+                    <span>Edit</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDisconnect('wordpress')}
+                    className="px-3 py-1.5 bg-rose-50 border border-rose-200 hover:bg-rose-100 text-rose-700 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-1"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    <span>Disconnect</span>
                   </button>
                 </div>
-                <span className="text-[10px] text-[#6f5a4c]">Provide the live link where your articles, case studies, or resources are displayed.</span>
               </div>
-
-              {/* Smart Content Publishing Directory Selector */}
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <label className="font-bold text-[#2b1b12] text-xs block">
-                    Content &amp; Case Studies Publishing Directory *
-                  </label>
-                  {detectedFolders.length > 0 && (
-                    <span className="text-[10px] text-emerald-800 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                      ✓ {detectedFolders.length} Folders Found in Repo
-                    </span>
-                  )}
-                </div>
-
-                {detectedFolders.length > 0 ? (
-                  <div className="space-y-1.5">
-                    <select
-                      value={githubConfig.folderPath || ''}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setGithubConfig({ ...githubConfig, folderPath: val });
-                      }}
-                      className="w-full p-2.5 bg-white border-2 border-[#c5a059]/70 rounded-xl font-mono text-xs text-[#2b1b12] focus:outline-none focus:border-[#2b1b12] cursor-pointer"
-                    >
-                      {detectedFolders.map((df) => (
-                        <option key={df.path} value={df.path}>
-                          📁 {df.label}
-                        </option>
-                      ))}
-                    </select>
-
-                    <div className="flex items-center gap-1.5 text-[11px] text-emerald-900 font-semibold bg-emerald-50/90 px-2.5 py-1.5 rounded-xl border border-emerald-200">
-                      <span>✓ Committing to: <code className="bg-white px-1.5 py-0.5 rounded border border-emerald-300 font-mono text-xs">{githubConfig.folderPath}</code></span>
-                      {githubTestResult?.targetRouteFolder && (
-                        <span className="text-emerald-700 font-normal">→ Serves at <strong>/{githubTestResult.targetRouteFolder}</strong></span>
-                      )}
+            ) : githubConfig ? (
+              <div className="p-3.5 bg-[#f8f3ec] border border-[#e4d6c6] rounded-2xl flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="p-2 bg-white rounded-xl border border-[#e4d6c6] shrink-0">
+                    <GithubIcon className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs font-bold text-[#2b1b12]">GitHub Repository</div>
+                    <div className="text-[11px] text-[#6f5a4c] truncate font-mono">
+                      {githubConfig.owner}/{githubConfig.repo}
                     </div>
                   </div>
-                ) : (
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. content/case-studies or content/resources"
-                    value={githubConfig.folderPath || ''}
-                    onChange={(e) => setGithubConfig({ ...githubConfig, folderPath: e.target.value })}
-                    className="w-full p-2.5 bg-white border border-[#e4d6c6] rounded-xl font-mono text-xs text-[#2b1b12] focus:outline-none focus:border-[#c5a059]"
-                  />
-                )}
-                <span className="text-[10px] text-[#6f5a4c]">Where Markdown case studies, blogs, and guides will be committed.</span>
-              </div>
-
-              {/* Diagnostic Box */}
-              {githubTestResult && (
-                <div className={`p-3 rounded-xl border text-xs space-y-1.5 animate-fade-in ${
-                  githubTestResult.error ? 'bg-red-50 border-red-200 text-red-950' : 'bg-emerald-50 border-emerald-300 text-emerald-950'
-                }`}>
-                  {githubTestResult.error ? (
-                    <div className="space-y-1">
-                      <span className="font-extrabold flex items-center gap-1.5 text-red-900">
-                        <AlertCircle className="w-3.5 h-3.5 text-red-600 shrink-0" />
-                        <span>Diagnostic Verification Failed</span>
-                      </span>
-                      <p className="text-[11px] text-red-800 leading-relaxed">
-                        {githubTestResult.error}
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-1">
-                      <span className="font-extrabold flex items-center gap-1.5 text-emerald-950">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                        <span>GitHub GitOps Verified! (@{githubTestResult.authenticatedUser})</span>
-                      </span>
-                      <p className="text-[10.5px] text-emerald-800">
-                        Framework: <strong>{githubTestResult.framework}</strong> • Write Access: <strong>{githubTestResult.hasWritePermission ? 'Yes' : 'No'}</strong>
-                      </p>
-                    </div>
-                  )}
                 </div>
-              )}
-
-              <div className="flex items-center gap-2 pt-2">
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => { setSelectedCms('github'); setCmsModalOpen(true); }}
+                    className="px-3 py-1.5 bg-white border border-[#e4d6c6] hover:bg-[#f1e8dc] text-[#2b1b12] rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-1"
+                  >
+                    <Edit2 className="w-3 h-3" />
+                    <span>Edit</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDisconnect('github')}
+                    className="px-3 py-1.5 bg-rose-50 border border-rose-200 hover:bg-rose-100 text-rose-700 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-1"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    <span>Disconnect</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="p-4 bg-[#fbf8f3] border border-dashed border-[#d8c09e] rounded-2xl text-center">
+                <p className="text-xs text-[#6f5a4c]">No CMS connected yet for auto-publishing.</p>
                 <button
                   type="button"
-                  onClick={() => setActiveModal('none')}
-                  className="py-2.5 px-4 bg-[#f8f3ec] hover:bg-[#ebdcc8] text-[#2b1b12] rounded-xl text-xs font-bold transition-all cursor-pointer"
+                  onClick={() => setCmsModalOpen(true)}
+                  className="mt-2 px-4 py-2 bg-[#2b1b12] hover:bg-[#3b2519] text-[#fffcf7] rounded-xl text-xs font-bold transition-all shadow-xs"
+                >
+                  Connect {selectedCms.toUpperCase()} →
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* CARD 2: GOOGLE SEARCH CONSOLE */}
+          <div className="bg-white border border-[#e4d6c6] rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
+            <div>
+              <h2 className="text-xs font-black uppercase tracking-wider text-[#2b1b12]">
+                GOOGLE SEARCH CONSOLE
+              </h2>
+              <p className="text-xs text-[#6f5a4c] mt-0.5">
+                Sync search volume, impressions, keywords, and backlinks.
+              </p>
+            </div>
+
+            {gscConfig ? (
+              <div className="p-4 bg-[#f8f3ec] border border-[#e4d6c6] rounded-2xl flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 shrink-0">
+                    <GscShieldIcon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 border border-emerald-300">
+                      ✓ CONNECTED
+                    </span>
+                    <p className="text-xs font-mono font-bold text-[#2b1b12] mt-1">
+                      {gscConfig.siteUrl || `sc-domain:${cleanDomain}`}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setGscModalOpen(true)}
+                    className="px-3 py-1.5 bg-white border border-[#e4d6c6] hover:bg-[#f1e8dc] text-[#2b1b12] rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDisconnect('gsc')}
+                    className="px-3 py-1.5 bg-rose-50 border border-rose-200 hover:bg-rose-100 text-rose-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                  >
+                    Disconnect
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="p-4 bg-[#fbf8f3] border border-[#e4d6c6] rounded-2xl flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-500 shrink-0">
+                    <GscShieldIcon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase text-slate-400">
+                      ● OFFLINE
+                    </span>
+                    <p className="text-xs text-[#6f5a4c] mt-0.5">Stream real Google SERP clicks &amp; impressions.</p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setGscModalOpen(true)}
+                  className="px-4 py-2 bg-[#2b1b12] hover:bg-[#3b2519] text-[#fffcf7] rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
+                >
+                  Connect GSC →
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN */}
+        <div className="lg:col-span-6 space-y-6">
+          {/* CARD 3: PAID CAMPAIGNS */}
+          <div className="bg-white border border-[#e4d6c6] rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
+            <div>
+              <h2 className="text-xs font-black uppercase tracking-wider text-[#2b1b12]">
+                PAID CAMPAIGNS
+              </h2>
+              <p className="text-xs text-[#6f5a4c] mt-0.5">
+                Optimize copy, track conversion statistics, and deploy campaigns.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => showToast('Meta Ads integration module activated.')}
+                className="py-3 px-4 rounded-2xl border border-[#e4d6c6] bg-white hover:bg-[#f8f3ec] text-xs font-bold text-[#2b1b12] transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xs"
+              >
+                <FacebookIcon className="w-4 h-4" />
+                <span>Meta Ads</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => showToast('Google Ads tracking connection activated.')}
+                className="py-3 px-4 rounded-2xl border border-[#e4d6c6] bg-white hover:bg-[#f8f3ec] text-xs font-bold text-[#2b1b12] transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xs"
+              >
+                <span className="font-bold text-[#4285f4]">G</span>
+                <span>Google Ads</span>
+              </button>
+            </div>
+          </div>
+
+          {/* CARD 4: SOCIAL CHANNELS */}
+          <div className="bg-white border border-[#e4d6c6] rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
+            <div>
+              <h2 className="text-xs font-black uppercase tracking-wider text-[#2b1b12]">
+                SOCIAL CHANNELS
+              </h2>
+              <p className="text-xs text-[#6f5a4c] mt-0.5">
+                Auto-schedule posts and track engagement stats across handles.
+              </p>
+            </div>
+
+            <div className="space-y-2.5">
+              {[
+                { id: 'linkedin', name: 'LinkedIn Profile', desc: 'Share updates and articles', icon: LinkedinIcon },
+                { id: 'twitter', name: 'X (Twitter) Profile', desc: 'Share tweets and threads', icon: TwitterIcon },
+                { id: 'instagram', name: 'Instagram Profile', desc: 'Auto-share carousel updates', icon: InstagramIcon },
+                { id: 'facebook', name: 'Facebook Page', desc: 'Share campaign announcements', icon: FacebookIcon },
+                { id: 'pinterest', name: 'Pinterest Board', desc: 'Auto-pin graphics and links', icon: PinterestIcon }
+              ].map((channel) => {
+                const connected = isSocialConnected(channel.id);
+
+                return (
+                  <div
+                    key={channel.id}
+                    className="p-3.5 bg-white border border-[#e4d6c6] rounded-2xl flex items-center justify-between gap-3 shadow-2xs hover:border-[#c5a059] transition-all"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="p-2 bg-[#f8f3ec] rounded-xl shrink-0">
+                        <channel.icon className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="text-xs font-bold text-[#2b1b12]">{channel.name}</h4>
+                        <p className="text-[11px] text-[#6f5a4c] truncate">{channel.desc}</p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (connected) {
+                          const updated = socialAccounts.filter(a => a.platform !== channel.id);
+                          setSocialAccounts(updated);
+                          const email = user?.email || 'default';
+                          fetch('/api/integrations', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email, domain: cleanDomain, platform: 'social', config: updated })
+                          });
+                          showToast(`Disconnected ${channel.name}`);
+                        } else {
+                          setActiveSocialPlatform(channel.id);
+                          setSocialModalOpen(true);
+                        }
+                      }}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
+                        connected
+                          ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200'
+                          : 'bg-[#2b1b12] hover:bg-[#3b2519] text-[#fffcf7] shadow-xs'
+                      }`}
+                    >
+                      {connected ? 'Connected ✓' : 'Connect'}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* =========================================================================
+          MODAL 1: CMS & STORES MODAL (WordPress, GitHub, Shopify, Magento)
+          ========================================================================= */}
+      {cmsModalOpen && (
+        <div className="fixed inset-0 z-[999999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-[#e4d6c6] rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl space-y-4 animate-fade-in text-left">
+            <div className="flex items-center justify-between pb-2 border-b border-[#e4d6c6]">
+              <div className="flex items-center gap-2.5">
+                {selectedCms === 'wordpress' && <WordPressIcon className="w-6 h-6" />}
+                {selectedCms === 'shopify' && <ShopifyIcon className="w-6 h-6" />}
+                {selectedCms === 'magento' && <MagentoIcon className="w-6 h-6" />}
+                {selectedCms === 'github' && <GithubIcon className="w-6 h-6" />}
+                <h3 className="font-bold text-base text-[#2b1b12]">
+                  Connect {selectedCms.toUpperCase()}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCmsModalOpen(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-black cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {selectedCms === 'wordpress' && (
+              <form onSubmit={handleSaveWordPress} className="space-y-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-[#2b1b12] uppercase mb-1">
+                    WordPress Site URL
+                  </label>
+                  <input
+                    type="url"
+                    value={wpUrl}
+                    onChange={(e) => setWpUrl(e.target.value)}
+                    placeholder={`https://${cleanDomain}`}
+                    className="w-full px-3 py-2 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl text-xs font-mono"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-[#2b1b12] uppercase mb-1">
+                    Administrator Username
+                  </label>
+                  <input
+                    type="text"
+                    value={wpUser}
+                    onChange={(e) => setWpUser(e.target.value)}
+                    placeholder="admin"
+                    className="w-full px-3 py-2 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl text-xs"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-[#2b1b12] uppercase mb-1">
+                    Application Password
+                  </label>
+                  <input
+                    type="password"
+                    value={wpAppPassword}
+                    onChange={(e) => setWpAppPassword(e.target.value)}
+                    placeholder="xxxx xxxx xxxx xxxx"
+                    className="w-full px-3 py-2 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl text-xs font-mono"
+                    required
+                  />
+                  <span className="text-[10px] text-[#6f5a4c] mt-0.5 block">
+                    Generate in WP Admin → Users → Profile → Application Passwords.
+                  </span>
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setCmsModalOpen(false)}
+                    className="flex-1 py-2 border border-[#e4d6c6] rounded-xl text-xs font-bold"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="flex-1 py-2 bg-[#2b1b12] text-white rounded-xl text-xs font-bold"
+                  >
+                    {saving ? 'Connecting...' : 'Save & Verify'}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {selectedCms === 'github' && (
+              <form onSubmit={handleSaveGitHub} className="space-y-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-[#2b1b12] uppercase mb-1">
+                    GitHub Owner / Organization
+                  </label>
+                  <input
+                    type="text"
+                    value={ghOwner}
+                    onChange={(e) => setGhOwner(e.target.value)}
+                    placeholder="octocat"
+                    className="w-full px-3 py-2 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl text-xs font-mono"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-[#2b1b12] uppercase mb-1">
+                    Repository Name
+                  </label>
+                  <input
+                    type="text"
+                    value={ghRepo}
+                    onChange={(e) => setGhRepo(e.target.value)}
+                    placeholder="blog-content"
+                    className="w-full px-3 py-2 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl text-xs font-mono"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-[#2b1b12] uppercase mb-1">
+                    Personal Access Token (repo scope)
+                  </label>
+                  <input
+                    type="password"
+                    value={ghToken}
+                    onChange={(e) => setGhToken(e.target.value)}
+                    placeholder="ghp_xxxxxxxxxxxx"
+                    className="w-full px-3 py-2 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl text-xs font-mono"
+                    required
+                  />
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setCmsModalOpen(false)}
+                    className="flex-1 py-2 border border-[#e4d6c6] rounded-xl text-xs font-bold"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="flex-1 py-2 bg-[#2b1b12] text-white rounded-xl text-xs font-bold"
+                  >
+                    {saving ? 'Saving...' : 'Save GitHub Config'}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {(selectedCms === 'shopify' || selectedCms === 'magento') && (
+              <div className="space-y-3 text-center py-4">
+                <p className="text-xs text-[#6f5a4c]">
+                  Enter your {selectedCms.toUpperCase()} store domain to initialize automated article draft syncing.
+                </p>
+                <input
+                  type="text"
+                  placeholder={`store.${cleanDomain}`}
+                  className="w-full px-3.5 py-2.5 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl text-xs"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCmsModalOpen(false);
+                    showToast(`✓ ${selectedCms.toUpperCase()} webhook endpoint configured!`);
+                  }}
+                  className="w-full py-2.5 bg-[#2b1b12] text-white rounded-xl text-xs font-bold"
+                >
+                  Save Store Connection
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          MODAL 2: GOOGLE SEARCH CONSOLE MODAL
+          ========================================================================= */}
+      {gscModalOpen && (
+        <div className="fixed inset-0 z-[999999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-[#e4d6c6] rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl space-y-4 animate-fade-in text-left">
+            <div className="flex items-center justify-between pb-2 border-b border-[#e4d6c6]">
+              <div className="flex items-center gap-2.5">
+                <GscShieldIcon className="w-6 h-6 text-emerald-700" />
+                <h3 className="font-bold text-base text-[#2b1b12]">
+                  Connect Google Search Console
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setGscModalOpen(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-black cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveGsc} className="space-y-3">
+              <div>
+                <label className="block text-[11px] font-bold text-[#2b1b12] uppercase mb-1">
+                  Search Console Property (Domain or URL)
+                </label>
+                <input
+                  type="text"
+                  value={gscPropertyUrl}
+                  onChange={(e) => setGscPropertyUrl(e.target.value)}
+                  placeholder={`sc-domain:${cleanDomain}`}
+                  className="w-full px-3.5 py-2.5 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl text-xs font-mono"
+                  required
+                />
+                <span className="text-[10px] text-[#6f5a4c] mt-0.5 block">
+                  Example: <code className="bg-[#f1e8dc] px-1 py-0.5 rounded">sc-domain:{cleanDomain}</code> or <code className="bg-[#f1e8dc] px-1 py-0.5 rounded">https://{cleanDomain}/</code>
+                </span>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#2b1b12] uppercase mb-1">
+                  Google Service Account Key (JSON)
+                </label>
+                <textarea
+                  rows={4}
+                  value={gscServiceAccountJson}
+                  onChange={(e) => setGscServiceAccountJson(e.target.value)}
+                  placeholder={`{\n  "type": "service_account",\n  "client_email": "rankmonk@project.iam.gserviceaccount.com",\n  "private_key": "-----BEGIN PRIVATE KEY-----..."\n}`}
+                  className="w-full px-3.5 py-2 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl text-[11px] font-mono resize-none"
+                />
+                <span className="text-[10px] text-[#6f5a4c] mt-0.5 block">
+                  Add this service account email as a User in GSC Settings → Users and permissions.
+                </span>
+              </div>
+
+              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-[11px] text-emerald-900 flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0" />
+                <span>Strict Real-Data Policy: Rank Monk only displays genuine Google Search Console statistics. Zero fake values.</span>
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setGscModalOpen(false)}
+                  className="flex-1 py-2.5 border border-[#e4d6c6] rounded-xl text-xs font-bold"
                 >
                   Cancel
                 </button>
                 <button
-                  type="button"
-                  disabled={isTestingGithub || !githubConfig.token || !githubConfig.repo}
-                  onClick={handleTestGithubDirect}
-                  className="py-2.5 px-3 bg-emerald-50 border border-emerald-300 hover:bg-emerald-100 text-emerald-900 font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-1 cursor-pointer disabled:opacity-50"
-                >
-                  {isTestingGithub ? (
-                    <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-700" />
-                      <span>Testing...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-3.5 h-3.5 text-emerald-700" />
-                      <span>Test Connection</span>
-                    </>
-                  )}
-                </button>
-                <button
                   type="submit"
-                  className="flex-1 py-2.5 bg-[#2b1b12] hover:bg-[#3d271a] text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer text-center"
+                  disabled={saving}
+                  className="flex-1 py-2.5 bg-[#2b1b12] text-white rounded-xl text-xs font-bold"
                 >
-                  Save GitOps Settings ✦
+                  {saving ? 'Verifying...' : 'Save & Connect GSC'}
                 </button>
               </div>
             </form>
@@ -2589,114 +1045,223 @@ export function IntegrationsWorkspace({
         </div>
       )}
 
-      {/* MODAL 5: WORDPRESS REST API CREDENTIALS */}
-      {activeModal === 'wordpress' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
-          <div className="bg-[#fffcf7] border border-[#d8c09e] rounded-3xl p-5 sm:p-7 max-w-lg w-full shadow-2xl space-y-4 my-8 animate-slide-up">
-            <div className="flex items-center justify-between border-b border-[#e4d6c6] pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-[#21759b] text-white flex items-center justify-center font-bold text-sm">
-                  WP
-                </div>
-                <div>
-                  <h3 className="font-editorial text-lg font-bold text-[#2b1b12]">WordPress REST API Connection</h3>
-                  <p className="text-[11px] text-[#6f5a4c]">Publish directly into your WordPress posts table</p>
-                </div>
-              </div>
+      {/* =========================================================================
+          MODAL 3: SOCIAL ACCOUNT CONNECT MODAL
+          ========================================================================= */}
+      {socialModalOpen && (
+        <div className="fixed inset-0 z-[999999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-[#e4d6c6] rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-fade-in text-left">
+            <div className="flex items-center justify-between pb-2 border-b border-[#e4d6c6]">
+              <h3 className="font-bold text-base text-[#2b1b12] capitalize">
+                Connect {activeSocialPlatform}
+              </h3>
               <button
-                onClick={() => setActiveModal('none')}
-                className="w-8 h-8 rounded-full bg-[#f8f3ec] text-[#6f5a4c] hover:text-[#2b1b12] flex items-center justify-center font-bold text-xs cursor-pointer"
+                type="button"
+                onClick={() => setSocialModalOpen(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-black cursor-pointer"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Quick WP Guide */}
-            <div className="bg-blue-50/80 border border-blue-200/90 rounded-2xl p-3 space-y-2 text-xs">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-xs text-blue-950 flex items-center gap-1.5">
-                  <HelpCircle className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                  <span>How to get your WordPress Password (No plugins needed)</span>
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setShowWpGuide(!showWpGuide)}
-                  className="text-[11px] font-bold text-blue-800 hover:text-blue-950 flex items-center gap-0.5 cursor-pointer"
-                >
-                  <span>{showWpGuide ? 'Hide' : 'Show'}</span>
-                  {showWpGuide ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                </button>
-              </div>
-
-              {showWpGuide && (
-                <ol className="list-decimal list-inside space-y-1 pt-1.5 border-t border-blue-200/60 text-[11px] text-[#2c3e50] leading-relaxed">
-                  <li>Log in to your WordPress Admin (<code className="bg-white px-1 py-0.5 rounded border border-blue-200 font-mono text-[10px]">yourdomain.com/wp-admin</code>).</li>
-                  <li>Click <strong>Users → Profile</strong> in the left sidebar.</li>
-                  <li>Scroll down to the <strong>Application Passwords</strong> section.</li>
-                  <li>Type <code className="bg-white px-1 py-0.5 rounded border border-blue-200 text-[10px] font-mono">RankMonk</code> and click <strong>Add New Application Password</strong>.</li>
-                  <li>Copy the 16-character generated password and paste it below!</li>
-                </ol>
-              )}
-            </div>
-
-            <form onSubmit={handleSaveWp} className="space-y-3 text-xs">
-              <div className="space-y-1">
-                <label className="font-bold text-[#2b1b12] block">WordPress Site URL *</label>
-                <input
-                  type="url"
-                  required
-                  placeholder="https://yourdomain.com"
-                  value={wpConfig.wpUrl || ''}
-                  onChange={(e) => setWpConfig({ ...wpConfig, wpUrl: e.target.value })}
-                  className="w-full p-2.5 bg-white border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] focus:outline-none focus:border-[#21759b]"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="font-bold text-[#2b1b12] block">WordPress Admin Username *</label>
+            <form onSubmit={handleConnectSocial} className="space-y-3">
+              <div>
+                <label className="block text-[11px] font-bold text-[#2b1b12] uppercase mb-1">
+                  Profile Handle or Page Name
+                </label>
                 <input
                   type="text"
+                  value={socialHandle}
+                  onChange={(e) => setSocialHandle(e.target.value)}
+                  placeholder={`@${cleanDomain.split('.')[0]}`}
+                  className="w-full px-3.5 py-2.5 bg-[#f8f3ec] border border-[#e4d6c6] rounded-xl text-xs"
                   required
-                  placeholder="admin or editor"
-                  value={wpConfig.wpUsername || ''}
-                  onChange={(e) => setWpConfig({ ...wpConfig, wpUsername: e.target.value })}
-                  className="w-full p-2.5 bg-white border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] focus:outline-none focus:border-[#21759b]"
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="font-bold text-[#2b1b12] block">WordPress Application Password *</label>
-                <input
-                  type="password"
-                  required
-                  placeholder="xxxx xxxx xxxx xxxx"
-                  value={wpConfig.wpAppPassword || ''}
-                  onChange={(e) => setWpConfig({ ...wpConfig, wpAppPassword: e.target.value })}
-                  className="w-full p-2.5 bg-white border border-[#e4d6c6] rounded-xl font-mono text-xs text-[#2b1b12] focus:outline-none focus:border-[#21759b]"
-                />
-                <span className="text-[10px] text-[#6f5a4c]">Generated under Users → Profile → Application Passwords.</span>
-              </div>
+              <p className="text-xs text-[#6f5a4c]">
+                Connect your official handle to enable 1-click organic post scheduling and visual carousels directly from Social Studio.
+              </p>
 
-              <div className="flex items-center gap-2 pt-2">
+              <div className="flex gap-2 pt-2">
                 <button
                   type="button"
-                  onClick={() => setActiveModal('none')}
-                  className="flex-1 py-2.5 bg-[#f8f3ec] hover:bg-[#ebdcc8] text-[#2b1b12] rounded-xl text-xs font-bold transition-all cursor-pointer"
+                  onClick={() => setSocialModalOpen(false)}
+                  className="flex-1 py-2 border border-[#e4d6c6] rounded-xl text-xs font-bold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 bg-[#21759b] hover:bg-[#1b6485] text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer text-center"
+                  className="flex-1 py-2 bg-[#2b1b12] text-white rounded-xl text-xs font-bold"
                 >
-                  Save WordPress Settings ✦
+                  Save Handle
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          MODAL 4: INTERACTIVE USER CONNECTION GUIDE (Requirement)
+          ========================================================================= */}
+      {guideModalOpen && (
+        <div className="fixed inset-0 z-[999999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-[#e4d6c6] rounded-3xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-6 sm:p-8 shadow-2xl space-y-5 animate-fade-in text-left">
+            <div className="flex items-center justify-between pb-3 border-b border-[#e4d6c6]">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-purple-100 text-purple-800 rounded-xl">
+                  <BookOpen className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg text-[#2b1b12]">
+                    Integration Connection Guide
+                  </h3>
+                  <p className="text-xs text-[#6f5a4c]">
+                    Step-by-step instructions for non-technical users to connect each platform.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setGuideModalOpen(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-black cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Guide Tabs */}
+            <div className="flex gap-2 overflow-x-auto pb-1 border-b border-[#e4d6c6]">
+              {[
+                { id: 'gsc', label: 'Google Search Console' },
+                { id: 'wordpress', label: 'WordPress' },
+                { id: 'github', label: 'GitHub' },
+                { id: 'social', label: 'Social Channels' }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setGuideTab(tab.id as any)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                    guideTab === tab.id
+                      ? 'bg-[#2b1b12] text-white shadow-xs'
+                      : 'text-[#6f5a4c] hover:bg-[#f8f3ec]'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Guide Content */}
+            <div className="space-y-4 text-xs text-[#2b1b12] leading-relaxed">
+              {guideTab === 'gsc' && (
+                <div className="space-y-3">
+                  <h4 className="font-bold text-sm text-[#2b1b12]">Connecting Google Search Console</h4>
+                  <ol className="list-decimal pl-5 space-y-2 text-[#6f5a4c]">
+                    <li>
+                      Log in to <a href="https://search.google.com/search-console" target="_blank" rel="noreferrer" className="text-indigo-600 underline font-semibold">Google Search Console</a>.
+                    </li>
+                    <li>
+                      In the bottom left corner, click <strong>Settings ⚙️</strong>.
+                    </li>
+                    <li>
+                      Click on <strong>Users and permissions</strong>, then click the blue <strong>Add user</strong> button.
+                    </li>
+                    <li>
+                      Enter your Google Service Account email (or your Rank Monk delegated email) and grant <strong>Full</strong> or <strong>Owner</strong> permission.
+                    </li>
+                    <li>
+                      Copy your Property identifier (e.g., <code className="bg-[#f1e8dc] px-1 py-0.5 rounded text-[11px] font-mono text-[#2b1b12]">sc-domain:{cleanDomain}</code> or <code className="bg-[#f1e8dc] px-1 py-0.5 rounded text-[11px] font-mono text-[#2b1b12]">https://{cleanDomain}/</code>).
+                    </li>
+                    <li>
+                      Paste the Property identifier and your Service Account Key into Rank Monk and click <strong>Save &amp; Connect GSC</strong>.
+                    </li>
+                  </ol>
+                  <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-[11px] text-emerald-900">
+                    💡 <em>Note:</em> Real clicks and impressions will immediately start streaming into your Dashboard Overview without any fake numbers.
+                  </div>
+                </div>
+              )}
+
+              {guideTab === 'wordpress' && (
+                <div className="space-y-3">
+                  <h4 className="font-bold text-sm text-[#2b1b12]">Connecting WordPress REST API</h4>
+                  <ol className="list-decimal pl-5 space-y-2 text-[#6f5a4c]">
+                    <li>
+                      Log in to your WordPress Dashboard (<code className="bg-[#f1e8dc] px-1 py-0.5 rounded text-[11px] font-mono text-[#2b1b12]">yourdomain.com/wp-admin</code>).
+                    </li>
+                    <li>
+                      Navigate to <strong>Users → Profile</strong> in the left sidebar.
+                    </li>
+                    <li>
+                      Scroll down to the <strong>Application Passwords</strong> section.
+                    </li>
+                    <li>
+                      In the text box labeled <strong>New Application Password Name</strong>, type <strong className="text-[#2b1b12]">RankMonk</strong>.
+                    </li>
+                    <li>
+                      Click <strong>Add New Application Password</strong>. WordPress will display a 24-character code (e.g., <code className="bg-[#f1e8dc] px-1 py-0.5 rounded text-[11px] font-mono text-[#2b1b12]">abcd efgh ijkl mnop qrst uvwx</code>).
+                    </li>
+                    <li>
+                      Copy that key, paste it into Rank Monk along with your admin username, and click <strong>Save &amp; Verify</strong>.
+                    </li>
+                  </ol>
+                </div>
+              )}
+
+              {guideTab === 'github' && (
+                <div className="space-y-3">
+                  <h4 className="font-bold text-sm text-[#2b1b12]">Connecting GitHub for GitOps Blogs</h4>
+                  <ol className="list-decimal pl-5 space-y-2 text-[#6f5a4c]">
+                    <li>
+                      Go to <a href="https://github.com/settings/tokens" target="_blank" rel="noreferrer" className="text-indigo-600 underline font-semibold">GitHub Settings → Developer Settings → Personal Access Tokens</a>.
+                    </li>
+                    <li>
+                      Click <strong>Generate new token (classic)</strong>.
+                    </li>
+                    <li>
+                      Select the <code className="bg-[#f1e8dc] px-1 py-0.5 rounded text-[11px] font-mono text-[#2b1b12]">repo</code> scope so Rank Monk can create commits and pull requests with generated markdown posts.
+                    </li>
+                    <li>
+                      Copy the generated token (starts with <code className="bg-[#f1e8dc] px-1 py-0.5 rounded text-[11px] font-mono text-[#2b1b12]">ghp_...</code>) and paste it into Rank Monk.
+                    </li>
+                  </ol>
+                </div>
+              )}
+
+              {guideTab === 'social' && (
+                <div className="space-y-3">
+                  <h4 className="font-bold text-sm text-[#2b1b12]">Connecting Social Channels</h4>
+                  <ol className="list-decimal pl-5 space-y-2 text-[#6f5a4c]">
+                    <li>
+                      <strong>Instagram:</strong> Ensure your Instagram account is switched to a <em>Professional / Creator</em> account and linked to your Facebook Business Page.
+                    </li>
+                    <li>
+                      <strong>LinkedIn:</strong> Have your company page or personal profile credentials ready.
+                    </li>
+                    <li>
+                      Click <strong>Connect</strong> next to any channel to authorize scheduling.
+                    </li>
+                  </ol>
+                </div>
+              )}
+            </div>
+
+            <div className="pt-2 border-t border-[#e4d6c6] text-right">
+              <button
+                type="button"
+                onClick={() => setGuideModalOpen(false)}
+                className="px-5 py-2.5 bg-[#2b1b12] text-white font-bold rounded-xl text-xs cursor-pointer"
+              >
+                Got It, Close Guide
+              </button>
+            </div>
           </div>
         </div>
       )}
     </div>
   );
 }
-

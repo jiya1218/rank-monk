@@ -41,6 +41,7 @@ function readStoredIntegrations(email: string, domain: string) {
   const result: {
     github?: any;
     wordpress?: any;
+    gsc?: any;
     socialAccounts?: any[];
     updatedAt?: string;
   } = {
@@ -56,6 +57,7 @@ function readStoredIntegrations(email: string, domain: string) {
       const globalData = JSON.parse(fs.readFileSync(globalFile, 'utf8'));
       if (globalData.github && isRealToken(globalData.github.token)) result.github = globalData.github;
       if (globalData.wordpress && globalData.wordpress.wpAppPassword && !globalData.wordpress.wpAppPassword.includes('preserved')) result.wordpress = globalData.wordpress;
+      if (globalData.gsc) result.gsc = globalData.gsc;
       if (Array.isArray(globalData.socialAccounts)) result.socialAccounts = globalData.socialAccounts;
     } catch {}
   }
@@ -66,6 +68,7 @@ function readStoredIntegrations(email: string, domain: string) {
       const domainData = JSON.parse(fs.readFileSync(domainFile, 'utf8'));
       if (domainData.github && isRealToken(domainData.github.token)) result.github = domainData.github;
       if (domainData.wordpress && domainData.wordpress.wpAppPassword && !domainData.wordpress.wpAppPassword.includes('preserved')) result.wordpress = domainData.wordpress;
+      if (domainData.gsc) result.gsc = domainData.gsc;
       if (Array.isArray(domainData.socialAccounts) && domainData.socialAccounts.length > 0) {
         result.socialAccounts = domainData.socialAccounts;
       }
@@ -127,11 +130,14 @@ export async function POST(req: NextRequest) {
       current.github = config;
     } else if (platform === 'wordpress') {
       current.wordpress = config;
+    } else if (platform === 'gsc') {
+      current.gsc = config;
     } else if (platform === 'social') {
       current.socialAccounts = Array.isArray(config) ? config : [...(current.socialAccounts || []), config];
     } else if (platform === 'all' && config) {
       if (config.github) current.github = config.github;
       if (config.wordpress) current.wordpress = config.wordpress;
+      if (config.gsc) current.gsc = config.gsc;
       if (config.socialAccounts) current.socialAccounts = config.socialAccounts;
     }
 
@@ -194,6 +200,8 @@ export async function DELETE(req: NextRequest) {
       delete current.github;
     } else if (platform === 'wordpress') {
       delete current.wordpress;
+    } else if (platform === 'gsc') {
+      delete current.gsc;
     } else if (platform === 'social') {
       if (accountId) {
         current.socialAccounts = (current.socialAccounts || []).filter(a => a.id !== accountId);
