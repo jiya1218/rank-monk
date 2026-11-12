@@ -258,10 +258,26 @@ export function IntegrationsWorkspace({
       if (savedGh) {
         const parsed = JSON.parse(savedGh);
         if (parsed.repo) parsed.repo = normalizeRepoName(parsed.repo);
-        setGithubConfig(parsed);
+        setGithubConfig(prev => ({
+          ...prev,
+          ...parsed,
+          token: parsed.token || '',
+          repo: parsed.repo || '',
+          branch: parsed.branch || 'main',
+          folderPath: parsed.folderPath || prev.folderPath || (cleanDomain.includes('officex') ? 'content/resources' : 'content/blogs')
+        }));
       }
       const savedWp = localStorage.getItem(`rm_wp_config_${cleanDomain}`) || localStorage.getItem('rm_wp_config');
-      if (savedWp) setWpConfig(JSON.parse(savedWp));
+      if (savedWp) {
+        const parsed = JSON.parse(savedWp);
+        setWpConfig(prev => ({
+          ...prev,
+          ...parsed,
+          wpUrl: parsed.wpUrl || parsed.url || '',
+          wpUsername: parsed.wpUsername || parsed.username || '',
+          wpAppPassword: parsed.wpAppPassword || parsed.appPassword || ''
+        }));
+      }
     } catch {}
 
     // Cloud Database Persistence: Load integrations preserved under user's email
@@ -274,14 +290,28 @@ export function IntegrationsWorkspace({
             if (data.integrations.github && data.integrations.github.token) {
               const gh = data.integrations.github;
               if (gh.repo) gh.repo = normalizeRepoName(gh.repo);
-              setGithubConfig(gh);
+              setGithubConfig(prev => ({
+                ...prev,
+                ...gh,
+                token: gh.token || '',
+                repo: gh.repo || '',
+                branch: gh.branch || 'main',
+                folderPath: gh.folderPath || prev.folderPath || (cleanDomain.includes('officex') ? 'content/resources' : 'content/blogs')
+              }));
               localStorage.setItem(`rm_gh_config_${cleanDomain}`, JSON.stringify(gh));
               localStorage.setItem('rm_gh_config', JSON.stringify(gh));
             }
-            if (data.integrations.wordpress && data.integrations.wordpress.wpUrl) {
-              setWpConfig(data.integrations.wordpress);
-              localStorage.setItem(`rm_wp_config_${cleanDomain}`, JSON.stringify(data.integrations.wordpress));
-              localStorage.setItem('rm_wp_config', JSON.stringify(data.integrations.wordpress));
+            if (data.integrations.wordpress && (data.integrations.wordpress.wpUrl || data.integrations.wordpress.url)) {
+              const wp = data.integrations.wordpress;
+              setWpConfig(prev => ({
+                ...prev,
+                ...wp,
+                wpUrl: wp.wpUrl || wp.url || '',
+                wpUsername: wp.wpUsername || wp.username || '',
+                wpAppPassword: wp.wpAppPassword || wp.appPassword || ''
+              }));
+              localStorage.setItem(`rm_wp_config_${cleanDomain}`, JSON.stringify(wp));
+              localStorage.setItem('rm_wp_config', JSON.stringify(wp));
             }
             if (Array.isArray(data.integrations.socialAccounts) && data.integrations.socialAccounts.length > 0) {
               setAccounts(data.integrations.socialAccounts);
@@ -2532,7 +2562,7 @@ export function IntegrationsWorkspace({
                   type="password"
                   required
                   placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                  value={githubConfig.token}
+                  value={githubConfig.token || ''}
                   onChange={(e) => setGithubConfig({ ...githubConfig, token: e.target.value })}
                   className="w-full p-2.5 bg-white border border-[#e4d6c6] rounded-xl font-mono text-xs text-[#2b1b12] focus:outline-none focus:border-[#c5a059]"
                 />
@@ -2547,7 +2577,7 @@ export function IntegrationsWorkspace({
                     type="text"
                     required
                     placeholder="e.g. acme/website"
-                    value={githubConfig.repo}
+                    value={githubConfig.repo || ''}
                     onChange={(e) => setGithubConfig({ ...githubConfig, repo: e.target.value })}
                     className="w-full p-2.5 bg-white border border-[#e4d6c6] rounded-xl font-mono text-xs text-[#2b1b12] focus:outline-none focus:border-[#c5a059]"
                   />
@@ -2560,7 +2590,7 @@ export function IntegrationsWorkspace({
                     type="text"
                     required
                     placeholder="main"
-                    value={githubConfig.branch}
+                    value={githubConfig.branch || 'main'}
                     onChange={(e) => setGithubConfig({ ...githubConfig, branch: e.target.value })}
                     className="w-full p-2.5 bg-white border border-[#e4d6c6] rounded-xl font-mono text-xs text-[#2b1b12] focus:outline-none focus:border-[#c5a059]"
                   />
@@ -2575,7 +2605,7 @@ export function IntegrationsWorkspace({
                   type="text"
                   required
                   placeholder="content/blogs or content/resources"
-                  value={githubConfig.folderPath}
+                  value={githubConfig.folderPath || ''}
                   onChange={(e) => setGithubConfig({ ...githubConfig, folderPath: e.target.value })}
                   className="w-full p-2.5 bg-white border border-[#e4d6c6] rounded-xl font-mono text-xs text-[#2b1b12] focus:outline-none focus:border-[#c5a059]"
                 />
@@ -2706,7 +2736,7 @@ export function IntegrationsWorkspace({
                   type="url"
                   required
                   placeholder="https://yourdomain.com"
-                  value={wpConfig.wpUrl}
+                  value={wpConfig.wpUrl || ''}
                   onChange={(e) => setWpConfig({ ...wpConfig, wpUrl: e.target.value })}
                   className="w-full p-2.5 bg-white border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] focus:outline-none focus:border-[#21759b]"
                 />
@@ -2718,7 +2748,7 @@ export function IntegrationsWorkspace({
                   type="text"
                   required
                   placeholder="admin or editor"
-                  value={wpConfig.wpUsername}
+                  value={wpConfig.wpUsername || ''}
                   onChange={(e) => setWpConfig({ ...wpConfig, wpUsername: e.target.value })}
                   className="w-full p-2.5 bg-white border border-[#e4d6c6] rounded-xl text-xs text-[#2b1b12] focus:outline-none focus:border-[#21759b]"
                 />
@@ -2730,7 +2760,7 @@ export function IntegrationsWorkspace({
                   type="password"
                   required
                   placeholder="xxxx xxxx xxxx xxxx"
-                  value={wpConfig.wpAppPassword}
+                  value={wpConfig.wpAppPassword || ''}
                   onChange={(e) => setWpConfig({ ...wpConfig, wpAppPassword: e.target.value })}
                   className="w-full p-2.5 bg-white border border-[#e4d6c6] rounded-xl font-mono text-xs text-[#2b1b12] focus:outline-none focus:border-[#21759b]"
                 />

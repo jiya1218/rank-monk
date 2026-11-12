@@ -1607,7 +1607,7 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
                   <label className="font-bold text-[#2b1b12]">GitHub Personal Access Token</label>
                   <input
                     type="password"
-                    value={githubConfig.token}
+                    value={githubConfig.token || ''}
                     onChange={(e) => setGithubConfig({ ...githubConfig, token: e.target.value })}
                     placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs focus:outline-none focus:border-[#c5a059]"
@@ -1620,7 +1620,7 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
                     <label className="font-bold text-[#2b1b12]">Repository (owner/repo)</label>
                     <input
                       type="text"
-                      value={githubConfig.repo}
+                      value={githubConfig.repo || ''}
                       onChange={(e) => setGithubConfig({ ...githubConfig, repo: e.target.value })}
                       placeholder="e.g. your-org/your-repo"
                       className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:outline-none focus:border-[#c5a059]"
@@ -1630,7 +1630,7 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
                     <label className="font-bold text-[#2b1b12]">Branch</label>
                     <input
                       type="text"
-                      value={githubConfig.branch}
+                      value={githubConfig.branch || 'main'}
                       onChange={(e) => setGithubConfig({ ...githubConfig, branch: e.target.value })}
                       placeholder="main"
                       className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:outline-none focus:border-[#c5a059]"
@@ -1642,7 +1642,7 @@ export function BlogsWorkspace({ project, user, onRefreshBrand }: BlogsWorkspace
                   <label className="font-bold text-[#2b1b12]">Blog Folder Path</label>
                   <input
                     type="text"
-                    value={githubConfig.folderPath}
+                    value={githubConfig.folderPath || ''}
                     onChange={(e) => setGithubConfig({ ...githubConfig, folderPath: e.target.value })}
                     placeholder="content/blogs or src/posts"
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:outline-none focus:border-[#c5a059]"
