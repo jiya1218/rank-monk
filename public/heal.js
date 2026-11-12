@@ -2,7 +2,7 @@
  * Rank Monk Autonomous SEO Self-Healing Edge Script
  * Embed on any website: <script src="https://rankmonk.in/heal.js" data-site="yourdomain.com" async></script>
  *
- * Dynamically resolves missing meta descriptions, duplicate title tags,
+ * Dynamically resolves 301 redirects, missing meta descriptions, duplicate title tags,
  * missing image alt attributes, and JSON-LD structured schemas.
  */
 (function() {
@@ -30,8 +30,28 @@
   }
 
   function applyHealing(rules) {
-    if (!rules || !rules.pages) return;
+    if (!rules) return;
     var pathname = window.location.pathname.replace(/\/$/, '') || '/';
+
+    // 0. Instant 301 Redirect Handling
+    if (rules.redirects && rules.redirects[pathname]) {
+      var dest = rules.redirects[pathname].destination;
+      if (dest && dest !== pathname && dest !== window.location.href) {
+        log('Executing 301 redirect: ' + pathname + ' -> ' + dest);
+        window.location.replace(dest);
+        return;
+      }
+    }
+    if (rules.pages && rules.pages[pathname] && rules.pages[pathname].redirect) {
+      var rDest = rules.pages[pathname].redirect;
+      if (rDest && rDest !== pathname && rDest !== window.location.href) {
+        log('Executing page redirect: ' + pathname + ' -> ' + rDest);
+        window.location.replace(rDest);
+        return;
+      }
+    }
+
+    if (!rules.pages) return;
     var pageRule = rules.pages[pathname] || rules.pages[window.location.href] || rules.pages['*'];
 
     var healedCount = 0;
@@ -88,6 +108,22 @@
       log('Injected Schema.org JSON-LD structured data');
     }
 
+    // 5. Semantic H1 Heading Tag Injection
+    if (pageRule && pageRule.h1) {
+      var existingH1 = document.querySelector('h1');
+      if (!existingH1) {
+        var h1Tag = document.createElement('h1');
+        h1Tag.setAttribute('data-rankmonk-healed', 'h1');
+        h1Tag.textContent = pageRule.h1;
+        var parentTarget = document.querySelector('main') || document.querySelector('#__next') || document.body;
+        if (parentTarget) {
+          parentTarget.insertBefore(h1Tag, parentTarget.firstChild);
+          healedCount++;
+          log('Injected missing <h1>: "' + pageRule.h1 + '"');
+        }
+      }
+    }
+
     if (healedCount > 0) {
       console.log('⚡ [Rank Monk] Successfully healed ' + healedCount + ' SEO issues on ' + pathname + ' in ' + Math.round(performance.now()) + 'ms ✓');
     }
@@ -114,4 +150,3 @@
       });
   } catch (e) {}
 })();
-

@@ -9,6 +9,7 @@ import {
   Search,
   CheckCircle2,
   AlertTriangle,
+  AlertCircle,
   ExternalLink,
   Copy,
   Download,
@@ -38,7 +39,9 @@ import {
   LayoutGrid,
   ChevronDown,
   ChevronUp,
-  ArrowRight
+  ArrowRight,
+  GitBranch,
+  Settings
 } from 'lucide-react';
 
 interface AeoGeoWorkspaceProps {
@@ -102,6 +105,117 @@ export function AeoGeoWorkspace({ project, user, onNavigateTab }: AeoGeoWorkspac
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  // AEO Prompt AI Fix & Remediation Modal State
+  const [activePromptFix, setActivePromptFix] = useState<any | null>(null);
+  const [isGeneratingPromptFix, setIsGeneratingPromptFix] = useState(false);
+  const [promptFixData, setPromptFixData] = useState<any | null>(null);
+  const [isApplyingPromptFix, setIsApplyingPromptFix] = useState(false);
+  const [promptFixSuccess, setPromptFixSuccess] = useState<any | null>(null);
+  const [remediatedPromptIds, setRemediatedPromptIds] = useState<Record<string, boolean>>({});
+  const [copiedPromptSnippet, setCopiedPromptSnippet] = useState<string | null>(null);
+  const [promptFixTab, setPromptFixTab] = useState<'grounding' | 'schema' | 'strategy'>('grounding');
+  const [promptPlatformInfo, setPromptPlatformInfo] = useState<any | null>(null);
+
+  // Open AEO AI Fix Studio for an individual prompt
+  const handleOpenPromptFix = async (q: any) => {
+    setActivePromptFix(q);
+    setIsGeneratingPromptFix(true);
+    setPromptFixData(null);
+    setPromptFixSuccess(null);
+    setCopiedPromptSnippet(null);
+    setPromptFixTab('grounding');
+
+    // Check platform & integrations
+    fetch(`/api/seo/detect-platform?domain=${encodeURIComponent(cleanDomain)}`)
+      .then(r => r.json())
+      .then(d => { if (d.success) setPromptPlatformInfo(d.data); })
+      .catch(() => {});
+
+    try {
+      const res = await fetch('/api/aeo/remediate-prompt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: q.query || q.prompt || '',
+          brandName,
+          domain: cleanDomain,
+          industry,
+          targetMarket,
+          category: q.category || 'Best for',
+          cluster: q.cluster || 'Enterprise Fit',
+          incumbentWinner: q.topCompetitorCited || 'Legacy Incumbents'
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setPromptFixData(data);
+      } else {
+        showToast('Unable to generate prompt remediation.');
+      }
+    } catch (err) {
+      console.error('[Prompt fix error]:', err);
+      showToast('Error generating AI fix for prompt.');
+    } finally {
+      setIsGeneratingPromptFix(false);
+    }
+  };
+
+  // Deploy AEO Remediation directly to website integrations
+  const handleDeployPromptFix = async () => {
+    if (!activePromptFix || !promptFixData) return;
+    setIsApplyingPromptFix(true);
+
+    try {
+      let githubConfig = undefined;
+      let wpConfig = undefined;
+      try {
+        const gh = localStorage.getItem(`rm_gh_config_${cleanDomain}`);
+        if (gh) githubConfig = JSON.parse(gh);
+        const wp = localStorage.getItem(`rm_wp_config_${cleanDomain}`);
+        if (wp) wpConfig = JSON.parse(wp);
+      } catch (e) {}
+
+      const res = await fetch('/api/seo/apply-fix', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          domain: cleanDomain,
+          brandName,
+          channel: 'auto',
+          fixes: [
+            {
+              id: `aeo_${activePromptFix.id || Date.now()}`,
+              pathname: '/',
+              type: 'schema_jsonld',
+              originalValue: `Citation Gap behind ${activePromptFix.topCompetitorCited || 'competitors'}`,
+              proposedValue: promptFixData.schemaJsonLd,
+              codeSnippet: promptFixData.groundingSnippet,
+              rationale: `Deploys entity grounding and FAQ schema to win citation for "${activePromptFix.query}".`
+            }
+          ],
+          githubConfig,
+          wpConfig
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setPromptFixSuccess(data);
+        if (activePromptFix.id) {
+          setRemediatedPromptIds(prev => ({ ...prev, [activePromptFix.id]: true }));
+        }
+        showToast(`✓ AI Remediation deployed for prompt!`);
+      } else {
+        showToast(data.error || 'Failed to deploy prompt remediation.');
+      }
+    } catch (err) {
+      console.error('[Deploy prompt fix error]:', err);
+      showToast('Error deploying prompt fix.');
+    } finally {
+      setIsApplyingPromptFix(false);
+    }
   };
 
   // 1. Fetch Overview Data
@@ -423,7 +537,7 @@ export function AeoGeoWorkspace({ project, user, onNavigateTab }: AeoGeoWorkspac
                 <th className="py-3.5 px-3 min-w-[115px] text-center">Citation Status</th>
                 <th className="py-3.5 px-3 min-w-[200px]">Model Checks (4 Engines)</th>
                 <th className="py-3.5 px-3 min-w-[150px]">Top Cited Entity</th>
-                <th className="py-3.5 px-3 w-24 text-center">Action</th>
+                <th className="py-3.5 px-3 min-w-[145px] text-center">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-sans">
@@ -515,17 +629,39 @@ export function AeoGeoWorkspace({ project, user, onNavigateTab }: AeoGeoWorkspac
                       </div>
                     </td>
                     <td className="py-3.5 px-3 text-center">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setExpandedPromptId(isExpanded ? null : q.id);
-                        }}
-                        className="px-2 py-1 rounded bg-[#faf7f2] hover:bg-[#efe4d5] text-[#2b1b12] text-[10px] font-bold border border-[#e4d6c6] cursor-pointer flex items-center justify-center gap-1 mx-auto"
-                      >
-                        <span>{isExpanded ? 'Hide' : 'Quote'}</span>
-                        {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                      </button>
+                      <div className="flex items-center justify-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenPromptFix(q);
+                          }}
+                          className={`px-2.5 py-1 rounded text-[10px] font-bold cursor-pointer transition-all flex items-center gap-1 shadow-xs ${
+                            remediatedPromptIds[q.id]
+                              ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                              : isWinning
+                              ? 'bg-[#2b1b12] hover:bg-[#3b2519] text-[#fffcf7]'
+                              : 'bg-gradient-to-r from-[#8a5b13] to-[#c5a059] hover:from-[#6f480f] hover:to-[#b08b43] text-white'
+                          }`}
+                          title={remediatedPromptIds[q.id] ? 'Remediation Deployed ✓' : 'Remediate Citation Gap with AI'}
+                        >
+                          <Sparkles className="w-3 h-3" />
+                          <span>{remediatedPromptIds[q.id] ? 'Healed ✓' : 'AI Fix ✦'}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setExpandedPromptId(isExpanded ? null : q.id);
+                          }}
+                          className="px-2 py-1 rounded bg-[#faf7f2] hover:bg-[#efe4d5] text-[#2b1b12] text-[10px] font-bold border border-[#e4d6c6] cursor-pointer flex items-center justify-center gap-1"
+                          title="View Verbatim AI Quote"
+                        >
+                          <span>{isExpanded ? 'Hide' : 'Quote'}</span>
+                          {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                        </button>
+                      </div>
                     </td>
                   </tr>
 
@@ -2334,6 +2470,261 @@ export function AeoGeoWorkspace({ project, user, onNavigateTab }: AeoGeoWorkspac
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* AEO PROMPT CITATION REMEDIATION STUDIO MODAL                             */}
+      {/* ========================================================================= */}
+      {activePromptFix && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-fade-in">
+          <div className="max-w-3xl w-full bg-[#fdfbf7] border border-[#e4d6c6] rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-scale-in">
+            {/* Modal Header */}
+            <div className="p-4 sm:p-5 border-b border-[#e4d6c6] bg-white flex items-center justify-between gap-3 shrink-0">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#8a5b13] to-[#c5a059] text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#f8f3ec] text-[#8a5b13] border border-[#e4d6c6]">
+                      AEO Engine Grounding
+                    </span>
+                    <span className="text-xs text-[#6f5a4c] font-mono">1-Click AI Fix</span>
+                  </div>
+                  <h3 className="font-editorial text-lg sm:text-xl font-bold text-[#2b1b12] truncate">
+                    Remediate Citation Gap with AI
+                  </h3>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setActivePromptFix(null);
+                  setPromptFixData(null);
+                  setPromptFixSuccess(null);
+                }}
+                className="text-[#6f5a4c] hover:text-[#2b1b12] text-sm p-1.5 font-bold rounded-lg hover:bg-[#f1e8dc] cursor-pointer shrink-0"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Scrollable Body */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 text-xs">
+              {/* Prompt & Current Gap Summary */}
+              <div className="p-4 bg-white border border-[#e4d6c6] rounded-2xl space-y-2.5 shadow-2xs">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-[10.5px] font-black uppercase text-[#6f5a4c] tracking-wider">
+                    Audited Buyer Prompt:
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-rose-50 text-rose-800 border border-rose-200 text-[10px] font-bold">
+                    Winner: {activePromptFix.topCompetitorCited || 'Legacy Incumbents'}
+                  </span>
+                </div>
+                <p className="text-sm font-bold text-[#2b1b12] leading-snug">
+                  &ldquo;{activePromptFix.query}&rdquo;
+                </p>
+                <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-100">
+                  <span className="px-2 py-0.5 rounded bg-[#f8f3ec] text-[#8a5b13] font-bold text-[10px]">
+                    {activePromptFix.category} • {activePromptFix.cluster}
+                  </span>
+                  <span className="text-[10.5px] text-[#6f5a4c]">
+                    Engine Status: ChatGPT {activePromptFix.gpt?.cited ? '✓' : '✗'} • Gemini {activePromptFix.gemini?.cited ? '✓' : '✗'} • Perp {activePromptFix.perplexity?.cited ? '✓' : '✗'} • Claude {activePromptFix.claude?.cited ? '✓' : '✗'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Website Stack & Integration Diagnosis */}
+              <div className="p-3.5 bg-[#faf7f2] border border-[#e4d6c6] rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-md bg-[#2b1b12] text-[#c5a059] flex items-center justify-center font-bold text-[10px]">
+                    ⚡
+                  </span>
+                  <div>
+                    <span className="font-bold text-[#2b1b12]">
+                      Target Stack: {promptPlatformInfo?.platform?.name || 'Next.js (React Framework)'}
+                    </span>
+                    <span className="ml-1.5 text-[10px] text-[#6f5a4c]">
+                      ({promptPlatformInfo?.platform?.badge || 'GitOps & Edge Ready'})
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold text-[10px]">
+                    Deployment Ready ✓
+                  </span>
+                </div>
+              </div>
+
+              {/* Loading Spinner */}
+              {isGeneratingPromptFix && (
+                <div className="py-12 flex flex-col items-center justify-center text-center space-y-2">
+                  <Loader2 className="w-7 h-7 animate-spin text-[#8a5b13]" />
+                  <p className="font-bold text-sm text-[#2b1b12]">
+                    Synthesizing Grounded Entity Anchors &amp; Schema...
+                  </p>
+                  <p className="text-[11px] text-[#6f5a4c]">
+                    Formulating competitive displacement strategy for &ldquo;{activePromptFix.query}&rdquo;
+                  </p>
+                </div>
+              )}
+
+              {/* Success View */}
+              {promptFixSuccess && (
+                <div className="p-5 bg-gradient-to-br from-emerald-950 via-[#1e3a2b] to-[#0f241a] text-white rounded-2xl border border-emerald-500/40 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold">
+                      <Check className="w-6 h-6 stroke-[3]" />
+                    </div>
+                    <div>
+                      <span className="px-2 py-0.5 rounded-full text-[9.5px] font-black uppercase tracking-wider bg-emerald-400/20 text-emerald-300 border border-emerald-400/30">
+                        LIVE ON DOMAIN
+                      </span>
+                      <h4 className="text-base font-bold text-white mt-0.5">
+                        Remediation Successfully Deployed!
+                      </h4>
+                    </div>
+                  </div>
+                  <p className="text-xs text-emerald-100/80 leading-relaxed">
+                    Entity grounding and Schema.org FAQ markup have been registered. Live answer engines (ChatGPT Search, Google Gemini, Perplexity, Claude) will associate <strong>{brandName}</strong> with this query cluster on their next web crawl pass.
+                  </p>
+                </div>
+              )}
+
+              {/* Remediation Preview Tabs */}
+              {promptFixData && !promptFixSuccess && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between border-b border-[#e4d6c6] pb-2">
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setPromptFixTab('grounding')}
+                        className={`px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer transition-all ${
+                          promptFixTab === 'grounding' ? 'bg-[#2b1b12] text-white shadow-xs' : 'bg-white text-[#2b1b12] border border-[#e4d6c6] hover:bg-[#efe4d5]'
+                        }`}
+                      >
+                        1. Entity Grounding Block
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPromptFixTab('schema')}
+                        className={`px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer transition-all ${
+                          promptFixTab === 'schema' ? 'bg-[#2b1b12] text-white shadow-xs' : 'bg-white text-[#2b1b12] border border-[#e4d6c6] hover:bg-[#efe4d5]'
+                        }`}
+                      >
+                        2. Schema.org JSON-LD
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPromptFixTab('strategy')}
+                        className={`px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer transition-all ${
+                          promptFixTab === 'strategy' ? 'bg-[#2b1b12] text-white shadow-xs' : 'bg-white text-[#2b1b12] border border-[#e4d6c6] hover:bg-[#efe4d5]'
+                        }`}
+                      >
+                        3. Displacement Strategy
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const snippet = promptFixTab === 'grounding' ? promptFixData.groundingSnippet : promptFixTab === 'schema' ? promptFixData.schemaJsonLd : promptFixData.displacementStrategy;
+                        navigator.clipboard?.writeText(snippet);
+                        setCopiedPromptSnippet(promptFixTab);
+                        showToast('✓ Snippet copied to clipboard!');
+                        setTimeout(() => setCopiedPromptSnippet(null), 2500);
+                      }}
+                      className="px-2.5 py-1 text-[11px] font-bold text-[#8a5b13] hover:text-[#2b1b12] flex items-center gap-1 cursor-pointer"
+                    >
+                      <Copy className="w-3 h-3" />
+                      <span>{copiedPromptSnippet === promptFixTab ? 'Copied!' : 'Copy Code'}</span>
+                    </button>
+                  </div>
+
+                  {/* Tab 1: Grounding Snippet */}
+                  {promptFixTab === 'grounding' && (
+                    <div className="space-y-2">
+                      <p className="text-[11px] text-[#6f5a4c]">
+                        Inject this semantic HTML anchor block into your page body or template. It provides deterministic factual evidence for LLMs:
+                      </p>
+                      <pre className="p-3 bg-slate-900 text-emerald-300 font-mono text-[11px] rounded-xl overflow-x-auto border border-slate-800 select-all leading-relaxed max-h-56">
+                        {promptFixData.groundingSnippet}
+                      </pre>
+                    </div>
+                  )}
+
+                  {/* Tab 2: Schema.org JSON-LD */}
+                  {promptFixTab === 'schema' && (
+                    <div className="space-y-2">
+                      <p className="text-[11px] text-[#6f5a4c]">
+                        Structured JSON-LD schema registering SoftwareApplication and Question/Answer intent directly in Google Knowledge Graph:
+                      </p>
+                      <pre className="p-3 bg-slate-900 text-sky-300 font-mono text-[11px] rounded-xl overflow-x-auto border border-slate-800 select-all leading-relaxed max-h-56">
+                        {promptFixData.schemaJsonLd}
+                      </pre>
+                    </div>
+                  )}
+
+                  {/* Tab 3: Displacement Strategy */}
+                  {promptFixTab === 'strategy' && (
+                    <div className="p-4 bg-white border border-[#e4d6c6] rounded-xl space-y-2">
+                      <h5 className="font-bold text-xs text-[#2b1b12] uppercase tracking-wider">
+                        Competitive Grounding Analysis
+                      </h5>
+                      <p className="text-xs text-[#4b382d] leading-relaxed">
+                        {promptFixData.displacementStrategy}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Modal Action Footer */}
+            <div className="p-4 sm:p-5 border-t border-[#e4d6c6] bg-[#faf7f2] flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+              <p className="text-[11px] text-[#6f5a4c] text-center sm:text-left">
+                ⚡ Deploying injects the fix into active edge rules, git/CMS targets, and marks this query as healed.
+              </p>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                {promptFixSuccess ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActivePromptFix(null);
+                      setPromptFixData(null);
+                      setPromptFixSuccess(null);
+                    }}
+                    className="w-full sm:w-auto px-5 py-2.5 bg-[#2b1b12] hover:bg-[#3b2519] text-[#fffcf7] font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer"
+                  >
+                    Done &amp; Return to Prompts
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={isGeneratingPromptFix || isApplyingPromptFix || !promptFixData}
+                    onClick={handleDeployPromptFix}
+                    className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-[#2b1b12] to-[#3a2518] hover:from-[#3b2519] hover:to-[#2b1b12] text-[#fffcf7] font-black text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 border border-[#c5a059]/40"
+                  >
+                    {isApplyingPromptFix ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-[#c5a059]" />
+                        <span>Deploying Remediation...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-3.5 h-3.5 text-[#c5a059] fill-current" />
+                        <span>✦ Deploy Prompt Remediation (Instant)</span>
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}

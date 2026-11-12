@@ -8,21 +8,20 @@ export async function POST(req: NextRequest) {
     const {
       domain = 'officex.pro',
       brandName = 'OfficeX',
-      channel, // 'script' | 'github' | 'cms'
+      channel, // 'script' | 'github' | 'cms' | 'auto'
       fixes = [],
       githubConfig,
       wpConfig
     } = body;
 
     const cleanDomain = domain.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '');
-
     const targetChannel = channel || 'auto';
 
     if (!Array.isArray(fixes) || fixes.length === 0) {
       return NextResponse.json({ success: false, error: 'No fixes provided' }, { status: 400 });
     }
 
-    // Helper: Apply Edge Script Rules
+    // Helper: Apply Edge Script & Rule Engine
     const applyScriptRules = () => {
       const rulesDir = path.join(process.cwd(), 'data', 'heal-rules');
       if (!fs.existsSync(rulesDir)) fs.mkdirSync(rulesDir, { recursive: true });
@@ -30,14 +29,19 @@ export async function POST(req: NextRequest) {
       const cleanFile = cleanDomain.replace(/[^a-zA-Z0-9.-]/g, '_').toLowerCase();
       const filePath = path.join(rulesDir, `${cleanFile}.json`);
 
-      let existingRules: any = { domain: cleanDomain, brandName, pages: {} };
+      let existingRules: any = { domain: cleanDomain, brandName, pages: {}, redirects: {} };
       if (fs.existsSync(filePath)) {
         try {
           existingRules = JSON.parse(fs.readFileSync(filePath, 'utf8'));
         } catch (e) {}
       }
 
+      if (!existingRules.redirects) existingRules.redirects = {};
+      if (!existingRules.pages) existingRules.pages = {};
+
       const updatedPages = { ...existingRules.pages };
+      const updatedRedirects = { ...existingRules.redirects };
+
       for (const fix of fixes) {
         let route = fix.pathname || fix.url || '/';
         try {
@@ -47,7 +51,21 @@ export async function POST(req: NextRequest) {
 
         if (!updatedPages[route]) updatedPages[route] = {};
 
-        if (fix.type === 'meta_description') {
+        if (fix.type === 'redirect_301') {
+          // Parse destination from proposedValue or codeSnippet
+          let destination = '/';
+          try {
+            if (fix.codeSnippet) {
+              const parsed = JSON.parse(fix.codeSnippet);
+              if (parsed.destination) destination = parsed.destination;
+            }
+          } catch (e) {
+            const match = (fix.proposedValue || '').match(/➔\s*([^\s]+)/);
+            if (match && match[1]) destination = match[1];
+          }
+          updatedRedirects[route] = { destination, status: 301, permanent: true };
+          updatedPages[route].redirect = destination;
+        } else if (fix.type === 'meta_description') {
           updatedPages[route].metaDesc = fix.proposedValue;
         } else if (fix.type === 'title') {
           updatedPages[route].title = fix.proposedValue;
@@ -55,80 +73,272 @@ export async function POST(req: NextRequest) {
           updatedPages[route].defaultAlt = fix.proposedValue;
         } else if (fix.type === 'canonical') {
           updatedPages[route].canonical = fix.proposedValue;
+        } else if (fix.type === 'heading_h1' || fix.type === 'h1') {
+          updatedPages[route].h1 = fix.proposedValue;
+        } else if (fix.type === 'robots_directive') {
+          updatedPages[route].robotsTag = 'index, follow';
+        } else if (fix.type === 'schema_jsonld') {
+          try {
+            updatedPages[route].schema = JSON.parse(fix.proposedValue);
+          } catch (e) {
+            updatedPages[route].schema = {
+              '@context': 'https://schema.org',
+              '@type': 'WebPage',
+              name: `${brandName} ${route}`
+            };
+          }
         }
       }
 
       existingRules.pages = updatedPages;
+      existingRules.redirects = updatedRedirects;
       existingRules.updatedAt = new Date().toISOString();
       fs.writeFileSync(filePath, JSON.stringify(existingRules, null, 2), 'utf8');
-      return Object.keys(updatedPages).length;
+
+      return Object.keys(updatedPages).length + Object.keys(updatedRedirects).length;
     };
 
-    // Helper: Commit to GitHub
+    // Helper: Commit to GitHub GitOps
     const applyGithubCommit = async () => {
       const token = githubConfig?.token || process.env.GITHUB_TOKEN || '';
-      const repo = (githubConfig?.repo || 'owner/repo').replace(/^(https?:\/\/)?github\.com\//i, '').replace(/^\/+|\/+$/g, '');
+      const repo = (githubConfig?.repo || '').replace(/^(https?:\/\/)?github\.com\//i, '').replace(/^\/+|\/+$/g, '');
+      const branch = githubConfig?.branch || 'main';
 
-      const seoConfigData = {
-        domain: cleanDomain,
-        brandName,
-        generatedAt: new Date().toISOString(),
-        fixesApplied: fixes.map(f => ({
-          route: f.pathname || f.url,
-          type: f.type,
-          tag: f.codeSnippet,
-          value: f.proposedValue
-        }))
-      };
+      if (!token || !repo.includes('/')) {
+        return {
+          applied: false,
+          repo: repo || 'Not configured',
+          reason: (!repo || !token) ? 'GitHub repository or access token not provided' : 'Verification pending'
+        };
+      }
 
-      const fileContent = JSON.stringify(seoConfigData, null, 2);
-      const filePath = 'public/seo-healing.json';
+      try {
+        // 1. Verify Repository Access
+        const repoRes = await fetch(`https://api.github.com/repos/${repo}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'User-Agent': 'RankMonk-GitOps/2.0'
+          }
+        });
 
-      if (token && repo.includes('/')) {
+        if (!repoRes.ok) {
+          const errData = await repoRes.json().catch(() => ({}));
+          return {
+            applied: false,
+            repo,
+            error: repoRes.status === 404
+              ? `Repository "${repo}" not found or token lacks access.`
+              : repoRes.status === 401
+              ? 'Invalid GitHub Personal Access Token.'
+              : repoRes.status === 403
+              ? `Access denied to "${repo}". Token lacks write permissions (needs "repo" scope).`
+              : (errData.message || `GitHub returned HTTP ${repoRes.status}`)
+          };
+        }
+
+        const modifiedFiles: string[] = [];
+        let latestCommitSha: string | undefined;
+        let latestCommitUrl: string | undefined;
+
+        // 2. Check and Embed Self-Healing Script into Root Layout if missing
+        for (const layoutCandidate of ['app/layout.tsx', 'src/app/layout.tsx', 'app/layout.jsx', 'src/app/layout.jsx']) {
+          try {
+            const layoutRes = await fetch(`https://api.github.com/repos/${repo}/contents/${layoutCandidate}?ref=${branch}`, {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'User-Agent': 'RankMonk-GitOps/2.0'
+              }
+            });
+            if (layoutRes.ok) {
+              const layoutData = await layoutRes.json();
+              const rawLayout = Buffer.from(layoutData.content, 'base64').toString('utf8');
+              if (!rawLayout.includes('rankmonk.in/heal.js') && !rawLayout.includes('heal.js')) {
+                const scriptTag = `\n        <script src="https://rankmonk.in/heal.js" data-site="${cleanDomain}" async></script>`;
+                let patchedLayout = rawLayout;
+                if (patchedLayout.includes('</head>')) {
+                  patchedLayout = patchedLayout.replace('</head>', `${scriptTag}\n      </head>`);
+                } else if (patchedLayout.includes('<body')) {
+                  patchedLayout = patchedLayout.replace(/<body([^>]*)>/, `<body$1>${scriptTag}`);
+                }
+                if (patchedLayout !== rawLayout) {
+                  const putLayout = await fetch(`https://api.github.com/repos/${repo}/contents/${layoutCandidate}`, {
+                    method: 'PUT',
+                    headers: {
+                      'Authorization': `Bearer ${token}`,
+                      'Accept': 'application/vnd.github.v3+json',
+                      'Content-Type': 'application/json',
+                      'User-Agent': 'RankMonk-GitOps/2.0'
+                    },
+                    body: JSON.stringify({
+                      message: `feat(seo): embed Rank Monk self-healing edge script in ${layoutCandidate}`,
+                      content: Buffer.from(patchedLayout, 'utf8').toString('base64'),
+                      sha: layoutData.sha,
+                      branch
+                    })
+                  });
+                  if (putLayout.ok) {
+                    const putLayoutData = await putLayout.json();
+                    modifiedFiles.push(layoutCandidate);
+                    latestCommitSha = putLayoutData.commit?.sha?.slice(0, 7);
+                    latestCommitUrl = putLayoutData.commit?.html_url;
+                  }
+                }
+              }
+              break;
+            }
+          } catch {}
+        }
+
+        // 3. For Specific Page Fixes (e.g. Missing H1 on /vendor), patch the page component directly
+        for (const fix of fixes) {
+          if (fix.type === 'heading_h1' || fix.type === 'h1') {
+            let route = fix.pathname || fix.url || '';
+            try {
+              route = new URL(fix.url, `https://${cleanDomain}`).pathname;
+            } catch {}
+            route = route.replace(/^\/+|\/+$/g, '');
+            if (!route) route = 'page';
+
+            const pageCandidates = [
+              `app/${route}/page.tsx`,
+              `src/app/${route}/page.tsx`,
+              `pages/${route}.tsx`,
+              `src/pages/${route}.tsx`,
+              `app/${route}/page.jsx`,
+              `src/app/${route}/page.jsx`
+            ];
+
+            for (const cand of pageCandidates) {
+              try {
+                const pageRes = await fetch(`https://api.github.com/repos/${repo}/contents/${cand}?ref=${branch}`, {
+                  headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'User-Agent': 'RankMonk-GitOps/2.0'
+                  }
+                });
+
+                if (pageRes.ok) {
+                  const pageData = await pageRes.json();
+                  const rawContent = Buffer.from(pageData.content, 'base64').toString('utf8');
+                  if (!rawContent.includes('<h1')) {
+                    const h1Snippet = `\n      <h1 className="text-2xl font-bold text-slate-900 mb-4">${fix.proposedValue}</h1>`;
+                    let patchedContent = rawContent;
+                    if (patchedContent.includes('<main')) {
+                      patchedContent = patchedContent.replace(/<main([^>]*)>/, `<main$1>${h1Snippet}`);
+                    } else if (patchedContent.includes('return (')) {
+                      patchedContent = patchedContent.replace(/return\s*\(\s*(<[^>]+>)/, `return (\n    $1${h1Snippet}`);
+                    }
+                    if (patchedContent !== rawContent) {
+                      const putPage = await fetch(`https://api.github.com/repos/${repo}/contents/${cand}`, {
+                        method: 'PUT',
+                        headers: {
+                          'Authorization': `Bearer ${token}`,
+                          'Accept': 'application/vnd.github.v3+json',
+                          'Content-Type': 'application/json',
+                          'User-Agent': 'RankMonk-GitOps/2.0'
+                        },
+                        body: JSON.stringify({
+                          message: `fix(seo): add missing H1 heading to /${route} via Rank Monk`,
+                          content: Buffer.from(patchedContent, 'utf8').toString('base64'),
+                          sha: pageData.sha,
+                          branch
+                        })
+                      });
+                      if (putPage.ok) {
+                        const putPageData = await putPage.json();
+                        modifiedFiles.push(cand);
+                        latestCommitSha = putPageData.commit?.sha?.slice(0, 7);
+                        latestCommitUrl = putPageData.commit?.html_url;
+                      }
+                    }
+                  }
+                  break;
+                }
+              } catch {}
+            }
+          }
+        }
+
+        // 4. Always maintain public/seo-healing.json in repo as canonical rules backup
+        const seoConfigData = {
+          domain: cleanDomain,
+          brandName,
+          generatedAt: new Date().toISOString(),
+          fixesApplied: fixes.map(f => ({
+            route: f.pathname || f.url,
+            type: f.type,
+            tag: f.codeSnippet,
+            value: f.proposedValue
+          }))
+        };
+        const fileContent = JSON.stringify(seoConfigData, null, 2);
+        const filePath = 'public/seo-healing.json';
+
+        let existingSha: string | undefined;
         try {
-          let existingSha: string | undefined;
-          const getRes = await fetch(`https://api.github.com/repos/${repo}/contents/${filePath}`, {
+          const getRes = await fetch(`https://api.github.com/repos/${repo}/contents/${filePath}?ref=${branch}`, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Accept': 'application/vnd.github.v3+json',
-              'User-Agent': 'RankMonk-Autonomous-SEO'
+              'User-Agent': 'RankMonk-GitOps/2.0'
             }
           });
           if (getRes.ok) {
             const getData = await getRes.json();
             existingSha = getData.sha;
           }
+        } catch {}
 
-          const putRes = await fetch(`https://api.github.com/repos/${repo}/contents/${filePath}`, {
-            method: 'PUT',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Accept': 'application/vnd.github.v3+json',
-              'Content-Type': 'application/json',
-              'User-Agent': 'RankMonk-Autonomous-SEO'
-            },
-            body: JSON.stringify({
-              message: `fix(seo): auto-heal ${fixes.length} missing meta & title tags via Rank Monk`,
-              content: Buffer.from(fileContent).toString('base64'),
-              sha: existingSha,
-              branch: 'main'
-            })
-          });
+        const putRes = await fetch(`https://api.github.com/repos/${repo}/contents/${filePath}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json',
+            'User-Agent': 'RankMonk-GitOps/2.0'
+          },
+          body: JSON.stringify({
+            message: `fix(seo): auto-heal ${fixes.length} SEO deficiencies via Rank Monk`,
+            content: Buffer.from(fileContent, 'utf8').toString('base64'),
+            sha: existingSha,
+            branch
+          })
+        });
 
-          if (putRes.ok) {
-            const putData = await putRes.json();
-            return {
-              applied: true,
-              sha: putData.commit?.sha?.slice(0, 7),
-              url: putData.commit?.html_url || `https://github.com/${repo}/commit/${putData.commit?.sha}`
-            };
+        if (putRes.ok) {
+          const putData = await putRes.json();
+          modifiedFiles.push(filePath);
+          if (!latestCommitSha) {
+            latestCommitSha = putData.commit?.sha?.slice(0, 7);
+            latestCommitUrl = putData.commit?.html_url;
           }
-        } catch (ghErr: any) {
-          console.warn('[GitHub SEO Commit Note]:', ghErr.message);
+          return {
+            applied: true,
+            sha: latestCommitSha || putData.commit?.sha?.slice(0, 7),
+            url: latestCommitUrl || putData.commit?.html_url || `https://github.com/${repo}/commit/${latestCommitSha}`,
+            repo,
+            modifiedFiles,
+            deploymentNote: 'Commit pushed to GitHub repository. Hosting provider build is running (~60-90s).'
+          };
+        } else {
+          const putErr = await putRes.json().catch(() => ({}));
+          return {
+            applied: false,
+            repo,
+            error: putErr.message || `Failed to commit to GitHub (HTTP ${putRes.status})`
+          };
         }
+      } catch (ghErr: any) {
+        console.warn('[GitHub SEO Commit Note]:', ghErr.message);
+        return {
+          applied: false,
+          repo,
+          error: ghErr.message || 'GitHub commit failed due to connection error.'
+        };
       }
-
-      return { applied: false, reason: 'Token or repo not configured' };
     };
 
     // Helper: Push to CMS
@@ -140,81 +350,30 @@ export async function POST(req: NextRequest) {
     };
 
     // -------------------------------------------------------------
-    // UNIFIED AUTONOMOUS MODE ('auto' / 'all')
+    // EXECUTION DISPATCH
     // -------------------------------------------------------------
-    if (targetChannel === 'auto' || targetChannel === 'all') {
-      const activeRulesCount = applyScriptRules();
-      const ghResult = await applyGithubCommit();
-      const cmsResult = await applyCmsPush();
+    const activeRulesCount = applyScriptRules();
+    const ghResult = await applyGithubCommit();
+    const cmsResult = await applyCmsPush();
 
-      const appliedList = ['⚡ Edge Self-Healing (Instant)'];
-      if (ghResult.applied) appliedList.push('🐙 GitHub Repository (Committed)');
-      if (cmsResult.applied) appliedList.push('🌐 WordPress / CMS (Updated)');
+    const appliedList: string[] = ['⚡ Edge Self-Healing Engine (Instant)'];
+    if (ghResult.applied) appliedList.push(`🐙 GitHub Repository (${ghResult.repo})`);
+    if (cmsResult.applied) appliedList.push(`🌐 WordPress / CMS REST API (${cmsResult.url})`);
 
-      return NextResponse.json({
-        success: true,
-        channel: 'auto',
-        message: `✓ Successfully applied ${fixes.length} SEO fixes automatically to your live website!`,
-        activeRulesCount,
-        appliedChannels: appliedList,
-        github: ghResult,
-        cms: cmsResult,
-        embedScript: `<script src="https://rankmonk.in/heal.js" data-site="${cleanDomain}" async></script>`
-      });
-    }
+    const hasSpecificIntegration = ghResult.applied || cmsResult.applied;
 
-    // -------------------------------------------------------------
-    // CHANNEL 1: 1-Line Self-Healing Edge Script Tag (Edge Rule Engine)
-    // -------------------------------------------------------------
-    if (targetChannel === 'script') {
-      const activeRulesCount = applyScriptRules();
-      return NextResponse.json({
-        success: true,
-        channel: 'script',
-        message: `✓ Successfully activated ${fixes.length} live self-healing rules for ${cleanDomain}!`,
-        activeRulesCount,
-        embedScript: `<script src="https://rankmonk.in/heal.js" data-site="${cleanDomain}" async></script>`
-      });
-    }
-
-    // -------------------------------------------------------------
-    // CHANNEL 2: GitHub GitOps Commit / Pull Request Bridge
-    // -------------------------------------------------------------
-    if (targetChannel === 'github') {
-      const ghResult = await applyGithubCommit();
-      if (ghResult.applied) {
-        return NextResponse.json({
-          success: true,
-          channel: 'github',
-          commitSha: ghResult.sha,
-          commitUrl: ghResult.url,
-          message: `✓ Successfully committed ${fixes.length} SEO fixes to GitHub repository!`
-        });
-      }
-      const simulatedSha = Math.random().toString(36).substring(2, 9);
-      return NextResponse.json({
-        success: true,
-        channel: 'github',
-        commitSha: simulatedSha,
-        commitUrl: `https://github.com/repo/commit/${simulatedSha}`,
-        message: `✓ Verified GitHub GitOps commit payload (${fixes.length} fixes formatted)!`
-      });
-    }
-
-    // -------------------------------------------------------------
-    // CHANNEL 3: WordPress / Headless CMS REST API Bridge
-    // -------------------------------------------------------------
-    if (targetChannel === 'cms') {
-      const wpUrl = wpConfig?.url || `https://${cleanDomain}`;
-      return NextResponse.json({
-        success: true,
-        channel: 'cms',
-        message: `✓ Dispatched ${fixes.length} meta tags and image alt attributes to CMS REST API at ${wpUrl}!`,
-        updatedCount: fixes.length
-      });
-    }
-
-    return NextResponse.json({ success: false, error: 'Unknown channel' }, { status: 400 });
+    return NextResponse.json({
+      success: true,
+      channel: targetChannel,
+      message: hasSpecificIntegration
+        ? `✓ Successfully deployed ${fixes.length} fixes directly to ${appliedList.join(' and ')}!`
+        : `✓ Successfully activated ${fixes.length} live fixes in Self-Healing Engine!`,
+      activeRulesCount,
+      appliedChannels: appliedList,
+      github: ghResult,
+      cms: cmsResult,
+      embedScript: `<script src="https://rankmonk.in/heal.js" data-site="${cleanDomain}" async></script>`
+    });
   } catch (err: any) {
     console.error('[API /api/seo/apply-fix error]:', err);
     return NextResponse.json(
@@ -223,4 +382,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-
