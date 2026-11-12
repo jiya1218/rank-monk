@@ -62,6 +62,11 @@ export async function POST(req: NextRequest) {
     const hasMetaDesc = Boolean(metaDescMatch && metaDescMatch[1] && metaDescMatch[1].trim().length > 0);
     const titleMatch = html.match(/<title\b[^>]*>([\s\S]*?)<\/title>/i);
     const titleLength = titleMatch && titleMatch[1] ? titleMatch[1].trim().length : 0;
+    const canonicalMatch = html.match(/<link\b[^>]*rel=["']canonical["'][^>]*href=["']([^"']*)["'][^>]*>/i);
+    const hasCanonical = Boolean(canonicalMatch && canonicalMatch[1]);
+    const hasJsonLd = html.includes('application/ld+json');
+    const robotsMatch = html.match(/<meta\b[^>]*name=["']robots["'][^>]*content=["']([^"']*)["'][^>]*>/i);
+    const hasNoindex = Boolean(robotsMatch && robotsMatch[1] && robotsMatch[1].toLowerCase().includes('noindex'));
 
     let isFixedOnLiveSite = false;
     let detailMessage = '';
@@ -82,10 +87,29 @@ export async function POST(req: NextRequest) {
         : 'Meta description tag is missing or empty in live HTML source.';
     } else if (normIssue.includes('title')) {
       isFixedOnLiveSite = titleLength >= 30 && titleLength <= 65;
-      detailMessage = `Title tag length on live site: ${titleLength} characters.`;
-    } else if (normIssue.includes('404') || normIssue.includes('broken')) {
+      detailMessage = isFixedOnLiveSite
+        ? `Verified! Title tag length on live site is optimal (${titleLength} chars).`
+        : `Title tag length on live site is ${titleLength} chars (recommended: 30-65 chars).`;
+    } else if (normIssue.includes('404') || normIssue.includes('broken') || normIssue.includes('http') || normIssue.includes('status')) {
       isFixedOnLiveSite = httpStatus === 200 || httpStatus === 301 || httpStatus === 302;
-      detailMessage = `HTTP response status on live site: ${httpStatus}`;
+      detailMessage = isFixedOnLiveSite
+        ? `Verified! URL returned active response status (HTTP ${httpStatus}).`
+        : `URL is still returning error status (HTTP ${httpStatus}).`;
+    } else if (normIssue.includes('canonical')) {
+      isFixedOnLiveSite = hasCanonical;
+      detailMessage = hasCanonical
+        ? `Verified! Canonical tag detected: ${canonicalMatch ? canonicalMatch[1] : ''}`
+        : 'Canonical link tag is missing from live HTML.';
+    } else if (normIssue.includes('schema') || normIssue.includes('jsonld')) {
+      isFixedOnLiveSite = hasJsonLd;
+      detailMessage = hasJsonLd
+        ? 'Verified! Schema.org JSON-LD structured data detected on live site.'
+        : 'Schema.org JSON-LD structured data not found in live HTML.';
+    } else if (normIssue.includes('noindex') || normIssue.includes('robot')) {
+      isFixedOnLiveSite = !hasNoindex;
+      detailMessage = !hasNoindex
+        ? 'Verified! Page is indexable (no restrictive noindex tag detected).'
+        : 'Robots meta tag still contains "noindex" directive.';
     } else {
       isFixedOnLiveSite = hasHealScript;
       detailMessage = hasHealScript

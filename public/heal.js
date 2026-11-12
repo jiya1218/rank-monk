@@ -115,7 +115,7 @@
         var h1Tag = document.createElement('h1');
         h1Tag.setAttribute('data-rankmonk-healed', 'h1');
         h1Tag.textContent = pageRule.h1;
-        var parentTarget = document.querySelector('main') || document.querySelector('#__next') || document.body;
+        var parentTarget = document.querySelector('main') || document.querySelector('#__next') || document.querySelector('#root') || document.body;
         if (parentTarget) {
           parentTarget.insertBefore(h1Tag, parentTarget.firstChild);
           healedCount++;
@@ -124,10 +124,71 @@
       }
     }
 
+    // 6. Canonical Tag Healing
+    if (pageRule && pageRule.canonical) {
+      var canonicalTag = document.querySelector('link[rel="canonical"]');
+      if (!canonicalTag) {
+        canonicalTag = document.createElement('link');
+        canonicalTag.rel = 'canonical';
+        canonicalTag.href = pageRule.canonical;
+        document.head.appendChild(canonicalTag);
+        healedCount++;
+        log('Injected canonical tag: ' + pageRule.canonical);
+      } else if (canonicalTag.href !== pageRule.canonical) {
+        canonicalTag.href = pageRule.canonical;
+        healedCount++;
+        log('Updated canonical tag: ' + pageRule.canonical);
+      }
+    }
+
+    // 7. Robots Directive Healing
+    if (pageRule && pageRule.robotsTag) {
+      var robotsTag = document.querySelector('meta[name="robots"]');
+      if (!robotsTag) {
+        robotsTag = document.createElement('meta');
+        robotsTag.name = 'robots';
+        robotsTag.content = pageRule.robotsTag;
+        document.head.appendChild(robotsTag);
+        healedCount++;
+      } else if (robotsTag.content && robotsTag.content.indexOf('noindex') !== -1) {
+        robotsTag.content = pageRule.robotsTag;
+        healedCount++;
+        log('Removed noindex from robots tag');
+      }
+    }
+
     if (healedCount > 0) {
       console.log('⚡ [Rank Monk] Successfully healed ' + healedCount + ' SEO issues on ' + pathname + ' in ' + Math.round(performance.now()) + 'ms ✓');
     }
   }
+
+  // SPA navigation support (Next.js App Router, React, Vue, Angular)
+  var cachedRules = null;
+  function onRouteTransition() {
+    if (cachedRules) {
+      setTimeout(function() {
+        applyHealing(cachedRules);
+      }, 80);
+    }
+  }
+
+  try {
+    var _pushState = history.pushState;
+    if (_pushState) {
+      history.pushState = function() {
+        _pushState.apply(this, arguments);
+        onRouteTransition();
+      };
+    }
+    var _replaceState = history.replaceState;
+    if (_replaceState) {
+      history.replaceState = function() {
+        _replaceState.apply(this, arguments);
+        onRouteTransition();
+      };
+    }
+    window.addEventListener('popstate', onRouteTransition);
+  } catch (spaErr) {}
 
   // Fetch active edge rules for domain
   try {
@@ -136,12 +197,13 @@
       .then(function(res) { return res.json(); })
       .then(function(data) {
         if (data && data.success && data.rules) {
+          cachedRules = data.rules;
           if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', function() {
-              applyHealing(data.rules);
+              applyHealing(cachedRules);
             });
           } else {
-            applyHealing(data.rules);
+            applyHealing(cachedRules);
           }
         }
       })

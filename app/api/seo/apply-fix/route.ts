@@ -199,15 +199,25 @@ export async function POST(req: NextRequest) {
               route = new URL(fix.url, `https://${cleanDomain}`).pathname;
             } catch {}
             route = route.replace(/^\/+|\/+$/g, '');
-            if (!route) route = 'page';
-
-            const pageCandidates = [
+            const isHomePage = !route || route === 'home';
+            const pageCandidates = isHomePage ? [
+              'app/page.tsx',
+              'src/app/page.tsx',
+              'pages/index.tsx',
+              'src/pages/index.tsx',
+              'app/page.jsx',
+              'src/app/page.jsx',
+              'pages/index.jsx'
+            ] : [
               `app/${route}/page.tsx`,
               `src/app/${route}/page.tsx`,
               `pages/${route}.tsx`,
+              `pages/${route}/index.tsx`,
               `src/pages/${route}.tsx`,
+              `src/pages/${route}/index.tsx`,
               `app/${route}/page.jsx`,
-              `src/app/${route}/page.jsx`
+              `src/app/${route}/page.jsx`,
+              `pages/${route}.jsx`
             ];
 
             for (const cand of pageCandidates) {
@@ -253,6 +263,88 @@ export async function POST(req: NextRequest) {
                         latestCommitSha = putPageData.commit?.sha?.slice(0, 7);
                         latestCommitUrl = putPageData.commit?.html_url;
                       }
+                    }
+                  }
+                  break;
+                }
+              } catch {}
+            }
+          } else if (fix.type === 'meta_description' || fix.type === 'title') {
+            let route = fix.pathname || fix.url || '';
+            try {
+              route = new URL(fix.url, `https://${cleanDomain}`).pathname;
+            } catch {}
+            route = route.replace(/^\/+|\/+$/g, '');
+
+            const isHomePage = !route || route === 'home';
+            const pageCandidates = isHomePage ? [
+              'app/page.tsx',
+              'src/app/page.tsx',
+              'pages/index.tsx',
+              'src/pages/index.tsx',
+              'app/layout.tsx',
+              'src/app/layout.tsx'
+            ] : [
+              `app/${route}/page.tsx`,
+              `src/app/${route}/page.tsx`,
+              `pages/${route}.tsx`,
+              `src/pages/${route}.tsx`
+            ];
+
+            for (const cand of pageCandidates) {
+              try {
+                const pageRes = await fetch(`https://api.github.com/repos/${repo}/contents/${cand}?ref=${branch}`, {
+                  headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'User-Agent': 'RankMonk-GitOps/2.0'
+                  }
+                });
+
+                if (pageRes.ok) {
+                  const pageData = await pageRes.json();
+                  const rawContent = Buffer.from(pageData.content, 'base64').toString('utf8');
+                  let patchedContent = rawContent;
+
+                  if (fix.type === 'meta_description') {
+                    if (patchedContent.includes('export const metadata') && patchedContent.includes('description:')) {
+                      patchedContent = patchedContent.replace(/description:\s*['"`]([^'"`]*)['"`]/, `description: "${fix.proposedValue}"`);
+                    } else if (patchedContent.includes('export const metadata = {')) {
+                      patchedContent = patchedContent.replace('export const metadata = {', `export const metadata = {\n  description: "${fix.proposedValue}",`);
+                    } else {
+                      patchedContent += `\n\nexport const metadata = {\n  description: "${fix.proposedValue}"\n};\n`;
+                    }
+                  } else if (fix.type === 'title') {
+                    if (patchedContent.includes('export const metadata') && patchedContent.includes('title:')) {
+                      patchedContent = patchedContent.replace(/title:\s*['"`]([^'"`]*)['"`]/, `title: "${fix.proposedValue}"`);
+                    } else if (patchedContent.includes('export const metadata = {')) {
+                      patchedContent = patchedContent.replace('export const metadata = {', `export const metadata = {\n  title: "${fix.proposedValue}",`);
+                    } else {
+                      patchedContent += `\n\nexport const metadata = {\n  title: "${fix.proposedValue}"\n};\n`;
+                    }
+                  }
+
+                  if (patchedContent !== rawContent) {
+                    const putMeta = await fetch(`https://api.github.com/repos/${repo}/contents/${cand}`, {
+                      method: 'PUT',
+                      headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json',
+                        'User-Agent': 'RankMonk-GitOps/2.0'
+                      },
+                      body: JSON.stringify({
+                        message: `fix(seo): update ${fix.type} for /${route} via Rank Monk`,
+                        content: Buffer.from(patchedContent, 'utf8').toString('base64'),
+                        sha: pageData.sha,
+                        branch
+                      })
+                    });
+                    if (putMeta.ok) {
+                      const putMetaData = await putMeta.json();
+                      modifiedFiles.push(cand);
+                      latestCommitSha = putMetaData.commit?.sha?.slice(0, 7);
+                      latestCommitUrl = putMetaData.commit?.html_url;
                     }
                   }
                   break;

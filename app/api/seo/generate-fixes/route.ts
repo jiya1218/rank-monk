@@ -140,8 +140,25 @@ function createFixesForIssue(
     else if (normId.includes('h1')) {
       fixType = 'heading_h1';
       originalValue = page.detail || 'Missing or multiple H1 tags';
-      proposedValue = `${brandName} ${capitalizedLeaf}`;
-      codeSnippet = `<h1>${proposedValue}</h1>`;
+      const lowerPath = pathname.toLowerCase();
+      if (pathname === '/') {
+        proposedValue = `${brandName} — Official Platform & Solutions`;
+      } else if (lowerPath.includes('vendor')) {
+        proposedValue = `${brandName} Vendor Management & Verified Services`;
+      } else if (lowerPath.includes('pricing') || lowerPath.includes('plan')) {
+        proposedValue = `${brandName} Enterprise Pricing & Flexible Plans`;
+      } else if (lowerPath.includes('about')) {
+        proposedValue = `About ${brandName} — Platform Architecture & Mission`;
+      } else if (lowerPath.includes('contact')) {
+        proposedValue = `Contact ${brandName} Support & Inquiries`;
+      } else if (lowerPath.includes('ticket') || lowerPath.includes('tenant') || lowerPath.includes('support')) {
+        proposedValue = `${brandName} Portal & Support Desk`;
+      } else if (lowerPath.includes('lease') || lowerPath.includes('leasing')) {
+        proposedValue = `${brandName} Commercial Leasing & Workspace Management`;
+      } else {
+        proposedValue = `${brandName} ${capitalizedLeaf}`;
+      }
+      codeSnippet = `<h1 className="text-2xl font-bold text-slate-900 mb-4">${proposedValue}</h1>`;
       rationale = 'Provides clear semantic hierarchy and primary topical keyword anchor for crawler document structure.';
     }
     // 11. Missing Schema.org JSON-LD
@@ -197,16 +214,17 @@ function createFixesForIssue(
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    const rawDomain = body.domain || '';
+    const cleanDomain = rawDomain.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '') || 'yourdomain.com';
+    const domainParts = cleanDomain.split('.')[0] || 'Brand';
+    const autoBrand = domainParts.charAt(0).toUpperCase() + domainParts.slice(1);
+    const brandName = body.brandName || autoBrand;
+    const industry = body.industry || 'Digital Technology & Enterprise Solutions';
     const {
-      domain = 'officex.pro',
-      brandName = 'OfficeX',
-      industry = 'Commercial Real Estate & Facility Management SaaS',
       issueId,
       failedPages = [],
       issues = []
     } = body;
-
-    const cleanDomain = domain.replace(/^(https?:\/\/)?(www\.)?/, '').replace(/\/$/, '');
 
     let allFixes: any[] = [];
 

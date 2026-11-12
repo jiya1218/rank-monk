@@ -131,7 +131,7 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
   useEffect(() => {
     if (!cleanDomain) return;
     try {
-      const gh = localStorage.getItem(`rm_gh_config_${cleanDomain}`);
+      const gh = localStorage.getItem(`rm_gh_config_${cleanDomain}`) || localStorage.getItem('rm_gh_config');
       if (gh) {
         const parsed = JSON.parse(gh);
         setHasGithubConfig(Boolean(parsed.token && parsed.repo));
@@ -373,8 +373,11 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
       let githubConfig = undefined;
       let wpConfig = undefined;
       try {
-        const gh = localStorage.getItem(`rm_gh_config_${cleanDomain}`);
+        const gh = localStorage.getItem(`rm_gh_config_${cleanDomain}`) || localStorage.getItem('rm_gh_config');
         if (gh) githubConfig = JSON.parse(gh);
+        if (!githubConfig && githubTokenInput && githubRepoInput) {
+          githubConfig = { token: githubTokenInput, repo: githubRepoInput, branch: 'main' };
+        }
         const wp = localStorage.getItem(`rm_wp_config_${cleanDomain}`);
         if (wp) wpConfig = JSON.parse(wp);
       } catch (e) {}
@@ -437,8 +440,11 @@ export function SeoAuditWorkspace({ project, onNavigateTab }: SeoAuditWorkspaceP
       let githubConfig = undefined;
       let wpConfig = undefined;
       try {
-        const gh = localStorage.getItem(`rm_gh_config_${cleanDomain}`);
+        const gh = localStorage.getItem(`rm_gh_config_${cleanDomain}`) || localStorage.getItem('rm_gh_config');
         if (gh) githubConfig = JSON.parse(gh);
+        if (!githubConfig && githubTokenInput && githubRepoInput) {
+          githubConfig = { token: githubTokenInput, repo: githubRepoInput, branch: 'main' };
+        }
         const wp = localStorage.getItem(`rm_wp_config_${cleanDomain}`);
         if (wp) wpConfig = JSON.parse(wp);
       } catch (e) {}
